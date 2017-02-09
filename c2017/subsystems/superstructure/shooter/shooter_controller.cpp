@@ -27,19 +27,21 @@ c2017::shooter::ShooterOutputProto ShooterController::Update(c2017::shooter::Sho
   bool disabled = ds->mode() == RobotMode::DISABLED || ds->mode() == RobotMode::ESTOP;
 
   auto y = (Eigen::Matrix<double, 1, 1>() << input->encoder_position()).finished();
-  r_ = (Eigen::Matrix<double, 3, 1>() << 0.0, goal_velocity_, 0.0).finished();
+  r_ = (Eigen::Matrix<double, 3, 1>() << 0.0, GetProfiledGoalVelocity(unprofiled_goal_velocity_), 0.0)
+           .finished();
 
   y(0) = (input->encoder_position());
 
   auto u = controller_.Update(observer_.x(), r_)(0, 0);
 
-  if (disabled || goal_velocity_ <= 0) {
+  if (disabled || unprofiled_goal_velocity_ <= 0) {
     u = 0.0;
   }
 
   observer_.Update((Eigen::Matrix<double, 1, 1>() << u).finished(), y);
 
-  auto absolute_error = r_ - observer_.x().cwiseAbs();
+  auto absolute_error = (Eigen::Matrix<double, 3, 1>() << 0.0, unprofiled_goal_velocity_, 0.0).finished() -
+                        observer_.x().cwiseAbs();
 
   at_goal_ = (absolute_error(0, 0) < angle_tolerance_) && (absolute_error(1, 0) < velocity_tolerance_);
 
@@ -55,8 +57,18 @@ c2017::shooter::ShooterOutputProto ShooterController::Update(c2017::shooter::Sho
 }
 
 void ShooterController::SetGoal(c2017::shooter::ShooterGoalProto goal) {
-  goal_velocity_ = goal->goal_velocity();
+  profiled_goal_velocity_ = status_->observed_velocity();
+  unprofiled_goal_velocity_ = goal->goal_velocity();
   shot_mode_ = goal->goal_mode();
+}
+
+double ShooterController::GetProfiledGoalVelocity(double unprofiled_goal_velocity) {
+  if (unprofiled_goal_velocity - status_->observed_velocity() > 25) {  // TODO (jishnusen) get tuned
+    profiled_goal_velocity_ += 25;
+    return profiled_goal_velocity_;
+  }
+
+  return unprofiled_goal_velocity;
 }
 
 }  // namespace shooter
