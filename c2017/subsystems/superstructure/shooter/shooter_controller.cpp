@@ -63,7 +63,7 @@ void ShooterController::SetGoal(c2017::shooter::ShooterGoalProto goal) {
 }
 
 double ShooterController::GetProfiledGoalVelocity(double unprofiled_goal_velocity) {
-  if (unprofiled_goal_velocity - status_->observed_velocity() > 25) {  // TODO (jishnusen) get tuned
+  if (unprofiled_goal_velocity - status_->observed_velocity() > 25) {  // TODO(jishnusen) get tuned
     profiled_goal_velocity_ += 25;
     return profiled_goal_velocity_;
   }
