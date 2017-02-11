@@ -16,10 +16,8 @@ void Logger::AddQueue(const std::string& name, T* queue) {
       aos::Die("Two queues with same name \"%s\"", name.c_str());
     }
   }
-  QueueLog queue_log = {std::make_unique<Reader<typename T::QueueReader>>(queue->MakeReader()),
-                        name,
-                        name + ".csv",
-                        true};
+  QueueLog queue_log = {std::make_unique<Reader<typename T::QueueReader>>(queue->MakeReader()), name,
+                        name + ".csv", true};
 
   queue_logs_.push_back(std::make_unique<QueueLog>(std::move(queue_log)));
 }
@@ -28,19 +26,23 @@ template <class R>
 std::experimental::optional<std::string> Logger::Reader<R>::GetMessageAsCSV(bool header) {
   auto message = reader_.ReadMessage();
   if (message) {
-    std::string out = "";
+    std::stringstream ss;
     if (header) {
-      out = out + muan::util::ProtoToCSVHeader(*message.value().get()) + "\n";
+      muan::util::ProtoToCsvHeader(*message.value().get(), ss);
+      ss << "\n";
     }
-    out = out + muan::util::ProtoToCSV(*message.value().get());
-    return out;
+
+    // TODO(Kyle) Refactor Reader's interface to have GetMessageAsCSV write directly to an ostream.
+    muan::util::ProtoToCsv(*message.value().get(), ss);
+    return ss.str();
   } else {
     return std::experimental::nullopt;
   }
 }
 
 template <class R>
-Logger::Reader<R>::Reader(R reader) : reader_{reader} {}
+Logger::Reader<R>::Reader(R reader)
+    : reader_{reader} {}
 
 }  // namespace logging
 }  // namespace muan

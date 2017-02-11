@@ -56,16 +56,16 @@ cc_library(
     ],
 )
 
-cc_proto_library(
-    name = "test_proto",
-    srcs = ["test_proto.proto"],
-    default_runtime = "//third_party/google/protobuf",
-    protoc = "//third_party/google/protobuf:protoc",
+cc_library(
+    name = "monitor",
+    srcs = ["monitor.cpp"],
+    hdrs = ["monitor.h"],
+    deps = [":history"]
 )
 
 cc_proto_library(
-    name = "test_death_proto",
-    srcs = ["test_death_proto.proto"],
+    name = "test_proto",
+    srcs = ["test_proto.proto"],
     default_runtime = "//third_party/google/protobuf",
     protoc = "//third_party/google/protobuf:protoc",
 )
@@ -75,7 +75,6 @@ cc_test(
     srcs = ["proto_utils_test.cpp"],
     deps = [
         ":proto_utils",
-        ":test_death_proto",
         ":test_proto",
         "//third_party/google/googletest",
     ],
@@ -99,3 +98,11 @@ cc_test(
         "//third_party/google/googletest",
     ],
 )
+
+cc_test(
+    name = "monitor_test",
+    srcs = ["monitor_test.cpp"],
+    deps = [":monitor", "//third_party/google/googletest:googletest"],
+    linkopts = ["-lm"]
+)
+

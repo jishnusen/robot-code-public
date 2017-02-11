@@ -1,0 +1,27 @@
+Whitespace(int time)
+
+include {
+  <stdio.h>
+}
+
+global {
+  int count
+}
+
+init {
+  //PASS1
+
+  //PASS2
+
+//PASS3
+  
+  //PASS4
+  
+//PASS5
+}
+
+periodic {
+  printf("%d\n", count);
+  count -= 1;
+  return (count <= 0);
+}

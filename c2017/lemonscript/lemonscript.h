@@ -11,9 +11,12 @@
 #include "third_party/aos/common/time.h"
 #include "third_party/aos/common/util/phased_loop.h"
 #include "third_party/aos/linux_code/init.h"
+#include "gflags/gflags.h"
 
 namespace c2017 {
 namespace lemonscript {
+
+DECLARE_string(auto_mode);
 
 class Lemonscript {
  public:
@@ -21,10 +24,14 @@ class Lemonscript {
   ~Lemonscript();
 
   void operator()();
+
   void Start();  // Start running lemonscript
-  void Stop();  // Pause running lemonscript
-  void Kill();  // Stop the thread
+  void Stop();   // Pause running lemonscript
+  void Kill();   // Stop the thread
  private:
+  void UpdateAutoRoutine();
+  c2017::webdash::WebDashQueue::QueueReader webdash_reader_ =
+    QueueManager::GetInstance().webdash_queue().MakeReader();
   ::lemonscript::LemonScriptState *state_;
   ::lemonscript::LemonScriptCompiler *compiler_;
   std::vector<const ::lemonscript::AvailableCppCommandDeclaration *> decls_;

@@ -58,6 +58,18 @@ class TestTranspiler:
 
         os.chdir(old_dir)
 
+    def test_transpiler_handles_whitespace(self):
+        self.clean_auto_funcs()
+
+        transpiler.main(["--input-files", "tests/files/transpiler/auto_functions/with_whitespace.func", "--output-cpp", "/tmp/auto_functions.cpp", "--output-header", "/tmp/auto_functions.h"])
+
+        assert os.path.isfile("/tmp/auto_functions.cpp")
+        assert os.path.isfile("/tmp/auto_functions.h")
+        assert "Whitespace" in open("/tmp/auto_functions.h").read()
+        assert "Whitespace" in open("/tmp/auto_functions.cpp").read()
+        for x in range(1,6):
+            assert "//PASS" + str(x) in open("/tmp/auto_functions.cpp").read()
+
     def test_run_transpiler_as_process(self):
         self.clean_auto_funcs()
 
