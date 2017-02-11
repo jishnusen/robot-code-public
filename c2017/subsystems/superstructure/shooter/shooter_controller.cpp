@@ -40,8 +40,8 @@ c2017::shooter::ShooterOutputProto ShooterController::Update(c2017::shooter::Sho
 
   observer_.Update((Eigen::Matrix<double, 1, 1>() << u).finished(), y);
 
-  auto absolute_error = (Eigen::Matrix<double, 3, 1>() << 0.0, unprofiled_goal_velocity_, 0.0).finished() -
-                        observer_.x().cwiseAbs();
+  auto absolute_error = ((Eigen::Matrix<double, 3, 1>() << 0.0, unprofiled_goal_velocity_, 0.0).finished() -
+                        observer_.x()).cwiseAbs();
 
   at_goal_ = (absolute_error(0, 0) < angle_tolerance_) && (absolute_error(1, 0) < velocity_tolerance_);
 
