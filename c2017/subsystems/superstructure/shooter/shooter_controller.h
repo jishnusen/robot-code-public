@@ -1,6 +1,7 @@
 #ifndef C2017_SUBSYSTEMS_SUPERSTRUCTURE_SHOOTER_SHOOTER_CONTROLLER_H_
 #define C2017_SUBSYSTEMS_SUPERSTRUCTURE_SHOOTER_SHOOTER_CONTROLLER_H_
 
+#include <algorithm>
 #include "c2017/queue_manager/queue_manager.h"
 #include "c2017/subsystems/superstructure/shooter/queue_types.h"
 #include "c2017/subsystems/superstructure/shooter/shooter_constants.h"
