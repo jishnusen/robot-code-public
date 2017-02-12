@@ -40,8 +40,9 @@ c2017::shooter::ShooterOutputProto ShooterController::Update(c2017::shooter::Sho
 
   observer_.Update((Eigen::Matrix<double, 1, 1>() << u).finished(), y);
 
-  auto absolute_error = ((Eigen::Matrix<double, 3, 1>() << 0.0, unprofiled_goal_velocity_, 0.0).finished() -
-                        observer_.x()).cwiseAbs();
+  auto absolute_error =
+      ((Eigen::Matrix<double, 3, 1>() << 0.0, unprofiled_goal_velocity_, 0.0).finished() - observer_.x())
+          .cwiseAbs();
 
   at_goal_ = (absolute_error(0, 0) < angle_tolerance_) && (absolute_error(1, 0) < velocity_tolerance_);
 
@@ -69,12 +70,9 @@ void ShooterController::SetGoal(c2017::shooter::ShooterGoalProto goal) {
 }
 
 double ShooterController::GetProfiledGoalVelocity(double unprofiled_goal_velocity) {
-  if (unprofiled_goal_velocity - status_->observed_velocity() > 25) {  // TODO(jishnusen) get tuned
-    profiled_goal_velocity_ += 25;
-    return profiled_goal_velocity_;
-  }
-
-  return unprofiled_goal_velocity;
+  profiled_goal_velocity_ =
+      std::max(profiled_goal_velocity_ + kShooterAcceleration, unprofiled_goal_velocity);
+  return profiled_goal_velocity_;
 }
 
 }  // namespace shooter
