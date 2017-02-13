@@ -64,7 +64,6 @@ c2017::shooter::ShooterOutputProto ShooterController::Update(c2017::shooter::Sho
 }
 
 void ShooterController::SetGoal(c2017::shooter::ShooterGoalProto goal) {
-  profiled_goal_velocity_ = status_->observed_velocity();
   unprofiled_goal_velocity_ = goal->goal_velocity();
   shot_mode_ = goal->goal_mode();
 }
