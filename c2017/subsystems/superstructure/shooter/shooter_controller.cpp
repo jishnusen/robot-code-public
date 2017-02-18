@@ -72,9 +72,12 @@ void ShooterController::SetGoal(c2017::shooter::ShooterGoalProto goal) {
 }
 
 double ShooterController::GetProfiledGoalVelocity(double unprofiled_goal_velocity) {
-  profiled_goal_velocity_ = status_->observed_velocity();
+  if (unprofiled_goal_velocity < profiled_goal_velocity_) {
+    profiled_goal_velocity_ = unprofiled_goal_velocity;
+  }
+
   profiled_goal_velocity_ =
-      std::max(profiled_goal_velocity_ + kShooterAcceleration, unprofiled_goal_velocity);
+      std::min(profiled_goal_velocity_ + kShooterAcceleration, unprofiled_goal_velocity);
   return profiled_goal_velocity_;
 }
 
