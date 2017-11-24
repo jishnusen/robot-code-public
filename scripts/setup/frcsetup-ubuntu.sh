@@ -71,9 +71,7 @@ echo Installing customization options
 sudo apt-get install zsh
 
 # Oh my ZSH!
-sudo add-apt-repository ppa:neovim-ppa/stable
-sudo apt-get update
-sudo apt-get install neovim
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
 
 # Powerlevel9k
 git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
@@ -84,7 +82,7 @@ sudo apt-get update
 sudo apt-get install neovim
 
 # Sketchy python fix cause for my dotfiles cause why not
-sudo ln -sf $(which python2.7) /usr/local/bin/pyhon2
+sudo ln -sf $(which python2.7) /usr/local/bin/python2
 sudo ln -sf $(which python3) /usr/local/bin/python3
 
 # Neovim python
