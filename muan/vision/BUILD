@@ -21,7 +21,7 @@ cc_binary(
     linkopts = [
         "-lopencv_imgproc",
         "-lopencv_core",
-        "-lopencv_video",
+        "-lopencv_videoio",
         "-lopencv_highgui",
     ],
     data = ["//c2017/vision/coprocessor:v4l_params_file"],

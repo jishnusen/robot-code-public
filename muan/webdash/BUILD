@@ -19,7 +19,10 @@ cc_binary(
       ":server",
       ":video_stream",
     ],
-    linkopts = ["-lopencv_imgproc"],
+    linkopts = [
+        "-lopencv_imgproc",
+        "-lopencv_videoio",
+    ],
 )
 
 filegroup(
@@ -58,6 +61,7 @@ cc_library(
     linkopts = [
         "-lopencv_core",
         "-lopencv_highgui",
+        "-lopencv_imgcodecs",
     ],
 )
 
