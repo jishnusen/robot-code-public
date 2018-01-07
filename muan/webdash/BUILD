@@ -53,6 +53,7 @@ cc_library(
         "//third_party/aos/common:die",
         "//third_party/aos/common/util:phased_loop",
         "//muan/queues:queues",
+        "@opencv//:opencv",
     ],
     linkopts = [
         "-lopencv_core",

@@ -10,7 +10,7 @@ cc_library(
     ],
     deps = [
         ":config_proto",
-        "@opencv//:core",
+        "@opencv//:opencv",
     ],
     visibility = ["//visibility:public"],
 )
