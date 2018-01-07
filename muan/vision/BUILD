@@ -8,7 +8,10 @@ cc_library(
         "-lopencv_imgproc",
         "-lopencv_core",
     ],
-    deps = [":config_proto"],
+    deps = [
+        "@opencv//:opencv",
+        ":config_proto",
+    ],
     visibility = ["//visibility:public"],
 )
 
