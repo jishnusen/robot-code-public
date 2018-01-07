@@ -3,10 +3,11 @@ cc_binary(
     srcs = ["vision_example.cpp"],
     data = ["captured.avi"],
     linkopts = [
-        "-lopencv_video",
+        "-lopencv_videoio",
         "-lopencv_highgui",
     ],
     deps = [
+        "@opencv//:opencv",
         "//muan/vision",
     ],
 )
