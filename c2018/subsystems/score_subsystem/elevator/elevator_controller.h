@@ -25,7 +25,6 @@ class ElevatorController {
   void Update(const ScoreSubsystemInputProto& input, ScoreSubsystemOutputProto* output, ScoreSubsystemStatusProto* status, bool outputs_enabled);
   Eigen::Matrix<double, 2, 1> UpdateProfiledGoal(double unprofiled_goal_, bool outputs_enabled);
   void SetGoal(c2018::score_subsystem::ScoreSubsystemGoalProto goal);
-  void SetGoalGodMode(c2018::score_subsystem::ScoreSubsystemGoalGodModeProto goal_god_mode);
   double CapU(double elevator_u);
 
  private:
@@ -43,7 +42,6 @@ class ElevatorController {
   aos::util::TrapezoidProfile trapezoid_profile_{std::chrono::milliseconds(5)};
 
   bool encoder_fault_detected_ = false;
-  int num_encoder_ticks = 0;
   int num_encoder_fault_ticks_ = 0;
 
   double old_pos_;
