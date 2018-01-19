@@ -1,14 +1,14 @@
 #ifndef C2018_SUBSYTEMS_SCORE_SUBSYSTEM_ELEVATOR_ELEVATOR_CONTROLLER_H_
 #define C2018_SUBSYTEMS_SCORE_SUBSYSTEM_ELEVATOR_ELEVATOR_CONTROLLER_H_
 
-#include "muan/queues/queue_manager.h"
-#include "c2018/subsystems/score_subsystem/queue_types.h"
 #include "c2018/subsystems/score_subsystem/elevator/elevator_constants.h"
+#include "c2018/subsystems/score_subsystem/queue_types.h"
+#include "muan/control/calibration/hall_calibration.h"
 #include "muan/control/state_space_controller.h"
 #include "muan/control/state_space_observer.h"
 #include "muan/control/state_space_plant.h"
+#include "muan/queues/queue_manager.h"
 #include "third_party/aos/common/util/trapezoid_profile.h"
-#include "muan/control/calibration/hall_calibration.h"
 
 namespace c2018 {
 
@@ -22,7 +22,8 @@ constexpr double kElevatorVelocity = 2.2;
 class ElevatorController {
  public:
   ElevatorController();
-  void Update(const ScoreSubsystemInputProto& input, ScoreSubsystemOutputProto* output, ScoreSubsystemStatusProto* status, bool outputs_enabled);
+  void Update(const ScoreSubsystemInputProto& input, ScoreSubsystemOutputProto* output,
+              ScoreSubsystemStatusProto* status, bool outputs_enabled);
   Eigen::Matrix<double, 2, 1> UpdateProfiledGoal(double unprofiled_goal_, bool outputs_enabled);
   void SetGoal(c2018::score_subsystem::ScoreSubsystemGoalProto goal);
   double CapU(double elevator_u);
@@ -49,7 +50,7 @@ class ElevatorController {
 
 constexpr double kEncoderFaultTicksAllowed = 100;
 
-}  // namepace elevator
+}  // namespace elevator
 
 }  // namespace score_subsystem
 

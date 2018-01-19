@@ -14,16 +14,23 @@ ElevatorController::ElevatorController() {
   trapezoid_profile_.set_maximum_velocity(kElevatorVelocity);
 }
 
-void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubsystemOutputProto* output, ScoreSubsystemStatusProto* status, bool outputs_enabled) {
+void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubsystemOutputProto* output,
+                                ScoreSubsystemStatusProto* status, bool outputs_enabled) {
   Eigen::Matrix<double, 3, 1> elevator_r_;
 
-  SetWeights((*status)->elevator_actual_height() >= 1.0, input->has_cube()); // Dynamic Weighting based on if in second stage, and if it has a cube
-  auto elevator_y = (Eigen::Matrix<double, 1, 1>() << hall_calib_.Update(input->elevator_encoder(), input->elevator_hall()));
-  elevator_r_ = (Eigen::Matrix<double, 3, 1>() << 0.0,
-                UpdateProfiledGoal(unprofiled_goal_, outputs_enabled),
-                0.0).finished();
+  SetWeights((*status)->elevator_actual_height() >= 1.0,
+             input->has_cube());  // Dynamic Weighting based on if in second stage, and if it has a cube
+  auto elevator_y = (Eigen::Matrix<double, 1, 1>()
+                     << hall_calib_.Update(input->elevator_encoder(), input->elevator_hall()));
+  elevator_r_ =
+      (Eigen::Matrix<double, 3, 1>() << UpdateProfiledGoal(unprofiled_goal_, outputs_enabled)(0, 0), 0.0, 0.0)
+          .finished();
 
-  auto elevator_u = elevator_controller_.Update(elevator_observer_.x())(0,0);
+  std::cout << hall_calib_.is_calibrated() << std::endl;
+  std::cout << hall_calib_.offset() << std::endl;
+  elevator_controller_.r() = elevator_r_;
+
+  auto elevator_u = elevator_controller_.Update(elevator_observer_.x())(0, 0);
 
   if (!outputs_enabled) {
     elevator_u = 0;
@@ -32,7 +39,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
       (*status)->set_elevator_uncapped_voltage(elevator_u);
       elevator_u = CapU(elevator_u);
     } else {
-      (*status)->set_elevator_uncapped_voltage(3); // TODO (Jishnu) find an actual value for this
+      (*status)->set_elevator_uncapped_voltage(3);  // TODO (Jishnu) find an actual value for this
       elevator_u = CapU(3);
     }
     if (old_pos_ == input->elevator_encoder()) {
@@ -48,9 +55,18 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
   elevator_observer_.Update((Eigen::Matrix<double, 1, 1>() << elevator_u).finished(), elevator_y.finished());
   plant_.Update((Eigen::Matrix<double, 1, 1>() << elevator_u).finished());
 
+  bool at_top = false;
+
+  if (elevator_observer_.x()(0, 0) == 2.07) {
+    at_top = true;
+  }
   (*output)->set_elevator_voltage(elevator_u);
-  (*status)->set_elevator_actual_height(elevator_observer_.x()(0,0));
-  (*status)->set_estimated_velocity(elevator_observer_.x()(0,0));
+  (*status)->set_elevator_actual_height(elevator_observer_.x()(0, 0));
+  (*status)->set_estimated_velocity(elevator_observer_.x()(0, 0));
+  (*status)->set_elevator_calibrated(hall_calib_.is_calibrated());
+  (*status)->set_elevator_profiled_goal(profiled_goal_(0, 0));
+  (*status)->set_elevator_unprofiled_goal(unprofiled_goal_);
+  (*status)->set_elevator_at_top(at_top);
 }
 
 void ElevatorController::SetGoal(c2018::score_subsystem::ScoreSubsystemGoalProto goal) {
@@ -68,9 +84,10 @@ void ElevatorController::SetGoal(c2018::score_subsystem::ScoreSubsystemGoalProto
   trapezoid_profile_.SetGoal(unprofiled_goal_);
 }
 
-Eigen::Matrix<double, 2, 1> ElevatorController::UpdateProfiledGoal(double unprofiled_goal_, bool outputs_enabled) {
+Eigen::Matrix<double, 2, 1> ElevatorController::UpdateProfiledGoal(double unprofiled_goal_,
+                                                                   bool outputs_enabled) {
   if (outputs_enabled) {
-    profiled_goal_ = trapezoid_profile_.Update(unprofiled_goal_,0);
+    profiled_goal_ = trapezoid_profile_.Update(unprofiled_goal_, 0);
   } else {
     profiled_goal_ = elevator_observer_.x().block<2, 1>(0, 0);
   }
