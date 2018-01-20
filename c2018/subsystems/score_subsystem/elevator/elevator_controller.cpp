@@ -56,7 +56,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
       elevator_u = CapU(elevator_u);
     } else {
       (*status)->set_elevator_uncapped_voltage(0);  // TODO (Jishnu) find an actual value for this
-      elevator_u = CapU(0);
+      elevator_u = 2;
     }
     if (old_pos_ == input->elevator_encoder() && std::abs(elevator_u) > 2) {
       num_encoder_fault_ticks_++;
@@ -75,9 +75,9 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
 
   bool at_top = false;
 
-  if (elevator_observer_.x()(0, 0) == kElevatorMaxHeight) {
-    at_top = true;
-  }
+  if (elevator_observer_.x()(0, 0) == kElevatorMaxHeight) { at_top = true; }
+
+  if (elevator_observer_.x()(0, 0) < 0) { elevator_observer_.x()(0,0) = 0; }
 
   file << elevator_observer_.x()(0,0) << "\n";
 
@@ -89,6 +89,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
   (*status)->set_elevator_profiled_goal(profiled_goal_(0, 0));
   (*status)->set_elevator_unprofiled_goal(unprofiled_goal_);
   (*status)->set_elevator_at_top(at_top);
+  (*status)->set_elevator_encoder_fault_detected(encoder_fault_detected_);
 }
 
 void ElevatorController::SetGoal(c2018::score_subsystem::ScoreSubsystemGoalProto goal) {
