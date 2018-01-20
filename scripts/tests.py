@@ -11,7 +11,7 @@ all_targets = [
     ["o2016", "//o2016/...", True, True],
     ["c2017", "//c2017/...", True, True],
     ["o2017", "//o2017/...", True, True],
-    ["c2018", "//c2018/...", False, True], # TODO(Kyle) Change to True, True when we have tests to run
+    ["c2018", "//c2018/...", True, True],
     ["testbench", "//testbench/...", False, True],
     ["generic_robot", "//generic_robot/...", True, True],
     ["drivetrain", "//third_party/frc971/control_loops/drivetrain:drivetrain_lib_test", False, True],
