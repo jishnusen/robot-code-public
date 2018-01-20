@@ -18,6 +18,11 @@ namespace elevator {
 
 constexpr double kElevatorAcceleration = 2.3;
 constexpr double kElevatorVelocity = 2.2;
+constexpr double kElevatorStartingHeight = 0;
+constexpr double kElevatorFirstCubeHeight = 0.3;
+constexpr double kElevatorSecondCubeHeight = 0.6;
+constexpr double kElevatorMaxHeight = 2.06;
+constexpr double kHallEffectHeight = 0.05;
 
 class ElevatorController {
  public:
@@ -33,8 +38,9 @@ class ElevatorController {
   muan::control::StateSpaceController<1, 3, 1> elevator_controller_;
   muan::control::StateSpaceObserver<1, 3, 1> elevator_observer_;
 
-  muan::control::HallCalibration hall_calib_{0.05};
+  muan::control::HallCalibration hall_calib_{kHallEffectHeight};
 
+  std::ofstream file{"/tmp/elevator.csv"};
   void SetWeights(bool second_stage, bool has_cube);
 
   Eigen::Matrix<double, 2, 1> profiled_goal_;
