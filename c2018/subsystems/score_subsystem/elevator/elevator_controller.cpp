@@ -55,7 +55,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
       (*status)->set_elevator_uncapped_voltage(elevator_u);
       elevator_u = CapU(elevator_u);
     } else {
-      (*status)->set_elevator_uncapped_voltage(0);  // TODO (Jishnu) find an actual value for this
+      (*status)->set_elevator_uncapped_voltage(2);
       elevator_u = 2;
     }
     if (old_pos_ == input->elevator_encoder() && std::abs(elevator_u) > 2) {
