@@ -40,7 +40,6 @@ class ElevatorController {
 
   muan::control::HallCalibration hall_calib_{kHallEffectHeight};
 
-  std::ofstream file{"/tmp/elevator.csv"};
   void SetWeights(bool second_stage, bool has_cube);
 
   Eigen::Matrix<double, 2, 1> profiled_goal_;

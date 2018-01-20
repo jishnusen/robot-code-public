@@ -79,8 +79,6 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
 
   if (elevator_observer_.x()(0, 0) < 0) { elevator_observer_.x()(0,0) = 0; }
 
-  file << elevator_observer_.x()(0,0) << "\n";
-
   (*output)->set_elevator_voltage(elevator_u);
   (*status)->set_elevator_actual_height(elevator_observer_.x()(0, 0));
   (*status)->set_elevator_voltage_error(elevator_observer_.x()(2, 0));
