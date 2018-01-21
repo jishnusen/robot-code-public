@@ -1,6 +1,7 @@
 #include <cmath>
 #include <limits>
 #include "c2018/subsystems/score_subsystem/elevator/elevator_controller.h"
+#include "muan/utils/math_utils.h"
 
 namespace c2018 {
 
@@ -49,14 +50,14 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
   auto elevator_u = elevator_controller_.Update(elevator_observer_.x())(0, 0);
 
   if (!outputs_enabled) {
-    elevator_u = 0;
+    elevator_u = CapU(0);
   } else {
     if (!encoder_fault_detected_) {
       (*status)->set_elevator_uncapped_voltage(elevator_u);
       elevator_u = CapU(elevator_u);
     } else {
       (*status)->set_elevator_uncapped_voltage(2);
-      elevator_u = 2;
+      elevator_u = CapU(2);
     }
     if (old_pos_ == input->elevator_encoder() && std::abs(elevator_u) > 2) {
       num_encoder_fault_ticks_++;
@@ -73,11 +74,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
   elevator_observer_.Update((Eigen::Matrix<double, 1, 1>() << elevator_u).finished(), elevator_y.finished());
   plant_.Update((Eigen::Matrix<double, 1, 1>() << elevator_u).finished());
 
-  bool at_top = false;
-
-  if (elevator_observer_.x()(0, 0) == kElevatorMaxHeight) { at_top = true; }
-
-  if (elevator_observer_.x()(0, 0) < 0) { elevator_observer_.x()(0,0) = 0; }
+  elevator_observer_.x(0) = muan::utils::Cap(elevator_observer_.x(0), 0, kElevatorMaxHeight);
 
   (*output)->set_elevator_voltage(elevator_u);
   (*status)->set_elevator_actual_height(elevator_observer_.x()(0, 0));
@@ -86,7 +83,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input, ScoreSubs
   (*status)->set_elevator_calibrated(hall_calib_.is_calibrated());
   (*status)->set_elevator_profiled_goal(profiled_goal_(0, 0));
   (*status)->set_elevator_unprofiled_goal(unprofiled_goal_);
-  (*status)->set_elevator_at_top(at_top);
+  (*status)->set_elevator_at_top((*status)->elevator_actual_height() >= kElevatorMaxHeight - 0.01);
   (*status)->set_elevator_encoder_fault_detected(encoder_fault_detected_);
 }
 
@@ -118,15 +115,7 @@ Eigen::Matrix<double, 2, 1> ElevatorController::UpdateProfiledGoal(double unprof
 }
 
 double ElevatorController::CapU(double elevator_u) {
-  double u;
-  if (elevator_u > 12) {
-    u = 12;
-  } else if (elevator_u < -12) {
-    u = -12;
-  } else {
-    u = elevator_u;
-  }
-  return u;
+  return muan::utils::Cap(elevator_u, -12, 12);
 }
 void ElevatorController::SetWeights(bool second_stage, bool has_cube) {
   if (second_stage && has_cube) {
