@@ -10,7 +10,8 @@ cc_library(
       "//muan/control:state_space",
       "//muan/wpilib:wpilib_queues",
       "//third_party/aos/common/util:trapezoid_profile",
-      "//muan/control/calibration:hall_calibration"
+      "//muan/control/calibration:hall_calibration",
+      "//muan/utils:math_utils"
   ]
 )
 
