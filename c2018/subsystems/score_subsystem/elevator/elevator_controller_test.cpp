@@ -11,9 +11,10 @@ class ElevatorControllerTest : public ::testing::Test {
   }
 
   void Update() {
-    if (plant_.x(0) < 0) { plant_.x(0) = 0; }
-    elevator_input_proto_->set_elevator_hall(plant_.x(0) >= 0.04 &&
-                                             plant_.x(0) <= 0.06);
+    if (plant_.x(0) < 0) {
+      plant_.x(0) = 0;
+    }
+    elevator_input_proto_->set_elevator_hall(plant_.x(0) >= 0.04 && plant_.x(0) <= 0.06);
     elevator_.Update(elevator_input_proto_, &elevator_output_proto_, &elevator_status_proto_,
                      outputs_enabled_);
     SetWeights(plant_.x()(0, 0) >= 1.0, elevator_input_proto_->has_cube());
@@ -70,6 +71,7 @@ TEST_F(ElevatorControllerTest, NotEnabled) {
   Update();
 
   EXPECT_EQ(elevator_status_proto_->elevator_actual_height(), 0.);
+  EXPECT_NEAR(elevator_output_proto_->elevator_voltage(), 0., 1e-3);
 }
 
 TEST_F(ElevatorControllerTest, Calibration) {
@@ -85,6 +87,8 @@ TEST_F(ElevatorControllerTest, Calibration) {
   for (int i = 0; i < 2000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0) + offset);
     Update();
+    EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
+                muan::utils::Cap(elevator_output_proto_->elevator_voltage(), -12, 12) - 0.01);
   }
 
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(), 2.06, 1e-3);
@@ -102,9 +106,12 @@ TEST_F(ElevatorControllerTest, Heights) {
   for (int i = 0; i < 2000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0));
     Update();
+    EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
+                muan::utils::Cap(elevator_output_proto_->elevator_voltage(), -12, 12) - 0.01);
   }
 
   EXPECT_TRUE(elevator_status_proto_->elevator_calibrated());
+  EXPECT_TRUE(elevator_status_proto_->elevator_at_top());
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(), 2.06, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal(), 2.06, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_profiled_goal(), 2.06, 1e-3);
@@ -114,6 +121,8 @@ TEST_F(ElevatorControllerTest, Heights) {
   for (int i = 0; i < 2000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0));
     Update();
+    EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
+                muan::utils::Cap(elevator_output_proto_->elevator_voltage(), -12, 12) - 0.01);
   }
 
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(), 0.6, 1e-3);
@@ -125,6 +134,8 @@ TEST_F(ElevatorControllerTest, Heights) {
   for (int i = 0; i < 2000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0));
     Update();
+    EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
+                muan::utils::Cap(elevator_output_proto_->elevator_voltage(), -12, 12) - 0.01);
   }
 
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(), 0, 1e-3);
@@ -136,6 +147,8 @@ TEST_F(ElevatorControllerTest, Heights) {
   for (int i = 0; i < 2000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0));
     Update();
+    EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
+                muan::utils::Cap(elevator_output_proto_->elevator_voltage(), -12, 12) - 0.01);
   }
 
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(), 0.3, 1e-3);
@@ -152,6 +165,8 @@ TEST_F(ElevatorControllerTest, EncoderFault) {
   for (int i = 0; i < 400; i++) {
     elevator_input_proto_->set_elevator_encoder(0);
     Update();
+    EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
+                muan::utils::Cap(elevator_output_proto_->elevator_voltage(), -12, 12) - 0.01);
   }
 
   EXPECT_TRUE(elevator_status_proto_->elevator_encoder_fault_detected());
