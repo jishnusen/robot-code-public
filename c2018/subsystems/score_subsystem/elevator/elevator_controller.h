@@ -20,6 +20,7 @@ constexpr double kElevatorAcceleration = 2.3;
 constexpr double kElevatorVelocity = 2.2;
 constexpr double kElevatorMaxHeight = 2.06;
 constexpr double kHallEffectHeight = 1.95;
+constexpr double kCalibrationVoltage = 2.0;
 
 class ElevatorController {
  public:

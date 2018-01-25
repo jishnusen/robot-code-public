@@ -77,7 +77,7 @@ TEST_F(ElevatorControllerTest, Calibration) {
   elevator_input_proto_->set_elevator_hall(false);
   outputs_enabled_ = true;
 
-  double offset = 0.1;
+  double offset = 1.0;
 
   SetGoal(2.06);
 
@@ -177,7 +177,7 @@ TEST_F(ElevatorControllerTest, HeightTooHigh) {
 
   SetGoal(4000);
 
-  for (int i = 0; i < 400; i++) {
+  for (int i = 0; i < 2000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0));
     Update();
     EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
