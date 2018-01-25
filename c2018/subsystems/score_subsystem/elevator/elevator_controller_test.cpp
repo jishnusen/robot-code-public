@@ -77,10 +77,12 @@ TEST_F(ElevatorControllerTest, Calibration) {
   elevator_input_proto_->set_elevator_hall(false);
   outputs_enabled_ = true;
 
+  double offset = 0.1;
+
   SetGoal(2.06);
 
   for (int i = 0; i < 2000; i++) {
-    elevator_input_proto_->set_elevator_encoder(plant_.y(0) + 0.1);
+    elevator_input_proto_->set_elevator_encoder(plant_.y(0) + offset);
     Update();
     EXPECT_TRUE(elevator_output_proto_->elevator_voltage() >=
                 muan::utils::Cap(elevator_output_proto_->elevator_voltage(), -12, 12) - 0.01);
