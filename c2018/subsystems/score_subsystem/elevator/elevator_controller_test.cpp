@@ -93,7 +93,7 @@ TEST_F(ElevatorControllerTest, Calibration) {
   EXPECT_NEAR(elevator_status_proto_->elevator_profiled_goal(), 2.06, 1e-3);
 }
 
-TEST_F(ElevatorControllerTest, Heights) {
+TEST_F(ElevatorControllerTest, AllHeights) {
   elevator_input_proto_->set_elevator_encoder(0);
   elevator_input_proto_->set_elevator_hall(false);
   outputs_enabled_ = true;
