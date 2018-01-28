@@ -15,6 +15,7 @@ cc_binary(
         "-lopencv_videoio",
         "-lopencv_highgui",
     ],
+    restricted_to = ["//tools:k8"]
 )
 
 cc_library(
@@ -25,7 +26,8 @@ cc_library(
         "//third_party/aos/common/util:phased_loop",
         "//third_party/aos/vision/events:udp",
         "//c2017/vision:vision_queues"
-    ]
+    ],
+    restricted_to = ["//tools:k8"]
 )
 
 filegroup(
@@ -35,6 +37,7 @@ filegroup(
         "constants/stream_camera_params"
     ],
     visibility = ["//visibility:public"],
+    restricted_to = ["//tools:k8"]
 )
 
 cc_library(
@@ -55,4 +58,5 @@ cc_library(
         "-lopencv_highgui",
     ],
     visibility = ["//visibility:public"],
+    restricted_to = ["//tools:k8"]
 )

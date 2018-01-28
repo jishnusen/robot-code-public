@@ -13,6 +13,7 @@ cc_library(
         ":config_proto",
     ],
     visibility = ["//visibility:public"],
+    restricted_to = ["//tools:k8"]
 )
 
 cc_binary(
@@ -30,6 +31,7 @@ cc_binary(
         ":config_proto",
         ":vision",
     ],
+    restricted_to = ["//tools:k8"]
 )
 
 cc_binary(
@@ -43,6 +45,7 @@ cc_binary(
       "-lopencv_imgproc",
       "-lopencv_videoio",
     ],
+    restricted_to = ["//tools:k8"],
 )
 
 cc_library(
@@ -62,6 +65,7 @@ cc_library(
         "-lopencv_highgui",
         "-lopencv_imgcodecs",
     ],
+    restricted_to = ["//tools:k8"],
 )
 
 cc_proto_library(
@@ -70,6 +74,7 @@ cc_proto_library(
     protoc = "//third_party/google/protobuf:protoc",
     default_runtime = "//third_party/google/protobuf",
     visibility = ["//visibility:public"],
+    restricted_to = ["//tools:k8"],
 )
 
 cc_test(
@@ -79,5 +84,6 @@ cc_test(
         ":vision",
         "//third_party/google/googletest",
     ],
-    linkopts = ["-lopencv_highgui"]
+    linkopts = ["-lopencv_highgui"],
+    restricted_to = ["//tools:k8"],
 )

@@ -768,62 +768,6 @@ py_proto_library(
     deps = [":protobuf_python"],
 )
 
-py_proto_library(
-    name = "python_specific_test_protos",
-    srcs = glob([
-        "python/google/protobuf/internal/*.proto",
-        "python/google/protobuf/internal/import_test_package/*.proto",
-    ]),
-    include = "python",
-    default_runtime = ":protobuf_python",
-    protoc = ":protoc",
-    srcs_version = "PY2AND3",
-    deps = [":python_common_test_protos"],
-)
-
-py_library(
-    name = "python_tests",
-    srcs = glob(
-        [
-            "python/google/protobuf/internal/*_test.py",
-            "python/google/protobuf/internal/test_util.py",
-            "python/google/protobuf/internal/import_test_package/__init__.py",
-        ],
-    ),
-    imports = ["python"],
-    srcs_version = "PY2AND3",
-    deps = [
-        ":protobuf_python",
-        ":python_common_test_protos",
-        ":python_specific_test_protos",
-    ],
-)
-
-internal_protobuf_py_tests(
-    name = "python_tests_batch",
-    data = glob([
-        "src/google/protobuf/**/*",
-    ]),
-    modules = [
-        "descriptor_database_test",
-        "descriptor_pool_test",
-        "descriptor_test",
-        "generator_test",
-        "json_format_test",
-        "message_factory_test",
-        "message_test",
-        "proto_builder_test",
-        "reflection_test",
-        "service_reflection_test",
-        "symbol_database_test",
-        "text_encoding_test",
-        "text_format_test",
-        "unknown_fields_test",
-        "wire_format_test",
-    ],
-    deps = [":python_tests"],
-)
-
 proto_lang_toolchain(
     name = "cc_toolchain",
     command_line = "--cpp_out=$(OUT)",
