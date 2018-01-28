@@ -83,7 +83,7 @@ void AutonomousBase::StartDriveRelative(double forward, double theta,
     }
   }
 
-  StartDriveAbsolute(left_goal, right_goal);
+  StartDriveAbsolute(left_goal, right_goal, follow_through);
 }
 
 void AutonomousBase::StartDrivePath(double x, double y, double heading,
@@ -263,19 +263,19 @@ void AutonomousBase::operator()() {
       StartDriveRelative(-3.5, 0.0, true);
       WaitUntilDriveComplete();
 
-      StartDrivePath(6.65, 1, M_PI * -.3);
+      StartDrivePath(-6.65, -1, 0.0);
       WaitUntilDriveComplete();
 
       StartDriveRelative(2.25, 0.0, true);
       WaitUntilDriveComplete();
 
-      StartDrivePath(4.5, 0.8, M_PI * -.5);
+      StartDrivePath(-4.5, -0.8, M_PI * -.5);
       WaitUntilDriveComplete();
 
-      StartDrivePath(4.2, 1.3, M_PI * -.8);
+      StartDrivePath(-4.2, -1.3, M_PI * -.8);
       WaitUntilDriveComplete();
 
-      StartDrivePath(6.65, 1, 0.0);
+      StartDrivePath(-6.65, -1, 0.0);
       WaitUntilDriveComplete();
     }
   }
