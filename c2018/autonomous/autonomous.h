@@ -19,8 +19,8 @@ class AutonomousBase {
   bool IsAutonomous();
 
   void StartDriveAbsolute(double left, double right, bool follow_through = false);
-  void StartDriveRelative(double forward, double theta, bool follow_through = false);
-  void StartDrivePath(double x, double y, double heading, bool follow_through = false);
+  void StartDriveRelative(double forward, double theta, double final_velocity = 0.0);
+  void StartDrivePath(double x, double y, double heading, bool follow_through = false, bool backwards = false);
 
   bool IsDriveComplete();
   void WaitUntilDriveComplete();
