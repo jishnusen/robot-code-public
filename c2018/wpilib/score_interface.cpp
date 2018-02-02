@@ -7,6 +7,11 @@
 namespace c2018 {
 namespace wpilib {
 
+constexpr double kPitchRadius = (1. + (1. / 16.)) * 0.0254;
+
+constexpr double kElevatorSensorRatio = 2.14;
+constexpr double kWristSensorRatio = 5.14;
+
 constexpr uint32_t kElevatorMotor = 4;
 constexpr uint32_t kIntakeMotor = 2;
 constexpr uint32_t kWristMotor = 3;
@@ -50,8 +55,10 @@ ScoreSubsystemInterface::ScoreSubsystemInterface(
 
 void ScoreSubsystemInterface::ReadSensors() {
   ScoreSubsystemInputProto sensors;
-  sensors->set_elevator_encoder(elevator_encoder_.Get() / 2.2222);
-  sensors->set_wrist_encoder(wrist_encoder_.Get() / 5.14);
+  sensors->set_elevator_encoder(elevator_encoder_.Get() * kPitchRadius *
+                                (2 * M_PI) / 512 / kElevatorSensorRatio);
+  sensors->set_wrist_encoder(wrist_encoder_.Get() * (2 * M_PI) / 512 /
+                             kWristSensorRatio);
   // These numbers come from the status to outpur ratios for the encoders.
   sensors->set_elevator_hall(elevator_hall_.Get());
   sensors->set_wrist_hall(wrist_hall_.Get());
@@ -72,7 +79,7 @@ void ScoreSubsystemInterface::WriteActuators() {
     wrist_.Set(
         muan::utils::Cap(outputs->wrist_voltage(), -kMaxVoltage, kMaxVoltage));
     roller_.Set(
-        muan::utils::Cap(outputs->roller_voltage(), -kMaxVoltage, kMaxVoltage));
+        muan::utils::Cap(outputs->intake_voltage(), -kMaxVoltage, kMaxVoltage));
     pcm_->WriteSolenoid(kIntakeSolenoid, outputs->claw_pinch());
   } else {
     elevator_.Set(0);
