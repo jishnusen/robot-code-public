@@ -259,33 +259,56 @@ void AutonomousBase::operator()() {
       StartDriveAtAngle(-2.2, -0.4, 0.0);
       WaitUntilDriveComplete();
     } else if (left_right_codes[1] == 'R') {
-      /*
-            // Switch is left, scale is right
-            LOG_P("Running LEFT SWITCH RIGHT SCALE auto");
+      // Switch is left, scale is right
+      LOG_P("Running LEFT SWITCH RIGHT SCALE auto");
 
-            StartDriveRelative(-3.5, 0.0);
-            WaitUntilDriveComplete();
+      // Start drive to scale
+      StartDriveRelative(-4.75, 0.0, 1.9);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(6.65, 1, M_PI * .75);
-            WaitUntilDriveComplete();
+      // Turn and get to scale
+      StartDriveAtAngle(-2.5, 0.5, 0.0);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(5.25, 2.5, M_PI * -.5);
-            WaitUntilDriveComplete();
-            StartDrivePath(4.25, 4.5, M_PI);
-            WaitUntilDriveComplete();
+      // Sharp turn to switch
+      StartDriveAtAngle(1.5, M_PI * -0.5, 1.0);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(4.5, 5, M_PI * .5);
-            WaitUntilDriveComplete();
+      // Go over bump
+      StartDriveAtAngle(3.0, M_PI * -0.5, 1.0);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(4.25, 5, M_PI);
-            WaitUntilDriveComplete();
+      // Turn to cube on switch
+      StartDriveAtAngle(1.0, 0.0, 0.0);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(5.2, 1, M_PI);
-            WaitUntilDriveComplete();
+      // Drive to cube
+      StartDriveRelative(0.4, 0.0, 0.0);
+      WaitUntilDriveComplete();
 
-            StartDriveRelative(-1.5, 0.0);
-            WaitUntilDriveComplete();
-      */
+      // Doing scoring and stuff
+      Wait(100);
+
+      // Quickturn towards other cube
+      StartDriveAtAngle(0.0, M_PI * 0.25, 0.0);
+      WaitUntilDriveComplete();
+
+      // Drive to other cube
+      StartDriveRelative(0.25, 0.0, 0.0);
+      WaitUntilDriveComplete();
+
+      // Drive towards scale
+      StartDriveAtAngle(1.75, M_PI * 0.6, 1.0);
+      WaitUntilDriveComplete();
+
+      // Back to scale
+      StartDriveAtAngle(1.0, M_PI * 0.5, 1.5);
+      WaitUntilDriveComplete();
+
+      // To scale
+      StartDriveRelative(2.0, M_PI * 0.6, 0.0);
+      WaitUntilDriveComplete();
+      // TODO(Livy) use splines to make this way better
     }
   } else if (left_right_codes[0] == 'R') {
     if (left_right_codes[1] == 'L') {
