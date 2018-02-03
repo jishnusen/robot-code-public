@@ -30,7 +30,7 @@ class AutonomousBase {
   void Wait(uint32_t num_cycles);
 
   double max_forward_velocity_ = 3.0, max_forward_acceleration_ = 3.0;
-  double max_angular_velocity_ = 3.0, max_angular_acceleration_ = 3.0;
+  double max_angular_velocity_ = 5.0, max_angular_acceleration_ = 4.0;
 
   // Follow through storage
   bool follow_through_ = false;
