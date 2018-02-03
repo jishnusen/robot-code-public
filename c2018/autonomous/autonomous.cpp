@@ -219,19 +219,50 @@ void AutonomousBase::operator()() {
       // Switch is left, scale is left
       LOG_P("Running LEFT SWITCH LEFT SCALE auto");
 
-      StartDriveRelative(-3.5, 0.0, -1.7);
+      // Start going back
+      StartDriveRelative(-4.0, 0.0, -1.9);
       WaitUntilDriveComplete();
 
+      // Turn
       StartDriveRelative(-1.0, M_PI * 0.5, -1.0);
       WaitUntilDriveComplete();
 
-      StartDriveAtAngle(-3.0, M_PI * 0.5, -1.0);
+      // Go over bump
+      StartDriveAtAngle(-4.0, M_PI * 0.5, -1.0);
       WaitUntilDriveComplete();
 
-      StartDrivePath(-6.5, -5.5, 0.0);
+      // Go to scale
+      StartDriveAtAngle(-3.1, -0.3, 0.0);
+      WaitUntilDriveComplete();
+
+      // Go to switch
+      StartDriveAtAngle(2.0, 0.15, 0.0);
+      WaitUntilDriveComplete();
+
+      // Scoring:
+      // At some point we'll probably have to drive forward once we have the cube so that we don't get in trouble for launching
+      Wait(100);
+
+      // Quickturn to next cube
+      StartDriveAtAngle(0.0, M_PI * 0.3, 0.0);
+      WaitUntilDriveComplete();
+
+      // Drive to next cube
+      StartDriveAtAngle(.35, M_PI * 0.3, 0.0);
+      WaitUntilDriveComplete();
+
+      // Start drive back to scale
+      StartDriveRelative(-0.175, 0.0, 1.0);
+      WaitUntilDriveComplete();
+
+      // Drive back to scale
+      StartDriveAtAngle(-2.2, -0.4, 0.0);
       WaitUntilDriveComplete();
 
       /*
+      StartDrivePath(-6.5, -5.5, 0.0);
+      WaitUntilDriveComplete();
+
       StartDriveRelative(-1, 0.0, 3.0);
       WaitUntilDriveComplete();
 
