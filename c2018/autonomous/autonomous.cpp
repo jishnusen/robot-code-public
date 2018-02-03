@@ -258,26 +258,6 @@ void AutonomousBase::operator()() {
       // Drive back to scale
       StartDriveAtAngle(-2.2, -0.4, 0.0);
       WaitUntilDriveComplete();
-
-      /*
-      StartDrivePath(-6.5, -5.5, 0.0);
-      WaitUntilDriveComplete();
-
-      StartDriveRelative(-1, 0.0, 3.0);
-      WaitUntilDriveComplete();
-
-      StartDriveRelative(2.5, 0.0, 3.0);
-      WaitUntilDriveComplete();
-
-      StartDrivePath(4.7, 5.2, M_PI * .5);
-      WaitUntilDriveComplete();
-
-      StartDrivePath(4.4, 4.2, M_PI);
-      WaitUntilDriveComplete();
-
-      StartDrivePath(5.7, 4.8, M_PI);
-      WaitUntilDriveComplete();
-      */
     } else if (left_right_codes[1] == 'R') {
       /*
             // Switch is left, scale is right
