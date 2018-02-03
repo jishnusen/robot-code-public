@@ -5,10 +5,13 @@
 #include "c2018/subsystems/drivetrain/drivetrain_base.h"
 #include "muan/logging/logger.h"
 #include "muan/queues/queue_manager.h"
+#include "muan/units/units.h"
 
 namespace c2018 {
 
 namespace autonomous {
+
+using muan::units::deg;
 
 using muan::queues::QueueManager;
 using DrivetrainGoal = frc971::control_loops::drivetrain::GoalProto;
@@ -75,18 +78,22 @@ void AutonomousBase::StartDriveRelative(double forward, double theta,
     threshold_positive_ = forward > 0.0;
 
     if (threshold_positive_) {
-      left_goal += final_velocity * final_velocity / (2 * max_forward_acceleration_);
-      right_goal += final_velocity * final_velocity / (2 * max_forward_acceleration_);
+      left_goal +=
+          final_velocity * final_velocity / (2 * max_forward_acceleration_);
+      right_goal +=
+          final_velocity * final_velocity / (2 * max_forward_acceleration_);
     } else {
-      left_goal -= final_velocity * final_velocity / (2 * max_forward_acceleration_);
-      right_goal -= final_velocity * final_velocity / (2 * max_forward_acceleration_);
+      left_goal -=
+          final_velocity * final_velocity / (2 * max_forward_acceleration_);
+      right_goal -=
+          final_velocity * final_velocity / (2 * max_forward_acceleration_);
     }
   }
 
   StartDriveAbsolute(left_goal, right_goal, follow_through_);
 }
 
-void AutonomousBase::StartDrivePath(double x, double y, double heading) {
+void AutonomousBase::StartDrivePath(double x, double y, double heading, int direction) {
   follow_through_ = false;
   DrivetrainGoal goal;
 
@@ -101,6 +108,12 @@ void AutonomousBase::StartDrivePath(double x, double y, double heading) {
   goal->mutable_angular_constraints()->set_max_acceleration(
       max_angular_acceleration_);
 
+  if (direction == 1) {
+    goal->mutable_path_command()->set_backwards(false);
+  } else if (direction == -1) {
+    goal->mutable_path_command()->set_backwards(true);
+  }
+
   drivetrain_goal_queue_->WriteMessage(goal);
 }
 
@@ -114,10 +127,10 @@ bool AutonomousBase::IsDriveComplete() {
       double distance_travelled = 0.5 * (status->estimated_left_position() +
                                          status->estimated_right_position());
       if (threshold_positive_ && distance_travelled > goal_dist_) {
-        printf("DRIVE COMPLETE");
+        printf("DRIVE COMPLETE\n");
         return true;
       } else if (!threshold_positive_ && distance_travelled < goal_dist_) {
-        printf("DRIVE COMPLETE");
+        printf("DRIVE COMPLETE\n");
         return true;
       }
     }
@@ -129,7 +142,7 @@ bool AutonomousBase::IsDriveComplete() {
                    goal->distance_command().right_goal()) < 1e-2 &&
           std::abs(status->estimated_left_velocity()) < 1e-2 &&
           std::abs(status->estimated_right_velocity()) < 1e-2) {
-        printf("DRIVE COMPLETE");
+        printf("DRIVE COMPLETE\n");
         return true;
       }
     }
@@ -145,13 +158,19 @@ bool AutonomousBase::IsDriveComplete() {
                    goal->path_command().y_goal()) < 2e-1 &&
           std::abs(status->estimated_left_velocity()) < 1e-2 &&
           std::abs(status->estimated_right_velocity()) < 1e-2) {
-        printf("DRIVE COMPLETE");
+        printf("DRIVE COMPLETE\n");
         return true;
       }
     }
   }
 
   return false;
+}
+
+void AutonomousBase::Wait(uint32_t num_cycles) {
+  for (uint32_t i = 0; IsAutonomous() && i < num_cycles; i++) {
+    loop_.SleepUntilNext();
+  }
 }
 
 void AutonomousBase::operator()() {
@@ -183,19 +202,22 @@ void AutonomousBase::operator()() {
   LOG_P("Starting autonomous with layout %s", left_right_codes.c_str());
   if (left_right_codes[0] == 'L') {
     if (left_right_codes[1] == 'L') {
-/*
       // Switch is left, scale is left
       LOG_P("Running LEFT SWITCH LEFT SCALE auto");
 
-      StartDriveRelative(-4.2, 0.0, 3.0);
+      StartDriveRelative(-4.2, 0.0, -2.0);
       WaitUntilDriveComplete();
 
-      StartDrivePath(5.2, 1, M_PI * .5);
+      StartDriveRelative(-1.5, M_PI * 0.5, -1.0);
       WaitUntilDriveComplete();
 
-      StartDrivePath(5.7, 4.8, M_PI);
+      StartDriveRelative(-3.0, 0.0, -1.0);
       WaitUntilDriveComplete();
 
+      StartDrivePath(-6.5, -5.5, 0.0);
+      WaitUntilDriveComplete();
+
+      /*
       StartDriveRelative(-1, 0.0, 3.0);
       WaitUntilDriveComplete();
 
@@ -210,60 +232,60 @@ void AutonomousBase::operator()() {
 
       StartDrivePath(5.7, 4.8, M_PI);
       WaitUntilDriveComplete();
-*/
+      */
     } else if (left_right_codes[1] == 'R') {
-/*
-      // Switch is left, scale is right
-      LOG_P("Running LEFT SWITCH RIGHT SCALE auto");
+      /*
+            // Switch is left, scale is right
+            LOG_P("Running LEFT SWITCH RIGHT SCALE auto");
 
-      StartDriveRelative(-3.5, 0.0);
-      WaitUntilDriveComplete();
+            StartDriveRelative(-3.5, 0.0);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(6.65, 1, M_PI * .75);
-      WaitUntilDriveComplete();
+            StartDrivePath(6.65, 1, M_PI * .75);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(5.25, 2.5, M_PI * -.5);
-      WaitUntilDriveComplete();
-      StartDrivePath(4.25, 4.5, M_PI);
-      WaitUntilDriveComplete();
+            StartDrivePath(5.25, 2.5, M_PI * -.5);
+            WaitUntilDriveComplete();
+            StartDrivePath(4.25, 4.5, M_PI);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(4.5, 5, M_PI * .5);
-      WaitUntilDriveComplete();
+            StartDrivePath(4.5, 5, M_PI * .5);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(4.25, 5, M_PI);
-      WaitUntilDriveComplete();
+            StartDrivePath(4.25, 5, M_PI);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(5.2, 1, M_PI);
-      WaitUntilDriveComplete();
+            StartDrivePath(5.2, 1, M_PI);
+            WaitUntilDriveComplete();
 
-      StartDriveRelative(-1.5, 0.0);
-      WaitUntilDriveComplete();
-*/
+            StartDriveRelative(-1.5, 0.0);
+            WaitUntilDriveComplete();
+      */
     }
   } else if (left_right_codes[0] == 'R') {
     if (left_right_codes[1] == 'L') {
-/*
-      // Switch is right, scale is left
-      LOG_P("Running RIGHT SWITCH LEFT SCALE auto");
+      /*
+            // Switch is right, scale is left
+            LOG_P("Running RIGHT SWITCH LEFT SCALE auto");
 
-      StartDriveRelative(-4.2, 0.0, true);
-      WaitUntilDriveComplete();
+            StartDriveRelative(-4.2, 0.0, true);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(4.2, 1.3, M_PI);
-      WaitUntilDriveComplete();
+            StartDrivePath(4.2, 1.3, M_PI);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(4.4, 3, M_PI * 0.5);
-      WaitUntilDriveComplete();
+            StartDrivePath(4.4, 3, M_PI * 0.5);
+            WaitUntilDriveComplete();
 
-      StartDrivePath(6.2, 4.5, M_PI);
-      WaitUntilDriveComplete();
+            StartDrivePath(6.2, 4.5, M_PI);
+            WaitUntilDriveComplete();
 
-      StartDriveRelative(2, 0.0);
-      WaitUntilDriveComplete();
+            StartDriveRelative(2, 0.0);
+            WaitUntilDriveComplete();
 
-      StartDriveRelative(-2, 0.0);
-      WaitUntilDriveComplete();
-*/
+            StartDriveRelative(-2, 0.0);
+            WaitUntilDriveComplete();
+      */
     } else if (left_right_codes[1] == 'R') {
       // Switch is right, scale is right
       LOG_P("Running RIGHT SWITCH RIGHT SCALE auto");
@@ -273,33 +295,34 @@ void AutonomousBase::operator()() {
       WaitUntilDriveComplete();
 
       // Align to scale
-      StartDrivePath(-6.8, -1.3, 0.3);
+      StartDrivePath(-6.8, -1.3, 0.15, -1);
       WaitUntilDriveComplete();
+
+      Wait(25);
 
       // Score
       // Drive to switch & score
-      StartDrivePath(-5., -1.4, -0.3);
+      StartDriveRelative(0.25, 0.0, 1.0);
+      WaitUntilDriveComplete();
+      StartDrivePath(-5.4, -1.4, -0.3, 1);
       WaitUntilDriveComplete();
 
       // Quickturn to get in position to grab second cube
-      StartDriveRelative(0.0, -1);
+      StartDriveRelative(0.0, -70 * deg);
       WaitUntilDriveComplete();
 
       // Drive forwards to cube
-      StartDriveRelative(0.5, 0.0);
+      StartDriveRelative(1.0, 0.0);
       WaitUntilDriveComplete();
 
-      StartDrivePath(-4.2, -1.3, M_PI * -.8);
-      WaitUntilDriveComplete();
-
-      StartDrivePath(-6.65, -1, 0.0);
+      StartDrivePath(-6.95, -1.3, 0.3, -1);
       WaitUntilDriveComplete();
     }
   }
 }
 
 void AutonomousBase::WaitUntilDriveComplete() {
-  while (!IsDriveComplete()) {
+  while (!IsDriveComplete() && IsAutonomous()) {
     loop_.SleepUntilNext();
   }
 }
