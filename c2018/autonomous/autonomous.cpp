@@ -270,12 +270,16 @@ void AutonomousBase::operator()() {
       StartDriveAtAngle(-2.5, 0.5, 0.0);
       WaitUntilDriveComplete();
 
+      // Start backing off scale
+      StartDriveRelative(0.2, 0.0, 0.5);
+      WaitUntilDriveComplete();
+
       // Sharp turn to switch
-      StartDriveAtAngle(1.5, M_PI * -0.5, 1.0);
+      StartDriveAtAngle(1.5, M_PI * -0.5, 0.1);
       WaitUntilDriveComplete();
 
       // Go over bump
-      StartDriveAtAngle(3.0, M_PI * -0.5, 1.0);
+      StartDriveAtAngle(3.0, M_PI * -0.5, 0.1);
       WaitUntilDriveComplete();
 
       // Turn to cube on switch
@@ -283,8 +287,8 @@ void AutonomousBase::operator()() {
       WaitUntilDriveComplete();
 
       // Drive to cube
-      StartDriveRelative(0.4, 0.0, 0.0);
-      WaitUntilDriveComplete();
+      //StartDriveRelative(0.2, 0.0, 0.0);
+      //WaitUntilDriveComplete();
 
       // Doing scoring and stuff
       Wait(100);
@@ -294,11 +298,11 @@ void AutonomousBase::operator()() {
       WaitUntilDriveComplete();
 
       // Drive to other cube
-      StartDriveRelative(0.25, 0.0, 0.0);
+      StartDriveRelative(0.2, 0.0, 0.0);
       WaitUntilDriveComplete();
 
       // Drive towards scale
-      StartDriveAtAngle(1.75, M_PI * 0.6, 1.0);
+      StartDriveAtAngle(2.0, M_PI * 0.6, 0.6);
       WaitUntilDriveComplete();
 
       // Back to scale
@@ -312,28 +316,39 @@ void AutonomousBase::operator()() {
     }
   } else if (left_right_codes[0] == 'R') {
     if (left_right_codes[1] == 'L') {
-      /*
-            // Switch is right, scale is left
-            LOG_P("Running RIGHT SWITCH LEFT SCALE auto");
+      LOG_P("Running RIGHT SWITCH LEFT SCALE auto");
 
-            StartDriveRelative(-4.2, 0.0, true);
-            WaitUntilDriveComplete();
+      // Back up
+      StartDriveRelative(-2.5, M_PI * 0.025, 1.5);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(4.2, 1.3, M_PI);
-            WaitUntilDriveComplete();
+      // Turn to switch
+      StartDriveAtAngle(-1.5, M_PI * 0.5, 0.0);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(4.4, 3, M_PI * 0.5);
-            WaitUntilDriveComplete();
+      // Turn uppppp
+      StartDriveAtAngle(1.0, M_PI, 2.0);
+      WaitUntilDriveComplete();
 
-            StartDrivePath(6.2, 4.5, M_PI);
-            WaitUntilDriveComplete();
+      // Turn uppppp pt 2
+      StartDriveAtAngle(1.0, M_PI * 1.5, 2.0);
+      WaitUntilDriveComplete();
 
-            StartDriveRelative(2, 0.0);
-            WaitUntilDriveComplete();
+      // Turn uppppp pt 3
+      StartDriveAtAngle(1.3, M_PI * 1.95, 1.0);
+      WaitUntilDriveComplete();
 
-            StartDriveRelative(-2, 0.0);
-            WaitUntilDriveComplete();
-      */
+      // Go get cube boi
+      StartDriveRelative(0.5, 0.0, 0.0);
+      WaitUntilDriveComplete();
+
+      Wait(200);
+
+      // Quickturn to scale
+      StartDriveAtAngle(0.0, M_PI * 2.5, 0.0);
+      WaitUntilDriveComplete();
+
+
     } else if (left_right_codes[1] == 'R') {
       // Switch is right, scale is right
       LOG_P("Running RIGHT SWITCH RIGHT SCALE auto");
