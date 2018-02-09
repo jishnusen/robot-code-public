@@ -93,7 +93,8 @@ void AutonomousBase::StartDriveRelative(double forward, double theta,
   StartDriveAbsolute(left_goal, right_goal, follow_through_);
 }
 
-void AutonomousBase::StartDriveAtAngle(double distance, double theta_absolute, double final_velocity) {
+void AutonomousBase::StartDriveAtAngle(double distance, double theta_absolute,
+                                       double final_velocity) {
   DrivetrainStatus status;
   if (!drivetrain_status_reader_.ReadLastMessage(&status)) {
     LOG_P("No drivetrain status found.");
@@ -102,12 +103,11 @@ void AutonomousBase::StartDriveAtAngle(double distance, double theta_absolute, d
 
   double delta_theta = theta_absolute - status->estimated_heading();
 
-  std::cout << "Delta is " << delta_theta << std::endl;
-
   StartDriveRelative(distance, delta_theta, final_velocity);
 }
 
-void AutonomousBase::StartDrivePath(double x, double y, double heading, int direction) {
+void AutonomousBase::StartDrivePath(double x, double y, double heading,
+                                    int direction) {
   follow_through_ = false;
   DrivetrainGoal goal;
 
@@ -141,10 +141,8 @@ bool AutonomousBase::IsDriveComplete() {
       double distance_travelled = 0.5 * (status->estimated_left_position() +
                                          status->estimated_right_position());
       if (threshold_positive_ && distance_travelled > goal_dist_) {
-        printf("DRIVE COMPLETE FOLLOW FORWARDS\n");
         return true;
       } else if (!threshold_positive_ && distance_travelled < goal_dist_) {
-        printf("DRIVE COMPLETE FOLLOW REVERSE\n");
         return true;
       }
     }
@@ -156,7 +154,6 @@ bool AutonomousBase::IsDriveComplete() {
                    goal->distance_command().right_goal()) < 1e-2 &&
           std::abs(status->estimated_left_velocity()) < 1e-2 &&
           std::abs(status->estimated_right_velocity()) < 1e-2) {
-        printf("DRIVE COMPLETE NO FOLLOW\n");
         return true;
       }
     }
@@ -172,7 +169,6 @@ bool AutonomousBase::IsDriveComplete() {
                    goal->path_command().y_goal()) < 2e-1 &&
           std::abs(status->estimated_left_velocity()) < 1e-2 &&
           std::abs(status->estimated_right_velocity()) < 1e-2) {
-        printf("DRIVE COMPLETE PATH\n");
         return true;
       }
     }
@@ -240,7 +236,8 @@ void AutonomousBase::operator()() {
       WaitUntilDriveComplete();
 
       // Scoring:
-      // At some point we'll probably have to drive forward once we have the cube so that we don't get in trouble for launching
+      // At some point we'll probably have to drive forward once we have the
+      // cube so that we don't get in trouble for launching
       Wait(100);
 
       // Quickturn to next cube
@@ -287,8 +284,8 @@ void AutonomousBase::operator()() {
       WaitUntilDriveComplete();
 
       // Drive to cube
-      //StartDriveRelative(0.2, 0.0, 0.0);
-      //WaitUntilDriveComplete();
+      // StartDriveRelative(0.2, 0.0, 0.0);
+      // WaitUntilDriveComplete();
 
       // Doing scoring and stuff
       Wait(100);
@@ -347,7 +344,6 @@ void AutonomousBase::operator()() {
       // Quickturn to scale
       StartDriveAtAngle(0.0, M_PI * 2.5, 0.0);
       WaitUntilDriveComplete();
-
 
     } else if (left_right_codes[1] == 'R') {
       // Switch is right, scale is right

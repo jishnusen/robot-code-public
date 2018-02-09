@@ -18,11 +18,15 @@ class AutonomousBase {
  protected:
   bool IsAutonomous();
 
-  void StartDriveAbsolute(double left, double right, bool follow_through = false);
-  void StartDriveRelative(double forward, double theta, double final_velocity = 0.0);
+  void StartDriveAbsolute(double left, double right,
+                          bool follow_through = false);
+  void StartDriveRelative(double forward, double theta,
+                          double final_velocity = 0.0);
   // Direction: 1 => forwards, 0 => autodetect, -1 => backwards
-  void StartDrivePath(double x, double y, double heading, int force_direction = 0);
-  void StartDriveAtAngle(double distance, double theta_absolute, double final_velocity = 0.0);
+  void StartDrivePath(double x, double y, double heading,
+                      int force_direction = 0);
+  void StartDriveAtAngle(double distance, double theta_absolute,
+                         double final_velocity = 0.0);
 
   bool IsDriveComplete();
   void WaitUntilDriveComplete();
