@@ -20,6 +20,7 @@ void Trajectory::SetPath(const Path &path, const State &state) {
   Reset();
 
   state_ = state;
+  state_(1) = state_(3) = 0.5 * (state_(1) + state_(3));
 
   double s_min = 0.0, s_max = 1.0;
   path.Populate(s_min, s_max, &poses_[0], kNumSamples);
