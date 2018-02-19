@@ -11,33 +11,32 @@
   <script>
     var datasock = new WebSocket("ws://" + document.location.host + "/data");
 
- //   var videolistsock = new WebSocket("ws://" + document.location.host + "/videolist");
+    var videolistsock = new WebSocket("ws://" + document.location.host + "/videolist");
 
     var has_made_list = false;
 
     function MakeList(data) {
       var text = "Click on any item to show all fields:<br/><ul id=\"lists\" class=\"collapsibleList\">";
       for (var key in data) {
-        text += "<li>" + key + "<ul>";
-        for (var element in data[key]) {
-	  text += "<li id=" + key + "_" + element + ">" + element + " = " + data[key][element] + "</li>";
-        }
+        text += "<li>" + key + "<ul id=" + key + ">";
         text += "</ul></li>";
       }
       text += "</ul>"
       document.body.innerHTML = text;
-      CollapsibleLists.apply();
     }
 
     var video_streams = [];
 
     function UpdateList(data) {
       for (var key in data) {
+	var keytext = "";
         for (var element in data[key]) {
           CollapsibleLists.apply();
 	  CollapsibleLists.apply();
-          document.getElementById(key + "_" + element).innerHTML = element + " = " + data[key][element];
+	  keytext += "<li>" + element + " = " + data[key][element] + "</li>";
+	  console.log(data[key][element]);
         }
+	document.getElementById(key).innerHTML = keytext;
       }
     }
 
@@ -51,28 +50,28 @@
       }
     };
 
-//    videolistsock.onmessage = function(data) {
-//      var streams = JSON.parse(data.data);
-//      if (streams.length == 0) {
-//        return;
-//      }
-//      var element = document.getElementById("lists");
-//      if (element == undefined) {
-//        setTimeout(function(){ videolistsock.onmessage(data); }, 100);
-//        return;
-//      }
-//      var html_string = "<li>video streams<ul id=\"streamlist\" class=\"collapsibleList\">";
- //     for (var stream of streams) {
-  //      html_string += "<li><a href=\"http://" + document.location.hostname + ":5802/" + stream + "\">" + stream + "</a></li>";
-  //    }
-  //    html_string += "</ul></li>";
-  //    element.innerHTML = html_string + element.innerHTML;
-  //    CollapsibleLists.apply();
-  //  };
+    videolistsock.onmessage = function(data) {
+      var streams = JSON.parse(data.data);
+      if (streams.length == 0) {
+        return;
+      }
+      var element = document.getElementById("lists");
+      if (element == undefined) {
+        setTimeout(function(){ videolistsock.onmessage(data); }, 100);
+        return;
+      }
+      var html_string = "<li>video streams<ul id=\"streamlist\" class=\"collapsibleList\">";
+      for (var stream of streams) {
+        html_string += "<li><a href=\"http://" + document.location.hostname + ":5802/" + stream + "\">" + stream + "</a></li>";
+      }
+      html_string += "</ul></li>";
+      element.innerHTML = html_string + element.innerHTML;
+      CollapsibleLists.apply();
+    };
 
-    //videolistsock.onopen = function(stream) {
-    //  videolistsock.send("ping");
-   // }
+    videolistsock.onopen = function(stream) {
+      videolistsock.send("ping");
+    }
 
     function ReadData() {
       datasock.send("ping");
