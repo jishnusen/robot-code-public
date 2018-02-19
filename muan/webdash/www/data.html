@@ -4,8 +4,7 @@
   <head>
     <title>1678 WebDash</title>
     <script src="CollapsibleLists.js"></script>
-    <script src="dygraph.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="dygraph.css">
+    <link rel="stylesheet" type="text/css">
   </head>
   <body>
   </body>
@@ -28,14 +27,14 @@
       text += "</ul>"
       document.body.innerHTML = text;
     }
-    
+
     var video_streams = [];
 
     function UpdateList(data) {
       for (var key in data) {
         for (var element in data[key]) {
           CollapsibleLists.apply();
-          CollapsibleLists.apply();
+	  CollapsibleLists.apply();
           document.getElementById(key + "_" + element).innerHTML = element + " = " + data[key][element];
         }
       }
@@ -61,7 +60,7 @@
         setTimeout(function(){ videolistsock.onmessage(data); }, 100);
         return;
       }
-      var html_string = "<li>video streams<ul class=\"collapsibleList\">";
+      var html_string = "<li>video streams<ul id=\"streamlist\" class=\"collapsibleList\">";
       for (var stream of streams) {
         html_string += "<li><a href=\"http://" + document.location.hostname + ":5802/" + stream + "\">" + stream + "</a></li>";
       }
