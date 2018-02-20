@@ -29,7 +29,8 @@ static constexpr double kWristMaxAngle = 160 * (M_PI / 180);
 
 static constexpr double kEncoderFaultTicksAllowed = 200;
 static constexpr double kCalibVoltage = 4;
-static constexpr double kOuttakeVoltage = -12;
+static constexpr double kSlowOuttakeVoltage = -5;
+static constexpr double kFastOuttakeVoltage = -9;
 static constexpr double kIntakeVoltage = 12;
 
 static constexpr double kHallEffectAngle = 0.23;
@@ -44,7 +45,8 @@ static constexpr int kNumHasCubeTicks = 50;
 enum class IntakeMode {
   IDLE = 0,
   IN = 1,
-  OUT = 2
+  OUT_FAST = 2,
+  OUT_SLOW = 3
 };
 
 class WristController {

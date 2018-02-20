@@ -49,7 +49,8 @@ TeleopBase::TeleopBase()
 
   stow_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_BUMPER));
   intake_ = gamepad_.MakeAxis(3, 0.7);
-  outtake_ = gamepad_.MakeAxis(2, 0.7);
+  outtake_fast_ = gamepad_.MakeAxis(2, 0.85);
+  outtake_slow_ = gamepad_.MakeAxis(2, 0.3);
 
   pos_0_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::A_BUTTON));
   pos_1_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::B_BUTTON));
@@ -206,9 +207,11 @@ void TeleopBase::SendScoreSubsystemMessage() {
     score_subsystem_goal_->set_score_goal(c2018::score_subsystem::STOW);
   }
 
-  if (outtake_->is_pressed()) {
-    score_subsystem_goal_->set_intake_goal(c2018::score_subsystem::OUTTAKE);
-  } else if (outtake_->was_released()) {
+  if (outtake_fast_->is_pressed()) {
+    score_subsystem_goal_->set_intake_goal(c2018::score_subsystem::OUTTAKE_FAST);
+  } else if (outtake_slow_->is_pressed()) {
+    score_subsystem_goal_->set_intake_goal(c2018::score_subsystem::OUTTAKE_SLOW);
+  } else if (outtake_slow_->was_released()) {
     score_subsystem_goal_->set_intake_goal(c2018::score_subsystem::FORCE_STOP);
   }
 

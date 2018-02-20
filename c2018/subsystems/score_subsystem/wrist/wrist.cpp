@@ -71,8 +71,13 @@ void WristController::Update(ScoreSubsystemInputProto input,
         wrist_solenoid_close = false;
         wrist_solenoid_open = false;
         break;
-      case IntakeMode::OUT:
-        intake_voltage_ = kOuttakeVoltage;
+      case IntakeMode::OUT_SLOW:
+        intake_voltage_ = kSlowOuttakeVoltage;
+        wrist_solenoid_close = true;
+        wrist_solenoid_open = false;
+        break;
+      case IntakeMode::OUT_FAST:
+        intake_voltage_ = kFastOuttakeVoltage;
         wrist_solenoid_close = true;
         wrist_solenoid_open = false;
         break;
