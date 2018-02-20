@@ -111,6 +111,11 @@ void WristController::Update(ScoreSubsystemInputProto input,
 
   wrist_voltage = wrist_controller_.Update(wrist_observer_.x(), wrist_r)(0, 0);
 
+  if (hall_calibration_.is_calibrated() && wrist_r(0) <= 1e-5) {
+    // If we're trying to stay at 0, set 0 voltage automatically
+    wrist_voltage = 0.0;
+  }
+
   if (outputs_enabled) {
     wrist_voltage = muan::utils::Cap(wrist_voltage, -kMaxVoltage, kMaxVoltage);
   } else {

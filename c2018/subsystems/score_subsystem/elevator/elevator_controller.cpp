@@ -76,7 +76,11 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
   } else if (encoder_fault_detected_) {
     elevator_u = 2.0;
     LOG(WARNING, "Encoder fault detected, setting voltage to 2.0");
+  } else if (profiled_goal_(0) <= 1e-5) {
+    // If we're trying to stay at 0, set 0 voltage automatically
+    elevator_u = 0.0;
   }
+
 
   if (old_pos_ == input->elevator_encoder() &&
       std::abs(elevator_u) >= kEncoderFaultMinVoltage) {
