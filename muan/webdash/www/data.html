@@ -3,7 +3,6 @@
 <html>
   <head>
     <title>1678 WebDash</title>
-    <script src="CollapsibleLists.js"></script>
     <link rel="stylesheet" type="text/css">
   </head>
   <body>
@@ -16,9 +15,10 @@
     var has_made_list = false;
 
     function MakeList(data) {
-      var text = "Click on any item to show all fields:<br/><ul id=\"lists\" class=\"collapsibleList\">";
+      var text = "Click on any item to show all fields:<br/><ul id=\"lists\">";
       for (var key in data) {
-        text += "<li>" + key + "<ul id=" + key + ">";
+        text += "<li onclick=\"Toggle('" + key + "')\">" + key;
+	text += "<ul id=" + key + " style=display:none>";
         text += "</ul></li>";
       }
       text += "</ul>"
@@ -31,10 +31,7 @@
       for (var key in data) {
 	var keytext = "";
         for (var element in data[key]) {
-          CollapsibleLists.apply();
-	  CollapsibleLists.apply();
 	  keytext += "<li>" + element + " = " + data[key][element] + "</li>";
-	  console.log(data[key][element]);
         }
 	document.getElementById(key).innerHTML = keytext;
       }
@@ -60,17 +57,25 @@
         setTimeout(function(){ videolistsock.onmessage(data); }, 100);
         return;
       }
-      var html_string = "<li>video streams<ul id=\"streamlist\" class=\"collapsibleList\">";
+      var html_string = "<li onclick=Toggle('streamlist')>video streams<ul id=\"streamlist\" style=display:none>";
       for (var stream of streams) {
         html_string += "<li><a href=\"http://" + document.location.hostname + ":5802/" + stream + "\">" + stream + "</a></li>";
       }
       html_string += "</ul></li>";
       element.innerHTML = html_string + element.innerHTML;
-      CollapsibleLists.apply();
     };
 
     videolistsock.onopen = function(stream) {
       videolistsock.send("ping");
+    }
+
+    function Toggle(node) {
+	var panel = document.getElementById(node);
+	if (panel.style.display == "block") {
+	  panel.style.display = "none";
+        } else {
+	  panel.style.display = "block";
+	}
     }
 
     function ReadData() {
