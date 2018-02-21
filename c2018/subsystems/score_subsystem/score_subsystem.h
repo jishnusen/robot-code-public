@@ -16,8 +16,8 @@ static constexpr double kElevatorFirstStage = 1;
 static constexpr double kElevatorSecondStage = 2;
 
 static constexpr double kElevatorIntake0 = 0;
-static constexpr double kElevatorIntake1 = 0.3;
-static constexpr double kElevatorIntake2 = 0.58;
+static constexpr double kElevatorIntake1 = 0.25;
+static constexpr double kElevatorIntake2 = 0.55;
 
 static constexpr double kElevatorExchange = 0.05;
 static constexpr double kElevatorSwitch = 0.6;
@@ -29,11 +29,11 @@ static constexpr double kElevatorScaleHigh = 1.94;
 static constexpr double kElevatorScaleSuperHighFront = 2.03;
 static constexpr double kElevatorScaleSuperHighBack = 2.18;
 
-static constexpr double kElevatorReversedOffset = -0.45;
+static constexpr double kElevatorReversedOffset = -0.25;
 
 static constexpr double kElevatorStow = 0.0;
 
-static constexpr double kElevatorWristSafeHeight = 0.89;
+static constexpr double kElevatorWristSafeHeight = 1.0;
 static constexpr double kElevatorExchangeHeight = 0.05;
 
 static constexpr double kWristForwardAngle = 0 * (M_PI / 180);

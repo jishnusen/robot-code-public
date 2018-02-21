@@ -35,7 +35,7 @@ static constexpr double kIntakeVoltage = 12;
 
 static constexpr double kHallEffectAngle = 0.23;
 
-static constexpr double kHoldingVoltage = 2.5;
+static constexpr double kHoldingVoltage = 1.5;
 static constexpr double kMaxVoltage = 12;
 
 static constexpr double kStallCurrent = 30;

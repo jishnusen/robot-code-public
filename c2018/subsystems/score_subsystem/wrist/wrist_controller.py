@@ -21,8 +21,8 @@ def make_gains():
 
     # Moment of inertia constants
     # M= mass and L = length
-    M = 11.0
-    L = 0.25
+    M = 4.0
+    L = 0.3
 
     # Parameters
     moment_inertia = M * L* L * (1.0 / 3.0)
