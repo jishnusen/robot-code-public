@@ -26,9 +26,10 @@ enum ScoreGoal {
 enum IntakeGoal {
   INTAKE_NONE = 0; // Let the state machine progress
   INTAKE = 1;
-  OUTTAKE_SLOW = 2;
-  OUTTAKE_FAST = 3;
-  FORCE_STOP = 4;
+  INTAKE_ONLY = 2;
+  OUTTAKE_SLOW = 3;
+  OUTTAKE_FAST = 4;
+  FORCE_STOP = 5;
 }
 
 message ScoreSubsystemInput {
@@ -65,8 +66,9 @@ enum ScoreSubsystemState {
   CALIBRATING = 0;
   HOLDING = 1;
   INTAKING = 2;
-  SCORING_SLOW = 3;
-  SCORING_FAST = 4;
+  INTAKING_ONLY = 3;
+  SCORING_SLOW = 4;
+  SCORING_FAST = 5;
 }
 
 message ScoreSubsystemStatus {

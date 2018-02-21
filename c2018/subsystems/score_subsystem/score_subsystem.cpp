@@ -69,6 +69,9 @@ void ScoreSubsystem::Update() {
     case ScoreSubsystemState::INTAKING:
       intake_mode = wrist::IntakeMode::IN;
       break;
+    case ScoreSubsystemState::INTAKING_ONLY:
+      intake_mode = wrist::IntakeMode::IN;
+      break;
     case ScoreSubsystemState::SCORING_SLOW:
       intake_mode = wrist::IntakeMode::OUT_SLOW;
       break;
@@ -156,6 +159,9 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
     case INTAKE_NONE:
       // Just let the state machine take over
       break;
+    case INTAKE_ONLY:
+      GoToState(ScoreSubsystemState::INTAKING_ONLY);
+      break;
     case INTAKE:
       GoToState(ScoreSubsystemState::INTAKING);
       break;
@@ -189,8 +195,12 @@ void ScoreSubsystem::RunStateMachine() {
       break;
     case INTAKING:
       if (status_->has_cube()) {
+        elevator_height_ = kElevatorStow;
+        wrist_angle_ = kWristStowAngle;
         GoToState(HOLDING);
       }
+      break;
+    case INTAKING_ONLY:
       break;
     case SCORING_FAST:
     case SCORING_SLOW:
@@ -213,6 +223,7 @@ void ScoreSubsystem::GoToState(ScoreSubsystemState desired_state) {
       break;
     case ScoreSubsystemState::HOLDING:
     case ScoreSubsystemState::INTAKING:
+    case ScoreSubsystemState::INTAKING_ONLY:
     case ScoreSubsystemState::SCORING_FAST:
     case ScoreSubsystemState::SCORING_SLOW:
       state_ = desired_state;
