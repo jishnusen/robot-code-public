@@ -91,6 +91,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
     }
   } else {
     num_encoder_fault_ticks_ = 0;
+    encoder_fault_detected_ = false;
   }
 
   (*status)->set_elevator_uncapped_voltage(elevator_u);
