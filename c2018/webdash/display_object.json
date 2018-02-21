@@ -12,13 +12,6 @@
       ]
     },
     {
-      "name": "Video Stream",
-      "type": "image",
-      "source": "?action=stream",
-      "coordinates": [1, 1],
-      "should-title": false
-    },
-    {
       "name": "Link to Data Stream",
       "type": "link",
       "source": "\\data",
@@ -28,7 +21,7 @@
     {
       "name": "Elevator Calibrated",
       "type": "bool",
-      "source": ["score_subsystem_status_queue", "elevator_calbrated"],
+      "source": ["score_subsystem_status_queue", "elevator_calibrated"],
       "coordinates": [3, 0],
       "should-title": true,
       "colors": {
