@@ -65,6 +65,9 @@ class ScoreSubsystemTest : public ::testing::Test {
       wrist_plant_.x(0) = 0;
     }
 
+    elevator_plant_.x(2) = -2;
+    wrist_plant_.x(2) = -2 * std::cos(wrist_plant_.x(0));
+
     UpdateInput();
 
     WriteMessages();
@@ -383,7 +386,7 @@ TEST_F(ScoreSubsystemTest, ScoreToIdle) {
   SetGoal(ScoreGoal::SCALE_MID_REVERSE, IntakeGoal::INTAKE_NONE, true);
   Update();
   SetGoal(ScoreGoal::SCORE_NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(600);
+  RunFor(1000);
   CheckGoal(kElevatorScaleMid + kElevatorReversedOffset, kWristBackwardAngle);
 
   SetGoal(ScoreGoal::SCORE_NONE, IntakeGoal::OUTTAKE_FAST, true);
@@ -396,7 +399,7 @@ TEST_F(ScoreSubsystemTest, ScoreToIdle) {
   EXPECT_EQ(score_subsystem_status_proto_->state(), SCORING_FAST);
 
   score_subsystem_input_proto_->set_has_cube(false);
-  RunFor(500);
+  RunFor(700);
 
   EXPECT_EQ(score_subsystem_output_proto_->intake_voltage(), 0);
 }
@@ -406,7 +409,7 @@ TEST_F(ScoreSubsystemTest, ForceIntake) {
 
   score_subsystem_input_proto_->set_has_cube(true);
   SetGoal(ScoreGoal::INTAKE_0, IntakeGoal::INTAKE, true);
-  RunFor(500);
+  RunFor(700);
 
   EXPECT_EQ(score_subsystem_output_proto_->intake_voltage(),
             wrist::kIntakeVoltage);

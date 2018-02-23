@@ -63,7 +63,7 @@ TEST_F(WristTest, Calib) {
     EXPECT_NEAR(wrist_output_proto_->wrist_voltage(), 0, 12);
   }
 
-  EXPECT_NEAR(wrist_status_proto_->wrist_angle(), M_PI / 4, 0.01);
+  EXPECT_NEAR(wrist_status_proto_->wrist_angle(), M_PI / 4, 1e-3);
   EXPECT_TRUE(wrist_status_proto_->wrist_calibrated());
 }
 
@@ -116,7 +116,7 @@ TEST_F(WristTest, Stow) {
     EXPECT_NEAR(wrist_output_proto_->wrist_voltage(), 0, 12);
   }
 
-  EXPECT_NEAR(wrist_status_proto_->wrist_angle(), kWristStowAngle, 0.01);
+  EXPECT_NEAR(wrist_status_proto_->wrist_angle(), kWristStowAngle, 1e-3);
   EXPECT_TRUE(wrist_status_proto_->wrist_calibrated());
 
   EXPECT_NEAR(wrist_output_proto_->intake_voltage(), 0, 1e-3);
