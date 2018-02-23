@@ -134,6 +134,7 @@ void WristController::Update(ScoreSubsystemInputProto input,
   (*status)->set_has_cube(has_cube);
   (*status)->set_wrist_profiled_goal(profiled_goal_(0, 0));
   (*status)->set_wrist_unprofiled_goal(unprofiled_goal_);
+  (*status)->set_wrist_calibration_offset(hall_calibration_.offset());
 }
 
 Eigen::Matrix<double, 2, 1> WristController::UpdateProfiledGoal(

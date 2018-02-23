@@ -81,13 +81,15 @@ message ScoreSubsystemStatus {
   required double elevator_profiled_goal = 7;
   required double elevator_unprofiled_goal = 8;
   required bool elevator_encoder_fault_detected = 9;
-  required ScoreSubsystemState state = 10;
-  required bool elevator_calibrated = 11;
-  required double wrist_angle = 12;
-  required double wrist_velocity = 13;
-  required bool wrist_calibrated = 14;
-  required double wrist_profiled_goal = 15;
-  required double wrist_unprofiled_goal = 16;
-  required bool claw_pinch = 17;
-  required bool has_cube = 18;
+  required double elevator_calibration_offset = 10;
+  required ScoreSubsystemState state = 11;
+  required bool elevator_calibrated = 12;
+  required double wrist_angle = 13;
+  required double wrist_velocity = 14;
+  required bool wrist_calibrated = 15;
+  required double wrist_profiled_goal = 16;
+  required double wrist_unprofiled_goal = 17;
+  required double wrist_calibration_offset = 18;
+  required bool claw_pinch = 19;
+  required bool has_cube = 20;
 }

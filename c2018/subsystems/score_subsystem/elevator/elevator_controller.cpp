@@ -89,7 +89,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
       encoder_fault_detected_ = true;
       LOG(WARNING, "Encoder fault detected due to offset velocity");
     }
-  } else {
+  } else if (old_pos_ != input->elevator_encoder()){
     num_encoder_fault_ticks_ = 0;
     encoder_fault_detected_ = false;
   }
@@ -115,6 +115,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
   (*status)->set_elevator_at_top((*status)->elevator_actual_height() >=
                                  kElevatorMaxHeight - 0.01);
   (*status)->set_elevator_encoder_fault_detected(encoder_fault_detected_);
+  (*status)->set_elevator_calibration_offset(hall_calib_.offset());
 }
 
 void ElevatorController::SetGoal(double goal) {
