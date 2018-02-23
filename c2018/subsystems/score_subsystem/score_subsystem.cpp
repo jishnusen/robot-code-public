@@ -69,8 +69,14 @@ void ScoreSubsystem::Update() {
     case ScoreSubsystemState::INTAKING:
       intake_mode = wrist::IntakeMode::IN;
       break;
-    case ScoreSubsystemState::SCORING:
-      intake_mode = wrist::IntakeMode::OUT;
+    case ScoreSubsystemState::INTAKING_ONLY:
+      intake_mode = wrist::IntakeMode::IN;
+      break;
+    case ScoreSubsystemState::SCORING_SLOW:
+      intake_mode = wrist::IntakeMode::OUT_SLOW;
+      break;
+    case ScoreSubsystemState::SCORING_FAST:
+      intake_mode = wrist::IntakeMode::OUT_FAST;
       break;
   }
 
@@ -153,11 +159,17 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
     case INTAKE_NONE:
       // Just let the state machine take over
       break;
+    case INTAKE_ONLY:
+      GoToState(ScoreSubsystemState::INTAKING_ONLY);
+      break;
     case INTAKE:
       GoToState(ScoreSubsystemState::INTAKING);
       break;
-    case OUTTAKE:
-      GoToState(ScoreSubsystemState::SCORING);
+    case OUTTAKE_SLOW:
+      GoToState(ScoreSubsystemState::SCORING_SLOW);
+      break;
+    case OUTTAKE_FAST:
+      GoToState(ScoreSubsystemState::SCORING_FAST);
       break;
     case FORCE_STOP:
       GoToState(ScoreSubsystemState::HOLDING);
@@ -183,10 +195,15 @@ void ScoreSubsystem::RunStateMachine() {
       break;
     case INTAKING:
       if (status_->has_cube()) {
+        elevator_height_ = kElevatorStow;
+        wrist_angle_ = kWristStowAngle;
         GoToState(HOLDING);
       }
       break;
-    case SCORING:
+    case INTAKING_ONLY:
+      break;
+    case SCORING_FAST:
+    case SCORING_SLOW:
       if (!status_->has_cube()) {
         GoToState(HOLDING);
       }
@@ -206,7 +223,9 @@ void ScoreSubsystem::GoToState(ScoreSubsystemState desired_state) {
       break;
     case ScoreSubsystemState::HOLDING:
     case ScoreSubsystemState::INTAKING:
-    case ScoreSubsystemState::SCORING:
+    case ScoreSubsystemState::INTAKING_ONLY:
+    case ScoreSubsystemState::SCORING_FAST:
+    case ScoreSubsystemState::SCORING_SLOW:
       state_ = desired_state;
       break;
   }

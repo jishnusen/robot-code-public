@@ -83,10 +83,10 @@ TEST_F(WristTest, Outtake) {
   wrist_input_proto_->set_wrist_encoder(0);
   wrist_input_proto_->set_wrist_hall(false);
   outputs_enabled_ = true;
-  SetGoal(0.0, IntakeMode::OUT);
+  SetGoal(0.0, IntakeMode::OUT_FAST);
   Update();
 
-  EXPECT_NEAR(wrist_output_proto_->intake_voltage(), -12.0, 1e-3);
+  EXPECT_NEAR(wrist_output_proto_->intake_voltage(), kFastOuttakeVoltage, 1e-3);
   EXPECT_FALSE(wrist_output_proto_->wrist_solenoid_open());
   EXPECT_TRUE(wrist_output_proto_->wrist_solenoid_close());
 }

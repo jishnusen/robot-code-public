@@ -35,14 +35,12 @@ class ScoreSubsystemTest : public ::testing::Test {
   void CalibrateDisabled() {
     driver_station_proto_->set_is_sys_active(false);
 
-    for (int i = 0; i < 200; i++) {
-      elevator_plant_.x(0) = i * 0.5e-2;
-      elevator_plant_.x(1) = 1.0;
-      wrist_plant_.x(0) = i * .125e-2;
-      wrist_plant_.x(1) = 0.25;
+    for (int i = 0; i < 2500; i++) {
+      elevator_plant_.x(0) = i * 5e-4;
+      wrist_plant_.x(0) = i * 5e-4;
 
       Update();
-      if (i < 50) {
+      if (i < 1000) {
         EXPECT_EQ(score_subsystem_status_proto_->state(),
                   ScoreSubsystemState::CALIBRATING);
       }
@@ -173,6 +171,10 @@ class ScoreSubsystemTest : public ::testing::Test {
   double wrist_offset_ = 0.0;
 
   void CheckGoal(double elevator, double wrist) const {
+    EXPECT_NEAR(score_subsystem_status_proto_->elevator_unprofiled_goal(),
+                elevator, 1e-3);
+    EXPECT_NEAR(score_subsystem_status_proto_->wrist_unprofiled_goal(), wrist, 1e-3);
+
     EXPECT_NEAR(score_subsystem_status_proto_->elevator_actual_height(),
                 elevator, 1e-3);
     EXPECT_NEAR(score_subsystem_status_proto_->wrist_angle(), wrist, 1e-3);
@@ -339,12 +341,12 @@ TEST_F(ScoreSubsystemTest, IntakeManual) {
 TEST_F(ScoreSubsystemTest, OuttakeManual) {
   CalibrateDisabled();
 
-  SetGoal(ScoreGoal::INTAKE_0, IntakeGoal::OUTTAKE, true);
+  SetGoal(ScoreGoal::INTAKE_0, IntakeGoal::OUTTAKE_FAST, true);
   Update();
 
   EXPECT_EQ(score_subsystem_output_proto_->intake_voltage(),
-            wrist::kOuttakeVoltage);
-  EXPECT_EQ(score_subsystem_status_proto_->state(), SCORING);
+            wrist::kFastOuttakeVoltage);
+  EXPECT_EQ(score_subsystem_status_proto_->state(), SCORING_FAST);
 
   SetGoal(ScoreGoal::INTAKE_0, IntakeGoal::FORCE_STOP, true);
   Update();
@@ -384,14 +386,14 @@ TEST_F(ScoreSubsystemTest, ScoreToIdle) {
   RunFor(600);
   CheckGoal(kElevatorScaleMid + kElevatorReversedOffset, kWristBackwardAngle);
 
-  SetGoal(ScoreGoal::SCORE_NONE, IntakeGoal::OUTTAKE, true);
+  SetGoal(ScoreGoal::SCORE_NONE, IntakeGoal::OUTTAKE_FAST, true);
   Update();
   SetGoal(ScoreGoal::SCORE_NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(10);
 
   EXPECT_EQ(score_subsystem_output_proto_->intake_voltage(),
-            wrist::kOuttakeVoltage);
-  EXPECT_EQ(score_subsystem_status_proto_->state(), SCORING);
+            wrist::kFastOuttakeVoltage);
+  EXPECT_EQ(score_subsystem_status_proto_->state(), SCORING_FAST);
 
   score_subsystem_input_proto_->set_has_cube(false);
   RunFor(500);
