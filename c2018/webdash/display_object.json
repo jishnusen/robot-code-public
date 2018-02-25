@@ -20,7 +20,7 @@
     },
     {
       "name": "Elevator Calibrated",
-      "type": "bool",
+      "type": "boolean",
       "source": ["score_subsystem_status", "elevator_calibrated"],
       "coordinates": [3, 0],
       "should-title": true,
@@ -31,7 +31,7 @@
     },
     {
       "name": "Claw Calibrated",
-      "type": "bool",
+      "type": "boolean",
       "source": ["score_subsystem_status", "claw_calibrated"],
       "coordinates": [3, 1],
       "should-title": true,
