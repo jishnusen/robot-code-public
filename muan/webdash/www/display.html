@@ -29,7 +29,7 @@
     function sendAutoData() { autosock.send(getRadioCheckedValue("auto")); }
 
     function getRadioCheckedValue(radio_name) {
-      var oRadio = document.getElementsByName("auto");
+      var oRadio = document.getElementsByName(radio_name);
       for (var i = 0; i < oRadio.length; i++) {
         if (oRadio[i].checked) {
           return oRadio[i].value;
@@ -109,10 +109,10 @@
       var link_id = "";
       var alliance_color = "#000000";
       var other_alliance_color = "#000000";
-      if (data["driver_station_status"]["alliance"] == 0) {
+      if (data["driver_station_status"]["alliance"] == 1) {
         alliance_color = "#ff0000";
         other_alliance_color = "#0000ff";
-      } else if (data["driver_station_status"]["alliance"] == 1) {
+      } else if (data["driver_station_status"]["alliance"] == 0) {
         alliance_color = "#0000ff";
         other_alliance_color = "#ff0000";
       }
@@ -138,6 +138,7 @@
             document.getElementById(coords).innerHTML += bool_box;
           }
           document.getElementById(box_id).style.backgroundColor = color;
+		console.log(source);
         }
 
         // Creates enum widgets, colored box
