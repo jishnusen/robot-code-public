@@ -14,7 +14,7 @@
     {
       "name": "Link to Data Stream",
       "type": "link",
-      "source": "\\data",
+      "source": "\\data.html",
       "coordinates": [3, 3],
       "should-title": false
     },
