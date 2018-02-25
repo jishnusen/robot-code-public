@@ -62,23 +62,22 @@
             "px;left:" + left_shift + "px;width:" + box_width + "px;height:" +
             box_height + "px></div>";
         widget_name = widget["name"];
+        if (widget["type"] == "auto") {
+          auto_id = "auto" + coords;
+          html_string = "<div id=" + coords + "><p>Auto Mode:</p>";
+          if (!document.getElementById(auto_id)) {
+            for (var i = 0; i < widget["autos"].length; i++) {
+              html_string += "<input type=\"radio\" name=\"auto\" value=\"" +
+                             widget["autos"][i] + "\">" + widget["autos"][i] +
+                             "<br>\n";
+            }
+            html_string +=
+                "<input type=\"button\" value=\"Update Auto\" onclick=\"sendAutoData()\"></div>";
+            document.getElementById(coords).innerHTML = html_string;
+          }
+        }
         if (widget["should-title"]) {
           document.getElementById(coords).innerHTML = "<p>" + widget_name + ":</p>";
-        }
-      }
-      if (widget["type"] == "auto") {
-        auto_id = "auto" + coords;
-        html_string = "<div id=" + coords + "><p>Auto Mode:</p>";
-        if (!document.getElementById(auto_id)) {
-          for (var i = 0; i < widget["autos"].length; i++) {
-            html_string += "<input type=\"radio\" name=\"auto\" value=\"" +
-                           widget["autos"][i] + "\">" + widget["autos"][i] +
-                           "<br>\n";
-          }
-          html_string +=
-              "<input type= \"button\"value= \"Update Auto\" "
-              "onclick=\"sendAutoData()\"></div>";
-          document.getElementById(coords).innerHTML = html_string;
         }
       }
       alertData();
