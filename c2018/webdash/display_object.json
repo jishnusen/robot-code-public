@@ -7,8 +7,9 @@
       "should-title": false,
       "autos": [
         "NONE",
-        "SCALE_ONLY",
-        "SCALE_PLUS_SWITCH"
+        "SCALE_PLUS_SWITCH",
+				"SINGLE_SWITCH",
+				"DOUBLE_SWITCH"
       ]
     },
     {

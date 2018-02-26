@@ -1,9 +1,12 @@
 #ifndef C2018_AUTONOMOUS_AUTONOMOUS_H_
 #define C2018_AUTONOMOUS_AUTONOMOUS_H_
 
+#include <string>
+
 #include "c2018/subsystems/score_subsystem/queue_types.h"
 #include "c2018/subsystems/score_subsystem/score_subsystem.pb.h"
 #include "muan/wpilib/queue_types.h"
+#include "muan/webdash/queue_types.h"
 #include "third_party/aos/common/util/phased_loop.h"
 #include "third_party/frc971/control_loops/drivetrain/drivetrain_config.h"
 #include "third_party/frc971/control_loops/drivetrain/queue_types.h"
@@ -19,6 +22,8 @@ class AutonomousBase {
 
  protected:
   bool IsAutonomous();
+
+  std::string AutoMode();
 
   void StartDriveAbsolute(double left, double right,
                           bool follow_through = false);
@@ -62,9 +67,9 @@ class AutonomousBase {
   c2018::score_subsystem::ScoreSubsystemStatusQueue::QueueReader
       score_status_reader_;
   muan::wpilib::DriverStationQueue::QueueReader driver_station_reader_;
+  muan::webdash::AutoSelectionQueue::QueueReader auto_mode_reader_;
   muan::wpilib::GameSpecificStringQueue::QueueReader
       game_specific_string_reader_;
-
   aos::time::PhasedLoop loop_{std::chrono::milliseconds(5)};
 };
 

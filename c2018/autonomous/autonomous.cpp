@@ -1,6 +1,7 @@
 #include "c2018/autonomous/autonomous.h"
 
 #include <chrono>
+#include <string>
 
 #include "c2018/subsystems/drivetrain/drivetrain_base.h"
 #include "muan/logging/logger.h"
@@ -17,6 +18,7 @@ using DrivetrainGoal = frc971::control_loops::drivetrain::GoalProto;
 using DrivetrainStatus = frc971::control_loops::drivetrain::StatusProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
+using muan::webdash::AutoSelectionProto;
 
 AutonomousBase::AutonomousBase()
     : config_(drivetrain::GetDrivetrainConfig()),
@@ -30,6 +32,8 @@ AutonomousBase::AutonomousBase()
               ->MakeReader()),
       driver_station_reader_(
           QueueManager<DriverStationProto>::Fetch()->MakeReader()),
+      auto_mode_reader_(
+	  QueueManager<AutoSelectionProto>::Fetch()->MakeReader()),
       game_specific_string_reader_(
           QueueManager<GameSpecificStringProto>::Fetch()->MakeReader()) {}
 
@@ -40,6 +44,15 @@ bool AutonomousBase::IsAutonomous() {
   } else {
     LOG(WARNING, "No driver station status found.");
     return false;
+  }
+}
+
+std::string AutonomousBase::AutoMode() {
+  AutoSelectionProto auto_mode;
+  if (auto_mode_reader_.ReadLastMessage(&auto_mode)) {
+    return auto_mode->auto_mode();
+  } else {
+    return "SCALE_PLUS_SWITCH";
   }
 }
 
@@ -226,281 +239,364 @@ void AutonomousBase::operator()() {
 
   // Start of autonomous. Grab the game specific string.
   auto left_right_codes = game_specific_string->code();
-  LOG(INFO, "Starting autonomous with layout %s", left_right_codes.c_str());
-  if (left_right_codes[0] == 'L') {
-    if (left_right_codes[1] == 'L') {
-      // Switch is left, scale is left
-      LOG(INFO, "Running LEFT SWITCH LEFT SCALE auto");
+  if (AutoMode() == "SCALE_PLUS_SWITCH") {
+    LOG(INFO, "Starting autonomous with layout %s", left_right_codes.c_str());
+    if (left_right_codes[0] == 'L') {
+      if (left_right_codes[1] == 'L') {
+        // Switch is left, scale is left
+        LOG(INFO, "Running LEFT SWITCH LEFT SCALE auto");
 
-      MoveToSwitch();
+        MoveToSwitch();
 
-      // Start going back
-      StartDriveRelative(-3.0, 0.0, -2.0);
-      WaitUntilDriveComplete();
+        // Start going back
+        StartDriveRelative(-3.0, 0.0, -2.0);
+        WaitUntilDriveComplete();
 
-      // Turn
-      StartDriveRelative(-2.0, M_PI * 0.5, -2.0);
-      WaitUntilDriveComplete();
+        // Turn
+        StartDriveRelative(-2.0, M_PI * 0.5, -2.0);
+        WaitUntilDriveComplete();
 
-      // Go over bump
-      StartDriveAtAngle(-3.8, M_PI * 0.5, -1.5);
-      WaitUntilDriveComplete();
+        // Go over bump
+        StartDriveAtAngle(-3.8, M_PI * 0.5, -1.5);
+        WaitUntilDriveComplete();
 
-      // Go to scale
-      StartDriveAtAngle(-1.6, M_PI * 0.1, -1.0);
-      Wait(50);
-      MoveToScale(false);
-      WaitUntilDriveComplete();
-      StartDriveAtAngle(-1.15, M_PI * -0.1, -1.0);
-      WaitUntilDriveComplete();
+        // Go to scale
+        StartDriveAtAngle(-1.6, M_PI * 0.1, -1.0);
+        Wait(50);
+        MoveToScale(false);
+        WaitUntilDriveComplete();
+        StartDriveAtAngle(-1.15, M_PI * -0.1, -1.0);
+        WaitUntilDriveComplete();
 
-      // Score on scale here
-      Score();
-      Wait(50);
-      StopScore();
+        // Score on scale here
+        Score();
+        Wait(50);
+        StopScore();
 
-      IntakeGround();
-      Wait(200);
+        IntakeGround();
+        Wait(200);
 
-      // Go to switch
-      StartDriveAtAngle(1.75, 0.15, 0.0);
-      WaitForCube();
-      Wait(25);
+        // Go to switch
+        StartDriveAtAngle(1.75, 0.15, 0.0);
+        WaitForCube();
+        Wait(25);
 
-      // Back up to prevent dragging cube against switch
-      StartDriveRelative(-0.15, 0.0);
-      MoveToSwitch();
+        // Back up to prevent dragging cube against switch
+        StartDriveRelative(-0.15, 0.0);
+        MoveToSwitch();
 
-      Wait(150);
+        Wait(150);
 
-      // Drive so bumpers get on switch
-      StartDriveRelative(0.2, 0.0, 1.5);
-      WaitUntilDriveComplete();
+        // Drive so bumpers get on switch
+        StartDriveRelative(0.2, 0.0, 1.5);
+        WaitUntilDriveComplete();
 
-      StopIntakeGround();
+        StopIntakeGround();
 
-      // Without wait it scores while driving back
-      Score();
+        // Without wait it scores while driving back
+        Score();
 
-      // Quickturn to next cube
-      StartDriveAtAngle(-0.15, M_PI * 0.3);
-
-      // Not get intake caught on switch
-      Wait(125);
-
-      // Go to ground intake
-      IntakeGround();
-
-      WaitUntilDriveComplete();
-
-      // Drive to next cube
-      StartDriveAtAngle(.7, M_PI * 0.33, 0.0);
-      WaitForCube();
-
-      max_angular_acceleration_ = 5.5;
-      max_forward_acceleration_ = 2.0;
-      // Drive back to scale
-      StartDriveAtAngle(-2.2, -0.2, 0.0);
-      Wait(100);
-      MoveToScale(false);
-      WaitUntilDriveComplete();
-
-      Score();
-      Wait(50);
-      StopScore();
-
-      IntakeGround();
-    } else if (left_right_codes[1] == 'R') {
-      // Switch is left, scale is right
-      LOG(INFO, "Running LEFT SWITCH RIGHT SCALE auto");
-
-      StopIntakeGround();
-      MoveToScale(false);
-
-      // Start drive to scale
-      StartDriveRelative(-4.75, 0.0, 1.9);
-      WaitUntilDriveComplete();
-
-      // Turn and get to scale
-      StartDriveAtAngle(-2.8, 0.5, 0.0);
-      WaitForCube();
-
-      // Score on scale
-      Score();
-      Wait(50);
-      StopScore();
-
-      // Start backing off scale
-      StartDriveRelative(0.2, 0.0, 0.5);
-      WaitUntilDriveComplete();
-
-      // Sharp turn to switch
-      StartDriveAtAngle(1.5, M_PI * -0.5, 0.1);
-      WaitUntilDriveComplete();
-
-      // Go over bump
-      StartDriveAtAngle(3.0, M_PI * -0.5, 0.1);
-      WaitUntilDriveComplete();
-
-      // Turn to cube on switch
-      StartDriveAtAngle(1.0, 0.0, 0.0);
-      WaitUntilDriveComplete();
-
-      // Drive to cube
-      StartDriveRelative(0.2, 0.0, 0.0);
-      WaitForCube();
-
-      // Back up to prevent cube drag
-      StartDriveRelative(-0.15, 0.0);
-      Wait(100);
-      MoveToSwitch();
-
-      // Drive so bumpers get on switch
-      StartDriveRelative(0.2, 0.0, 1.5);
-      WaitUntilDriveComplete();
-
-      // Without wait it scores while driving back
-      Score();
-
-      // Quickturn towards other cube
-      StartDriveAtAngle(0.0, M_PI * 0.25, 0.0);
-      WaitUntilDriveComplete();
-      IntakeGround();
-      Wait(100);
-
-      // Drive to other cube
-      StartDriveRelative(0.2, 0.0, 0.0);
-      WaitForCube();
-
-      // Drive towards scale
-      StartDriveAtAngle(2.0, M_PI * 0.6, 0.6);
-      WaitUntilDriveComplete();
-
-      // Back to scale
-      StartDriveAtAngle(1.0, M_PI * 0.5, 1.5);
-      WaitUntilDriveComplete();
-
-      MoveToScale(true);
-      // To scale
-      StartDriveRelative(2.0, M_PI * 0.6, 0.0);
-      WaitUntilDriveComplete();
-
-      Score();
-      Wait(100);
-      StopScore();
-
-      StartDriveRelative(-0.5, 0.0);
-      IntakeGround();
-      WaitUntilDriveComplete();
+        // Quickturn to next cube
+        StartDriveAtAngle(-0.15, M_PI * 0.3);
+  
+        // Not get intake caught on switch
+        Wait(125);
+  
+        // Go to ground intake
+        IntakeGround();
+  
+        WaitUntilDriveComplete();
+  
+        // Drive to next cube
+        StartDriveAtAngle(.7, M_PI * 0.33, 0.0);
+        WaitForCube();
+  
+        max_angular_acceleration_ = 5.5;
+        max_forward_acceleration_ = 2.0;
+        // Drive back to scale
+        StartDriveAtAngle(-2.2, -0.2, 0.0);
+        Wait(100);
+        MoveToScale(false);
+        WaitUntilDriveComplete();
+  
+        Score();
+        Wait(50);
+        StopScore();
+  
+        IntakeGround();
+      } else if (left_right_codes[1] == 'R') {
+        // Switch is left, scale is right
+        LOG(INFO, "Running LEFT SWITCH RIGHT SCALE auto");
+  
+        StopIntakeGround();
+        MoveToScale(false);
+  
+        // Start drive to scale
+        StartDriveRelative(-4.75, 0.0, 1.9);
+        WaitUntilDriveComplete();
+  
+        // Turn and get to scale
+        StartDriveAtAngle(-2.8, 0.5, 0.0);
+        WaitForCube();
+  
+        // Score on scale
+        Score();
+        Wait(50);
+        StopScore();
+  
+        // Start backing off scale
+        StartDriveRelative(0.2, 0.0, 0.5);
+        WaitUntilDriveComplete();
+  
+        // Sharp turn to switch
+        StartDriveAtAngle(1.5, M_PI * -0.5, 0.1);
+        WaitUntilDriveComplete();
+  
+        // Go over bump
+        StartDriveAtAngle(3.0, M_PI * -0.5, 0.1);
+        WaitUntilDriveComplete();
+  
+        // Turn to cube on switch
+        StartDriveAtAngle(1.0, 0.0, 0.0);
+        WaitUntilDriveComplete();
+  
+        // Drive to cube
+        StartDriveRelative(0.2, 0.0, 0.0);
+        WaitForCube();
+  
+        // Back up to prevent cube drag
+        StartDriveRelative(-0.15, 0.0);
+        Wait(100);
+        MoveToSwitch();
+  
+        // Drive so bumpers get on switch
+        StartDriveRelative(0.2, 0.0, 1.5);
+        WaitUntilDriveComplete();
+  
+        // Without wait it scores while driving back
+        Score();
+  
+        // Quickturn towards other cube
+        StartDriveAtAngle(0.0, M_PI * 0.25, 0.0);
+        WaitUntilDriveComplete();
+        IntakeGround();
+        Wait(100);
+  
+        // Drive to other cube
+        StartDriveRelative(0.2, 0.0, 0.0);
+        WaitForCube();
+  
+        // Drive towards scale
+        StartDriveAtAngle(2.0, M_PI * 0.6, 0.6);
+        WaitUntilDriveComplete();
+  
+        // Back to scale
+        StartDriveAtAngle(1.0, M_PI * 0.5, 1.5);
+        WaitUntilDriveComplete();
+  
+        MoveToScale(true);
+        // To scale
+        StartDriveRelative(2.0, M_PI * 0.6, 0.0);
+        WaitUntilDriveComplete();
+  
+        Score();
+        Wait(100);
+        StopScore();
+  
+        StartDriveRelative(-0.5, 0.0);
+        IntakeGround();
+        WaitUntilDriveComplete();
+      }
+    } else if (left_right_codes[0] == 'R') {
+      if (left_right_codes[1] == 'L') {
+        LOG(INFO, "Running RIGHT SWITCH LEFT SCALE auto");
+  
+        MoveToScale(false);
+        // Back up
+        StartDriveRelative(-2.5, M_PI * 0.025, 1.5);
+        WaitUntilDriveComplete();
+  
+        // Turn to switch
+        StartDriveAtAngle(-1.5, M_PI * 0.5, 0.0);
+        WaitUntilDriveComplete();
+  
+        Score();
+        Wait(50);
+        StopScore();
+        IntakeGround();
+  
+        StartDriveAtAngle(1.0, M_PI * 1.65, 1.0);
+        WaitUntilDriveComplete();
+  
+        // Go get cube boi
+        StartDriveRelative(0.5, 0.0, 0.0);
+        WaitForCube();
+  
+        Wait(200);
+  
+        // Quickturn to scale
+        StartDriveAtAngle(0.0, M_PI * 2.5, 0.0);
+        WaitUntilDriveComplete();
+  
+      } else if (left_right_codes[1] == 'R') {
+        // Switch is right, scale is right
+        LOG(INFO, "Running RIGHT SWITCH RIGHT SCALE auto");
+  
+        StopIntakeGround();
+        MoveToScale(false);
+  
+        // Start drive to scale
+        StartDriveRelative(-4.375, 0.0, 2.5);
+        WaitUntilDriveComplete();
+  
+        // Turn and get to scale
+        StartDriveAtAngle(-2.6, 0.5, -1.2);
+        WaitUntilDriveComplete();
+  
+        // Score on scale
+        Score();
+        Wait(20);
+        StopScore();
+  
+        // Lower intake
+        IntakeGround();
+        Wait(90);
+  
+        // Drive to switch to pick up cube
+        StartDriveAtAngle(2.0, M_PI * -0.1);
+        WaitForCube();
+        Wait(25);
+  
+        // Back up to prevent dragging cube against switch
+        StartDriveRelative(-0.15, 0.0);
+        MoveToSwitch();
+        // WaitUntilElevatorAtPosition();  // TODO(Livy) Make sure this actually
+        // works
+        Wait(100);
+        StopIntakeGround();
+  
+        // Drive so bumpers get on switch
+        StartDriveRelative(0.2, 0.0, 1.5);
+        WaitUntilDriveComplete();
+  
+        // Without wait it scores while driving back
+        Score();
+  
+        // Turn to get in position to grab second cube
+        StartDriveAtAngle(-0.3, M_PI * -0.3141592, 0.01);
+        Wait(150);
+        StopScore();
+        IntakeGround();
+        WaitUntilDriveComplete();
+  
+        // Drive forwards to 2nd cube
+        StartDriveRelative(1.0, 0.0, 0.01);
+        WaitForCube();
+  
+        // TODO(Livy) If/when we can control elevator speed make it go way slower
+        // here
+        StopIntakeGround();
+  
+        // Start drive to scale
+  
+        max_forward_acceleration_ = 1.7;
+        StartDriveAtAngle(-1.5, 0.0, 1.7);
+        Wait(100);
+        MoveToScale(false);
+        WaitUntilDriveComplete();
+  
+        StartDriveAtAngle(-0.8, M_PI * 0.1, 1.0);
+        WaitUntilDriveComplete();
+        Score();
+        Wait(100);
+        StopScore();
+  
+        IntakeGround();
+        StartDriveRelative(0.5, 0.0);
+      }
     }
-  } else if (left_right_codes[0] == 'R') {
-    if (left_right_codes[1] == 'L') {
-      LOG(INFO, "Running RIGHT SWITCH LEFT SCALE auto");
-
-      MoveToScale(false);
-      // Back up
-      StartDriveRelative(-2.5, M_PI * 0.025, 1.5);
-      WaitUntilDriveComplete();
-
-      // Turn to switch
-      StartDriveAtAngle(-1.5, M_PI * 0.5, 0.0);
-      WaitUntilDriveComplete();
-
-      Score();
-      Wait(50);
-      StopScore();
-      IntakeGround();
-
-      StartDriveAtAngle(1.0, M_PI * 1.65, 1.0);
-      WaitUntilDriveComplete();
-
-      // Go get cube boi
-      StartDriveRelative(0.5, 0.0, 0.0);
-      WaitForCube();
-
-      Wait(200);
-
-      // Quickturn to scale
-      StartDriveAtAngle(0.0, M_PI * 2.5, 0.0);
-      WaitUntilDriveComplete();
-
-    } else if (left_right_codes[1] == 'R') {
-      // Switch is right, scale is right
-      LOG(INFO, "Running RIGHT SWITCH RIGHT SCALE auto");
-
-      StopIntakeGround();
-      MoveToScale(false);
-
-      // Start drive to scale
-      StartDriveRelative(-4.375, 0.0, 2.5);
-      WaitUntilDriveComplete();
-
-      // Turn and get to scale
-      StartDriveAtAngle(-2.6, 0.5, -1.2);
-      WaitUntilDriveComplete();
-
-      // Score on scale
-      Score();
-      Wait(20);
-      StopScore();
-
-      // Lower intake
-      IntakeGround();
-      Wait(90);
-
-      // Drive to switch to pick up cube
-      StartDriveAtAngle(2.0, M_PI * -0.1);
-      WaitForCube();
-      Wait(25);
-
-      // Back up to prevent dragging cube against switch
-      StartDriveRelative(-0.15, 0.0);
+	} else if (AutoMode() == "SINGLE_SWITCH") {
+    if (left_right_codes[0] == 'L') {
+      LOG(INFO, "Running single cube auto on LEFT SWITCH");
+    
       MoveToSwitch();
-      // WaitUntilElevatorAtPosition();  // TODO(Livy) Make sure this actually
-      // works
-      Wait(100);
-      StopIntakeGround();
-
-      // Drive so bumpers get on switch
-      StartDriveRelative(0.2, 0.0, 1.5);
+      StartDriveAtAngle(1.3, M_PI * 0.22, 2.0);
       WaitUntilDriveComplete();
-
-      // Without wait it scores while driving back
+      StartDriveAtAngle(1.67, 0, 1);
+      WaitUntilDriveComplete();
       Score();
-
-      // Turn to get in position to grab second cube
-      StartDriveAtAngle(-0.3, M_PI * -0.3141592, 0.01);
+      Wait(100);
+      StopScore();
+    
+      StartDriveAtAngle(-1.3, M_PI * 0.18, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(-1.5, 0, 0);
+      WaitUntilDriveComplete();
+    
+      // Second Cube
+      IntakeGround();
+      StartDriveAtAngle(1.1, 0, 1.0);
+      WaitUntilDriveComplete();
+      StartDriveRelative(0.2, -0.3);
       Wait(150);
-      StopScore();
-      IntakeGround();
       WaitUntilDriveComplete();
-
-      // Drive forwards to 2nd cube
-      StartDriveRelative(1.0, 0.0, 0.01);
-      WaitForCube();
-
-      // TODO(Livy) If/when we can control elevator speed make it go way slower
-      // here
       StopIntakeGround();
-
-      // Start drive to scale
-
-      max_forward_acceleration_ = 1.7;
-      StartDriveAtAngle(-1.5, 0.0, 1.7);
-      Wait(100);
-      MoveToScale(false);
+    
+      // Score Second Cube
+      StartDriveAtAngle(-1, 0, 0);
       WaitUntilDriveComplete();
-
-      StartDriveAtAngle(-0.8, M_PI * 0.1, 1.0);
+      MoveToSwitch();
+      StartDriveAtAngle(1.3, M_PI * 0.20, 1.7);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(1., 0, 0);
       WaitUntilDriveComplete();
       Score();
       Wait(100);
       StopScore();
-
+    
+      StartDriveRelative(-0.5, 0);
+    
+    } else if (left_right_codes[0] == 'R') {
+      LOG(INFO, "Running single cube auto on RIGHT SWITCH");
+    
+      MoveToSwitch();
+      StartDriveAtAngle(1.3, M_PI * -0.18, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(1.7, 0, 1);
+      WaitUntilDriveComplete();
+      Score();
+      Wait(100);
+      StopScore();
+    
+      StartDriveAtAngle(-1.3, M_PI * -0.25, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(-1.5, 0, 0);
+      WaitUntilDriveComplete();
+    
+      // Second Cube
       IntakeGround();
-      StartDriveRelative(0.5, 0.0);
+      StartDriveAtAngle(1.1, 0, 1.0);
+      WaitUntilDriveComplete();
+      StartDriveRelative(0.2, -0.3);
+      Wait(150);
+      WaitUntilDriveComplete();
+      StopIntakeGround();
+    
+      // Score Second Cube
+      StartDriveAtAngle(-1, 0, 0);
+      WaitUntilDriveComplete();
+      MoveToSwitch();
+      StartDriveAtAngle(1.3, M_PI * -0.28, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(1., 0, 1);
+      WaitUntilDriveComplete();
+      Score();
+      Wait(100);
+      StopScore();
+    
+      StartDriveRelative(-0.5, 0);
     }
-  }
+	}
   LOG(INFO, "Finished with auto!");
 }
 
