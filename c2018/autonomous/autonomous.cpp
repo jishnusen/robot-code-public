@@ -532,8 +532,42 @@ void AutonomousBase::operator()() {
       WaitUntilDriveComplete();
       StartDriveAtAngle(-1.5, 0, 0);
       WaitUntilDriveComplete();
+    } else if (left_right_codes[0] == 'R') {
+      LOG(INFO, "Running single cube auto on RIGHT SWITCH");
     
-      // Second Cube
+      MoveToSwitch();
+      StartDriveAtAngle(1.3, M_PI * -0.18, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(1.7, 0, 1);
+      WaitUntilDriveComplete();
+      Score();
+      Wait(100);
+      StopScore();
+    
+      StartDriveAtAngle(-1.3, M_PI * -0.25, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(-1.5, 0, 0);
+      WaitUntilDriveComplete();
+    }
+	} else if (AutoMode() == "DOUBLE_SWITCH") {
+    if (left_right_codes[0] == 'L') {
+      LOG(INFO, "Running double cube auto on LEFT SWITCH");
+    
+      MoveToSwitch();
+      StartDriveAtAngle(1.3, M_PI * 0.22, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(1.67, 0, 1);
+      WaitUntilDriveComplete();
+      Score();
+      Wait(100);
+      StopScore();
+    
+      StartDriveAtAngle(-1.3, M_PI * 0.18, 2.0);
+      WaitUntilDriveComplete();
+      StartDriveAtAngle(-1.5, 0, 0);
+      WaitUntilDriveComplete();
+    
+      // Intake Second Cube
       IntakeGround();
       StartDriveAtAngle(1.1, 0, 1.0);
       WaitUntilDriveComplete();
@@ -557,7 +591,7 @@ void AutonomousBase::operator()() {
       StartDriveRelative(-0.5, 0);
     
     } else if (left_right_codes[0] == 'R') {
-      LOG(INFO, "Running single cube auto on RIGHT SWITCH");
+      LOG(INFO, "Running double cube auto on RIGHT SWITCH");
     
       MoveToSwitch();
       StartDriveAtAngle(1.3, M_PI * -0.18, 2.0);
@@ -573,7 +607,7 @@ void AutonomousBase::operator()() {
       StartDriveAtAngle(-1.5, 0, 0);
       WaitUntilDriveComplete();
     
-      // Second Cube
+      // Intake Second Cube
       IntakeGround();
       StartDriveAtAngle(1.1, 0, 1.0);
       WaitUntilDriveComplete();
@@ -596,7 +630,7 @@ void AutonomousBase::operator()() {
     
       StartDriveRelative(-0.5, 0);
     }
-	}
+  }
   LOG(INFO, "Finished with auto!");
 }
 
