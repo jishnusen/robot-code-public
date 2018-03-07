@@ -26,7 +26,7 @@ cc_library(
     deps = [
         ":score_subsystem_proto",
         ":score_subsystem_queues",
-        "//c2018/subsystems/score_subsystem/elevator:elevator_controller",
+        "//c2018/subsystems/score_subsystem/elevator:elevator",
         "//c2018/subsystems/score_subsystem/wrist:wrist_controller",
         "//muan/queues:queue_manager",
         "//muan/wpilib:wpilib_queues",

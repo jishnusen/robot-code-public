@@ -22,12 +22,17 @@ namespace elevator {
 
 constexpr double kElevatorAcceleration = 4.0;
 constexpr double kElevatorVelocity = 2.5;
+
 constexpr double kElevatorMinHeight = 0.0;
 constexpr double kElevatorMaxHeight = 1.92;
+
+constexpr double kElevatorMaxVoltage = 12;
+
 constexpr double kHallEffectHeight = 0.92;
 constexpr double kCalibrationVoltage = 6;
-constexpr double kElevatorMaxVoltage = 12;
+
 constexpr double kEncoderFaultMinVoltage = 6;
+constexpr double kEncoderFaultTicksAllowed = 100;
 
 class ElevatorController {
  public:
@@ -44,7 +49,7 @@ class ElevatorController {
 
  private:
   muan::control::StateSpacePlant<1, 3, 1> plant_;
-  muan::control::StateSpaceController<1, 3, 1> elevator_controller_;
+  muan::control::StateSpaceController<1, 3, 1> elevator_;
   muan::control::StateSpaceObserver<1, 3, 1> elevator_observer_;
 
   muan::control::HallCalibration hall_calib_{kHallEffectHeight};
@@ -61,8 +66,6 @@ class ElevatorController {
 
   double old_pos_;
 };
-
-constexpr double kEncoderFaultTicksAllowed = 100;
 
 }  // namespace elevator
 

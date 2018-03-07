@@ -38,8 +38,6 @@ static constexpr double kHallEffectAngle = 0.24;
 static constexpr double kHoldingVoltage = 1.5;
 static constexpr double kMaxVoltage = 12;
 
-static constexpr double kStallCurrent = 30;
-
 static constexpr int kNumHasCubeTicks = 10;
 
 enum class IntakeMode {

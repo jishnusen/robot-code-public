@@ -1,4 +1,4 @@
-#include "c2018/subsystems/score_subsystem/elevator/elevator_controller.h"
+#include "c2018/subsystems/score_subsystem/elevator/elevator.h"
 
 namespace c2018 {
 namespace score_subsystem {
@@ -6,14 +6,14 @@ namespace elevator {
 
 ElevatorController::ElevatorController() {
   auto elevator_plant = muan::control::StateSpacePlant<1, 3, 1>(
-      frc1678::elevator_controller::controller::first_stage_integral::A(),
-      frc1678::elevator_controller::controller::first_stage_integral::B(),
-      frc1678::elevator_controller::controller::first_stage_integral::C());
+      frc1678::elevator::controller::first_stage_integral::A(),
+      frc1678::elevator::controller::first_stage_integral::B(),
+      frc1678::elevator::controller::first_stage_integral::C());
 
-  elevator_controller_ = muan::control::StateSpaceController<1, 3, 1>(
-      frc1678::elevator_controller::controller::first_stage_integral::K(),
-      frc1678::elevator_controller::controller::first_stage_integral::Kff(),
-      frc1678::elevator_controller::controller::first_stage_integral::A(),
+  elevator_ = muan::control::StateSpaceController<1, 3, 1>(
+      frc1678::elevator::controller::first_stage_integral::K(),
+      frc1678::elevator::controller::first_stage_integral::Kff(),
+      frc1678::elevator::controller::first_stage_integral::A(),
       Eigen::Matrix<double, 1, 1>::Ones() *
           -std::numeric_limits<double>::infinity(),
       Eigen::Matrix<double, 1, 1>::Ones() *
@@ -21,12 +21,12 @@ ElevatorController::ElevatorController() {
 
   elevator_observer_ = muan::control::StateSpaceObserver<1, 3, 1>(
       elevator_plant,
-      frc1678::elevator_controller::controller::first_stage_integral::L());
+      frc1678::elevator::controller::first_stage_integral::L());
 
   plant_ = muan::control::StateSpacePlant<1, 3, 1>(
-      frc1678::elevator_controller::controller::first_stage_integral::A(),
-      frc1678::elevator_controller::controller::first_stage_integral::B(),
-      frc1678::elevator_controller::controller::first_stage_integral::C());
+      frc1678::elevator::controller::first_stage_integral::A(),
+      frc1678::elevator::controller::first_stage_integral::B(),
+      frc1678::elevator::controller::first_stage_integral::C());
 
   trapezoid_profile_.set_maximum_acceleration(kElevatorAcceleration);
   trapezoid_profile_.set_maximum_velocity(kElevatorVelocity);
@@ -67,7 +67,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
                     .finished();
 
   auto elevator_u =
-      elevator_controller_.Update(elevator_observer_.x(), elevator_r_)(0, 0);
+      elevator_.Update(elevator_observer_.x(), elevator_r_)(0, 0);
 
   if (!outputs_enabled) {
     elevator_u = CapU(0);
@@ -138,73 +138,73 @@ double ElevatorController::CapU(double elevator_u) {
 
 void ElevatorController::SetWeights(bool second_stage, bool has_cube) {
   if (second_stage && has_cube) {
-    elevator_controller_.A() = frc1678::elevator_controller::controller::
+    elevator_.A() = frc1678::elevator::controller::
         second_stage_cube_integral::A();
-    elevator_controller_.K() = frc1678::elevator_controller::controller::
+    elevator_.K() = frc1678::elevator::controller::
         second_stage_cube_integral::K();
-    elevator_controller_.Kff() = frc1678::elevator_controller::controller::
+    elevator_.Kff() = frc1678::elevator::controller::
         second_stage_cube_integral::Kff();
 
-    elevator_observer_.L() = frc1678::elevator_controller::controller::
+    elevator_observer_.L() = frc1678::elevator::controller::
         second_stage_cube_integral::L();
 
-    plant_.A() = frc1678::elevator_controller::controller::
+    plant_.A() = frc1678::elevator::controller::
         second_stage_cube_integral::A();
-    plant_.B() = frc1678::elevator_controller::controller::
+    plant_.B() = frc1678::elevator::controller::
         second_stage_cube_integral::B();
-    plant_.C() = frc1678::elevator_controller::controller::
+    plant_.C() = frc1678::elevator::controller::
         second_stage_cube_integral::C();
   } else if (second_stage && !has_cube) {
-    elevator_controller_.A() =
-        frc1678::elevator_controller::controller::second_stage_integral::A();
-    elevator_controller_.K() =
-        frc1678::elevator_controller::controller::second_stage_integral::K();
-    elevator_controller_.Kff() =
-        frc1678::elevator_controller::controller::second_stage_integral::Kff();
+    elevator_.A() =
+        frc1678::elevator::controller::second_stage_integral::A();
+    elevator_.K() =
+        frc1678::elevator::controller::second_stage_integral::K();
+    elevator_.Kff() =
+        frc1678::elevator::controller::second_stage_integral::Kff();
 
     elevator_observer_.L() =
-        frc1678::elevator_controller::controller::second_stage_integral::L();
+        frc1678::elevator::controller::second_stage_integral::L();
 
     plant_.A() =
-        frc1678::elevator_controller::controller::second_stage_integral::A();
+        frc1678::elevator::controller::second_stage_integral::A();
     plant_.B() =
-        frc1678::elevator_controller::controller::second_stage_integral::B();
+        frc1678::elevator::controller::second_stage_integral::B();
     plant_.C() =
-        frc1678::elevator_controller::controller::second_stage_integral::C();
+        frc1678::elevator::controller::second_stage_integral::C();
   } else if (!second_stage && has_cube) {
-    elevator_controller_.A() = frc1678::elevator_controller::controller::
+    elevator_.A() = frc1678::elevator::controller::
         first_stage_cube_integral::A();
-    elevator_controller_.K() = frc1678::elevator_controller::controller::
+    elevator_.K() = frc1678::elevator::controller::
         first_stage_cube_integral::K();
-    elevator_controller_.Kff() = frc1678::elevator_controller::controller::
+    elevator_.Kff() = frc1678::elevator::controller::
         first_stage_cube_integral::Kff();
 
-    elevator_observer_.L() = frc1678::elevator_controller::controller::
+    elevator_observer_.L() = frc1678::elevator::controller::
         first_stage_cube_integral::L();
 
-    plant_.A() = frc1678::elevator_controller::controller::
+    plant_.A() = frc1678::elevator::controller::
         first_stage_cube_integral::A();
-    plant_.B() = frc1678::elevator_controller::controller::
+    plant_.B() = frc1678::elevator::controller::
         first_stage_cube_integral::B();
-    plant_.C() = frc1678::elevator_controller::controller::
+    plant_.C() = frc1678::elevator::controller::
         first_stage_cube_integral::C();
   } else if (!second_stage && !has_cube) {
-    elevator_controller_.A() =
-        frc1678::elevator_controller::controller::first_stage_integral::A();
-    elevator_controller_.K() =
-        frc1678::elevator_controller::controller::first_stage_integral::K();
-    elevator_controller_.Kff() =
-        frc1678::elevator_controller::controller::first_stage_integral::Kff();
+    elevator_.A() =
+        frc1678::elevator::controller::first_stage_integral::A();
+    elevator_.K() =
+        frc1678::elevator::controller::first_stage_integral::K();
+    elevator_.Kff() =
+        frc1678::elevator::controller::first_stage_integral::Kff();
 
     elevator_observer_.L() =
-        frc1678::elevator_controller::controller::first_stage_integral::L();
+        frc1678::elevator::controller::first_stage_integral::L();
 
     plant_.A() =
-        frc1678::elevator_controller::controller::first_stage_integral::A();
+        frc1678::elevator::controller::first_stage_integral::A();
     plant_.B() =
-        frc1678::elevator_controller::controller::first_stage_integral::B();
+        frc1678::elevator::controller::first_stage_integral::B();
     plant_.C() =
-        frc1678::elevator_controller::controller::first_stage_integral::C();
+        frc1678::elevator::controller::first_stage_integral::C();
   }
 }
 
