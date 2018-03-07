@@ -27,7 +27,7 @@ cc_library(
         ":score_subsystem_proto",
         ":score_subsystem_queues",
         "//c2018/subsystems/score_subsystem/elevator:elevator",
-        "//c2018/subsystems/score_subsystem/wrist:wrist_controller",
+        "//c2018/subsystems/score_subsystem/wrist:wrist",
         "//muan/queues:queue_manager",
         "//muan/wpilib:wpilib_queues",
     ],

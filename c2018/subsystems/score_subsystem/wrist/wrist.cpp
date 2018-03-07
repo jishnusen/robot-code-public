@@ -11,19 +11,19 @@ WristController::WristController()
       status_queue_{QueueManager<ScoreSubsystemStatusProto>::Fetch()},
       output_queue_{QueueManager<ScoreSubsystemOutputProto>::Fetch()} {
   auto wrist_plant = muan::control::StateSpacePlant<1, 3, 1>(
-      frc1678::wrist_controller::controller::A(),
-      frc1678::wrist_controller::controller::B(),
-      frc1678::wrist_controller::controller::C());
+      frc1678::wrist::controller::A(),
+      frc1678::wrist::controller::B(),
+      frc1678::wrist::controller::C());
 
-  wrist_controller_ = muan::control::StateSpaceController<1, 3, 1>(
-      frc1678::wrist_controller::controller::K(),
-      frc1678::wrist_controller::controller::Kff(),
-      frc1678::wrist_controller::controller::A(),
+  wrist_ = muan::control::StateSpaceController<1, 3, 1>(
+      frc1678::wrist::controller::K(),
+      frc1678::wrist::controller::Kff(),
+      frc1678::wrist::controller::A(),
       Eigen::Matrix<double, 1, 1>::Ones() * -12,
       Eigen::Matrix<double, 1, 1>::Ones() * 12);
 
   wrist_observer_ = muan::control::StateSpaceObserver<1, 3, 1>(
-      wrist_plant, frc1678::wrist_controller::controller::L());
+      wrist_plant, frc1678::wrist::controller::L());
 
   trapezoidal_motion_profile_.set_maximum_acceleration(kMaxWristAcceleration);
   trapezoidal_motion_profile_.set_maximum_velocity(kMaxWristVelocity);
@@ -107,9 +107,9 @@ void WristController::Update(ScoreSubsystemInputProto input,
        0.0, 0.0)
           .finished();
 
-  wrist_controller_.r() = wrist_r;
+  wrist_.r() = wrist_r;
 
-  wrist_voltage = wrist_controller_.Update(wrist_observer_.x(), wrist_r)(0, 0);
+  wrist_voltage = wrist_.Update(wrist_observer_.x(), wrist_r)(0, 0);
 
   if (hall_calibration_.is_calibrated() && wrist_r(0) <= 1e-5) {
     // If we're trying to stay at 0, set 0 voltage automatically

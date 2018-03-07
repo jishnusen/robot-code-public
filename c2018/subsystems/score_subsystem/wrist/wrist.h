@@ -65,7 +65,7 @@ class WristController {
   ScoreSubsystemOutputQueue* output_queue_;
   muan::control::HallCalibration hall_calibration_{kHallEffectAngle};
   muan::control::StateSpacePlant<1, 3, 1> plant_;
-  muan::control::StateSpaceController<1, 3, 1> wrist_controller_;
+  muan::control::StateSpaceController<1, 3, 1> wrist_;
   muan::control::StateSpaceObserver<1, 3, 1> wrist_observer_;
 
   double CapU(double wrist_voltage);
