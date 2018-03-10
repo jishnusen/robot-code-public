@@ -45,6 +45,8 @@ class ElevatorController {
   void SetGoal(double goal);
   double CapU(double elevator_u);
 
+  double TimeLeftUntil(double x);
+
   bool is_calibrated() const;
 
  private:
