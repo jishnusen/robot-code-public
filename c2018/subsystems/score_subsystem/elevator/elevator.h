@@ -43,9 +43,10 @@ class ElevatorController {
   Eigen::Matrix<double, 2, 1> UpdateProfiledGoal(double unprofiled_goal_,
                                                  bool outputs_enabled);
   void SetGoal(double goal);
+  void SetTimerGoal(double goal);
   double CapU(double elevator_u);
 
-  double TimeLeftUntil(double x);
+  double TimeLeftUntil(double x) const;
 
   bool is_calibrated() const;
 
@@ -60,8 +61,10 @@ class ElevatorController {
 
   Eigen::Matrix<double, 2, 1> profiled_goal_;
   double unprofiled_goal_;
+  double timer_goal_;
 
   aos::util::TrapezoidProfile trapezoid_profile_{std::chrono::milliseconds(5)};
+  aos::util::TrapezoidProfile timer_profile_{std::chrono::milliseconds(5)};
 
   bool encoder_fault_detected_ = false;
   int num_encoder_fault_ticks_ = 0;

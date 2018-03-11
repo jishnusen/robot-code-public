@@ -52,15 +52,19 @@ class WristController {
   WristController();
 
   void SetGoal(double angle, IntakeMode mode);
+  void SetTimerGoal(double angle);
   Eigen::Matrix<double, 2, 1> UpdateProfiledGoal(double unprofiled_goal_,
                                                  bool outputs_enabled);
   void Update(ScoreSubsystemInputProto input, ScoreSubsystemOutputProto* output,
               ScoreSubsystemStatusProto* status, bool outputs_enabled);
 
+  double TimeLeftUntil(double angle) const;
+
   bool is_calibrated() const;
 
  private:
   aos::util::TrapezoidProfile trapezoidal_motion_profile_;
+  aos::util::TrapezoidProfile trapezoidal_time_estimator_;
   ScoreSubsystemStatusQueue* status_queue_;
   ScoreSubsystemOutputQueue* output_queue_;
   muan::control::HallCalibration hall_calibration_{kHallEffectAngle};
@@ -72,6 +76,7 @@ class WristController {
 
   IntakeMode intake_mode_ = IntakeMode::IDLE;
   double unprofiled_goal_ = 0;
+  double timer_goal_ = 0;
   Eigen::Matrix<double, 2, 1> profiled_goal_;
 
   double old_pos_;

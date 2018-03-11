@@ -23,7 +23,7 @@ void ScoreSubsystem::BoundGoal(double* elevator_goal,
                                       elevator::kElevatorMaxHeight);
   }
 
-  if (status_->elevator_actual_height() < kElevatorWristSafeHeight) {
+  if (wrist_.TimeLeftUntil(*wrist_goal) <= elevator_.TimeLeftUntil(kElevatorWristSafeHeight)) {
     *wrist_goal = muan::utils::Cap(*wrist_goal, 0, kWristSafeAngle);
   }
 }
@@ -55,6 +55,8 @@ void ScoreSubsystem::Update() {
   double constrained_elevator_height = elevator_height_;
   double constrained_wrist_angle = wrist_angle_;
 
+  wrist_.SetTimerGoal(wrist_angle_);
+  elevator_.SetTimerGoal(elevator_height_);
   BoundGoal(&constrained_elevator_height, &constrained_wrist_angle);
 
   elevator_.SetGoal(constrained_elevator_height);
