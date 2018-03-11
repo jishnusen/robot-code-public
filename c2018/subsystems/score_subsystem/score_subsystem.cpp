@@ -18,11 +18,13 @@ ScoreSubsystem::ScoreSubsystem()
 
 void ScoreSubsystem::BoundGoal(double* elevator_goal,
                                double* wrist_goal) const {
+  // Elevator goal doesn't get too low if the wrist can't handle it
   if (status_->wrist_angle() > kWristSafeAngle) {
     *elevator_goal = muan::utils::Cap(*elevator_goal, kElevatorWristSafeHeight,
                                       elevator::kElevatorMaxHeight);
   }
 
+  // Wrist doesn't try to go too far if the elevator can't handle it
   if (status_->elevator_actual_height() < kElevatorWristSafeHeight) {
     *wrist_goal = muan::utils::Cap(*wrist_goal, 0, kWristSafeAngle);
   }
@@ -40,23 +42,30 @@ void ScoreSubsystem::Update() {
   }
 
   if (!ds_status_reader_.ReadLastMessage(&driver_station)) {
+    // Even if we don't get a message, we know that it is a 12V battery
     driver_station->set_battery_voltage(12.0);
   }
 
   if (!goal_reader_.ReadLastMessage(&goal)) {
+    // Don't try and move stuff if there is no goal
     goal->set_score_goal(SCORE_NONE);
     goal->set_intake_goal(INTAKE_NONE);
   }
 
+  // All the logic in the state machine is in this function
   RunStateMachine();
 
+  // Bridge between score goal enumerator and the individual mechanism goals
   SetGoal(goal);
 
+  // These are the goals before they get safety-ized
   double constrained_elevator_height = elevator_height_;
   double constrained_wrist_angle = wrist_angle_;
 
+  // Now we make them safe so stuff doesn't break
   BoundGoal(&constrained_elevator_height, &constrained_wrist_angle);
 
+  // Then we tell the controller to do it
   elevator_.SetGoal(constrained_elevator_height);
   elevator_.Update(input, &output, &status_, driver_station->is_sys_active());
 
@@ -85,11 +94,14 @@ void ScoreSubsystem::Update() {
 
   status_->set_state(state_);
 
+  // Write those queues after Updating the controllers
   output_queue_->WriteMessage(output);
   status_queue_->WriteMessage(status_);
 }
 
 void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
+  // These set the member variable goals before they are constrained
+  // They are set based on the score goal enumerator
   switch (goal->score_goal()) {
     case SCORE_NONE:
       break;
@@ -182,8 +194,10 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
 }
 
 void ScoreSubsystem::RunStateMachine() {
+  // This is the logic to move between 'states'
   switch (state_) {
     case ScoreSubsystemState::CALIBRATING:
+      // Stow after calibrating
       elevator_height_ = status_->elevator_actual_height();
       wrist_angle_ = status_->wrist_angle();
       if (status_->wrist_calibrated() && status_->elevator_calibrated()) {
@@ -198,6 +212,7 @@ void ScoreSubsystem::RunStateMachine() {
     case HOLDING:
       break;
     case INTAKING:
+      // Stow after cube
       if (status_->has_cube()) {
         elevator_height_ = kElevatorStow;
         wrist_angle_ = kWristStowAngle;
@@ -213,6 +228,7 @@ void ScoreSubsystem::RunStateMachine() {
 }
 
 void ScoreSubsystem::GoToState(ScoreSubsystemState desired_state) {
+  // Changes state to desired_state
   switch (state_) {
     case ScoreSubsystemState::CALIBRATING:
       if (wrist_.is_calibrated() && elevator_.is_calibrated()) {
