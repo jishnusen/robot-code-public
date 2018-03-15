@@ -130,7 +130,7 @@ double TrapezoidProfile::TimeLeftUntil(double x, double goal_position,
   double deceleration_time = std::max(deceleration_time_, 0.);
   double constant_time = std::max(constant_time_, 0.);
 
-  if (std::abs(x - output_(0)) < 1e-6) {
+  if (std::abs(x - output_(0)) < 1e-6 || x < output_(0)) {
     return 0;
   }
   
@@ -191,7 +191,7 @@ double TrapezoidProfile::TimeLeftUntil(double x, double goal_position,
   } else {
     constant_time = constant_distance / output_(1);
     deceleration_time =
-        (-output_(1) + sqrt(output_(1) * top_velocity +
+        (-output_(1) + sqrt(output_(1) * output_(1) +
                             2 * deceleration_ * deceleration_distance)) /
         deceleration_;
   }
@@ -200,7 +200,7 @@ double TrapezoidProfile::TimeLeftUntil(double x, double goal_position,
   deceleration_time = std::max(0., deceleration_time);
   constant_time = std::max(0., constant_time);
 
-  return acceleration_time + deceleration_time;
+  return acceleration_time + constant_time + deceleration_time;
 }
 
 }  // namespace util

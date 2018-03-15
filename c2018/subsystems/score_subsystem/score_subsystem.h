@@ -68,6 +68,9 @@ class ScoreSubsystem {
   double elevator_height_;
   double wrist_angle_;
 
+  double time_until_elevator_safe_;
+  double time_until_wrist_safe_;
+
   ScoreSubsystemState state_ = ScoreSubsystemState::CALIBRATING;
 };
 
