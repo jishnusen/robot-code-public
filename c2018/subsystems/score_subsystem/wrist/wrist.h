@@ -30,9 +30,6 @@ static constexpr double kWristMinAngle = 0;
 static constexpr double kWristStowAngle = 80 * (M_PI / 180);
 static constexpr double kWristMaxAngle = 160 * (M_PI / 180);
 
-// Encoder fault parameters
-static constexpr double kEncoderFaultTicksAllowed = 200;
-
 // Hall Calibration constants
 static constexpr double kCalibVoltage = 4;
 static constexpr double kHallEffectAngle = 0.28;
@@ -93,9 +90,6 @@ class WristController {
   IntakeMode intake_mode_ = IntakeMode::IDLE;
   double unprofiled_goal_ = 0;
   Eigen::Matrix<double, 2, 1> profiled_goal_;
-
-  // Encoder fault stuff if ever implement that
-  double old_pos_;
 
   // Voltage to give to intake
   double intake_voltage_ = 0;

@@ -8,7 +8,6 @@ using muan::queues::QueueManager;
 
 WristController::WristController()
     : trapezoidal_motion_profile_{::std::chrono::milliseconds(5)} {
-  // Initialize all the state space magic
   auto wrist_plant_ = muan::control::StateSpacePlant<1, 3, 1>(
       frc1678::wrist::controller::A(), frc1678::wrist::controller::B(),
       frc1678::wrist::controller::C());
@@ -22,7 +21,6 @@ WristController::WristController()
   wrist_observer_ = muan::control::StateSpaceObserver<1, 3, 1>(
       wrist_plant_, frc1678::wrist::controller::L());
 
-  // Set up those motion profiles
   trapezoidal_motion_profile_.set_maximum_acceleration(kMaxWristAcceleration);
   trapezoidal_motion_profile_.set_maximum_velocity(kMaxWristVelocity);
 }
@@ -46,7 +44,6 @@ void WristController::Update(ScoreSubsystemInputProto input,
   double calibrated_encoder =
       hall_calibration_.Update(input->wrist_encoder(), input->wrist_hall());
 
-  // A single item vector for state-space-ing (Yes, that is a word)
   auto wrist_y =
       (Eigen::Matrix<double, 1, 1>() << calibrated_encoder).finished();
 
@@ -61,7 +58,6 @@ void WristController::Update(ScoreSubsystemInputProto input,
   }
   bool has_cube = has_cube_for_ticks_ > kNumHasCubeTicks;
 
-  // Don't do heck if it's disabled
   if (!outputs_enabled) {
     wrist_voltage = 0.0;
     trapezoidal_motion_profile_.MoveCurrentState(
@@ -72,9 +68,7 @@ void WristController::Update(ScoreSubsystemInputProto input,
   bool wrist_solenoid_close = false;
   bool wrist_solenoid_open = false;
 
-  // WHoa! iS iT enABLeDDD>!?>W
   if (outputs_enabled) {
-    // YEA IT IS!
     switch (intake_mode_) {  // OK lets set the intake mode
       case IntakeMode::IN:
         intake_voltage_ = kIntakeVoltage;
@@ -102,26 +96,21 @@ void WristController::Update(ScoreSubsystemInputProto input,
         break;
     }
   } else {
-    intake_voltage_ = 0;  // Aw it was disabled
+    intake_voltage_ = 0;
   }
 
-  // Calibration voltage. Not actually useful as this isn't a mechanism where
-  // this is viable -- prematch calib FTW
   if (!hall_calibration_.is_calibrated()) {
     wrist_voltage = kCalibVoltage;
   } else if (!was_calibrated_) {
     plant_.x()(0, 0) += hall_calibration_.offset();
   }
 
-  // Make an R matrix from the profiled goal and make the profiled goal while
-  // we're at it
   Eigen::Matrix<double, 3, 1> wrist_r =
       (Eigen::Matrix<double, 3, 1>()
            << UpdateProfiledGoal(unprofiled_goal_, outputs_enabled)(0, 0),
        0.0, 0.0)
           .finished();
 
-  // Use that r matrix
   wrist_controller_.r() = wrist_r;
 
   // Get voltage from the controller

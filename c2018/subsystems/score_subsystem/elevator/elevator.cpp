@@ -5,7 +5,6 @@ namespace score_subsystem {
 namespace elevator {
 
 ElevatorController::ElevatorController() {
-  // Initialize the state space magic
   auto elevator_plant = muan::control::StateSpacePlant<1, 3, 1>(
       frc1678::elevator::controller::first_stage_integral::A(),
       frc1678::elevator::controller::first_stage_integral::B(),
@@ -28,7 +27,7 @@ ElevatorController::ElevatorController() {
       frc1678::elevator::controller::first_stage_integral::B(),
       frc1678::elevator::controller::first_stage_integral::C());
 
-  // Tune? the trapezoid profile
+  // Initialize the trapezoid profile
   trapezoid_profile_.set_maximum_acceleration(kElevatorMaxAcceleration);
   trapezoid_profile_.set_maximum_velocity(kElevatorMaxVelocity);
 }
@@ -79,14 +78,12 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
       elevator_controller_.Update(elevator_observer_.x(), elevator_r_)(0, 0);
 
   if (!outputs_enabled) {
-    // Make elevator volts reflect reality so observer and plant don't get
-    // scared
+    // Make elevator volts reflect reality
     elevator_u = CapU(0);
   } else if (!hall_calib_.is_calibrated()) {
     // Calibrate if not calibrated with manual volts
     elevator_u = kCalibrationVoltage;
   } else if (encoder_fault_detected_) {
-    // Slow coming down if encoder is sad
     elevator_u = 2.0;
     LOG(WARNING, "Encoder fault detected, setting voltage to 2.0");
   } else if (profiled_goal_(0) <= 1e-5) {
