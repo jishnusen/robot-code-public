@@ -1,5 +1,7 @@
 #include "c2018/subsystems/score_subsystem/score_subsystem.h"
 
+#include <algorithm>
+
 namespace c2018 {
 namespace score_subsystem {
 
@@ -68,10 +70,14 @@ void ScoreSubsystem::Update() {
   if (state_ == ScoreSubsystemState::INTAKE_RUNNING) {
     switch (intake_goal_) {
       case IntakeGoal::INTAKE_NONE:
-        LOG(WARNING, "State is INTAKE_RUNNING, but intake goal is INTAKE_NONE (invalid state)");
+        LOG(WARNING,
+            "State is INTAKE_RUNNING, but intake goal is INTAKE_NONE (invalid "
+            "state)");
         break;
       case IntakeGoal::FORCE_STOP:
-        LOG(WARNING, "State is INTAKE_RUNNING, but intake goal is FORCE_STOP (invalid state)");
+        LOG(WARNING,
+            "State is INTAKE_RUNNING, but intake goal is FORCE_STOP (invalid "
+            "state)");
         break;
       case IntakeGoal::INTAKE:
       case IntakeGoal::INTAKE_ONLY:
@@ -133,7 +139,8 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
       wrist_angle_ = kWristForwardAngle;
       break;
     case SCALE_MID_REVERSE:
-      elevator_height_ = kElevatorBaseHeight + kCubeHeight + kElevatorReversedOffset;
+      elevator_height_ =
+          kElevatorBaseHeight + kCubeHeight + kElevatorReversedOffset;
       wrist_angle_ = kWristBackwardAngle;
       break;
     case SCALE_HIGH_FORWARD:
@@ -141,7 +148,8 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
       wrist_angle_ = kWristForwardAngle;
       break;
     case SCALE_HIGH_REVERSE:
-      elevator_height_ = kElevatorBaseHeight + 2 * kCubeHeight + kElevatorReversedOffset;
+      elevator_height_ =
+          kElevatorBaseHeight + 2 * kCubeHeight + kElevatorReversedOffset;
       wrist_angle_ = kWristBackwardAngle;
       break;
     case SCALE_SUPER_HIGH_FORWARD:
@@ -149,7 +157,8 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
       wrist_angle_ = kWristTiltUpAngle;
       break;
     case SCALE_SUPER_HIGH_REVERSE:
-      elevator_height_ = kElevatorBaseHeight + 3 * kCubeHeight + kElevatorReversedOffset;
+      elevator_height_ =
+          kElevatorBaseHeight + 3 * kCubeHeight + kElevatorReversedOffset;
       wrist_angle_ = kWristBackwardAngle;
       break;
     case SCALE_SHOOT:
@@ -201,14 +210,15 @@ void ScoreSubsystem::RunStateMachine() {
   }
 }
 
-void ScoreSubsystem::GoToState(ScoreSubsystemState desired_state, IntakeGoal intake) {
+void ScoreSubsystem::GoToState(ScoreSubsystemState desired_state,
+                               IntakeGoal intake) {
   switch (state_) {
     case ScoreSubsystemState::CALIBRATING:
       if (wrist_.is_calibrated() && elevator_.is_calibrated()) {
         state_ = desired_state;
       } else {
         LOG(ERROR, "Tried to go to invalid state %d while calibrating!",
-              static_cast<int>(desired_state));
+            static_cast<int>(desired_state));
       }
       break;
     case ScoreSubsystemState::INTAKE_RUNNING:
