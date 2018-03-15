@@ -51,7 +51,7 @@ enum class IntakeMode {
   IDLE = 0,
   IN = 1,
   OUT_FAST = 2,
-  OUT_SLOW = 3
+  OUT_SLOW = 3,
 };
 
 class WristController {
@@ -60,7 +60,7 @@ class WristController {
   WristController();
 
   // Sets the unprofiled goal after capping
-  void SetGoal(double angle, IntakeMode mode);
+  void SetGoal(double angle, IntakeMode mode, bool intake_open);
   Eigen::Matrix<double, 2, 1> UpdateProfiledGoal(double unprofiled_goal_,
                                                  bool outputs_enabled);
 
@@ -96,6 +96,7 @@ class WristController {
 
   // If it was calibrated
   bool was_calibrated_ = false;
+  bool intake_open_ = false;
 
   // Does it _really_ have a cube?
   int has_cube_for_ticks_ = 0;
