@@ -11,9 +11,9 @@ class WristTest : public ::testing::Test {
  public:
   WristTest() {
     plant_ = muan::control::StateSpacePlant<1, 3, 1>(
-        frc1678::wrist_controller::controller::cube_integral::A(),
-        frc1678::wrist_controller::controller::cube_integral::B(),
-        frc1678::wrist_controller::controller::cube_integral::C());
+        frc1678::wrist::controller::cube_integral::A(),
+        frc1678::wrist::controller::cube_integral::B(),
+        frc1678::wrist::controller::cube_integral::C());
   }
   // UPDATE
   void Update() {
@@ -50,13 +50,13 @@ class WristTest : public ::testing::Test {
   WristController wrist_;
   void SetWeights(bool has_cube) {
     if (has_cube) {
-      plant_.A() = frc1678::wrist_controller::controller::cube_integral::A();
-      plant_.B() = frc1678::wrist_controller::controller::cube_integral::B();
-      plant_.C() = frc1678::wrist_controller::controller::cube_integral::C();
+      plant_.A() = frc1678::wrist::controller::cube_integral::A();
+      plant_.B() = frc1678::wrist::controller::cube_integral::B();
+      plant_.C() = frc1678::wrist::controller::cube_integral::C();
     } else {
-      plant_.A() = frc1678::wrist_controller::controller::no_cube_integral::A();
-      plant_.B() = frc1678::wrist_controller::controller::no_cube_integral::B();
-      plant_.C() = frc1678::wrist_controller::controller::no_cube_integral::C();
+      plant_.A() = frc1678::wrist::controller::no_cube_integral::A();
+      plant_.B() = frc1678::wrist::controller::no_cube_integral::B();
+      plant_.C() = frc1678::wrist::controller::no_cube_integral::C();
     }
   }
 };
