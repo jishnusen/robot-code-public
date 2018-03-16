@@ -57,6 +57,7 @@ class ElevatorController {
   double CapU(double elevator_u);  // Voltage capper to +/- 12
 
   double TimeLeftUntil(double x) const;
+
   bool is_calibrated() const;  // Getter for if it's calibrated
 
  private:

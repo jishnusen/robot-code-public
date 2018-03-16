@@ -27,6 +27,7 @@ ElevatorController::ElevatorController() {
       frc1678::elevator::controller::first_stage_integral::B(),
       frc1678::elevator::controller::first_stage_integral::C());
 
+  // Initialize the trapezoid profile
   trapezoid_profile_.set_maximum_acceleration(kElevatorMaxAcceleration);
   trapezoid_profile_.set_maximum_velocity(kElevatorMaxVelocity);
   timer_profile_.set_maximum_acceleration(kElevatorMaxAcceleration);
