@@ -54,8 +54,8 @@ void ScoreSubsystem::Update() {
   }
 
   // These are the goals before they get safety-ized
-  double constrained_elevator_height = elevator_height_;
-  double constrained_wrist_angle = wrist_angle_;
+  double constrained_elevator_height = elevator_height_ + goal->elevator_god_mode_goal() * 0.005;
+  double constrained_wrist_angle = wrist_angle_ + goal->wrist_god_mode_goal() * 0.005;
 
   // Now we make them safe so stuff doesn't break
   BoundGoal(&constrained_elevator_height, &constrained_wrist_angle);
