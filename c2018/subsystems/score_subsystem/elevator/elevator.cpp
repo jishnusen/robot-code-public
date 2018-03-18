@@ -171,6 +171,10 @@ double ElevatorController::CapU(double elevator_u) {
 }
 
 double ElevatorController::TimeLeftUntil(double x) const {
+  if (elevator_observer_.x()(0, 0) > x) {
+    return 0;
+  }
+
   return timer_profile_.TimeLeftUntil(x, unprofiled_goal_, 0);
 }
 

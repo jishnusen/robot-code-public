@@ -175,6 +175,10 @@ Eigen::Matrix<double, 2, 1> WristController::UpdateProfiledGoal(
 }
 
 double WristController::TimeLeftUntil(double angle) const {
+  if (wrist_observer_.x()(0, 0) > angle) {
+    return 0;
+  }
+
   return trapezoidal_time_estimator_.TimeLeftUntil(angle, angle, 0.0);
 }
 

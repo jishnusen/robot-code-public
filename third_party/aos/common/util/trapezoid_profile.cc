@@ -130,7 +130,7 @@ double TrapezoidProfile::TimeLeftUntil(double x, double goal_position,
   double deceleration_time = std::max(deceleration_time_, 0.);
   double constant_time = std::max(constant_time_, 0.);
 
-  if (std::abs(x - output_(0)) < 1e-6 || x < output_(0)) {
+  if (std::abs(x - output_(0)) < 1e-6) {
     return 0;
   }
   
