@@ -49,24 +49,11 @@ void WristController::Update(ScoreSubsystemInputProto input,
   double calibrated_encoder =
       hall_calibration_.Update(input->wrist_encoder(), input->wrist_hall());
 
-  if (input->has_cube()) {
-    SetWeights(true);
-  } else {
-    SetWeights(false);
-  }
   auto wrist_y =
       (Eigen::Matrix<double, 1, 1>() << calibrated_encoder).finished();
 
   // Setting up that wrist voltage to start it 0.0
   double wrist_voltage = 0.0;
-
-  // Logic to make sure it actually has a cube
-  if (input->has_cube() && has_cube_for_ticks_ < kNumHasCubeTicks * 2) {
-    has_cube_for_ticks_++;
-  } else if (!input->has_cube() && has_cube_for_ticks_ > 0) {
-    has_cube_for_ticks_--;
-  }
-  bool has_cube = has_cube_for_ticks_ > kNumHasCubeTicks;
 
   if (!outputs_enabled) {
     wrist_voltage = 0.0;
@@ -94,6 +81,9 @@ void WristController::Update(ScoreSubsystemInputProto input,
         break;
       case IntakeGoal::INTAKE_CLOSE:
       case IntakeGoal::SETTLE:
+        if (!has_cube_ || intake_state_ == IDLING_WITHOUT_CUBE) {
+          intake_state_ = MOVING;
+        }
         intake_voltage_ = kIntakeVoltage;
         wrist_solenoid_close = true;
         wrist_solenoid_open = false;
@@ -114,7 +104,7 @@ void WristController::Update(ScoreSubsystemInputProto input,
         wrist_solenoid_open = true;
         break;
       case IntakeGoal::INTAKE_NONE:
-        if (has_cube) {
+        if (input->has_cube()) {
           intake_voltage_ = kHoldingVoltage;
         } else {
           intake_voltage_ = 0;
@@ -125,6 +115,16 @@ void WristController::Update(ScoreSubsystemInputProto input,
     }
   } else {
     intake_voltage_ = 0;
+  }
+
+  cube_proxy_ = input->has_cube();
+  RunIntakeStateMachine();
+  has_cube_ = intake_state_ == IDLING_WITH_CUBE;
+
+  if (has_cube_) {
+    SetWeights(true);
+  } else {
+    SetWeights(false);
   }
 
   if (!hall_calibration_.is_calibrated()) {
@@ -168,10 +168,12 @@ void WristController::Update(ScoreSubsystemInputProto input,
   (*output)->set_wrist_solenoid_close(wrist_solenoid_close);
   (*status)->set_wrist_calibrated(hall_calibration_.is_calibrated());
   (*status)->set_wrist_angle(wrist_observer_.x()(0, 0));
-  (*status)->set_has_cube(has_cube);
+  (*status)->set_has_cube(has_cube_);
+  (*status)->set_intake_state(intake_state_);
   (*status)->set_wrist_profiled_goal(profiled_goal_(0, 0));
   (*status)->set_wrist_unprofiled_goal(unprofiled_goal_);
   (*status)->set_wrist_calibration_offset(hall_calibration_.offset());
+  (*status)->set_ticks(has_cube_for_ticks_);
 }
 
 Eigen::Matrix<double, 2, 1> WristController::UpdateProfiledGoal(
@@ -189,6 +191,25 @@ Eigen::Matrix<double, 2, 1> WristController::UpdateProfiledGoal(
 double WristController::TimeLeftUntil(double angle, double final_angle) {
   trapezoidal_time_estimator_.Update(final_angle, 0);
   return trapezoidal_time_estimator_.TimeLeftUntil(angle, final_angle, 0.0);
+}
+
+void WristController::RunIntakeStateMachine() {
+  switch (intake_state_) {
+    case MOVING:
+      has_cube_for_ticks_--;
+      if (has_cube_for_ticks_ < 0) {
+        has_cube_for_ticks_ = kNumHasCubeTicks;
+        intake_state_ = IDLING_WITH_CUBE;
+      }
+      break;
+    case IDLING_WITHOUT_CUBE:
+      if (cube_proxy_) {
+        intake_state_ = MOVING;
+      }
+      break;
+    case IDLING_WITH_CUBE:
+      break;
+  }
 }
 
 bool WristController::is_calibrated() const {

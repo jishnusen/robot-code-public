@@ -232,6 +232,23 @@ TEST_F(WristTest, CanCapAngle) {
   EXPECT_TRUE(wrist_status_proto_->wrist_unprofiled_goal() >= kWristMinAngle);
 }
 
+TEST_F(WristTest, SaneHasCube) {
+  outputs_enabled_ = true;
+  wrist_input_proto_->set_has_cube(true);
+  SetGoal(0.0, IntakeGoal::INTAKE_CLOSE);
+  Update();
+
+  EXPECT_FALSE(wrist_status_proto_->has_cube());
+  EXPECT_EQ(wrist_status_proto_->intake_state(), IntakeState::MOVING);
+
+  for (int i = 0; i < 101; i++) {
+    Update();
+  }
+
+  EXPECT_EQ(wrist_status_proto_->intake_state(), IntakeState::IDLING_WITH_CUBE);
+  EXPECT_TRUE(wrist_status_proto_->has_cube());
+}
+
 }  // namespace wrist
 
 }  // namespace score_subsystem

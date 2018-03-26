@@ -45,7 +45,7 @@ static constexpr double kHoldingVoltage = 1.5;
 static constexpr double kMaxVoltage = 12;
 
 // Has Cube encoder stuff
-static constexpr int kNumHasCubeTicks = 10;
+static constexpr int kNumHasCubeTicks = 100;
 
 class WristController {
  public:
@@ -94,7 +94,11 @@ class WristController {
   bool was_calibrated_ = false;
 
   // Does it _really_ have a cube?
-  int has_cube_for_ticks_ = 0;
+  int has_cube_for_ticks_ = kNumHasCubeTicks;
+  bool cube_proxy_ = true;
+  bool has_cube_ = false;
+  c2018::score_subsystem::IntakeState intake_state_ = IDLING_WITHOUT_CUBE;
+  void RunIntakeStateMachine();
 };
 
 }  // namespace wrist
