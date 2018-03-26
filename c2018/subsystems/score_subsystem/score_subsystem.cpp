@@ -78,7 +78,7 @@ void ScoreSubsystem::Update() {
   wrist_.Update(input, &output, &status_, driver_station->is_sys_active());
 
   status_->set_state(state_);
-  status_->set_intake_state(intake_goal_);
+  status_->set_intake_goal(intake_goal_);
 
   // Write those queues after Updating the controllers
   output_queue_->WriteMessage(output);
