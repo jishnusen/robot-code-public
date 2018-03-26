@@ -80,6 +80,12 @@ enum ScoreSubsystemState {
   INTAKING_ONLY = 3;
 }
 
+enum IntakeState {
+  MOVING = 0;
+  IDLING_WITHOUT_CUBE = 1;
+  IDLING_WITH_CUBE = 2;
+}
+
 message ScoreSubsystemStatus {
   required uint64 timestamp = 1;
   required double elevator_actual_height = 2;
@@ -103,5 +109,7 @@ message ScoreSubsystemStatus {
   required bool has_cube = 20;
   required double wrist_time_left = 21;
   required double elevator_time_left = 22;
-  required IntakeGoal intake_state = 23;
+  required IntakeGoal intake_goal = 23;
+  required IntakeState intake_state = 24;
+  required double ticks = 25;
 }
