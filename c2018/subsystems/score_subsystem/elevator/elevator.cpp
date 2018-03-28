@@ -166,6 +166,15 @@ muan::control::MotionProfilePosition ElevatorController::UpdateProfiledGoal(
   return profiled_goal_;
 }
 
+muan::units::Time ElevatorController::TimeLeftUntil(
+    muan::units::Length target, muan::units::Length final_goal) {
+  muan::control::TrapezoidalMotionProfile profile =
+      muan::control::TrapezoidalMotionProfile(
+          kElevatorConstraints, {final_goal, 0},
+          {elevator_observer_.x()(0, 0), elevator_observer_.x()(1, 0)});
+  return profile.TimeLeftUntil(target);
+}
+
 double ElevatorController::CapU(double elevator_u) {
   // Cap voltage to what's possible (SKY's the limit)
   // SKY = +/- 12

@@ -54,7 +54,10 @@ class ElevatorController {
                                       // outside data
   void SetGoal(double goal);  // Setter for unprofiled_goal_ that also caps it
                               // to kElevatorMin and Max Height
-  
+
+  muan::units::Time TimeLeftUntil(muan::units::Length target,
+                                  muan::units::Length final_goal);
+
   bool is_calibrated() const;  // Getter for if it's calibrated
 
  private:
