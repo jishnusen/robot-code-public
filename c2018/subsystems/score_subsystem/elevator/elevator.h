@@ -10,10 +10,10 @@
 #include "muan/control/state_space_controller.h"
 #include "muan/control/state_space_observer.h"
 #include "muan/control/state_space_plant.h"
+#include "muan/control/trapezoidal_motion_profile.h"
 #include "muan/logging/logger.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/utils/math_utils.h"
-#include "third_party/aos/common/util/trapezoid_profile.h"
 namespace c2018 {
 
 namespace score_subsystem {
@@ -21,8 +21,12 @@ namespace score_subsystem {
 namespace elevator {
 
 // Trapezoid Profile parameter
-constexpr double kElevatorMaxAcceleration = 4.0;
-constexpr double kElevatorMaxVelocity = 2.5;
+constexpr double kElevatorMaxAcceleration =
+    4.0 * muan::units::m / muan::units::s / muan::units::s;
+constexpr double kElevatorMaxVelocity = 2.5 * muan::units::m / muan::units::s;
+constexpr muan::control::MotionProfileConstraints kElevatorConstraints = {
+    .max_velocity = kElevatorMaxVelocity,
+    .max_acceleration = kElevatorMaxAcceleration};
 
 // Capping stuff so it doesn't go boom
 constexpr double kElevatorMinHeight = 0.0;
@@ -48,19 +52,19 @@ class ElevatorController {
               bool outputs_enabled);  // Figures out what the elevator should do
                                       // and what it's doing based on the
                                       // outside data
-  Eigen::Matrix<double, 2, 1> UpdateProfiledGoal(
-      double unprofiled_goal_,
-      bool outputs_enabled);  // Utilizes the trapezoidal motion profile
   void SetGoal(double goal);  // Setter for unprofiled_goal_ that also caps it
                               // to kElevatorMin and Max Height
-  void SetTimerGoal(double goal);
-  double CapU(double elevator_u);  // Voltage capper to +/- 12
-
-  double TimeLeftUntil(double x, double final_goal);
-
+  
   bool is_calibrated() const;  // Getter for if it's calibrated
 
  private:
+  muan::control::MotionProfilePosition profile_initial_;
+  muan::control::MotionProfilePosition unprofiled_goal_;
+
+  muan::control::MotionProfilePosition UpdateProfiledGoal(
+      bool outputs_enabled);       // Utilizes the trapezoidal motion profile
+  double CapU(double elevator_u);  // Voltage capper to +/- 12
+
   // State Space magic lol
   muan::control::StateSpacePlant<1, 3, 1> plant_;
   muan::control::StateSpaceController<1, 3, 1> elevator_controller_;
@@ -73,13 +77,8 @@ class ElevatorController {
   void SetWeights(bool second_stage, bool has_cube);
 
   // Goals stored inside of the class for usage in functions
-  Eigen::Matrix<double, 2, 1> profiled_goal_;
-  double unprofiled_goal_;
-  double timer_goal_;
-
-  // Motion profiling
-  aos::util::TrapezoidProfile trapezoid_profile_{std::chrono::milliseconds(5)};
-  aos::util::TrapezoidProfile timer_profile_{std::chrono::milliseconds(5)};
+  muan::control::MotionProfilePosition profiled_goal_;
+  muan::units::Time profile_time_;
 
   // Encoder fault stuff
   bool encoder_fault_detected_ = false;
