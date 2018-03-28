@@ -38,6 +38,7 @@ class TrapezoidalMotionProfile : public MotionProfile {
   // where the beginning of the profile was at time t=0
   MotionProfilePosition Calculate(muan::units::Time t) const override;
 
+  muan::units::Time TimeLeftUntil(muan::units::Length pos) const;
   muan::units::Time total_time() const override { return end_deccel_; }
 
   MotionProfileConstraints& constraints() { return constraints_; }
