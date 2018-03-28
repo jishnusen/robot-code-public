@@ -21,9 +21,8 @@ namespace score_subsystem {
 namespace elevator {
 
 // Trapezoid Profile parameter
-constexpr double kElevatorMaxAcceleration =
-    4.0 * muan::units::m / muan::units::s / muan::units::s;
-constexpr double kElevatorMaxVelocity = 2.5 * muan::units::m / muan::units::s;
+constexpr double kElevatorMaxAcceleration = 4.0 * muan::units::mps2;
+constexpr double kElevatorMaxVelocity = 2.5 * muan::units::mps;
 constexpr muan::control::MotionProfileConstraints kElevatorConstraints = {
     .max_velocity = kElevatorMaxVelocity,
     .max_acceleration = kElevatorMaxAcceleration};

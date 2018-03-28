@@ -54,7 +54,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
     profile_initial_ = {
         .position = elevator_observer_.x()(0, 0) * muan::units::m,
         .velocity =
-            elevator_observer_.x()(1, 0) * muan::units::m / muan::units::s};
+            elevator_observer_.x()(1, 0) * muan::units::mps};
   }
 
   // The first calibrate is the only one that does anything to the model
@@ -64,7 +64,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
     profile_initial_ = {
         .position = elevator_observer_.x()(0, 0) * muan::units::m,
         .velocity =
-            elevator_observer_.x()(1, 0) * muan::units::m / muan::units::s};
+            elevator_observer_.x()(1, 0) * muan::units::mps};
   }
 
   // Update the trapezoidal motion profile
@@ -142,7 +142,7 @@ void ElevatorController::SetGoal(double goal) {
     profile_initial_ = {
         .position = elevator_observer_.x()(0, 0) * muan::units::m,
         .velocity =
-            elevator_observer_.x()(1, 0) * muan::units::m / muan::units::s};
+            elevator_observer_.x()(1, 0) * muan::units::mps};
   }
   // Cap goal to actual possible height so things don't break
   unprofiled_goal_ = {
