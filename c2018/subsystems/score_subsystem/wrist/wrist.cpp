@@ -184,9 +184,10 @@ muan::control::MotionProfilePosition WristController::UpdateProfiledGoal(
 }
 
 double WristController::TimeLeftUntil(double angle, double final_angle) {
-  if (wrist_observer_.x()(0, 0) > angle) {
+  if (profiled_goal_.position > angle) {
     return 0.;
   }
+
   muan::control::TrapezoidalMotionProfile profile =
       muan::control::TrapezoidalMotionProfile(kWristConstraints,
                                               {final_angle, 0}, profiled_goal_);
