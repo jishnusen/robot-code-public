@@ -45,9 +45,9 @@ class WristTest : public ::testing::Test {
 
  protected:
   muan::control::StateSpacePlant<1, 3, 1> plant_;
+  WristController wrist_;
 
  private:
-  WristController wrist_;
   void SetWeights(bool has_cube) {
     if (has_cube) {
       plant_.A() = frc1678::wrist::controller::cube_integral::A();
