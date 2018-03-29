@@ -18,8 +18,7 @@ ScoreSubsystem::ScoreSubsystem()
       ds_status_reader_{
           QueueManager<DriverStationProto>::Fetch()->MakeReader()} {}
 
-void ScoreSubsystem::BoundGoal(double* elevator_goal,
-                               double* wrist_goal) {
+void ScoreSubsystem::BoundGoal(double* elevator_goal, double* wrist_goal) {
   // Elevator goal doesn't get too low if the wrist can't handle it
   if (status_->wrist_angle() > kWristSafeAngle) {
     *elevator_goal = muan::utils::Cap(*elevator_goal, kElevatorWristSafeHeight,
@@ -32,8 +31,6 @@ void ScoreSubsystem::BoundGoal(double* elevator_goal,
       wrist_.TimeLeftUntil(kWristSafeAngle, wrist::kWristMaxAngle);
 
   // Wrist doesn't try to go too far if the elevator can't handle it
-  std::cout << time_until_elevator_safe << "\t" << time_until_wrist_safe
-            << "\t" << *wrist_goal << "\t" << *elevator_goal << std::endl;
   if (*wrist_goal > kWristSafeAngle &&
       time_until_elevator_safe > time_until_wrist_safe) {
     *wrist_goal = 0.0;
