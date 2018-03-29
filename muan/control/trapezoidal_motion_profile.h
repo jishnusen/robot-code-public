@@ -1,6 +1,7 @@
 #ifndef MUAN_CONTROL_TRAPEZOIDAL_MOTION_PROFILE_H_
 #define MUAN_CONTROL_TRAPEZOIDAL_MOTION_PROFILE_H_
 
+#include <algorithm>
 #include <cmath>
 #include <type_traits>
 #include "muan/control/motion_profile.h"

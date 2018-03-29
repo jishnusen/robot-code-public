@@ -112,7 +112,8 @@ muan::units::Time TrapezoidalMotionProfile::TimeLeftUntil(
 
   muan::units::Velocity deccel_velocity;
   if (end_accel > 0) {
-    deccel_velocity = sqrt(std::abs(velocity * velocity + 2 * acceleration * accel_dist));
+    deccel_velocity =
+        sqrt(std::abs(velocity * velocity + 2 * acceleration * accel_dist));
   } else {
     deccel_velocity = velocity;
   }
@@ -138,11 +139,13 @@ muan::units::Time TrapezoidalMotionProfile::TimeLeftUntil(
   }
 
   muan::units::Time accel_time =
-      (-velocity + sqrt(std::abs(velocity * velocity + 2 * acceleration * accel_dist))) /
+      (-velocity +
+       sqrt(std::abs(velocity * velocity + 2 * acceleration * accel_dist))) /
       acceleration;
 
   muan::units::Time deccel_time =
-      (-deccel_velocity + sqrt(std::abs(deccel_velocity * deccel_velocity + 2 * decceleration * deccel_dist))) /
+      (-deccel_velocity + sqrt(std::abs(deccel_velocity * deccel_velocity +
+                                        2 * decceleration * deccel_dist))) /
       decceleration;
 
   muan::units::Time full_speed_time =
