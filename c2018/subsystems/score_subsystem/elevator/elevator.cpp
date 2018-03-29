@@ -165,6 +165,9 @@ muan::control::MotionProfilePosition ElevatorController::UpdateProfiledGoal(
 
 muan::units::Time ElevatorController::TimeLeftUntil(double target,
                                                     double final_goal) {
+  if (profiled_goal_.position > target) {
+    return 0.;
+  }
   muan::control::TrapezoidalMotionProfile profile =
       muan::control::TrapezoidalMotionProfile(kElevatorConstraints,
                                               {final_goal, 0}, profiled_goal_);
