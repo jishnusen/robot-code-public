@@ -53,8 +53,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
     profile_time_ = 0.;
     profile_initial_ = {
         .position = elevator_observer_.x()(0, 0) * muan::units::m,
-        .velocity =
-            elevator_observer_.x()(1, 0) * muan::units::mps};
+        .velocity = elevator_observer_.x()(1, 0) * muan::units::mps};
   }
 
   // The first calibrate is the only one that does anything to the model
@@ -63,8 +62,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
     profile_time_ = 0.;
     profile_initial_ = {
         .position = elevator_observer_.x()(0, 0) * muan::units::m,
-        .velocity =
-            elevator_observer_.x()(1, 0) * muan::units::mps};
+        .velocity = elevator_observer_.x()(1, 0) * muan::units::mps};
   }
 
   // Update the trapezoidal motion profile
@@ -141,8 +139,7 @@ void ElevatorController::SetGoal(double goal) {
     profile_time_ = 0.;
     profile_initial_ = {
         .position = elevator_observer_.x()(0, 0) * muan::units::m,
-        .velocity =
-            elevator_observer_.x()(1, 0) * muan::units::mps};
+        .velocity = elevator_observer_.x()(1, 0) * muan::units::mps};
   }
   // Cap goal to actual possible height so things don't break
   unprofiled_goal_ = {
@@ -166,12 +163,11 @@ muan::control::MotionProfilePosition ElevatorController::UpdateProfiledGoal(
   return profiled_goal_;
 }
 
-muan::units::Time ElevatorController::TimeLeftUntil(
-    muan::units::Length target, muan::units::Length final_goal) {
+muan::units::Time ElevatorController::TimeLeftUntil(double target,
+                                                    double final_goal) {
   muan::control::TrapezoidalMotionProfile profile =
-      muan::control::TrapezoidalMotionProfile(
-          kElevatorConstraints, {final_goal, 0},
-          {elevator_observer_.x()(0, 0), elevator_observer_.x()(1, 0)});
+      muan::control::TrapezoidalMotionProfile(kElevatorConstraints,
+                                              {final_goal, 0}, profiled_goal_);
   return profile.TimeLeftUntil(target);
 }
 
