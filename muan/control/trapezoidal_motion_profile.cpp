@@ -81,39 +81,47 @@ MotionProfilePosition TrapezoidalMotionProfile::Calculate(
 
 muan::units::Time TrapezoidalMotionProfile::TimeLeftUntil(
     muan::units::Length target) const {
-  muan::units::Time end_accel = std::max(end_accel_, 0.);
-  muan::units::Time end_full_speed = std::max(end_full_speed_, 0.) - end_accel;
-  muan::units::Time end_deccel =
-      std::max(end_deccel_, 0.) - end_full_speed - end_accel;
+  muan::units::Length position = initial_.position * direction_;
+  muan::units::Velocity velocity = initial_.velocity * direction_;
 
-  MotionProfilePosition state = Calculate(0.);
+  muan::units::Time end_accel = end_accel_ * direction_;
+  muan::units::Time end_full_speed = end_full_speed_ * direction_ - end_accel;
 
-  muan::units::Length dist_to_target = target - state.position;
+  if (target < position) {
+    end_accel *= -1.;
+    end_full_speed *= -1.;
+    velocity *= -1.;
+  }
+
+  end_accel = std::max(end_accel, 0.);
+  end_full_speed = std::max(end_full_speed, 0.);
+  muan::units::Time end_deccel = end_deccel_ - end_accel - end_full_speed;
+  end_deccel = std::max(end_deccel, 0.);
+
+  muan::units::Acceleration acceleration = constraints_.max_acceleration;
+  muan::units::Acceleration decceleration = -constraints_.max_acceleration;
+
+  muan::units::Length dist_to_target = std::abs(target - position);
 
   if (std::abs(dist_to_target) < 1e-6) {
     return 0.;
   }
 
-  if (std::abs(target - goal_.position) < 1e-6) {
-    return end_deccel_;
-  }
-
   muan::units::Length accel_dist =
-      state.velocity * end_accel_ +
-      0.5 * constraints_.max_acceleration * end_accel * end_accel;
+      velocity * end_accel + 0.5 * acceleration * end_accel * end_accel;
 
-  muan::units::Length decel_velocity;
+  muan::units::Velocity deccel_velocity;
   if (end_accel > 0) {
-    decel_velocity =
-        -sqrt(std::abs(state.velocity) +
-              2 * constraints_.max_acceleration * std::abs(accel_dist));
+    deccel_velocity = sqrt(std::abs(velocity * velocity + 2 * acceleration * accel_dist));
   } else {
-    decel_velocity = state.velocity;
+    deccel_velocity = velocity;
   }
 
   muan::units::Length deccel_dist =
-      decel_velocity * end_accel_ +
-      -0.5 * constraints_.max_acceleration * end_deccel * end_deccel;
+      deccel_velocity * end_deccel +
+      0.5 * decceleration * end_deccel * end_deccel;
+
+  deccel_dist = std::max(deccel_dist, 0.);
 
   muan::units::Length full_speed_dist =
       constraints_.max_velocity * end_full_speed;
@@ -130,14 +138,12 @@ muan::units::Time TrapezoidalMotionProfile::TimeLeftUntil(
   }
 
   muan::units::Time accel_time =
-      (-state.velocity + sqrt(state.velocity * state.velocity +
-                              2 * constraints_.max_acceleration * accel_dist)) /
-      constraints_.max_acceleration;
+      (-velocity + sqrt(std::abs(velocity * velocity + 2 * acceleration * accel_dist))) /
+      acceleration;
 
   muan::units::Time deccel_time =
-      (-state.velocity + sqrt(state.velocity * state.velocity +
-                              2 * constraints_.max_acceleration * accel_dist)) /
-      (-constraints_.max_acceleration);
+      (-deccel_velocity + sqrt(std::abs(deccel_velocity * deccel_velocity + 2 * decceleration * deccel_dist))) /
+      decceleration;
 
   muan::units::Time full_speed_time =
       full_speed_dist / constraints_.max_velocity;
