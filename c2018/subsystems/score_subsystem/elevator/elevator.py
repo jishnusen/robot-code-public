@@ -10,7 +10,8 @@ from muan.control.controls import *
 
 dt = 0.005
 
-def make_gains(second_stage, has_cube, subname='gains'):
+
+def make_gains(second_stage, has_cube, god_mode, subname='gains'):
     # x = |   Linear Height   |
     #     |  Linear Velocity  |
     # u = voltage
@@ -72,20 +73,36 @@ def make_gains(second_stage, has_cube, subname='gains'):
         [0., 1.]
     ])
 
+    Q_controller = np.asmatrix([
+        [0., 0.],
+        [0., 5e-1]
+    ])
+
+    R_controller = np.asmatrix([
+        [1e-3]
+    ])
+
     A_d, B_d, Q_d, R_d = c2d(A_c, B_c, dt, Q_noise, R_noise)
-    K = place(A_c, B_c, [-10.0, -7.0])
+
+    if not god_mode:
+        K = place(A_c, B_c, [-10.0, -7.0])
+    else:
+        K = dlqr(A_d, B_d, Q_controller, R_controller)
+
     Kff = feedforwards(A_d, B_d, Q_ff)
     L = dkalman(A_d, C, Q_d, R_d)
 
-    gains = StateSpaceGains(name, dt, A_d, B_d, C, None, Q_d, R_noise, K, Kff, L)
+    gains = StateSpaceGains(name, dt, A_d, B_d, C,
+                            None, Q_d, R_noise, K, Kff, L)
     gains.A_c = A_c
     gains.B_c = B_c
     gains.Q_c = Q_noise
 
     return gains
 
-def make_augmented_gains(second_stage, has_cube, subname):
-    unaugmented_gains = make_gains(second_stage, has_cube, subname)
+
+def make_augmented_gains(second_stage, has_cube, god_mode, subname):
+    unaugmented_gains = make_gains(second_stage, has_cube, god_mode, subname)
 
     dt = unaugmented_gains.dt
 
@@ -133,7 +150,8 @@ def make_augmented_gains(second_stage, has_cube, subname):
 
     name = unaugmented_gains.name + '_integral'
 
-    gains = StateSpaceGains(name, dt, A_d, B_d, C, None, Q_d, R_noise, K, Kff, L)
+    gains = StateSpaceGains(name, dt, A_d, B_d, C,
+                            None, Q_d, R_noise, K, Kff, L)
 
     return gains
 
@@ -141,7 +159,14 @@ def make_augmented_gains(second_stage, has_cube, subname):
 u_max = np.asmatrix([12.]).T
 x0 = np.asmatrix([0., 0., 0.]).T
 
-gains = [make_augmented_gains(True, True, 'second_stage_cube'), make_augmented_gains(True, False, 'second_stage'), make_augmented_gains(False, True, 'first_stage_cube'), make_augmented_gains(False, False, 'first_stage')]
+gains = [make_augmented_gains(True, True, False, 'second_stage_cube'),
+         make_augmented_gains(True, False, False, 'second_stage'),
+         make_augmented_gains(False, True, False, 'first_stage_cube'),
+         make_augmented_gains(False, False, False, 'first_stage'),
+         make_augmented_gains(True, True, True, 'god_mode_second_stage_cube'),
+         make_augmented_gains(True, False, True, 'god_mode_second_stage'),
+         make_augmented_gains(False, True, True, 'god_mode_first_stage_cube'),
+         make_augmented_gains(False, False, True, 'god_mode_first_stage')]
 
 plant = StateSpacePlant(gains, x0)
 controller = StateSpaceController(gains, -u_max, u_max)
@@ -149,8 +174,10 @@ observer = StateSpaceObserver(gains, x0)
 
 profile = TrapezoidalMotionProfile(1.0, 3.0, 3.0)
 
+
 def goal(t):
     return np.asmatrix([profile.distance(t), profile.velocity(t), 0.]).T
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
@@ -160,5 +187,6 @@ if __name__ == '__main__':
     else:
         from muan.control.state_space_scenario import StateSpaceScenario
 
-        scenario = StateSpaceScenario(plant, x0, controller, observer, x0, 'elevator')
+        scenario = StateSpaceScenario(
+            plant, x0, controller, observer, x0, 'elevator')
         scenario.run(goal, 4)

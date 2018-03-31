@@ -51,18 +51,16 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
   // disabled
   if (!outputs_enabled) {
     profile_time_ = 0.;
-    profile_initial_ = {
-        .position = elevator_observer_.x()(0, 0) * muan::units::m,
-        .velocity = elevator_observer_.x()(1, 0) * muan::units::mps};
+    profile_initial_ = {elevator_observer_.x()(0, 0) * muan::units::m,
+                        elevator_observer_.x()(1, 0) * muan::units::mps};
   }
 
   // The first calibrate is the only one that does anything to the model
   if (hall_calib_.is_calibrated() && !was_calibrated) {
     elevator_observer_.x(0) += hall_calib_.offset();
     profile_time_ = 0.;
-    profile_initial_ = {
-        .position = elevator_observer_.x()(0, 0) * muan::units::m,
-        .velocity = elevator_observer_.x()(1, 0) * muan::units::mps};
+    profile_initial_ = {elevator_observer_.x()(0, 0) * muan::units::m,
+                        elevator_observer_.x()(1, 0) * muan::units::mps};
   }
 
   // Update the trapezoidal motion profile
@@ -134,18 +132,28 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
   (*status)->set_elevator_calibration_offset(hall_calib_.offset());
 }
 
-void ElevatorController::SetGoal(double goal) {
-  if (std::abs(goal - unprofiled_goal_.position) > 1e-10) {
+void ElevatorController::SetGoal(muan::control::MotionProfilePosition goal,
+                                 bool god_mode) {
+  if (std::abs(goal.position - unprofiled_goal_.position) > 1e-10) {
     profile_time_ = 0.;
-    profile_initial_ = {
-        .position = elevator_observer_.x()(0, 0) * muan::units::m,
-        .velocity = elevator_observer_.x()(1, 0) * muan::units::mps};
+    profile_initial_ = {elevator_observer_.x()(0, 0) * muan::units::m,
+                        elevator_observer_.x()(1, 0) * muan::units::mps};
   }
   // Cap goal to actual possible height so things don't break
-  unprofiled_goal_ = {
-      .position =
-          muan::utils::Cap(goal, 0., kElevatorMaxHeight) * muan::units::m,
-      .velocity = 0.};
+  if (!god_mode) {
+    unprofiled_goal_ = {
+        muan::utils::Cap(goal.position, 0., kElevatorMaxHeight) *
+            muan::units::m,
+        0.};
+  } else {
+    profile_time_ = 0.;
+    profile_initial_ = {elevator_observer_.x()(0, 0) * muan::units::m,
+                        elevator_observer_.x()(1, 0) * muan::units::mps};
+    unprofiled_goal_ = {elevator_observer_.x()(0, 0) * muan::units::m,
+                        goal.velocity};
+  }
+
+  god_mode_ = god_mode;
 }
 
 muan::control::MotionProfilePosition ElevatorController::UpdateProfiledGoal(
@@ -184,7 +192,7 @@ double ElevatorController::CapU(double elevator_u) {
 void ElevatorController::SetWeights(bool second_stage, bool has_cube) {
   // Change the gains based on where it is using stuff generated from the python
   // controller for all the scenarios
-  if (second_stage && has_cube) {
+  if (second_stage && has_cube && !god_mode_) {
     elevator_controller_.A() =
         frc1678::elevator::controller::second_stage_cube_integral::A();
     elevator_controller_.K() =
@@ -198,7 +206,7 @@ void ElevatorController::SetWeights(bool second_stage, bool has_cube) {
     plant_.A() = frc1678::elevator::controller::second_stage_cube_integral::A();
     plant_.B() = frc1678::elevator::controller::second_stage_cube_integral::B();
     plant_.C() = frc1678::elevator::controller::second_stage_cube_integral::C();
-  } else if (second_stage && !has_cube) {
+  } else if (second_stage && !has_cube && !god_mode_) {
     elevator_controller_.A() =
         frc1678::elevator::controller::second_stage_integral::A();
     elevator_controller_.K() =
@@ -212,7 +220,7 @@ void ElevatorController::SetWeights(bool second_stage, bool has_cube) {
     plant_.A() = frc1678::elevator::controller::second_stage_integral::A();
     plant_.B() = frc1678::elevator::controller::second_stage_integral::B();
     plant_.C() = frc1678::elevator::controller::second_stage_integral::C();
-  } else if (!second_stage && has_cube) {
+  } else if (!second_stage && has_cube && !god_mode_) {
     elevator_controller_.A() =
         frc1678::elevator::controller::first_stage_cube_integral::A();
     elevator_controller_.K() =
@@ -226,7 +234,7 @@ void ElevatorController::SetWeights(bool second_stage, bool has_cube) {
     plant_.A() = frc1678::elevator::controller::first_stage_cube_integral::A();
     plant_.B() = frc1678::elevator::controller::first_stage_cube_integral::B();
     plant_.C() = frc1678::elevator::controller::first_stage_cube_integral::C();
-  } else if (!second_stage && !has_cube) {
+  } else if (!second_stage && !has_cube && !god_mode_) {
     elevator_controller_.A() =
         frc1678::elevator::controller::first_stage_integral::A();
     elevator_controller_.K() =
@@ -240,6 +248,74 @@ void ElevatorController::SetWeights(bool second_stage, bool has_cube) {
     plant_.A() = frc1678::elevator::controller::first_stage_integral::A();
     plant_.B() = frc1678::elevator::controller::first_stage_integral::B();
     plant_.C() = frc1678::elevator::controller::first_stage_integral::C();
+  } else if (second_stage && has_cube && god_mode_) {
+    elevator_controller_.A() =
+        frc1678::elevator::controller::god_mode_second_stage_cube_integral::A();
+    elevator_controller_.K() =
+        frc1678::elevator::controller::god_mode_second_stage_cube_integral::K();
+    elevator_controller_.Kff() = frc1678::elevator::controller::
+        god_mode_second_stage_cube_integral::Kff();
+
+    elevator_observer_.L() =
+        frc1678::elevator::controller::god_mode_second_stage_cube_integral::L();
+
+    plant_.A() =
+        frc1678::elevator::controller::god_mode_second_stage_cube_integral::A();
+    plant_.B() =
+        frc1678::elevator::controller::god_mode_second_stage_cube_integral::B();
+    plant_.C() =
+        frc1678::elevator::controller::god_mode_second_stage_cube_integral::C();
+  } else if (second_stage && !has_cube && god_mode_) {
+    elevator_controller_.A() =
+        frc1678::elevator::controller::god_mode_second_stage_integral::A();
+    elevator_controller_.K() =
+        frc1678::elevator::controller::god_mode_second_stage_integral::K();
+    elevator_controller_.Kff() =
+        frc1678::elevator::controller::god_mode_second_stage_integral::Kff();
+
+    elevator_observer_.L() =
+        frc1678::elevator::controller::god_mode_second_stage_integral::L();
+
+    plant_.A() =
+        frc1678::elevator::controller::god_mode_second_stage_integral::A();
+    plant_.B() =
+        frc1678::elevator::controller::god_mode_second_stage_integral::B();
+    plant_.C() =
+        frc1678::elevator::controller::god_mode_second_stage_integral::C();
+  } else if (!second_stage && has_cube && god_mode_) {
+    elevator_controller_.A() =
+        frc1678::elevator::controller::god_mode_first_stage_cube_integral::A();
+    elevator_controller_.K() =
+        frc1678::elevator::controller::god_mode_first_stage_cube_integral::K();
+    elevator_controller_.Kff() = frc1678::elevator::controller::
+        god_mode_first_stage_cube_integral::Kff();
+
+    elevator_observer_.L() =
+        frc1678::elevator::controller::god_mode_first_stage_cube_integral::L();
+
+    plant_.A() =
+        frc1678::elevator::controller::god_mode_first_stage_cube_integral::A();
+    plant_.B() =
+        frc1678::elevator::controller::god_mode_first_stage_cube_integral::B();
+    plant_.C() =
+        frc1678::elevator::controller::god_mode_first_stage_cube_integral::C();
+  } else if (!second_stage && !has_cube && god_mode_) {
+    elevator_controller_.A() =
+        frc1678::elevator::controller::god_mode_first_stage_integral::A();
+    elevator_controller_.K() =
+        frc1678::elevator::controller::god_mode_first_stage_integral::K();
+    elevator_controller_.Kff() =
+        frc1678::elevator::controller::god_mode_first_stage_integral::Kff();
+
+    elevator_observer_.L() =
+        frc1678::elevator::controller::god_mode_first_stage_integral::L();
+
+    plant_.A() =
+        frc1678::elevator::controller::god_mode_first_stage_integral::A();
+    plant_.B() =
+        frc1678::elevator::controller::god_mode_first_stage_integral::B();
+    plant_.C() =
+        frc1678::elevator::controller::god_mode_first_stage_integral::C();
   }
 }
 

@@ -25,7 +25,7 @@ class ElevatorControllerTest : public ::testing::Test {
                       .finished());
   }
 
-  void SetGoal(double goal) { elevator_.SetGoal(goal); }
+  void SetGoal(double goal) { elevator_.SetGoal({goal, 0}); }
 
   void SetInput(double position, bool hall) {
     elevator_input_proto_->set_elevator_encoder(position);
