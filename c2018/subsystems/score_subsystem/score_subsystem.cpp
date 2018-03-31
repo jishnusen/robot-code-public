@@ -68,10 +68,10 @@ void ScoreSubsystem::Update() {
   BoundGoal(&constrained_elevator_height, &constrained_wrist_angle);
 
   // Then we tell the controller to do it
-  elevator_.SetGoal(constrained_elevator_height);
+  elevator_.SetGoal({constrained_elevator_height, 0.});
   elevator_.Update(input, &output, &status_, driver_station->is_sys_active());
 
-  wrist_.SetGoal(constrained_wrist_angle, intake_goal_);
+  wrist_.SetGoal({constrained_wrist_angle, 0.}, intake_goal_);
   wrist_.Update(input, &output, &status_, driver_station->is_sys_active());
 
   status_->set_state(state_);
