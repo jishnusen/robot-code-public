@@ -103,7 +103,7 @@ muan::units::Time TrapezoidalMotionProfile::TimeLeftUntil(
 
   muan::units::Length dist_to_target = std::abs(target - position);
 
-  if (std::abs(dist_to_target) < 1e-6) {
+  if (dist_to_target < 1e-6) {
     return 0.;
   }
 
