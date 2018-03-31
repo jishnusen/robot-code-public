@@ -71,6 +71,7 @@ message ScoreSubsystemGoal {
 
   required double elevator_god_mode_goal = 4;
   required double wrist_god_mode_goal = 5;
+  required bool god_mode = 6;
 }
 
 enum ScoreSubsystemState {
