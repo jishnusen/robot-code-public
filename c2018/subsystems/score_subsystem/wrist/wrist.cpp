@@ -41,6 +41,7 @@ void WristController::SetGoal(muan::control::MotionProfilePosition wrist_angle,
   }
   // Set the goal intake mode
   intake_mode_ = intake_mode;
+  god_mode_ = god_mode;
 }
 
 void WristController::Update(ScoreSubsystemInputProto input,
@@ -208,7 +209,7 @@ bool WristController::is_calibrated() const {
 }
 
 void WristController::SetWeights(bool has_cube) {
-  if (has_cube) {
+  if (has_cube && !god_mode_) {
     wrist_controller_.A() = frc1678::wrist::controller::cube_integral::A();
     wrist_controller_.K() = frc1678::wrist::controller::cube_integral::K();
     wrist_controller_.Kff() = frc1678::wrist::controller::cube_integral::Kff();
@@ -218,7 +219,7 @@ void WristController::SetWeights(bool has_cube) {
     plant_.A() = frc1678::wrist::controller::cube_integral::A();
     plant_.B() = frc1678::wrist::controller::cube_integral::B();
     plant_.C() = frc1678::wrist::controller::cube_integral::C();
-  } else {
+  } else if (!has_cube && !god_mode_) {
     wrist_controller_.A() = frc1678::wrist::controller::no_cube_integral::A();
     wrist_controller_.K() = frc1678::wrist::controller::no_cube_integral::K();
     wrist_controller_.Kff() =
@@ -229,6 +230,34 @@ void WristController::SetWeights(bool has_cube) {
     plant_.A() = frc1678::wrist::controller::no_cube_integral::A();
     plant_.B() = frc1678::wrist::controller::no_cube_integral::B();
     plant_.C() = frc1678::wrist::controller::no_cube_integral::C();
+  } else if (has_cube && !god_mode_) {
+    wrist_controller_.A() =
+        frc1678::wrist::controller::god_mode_cube_integral::A();
+    wrist_controller_.K() =
+        frc1678::wrist::controller::god_mode_cube_integral::K();
+    wrist_controller_.Kff() =
+        frc1678::wrist::controller::god_mode_cube_integral::Kff();
+
+    wrist_observer_.L() =
+        frc1678::wrist::controller::god_mode_cube_integral::L();
+
+    plant_.A() = frc1678::wrist::controller::god_mode_cube_integral::A();
+    plant_.B() = frc1678::wrist::controller::god_mode_cube_integral::B();
+    plant_.C() = frc1678::wrist::controller::god_mode_cube_integral::C();
+  } else if (!has_cube && !god_mode_) {
+    wrist_controller_.A() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::A();
+    wrist_controller_.K() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::K();
+    wrist_controller_.Kff() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::Kff();
+
+    wrist_observer_.L() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::L();
+
+    plant_.A() = frc1678::wrist::controller::god_mode_no_cube_integral::A();
+    plant_.B() = frc1678::wrist::controller::god_mode_no_cube_integral::B();
+    plant_.C() = frc1678::wrist::controller::god_mode_no_cube_integral::C();
   }
 }
 
