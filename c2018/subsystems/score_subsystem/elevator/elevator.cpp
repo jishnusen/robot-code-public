@@ -151,6 +151,13 @@ void ElevatorController::SetGoal(muan::control::MotionProfilePosition goal,
                         elevator_observer_.x()(1, 0) * muan::units::mps};
     unprofiled_goal_ = {elevator_observer_.x()(0, 0) * muan::units::m,
                         goal.velocity};
+    if (std::abs(elevator_observer_.x()(0, 0) - kElevatorMaxHeight) < 5e-2) {
+      unprofiled_goal_.velocity =
+          muan::utils::Cap(unprofiled_goal_.velocity, -kElevatorMaxVelocity, 0.);
+    } else if (elevator_observer_.x()(0, 0) < 5e-2) {
+      unprofiled_goal_.velocity =
+          muan::utils::Cap(unprofiled_goal_.velocity, 0., kElevatorMaxVelocity);
+    }
   }
 
   god_mode_ = god_mode;
