@@ -33,11 +33,19 @@ void WristController::SetGoal(muan::control::MotionProfilePosition wrist_angle,
   if (!god_mode) {
     // Cap unprofiled goal to keep things safe
     unprofiled_goal_ = {
-        muan::utils::Cap(wrist_angle.position, kWristMinAngle, kWristMaxAngle), 0.};
+        muan::utils::Cap(wrist_angle.position, kWristMinAngle, kWristMaxAngle),
+        0.};
   } else {
     unprofiled_goal_ = {wrist_observer_.x()(0, 0), wrist_angle.velocity};
     profile_time_ = 0.;
     profile_initial_ = {wrist_observer_.x()(0, 0), wrist_observer_.x()(1, 0)};
+    if (std::abs(wrist_observer_.x()(0, 0) - kWristMaxAngle) < 5e-2) {
+      unprofiled_goal_.velocity =
+          muan::utils::Cap(unprofiled_goal_.velocity, -kMaxWristVelocity, 0.);
+    } else if (std::abs(wrist_observer_.x()(0, 0) - kWristMinAngle) < 5e-2) {
+      unprofiled_goal_.velocity =
+          muan::utils::Cap(unprofiled_goal_.velocity, 0., kMaxWristVelocity);
+    }
   }
   // Set the goal intake mode
   intake_mode_ = intake_mode;
