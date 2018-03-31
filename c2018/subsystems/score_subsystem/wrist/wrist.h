@@ -54,7 +54,7 @@ class WristController {
   WristController();
 
   // Sets the unprofiled goal after capping
-  void SetGoal(double angle, IntakeGoal mode);
+  void SetGoal(muan::control::MotionProfilePosition angle, IntakeGoal mode, bool god_mode = false);
   // Updates the model
   void Update(ScoreSubsystemInputProto input, ScoreSubsystemOutputProto* output,
               ScoreSubsystemStatusProto* status, bool outputs_enabled);
@@ -94,6 +94,8 @@ class WristController {
 
   // Does it _really_ have a cube?
   int has_cube_for_ticks_ = 0;
+
+  bool god_mode_ = false;
 };
 
 }  // namespace wrist
