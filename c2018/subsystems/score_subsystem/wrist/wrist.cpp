@@ -23,14 +23,22 @@ WristController::WristController() {
       wrist_plant, frc1678::wrist::controller::cube_integral::L());
 }
 
-void WristController::SetGoal(double wrist_angle, IntakeGoal intake_mode) {
-  if (std::abs(wrist_angle - unprofiled_goal_.position) > 1e-10) {
+void WristController::SetGoal(muan::control::MotionProfilePosition wrist_angle,
+                              IntakeGoal intake_mode, bool god_mode) {
+  if (std::abs(wrist_angle.position - unprofiled_goal_.position) > 1e-10) {
     profile_time_ = 0.;
     profile_initial_ = {wrist_observer_.x()(0, 0), wrist_observer_.x()(1, 0)};
   }
-  // Cap unprofiled goal to keep things safe
-  unprofiled_goal_ = {
-      muan::utils::Cap(wrist_angle, kWristMinAngle, kWristMaxAngle), 0.};
+
+  if (!god_mode) {
+    // Cap unprofiled goal to keep things safe
+    unprofiled_goal_ = {
+        muan::utils::Cap(wrist_angle.position, kWristMinAngle, kWristMaxAngle), 0.};
+  } else {
+    unprofiled_goal_ = {wrist_observer_.x()(0, 0), wrist_angle.velocity};
+    profile_time_ = 0.;
+    profile_initial_ = {wrist_observer_.x()(0, 0), wrist_observer_.x()(1, 0)};
+  }
   // Set the goal intake mode
   intake_mode_ = intake_mode;
 }
