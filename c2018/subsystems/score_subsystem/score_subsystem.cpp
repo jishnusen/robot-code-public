@@ -165,8 +165,8 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
       break;
   }
 
-  elevator_height_ += goal->elevator_god_mode_goal() * 0.005;
-  wrist_angle_ += goal->wrist_god_mode_goal() * 0.005;
+  // elevator_height_ += goal->elevator_god_mode_goal() * 0.005;
+  // wrist_angle_ += goal->wrist_god_mode_goal() * 0.005;
 
   elevator_height_ = muan::utils::Cap(
       elevator_height_, c2018::score_subsystem::elevator::kElevatorMinHeight,

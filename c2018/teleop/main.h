@@ -17,9 +17,9 @@ namespace teleop {
 
 constexpr int kNumRumbleTicks = 25;
 
-constexpr double kGodmodeElevatorMultiplier = 6;  // tentative
-constexpr double kGodmodeWristMultiplier = 10;    // tentative
-constexpr double kGodmodeThreshold = .1;          // tentative
+constexpr double kGodmodeElevatorMultiplier = .25;  // tentative
+constexpr double kGodmodeWristMultiplier = 1;       // tentative
+constexpr double kGodmodeThreshold = .1;            // tentative
 
 class TeleopBase {
  public:
