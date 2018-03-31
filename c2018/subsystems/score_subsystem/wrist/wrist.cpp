@@ -4,8 +4,6 @@ namespace c2018 {
 namespace score_subsystem {
 namespace wrist {
 
-using muan::queues::QueueManager;
-
 WristController::WristController()
     : trapezoidal_motion_profile_{::std::chrono::milliseconds(5)},
       trapezoidal_time_estimator_{::std::chrono::milliseconds(5)} {
@@ -81,7 +79,7 @@ void WristController::Update(ScoreSubsystemInputProto input,
         break;
       case IntakeGoal::INTAKE_CLOSE:
       case IntakeGoal::SETTLE:
-        if (!has_cube_ || intake_state_ == IDLING_WITHOUT_CUBE) {
+        if (intake_state_ == IDLING_WITHOUT_CUBE) {
           intake_state_ = MOVING;
         }
         intake_voltage_ = kIntakeVoltage;
@@ -119,7 +117,7 @@ void WristController::Update(ScoreSubsystemInputProto input,
 
   cube_proxy_ = input->has_cube();
   RunIntakeStateMachine();
-  has_cube_ = intake_state_ == IDLING_WITH_CUBE;
+  has_cube_ = intake_state_ == IDLING_WITH_CUBE && input->has_cube();
 
   if (has_cube_) {
     SetWeights(true);
@@ -208,6 +206,9 @@ void WristController::RunIntakeStateMachine() {
       }
       break;
     case IDLING_WITH_CUBE:
+      if (!cube_proxy_) {
+        intake_state_ = IDLING_WITHOUT_CUBE;
+      }
       break;
   }
 }
