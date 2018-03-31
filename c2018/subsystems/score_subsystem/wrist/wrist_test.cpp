@@ -32,7 +32,7 @@ class WristTest : public ::testing::Test {
   }
 
   void SetGoal(double angle, IntakeGoal intake_mode) {
-    wrist_.SetGoal(angle, intake_mode);
+    wrist_.SetGoal({angle, 0.}, intake_mode);
   }
 
   ScoreSubsystemInputProto wrist_input_proto_;
