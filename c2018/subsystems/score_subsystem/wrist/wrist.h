@@ -85,6 +85,7 @@ class WristController {
   double CapU(double wrist_voltage);
 
   IntakeGoal intake_mode_ = IntakeGoal::INTAKE_NONE;
+  PinchState pinch_state_ = PinchState::IDLE_WITH_CUBE;
 
   // Voltage to give to intake
   double intake_voltage_ = 0;
