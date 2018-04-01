@@ -1,7 +1,6 @@
 #include "muan/control/trapezoidal_motion_profile.h"
 
 namespace muan {
-
 namespace control {
 
 TrapezoidalMotionProfile::TrapezoidalMotionProfile(
@@ -155,5 +154,4 @@ muan::units::Time TrapezoidalMotionProfile::TimeLeftUntil(
 }
 
 }  // namespace control
-
 }  // namespace muan

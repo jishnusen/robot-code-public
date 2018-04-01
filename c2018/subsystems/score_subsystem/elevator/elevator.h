@@ -14,10 +14,9 @@
 #include "muan/logging/logger.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/utils/math_utils.h"
+
 namespace c2018 {
-
 namespace score_subsystem {
-
 namespace elevator {
 
 // Trapezoid Profile parameter
@@ -29,13 +28,13 @@ constexpr muan::control::MotionProfileConstraints kElevatorConstraints = {
 
 // Capping stuff so it doesn't go boom
 constexpr double kElevatorMinHeight = 0.0;
-constexpr double kElevatorMaxHeight = 1.92;
+constexpr double kElevatorMaxHeight = 1.944;
 
 // Realistic voltage (SKY)
 constexpr double kElevatorMaxVoltage = 12;
 
 // Calibration parameters so it thinks it is where it actually is
-constexpr double kHallEffectHeight = 0.92;
+constexpr double kHallEffectHeight = 0.89;
 constexpr double kCalibrationVoltage = 6;
 
 // Encoder fault stuff so it doesn't get too sad when they break
@@ -89,9 +88,7 @@ class ElevatorController {
 };
 
 }  // namespace elevator
-
 }  // namespace score_subsystem
-
 }  // namespace c2018
 
 #endif  // C2018_SUBSYSTEMS_SCORE_SUBSYSTEM_ELEVATOR_ELEVATOR_H_

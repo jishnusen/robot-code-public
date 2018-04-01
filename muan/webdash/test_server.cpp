@@ -1,6 +1,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+
 #include "c2017/subsystems/superstructure/shooter/queue_types.h"
 #include "muan/teleop/queue_types.h"
 #include "muan/webdash/server.h"
@@ -81,13 +82,13 @@ int main() {
       "     {"
       "       \"name\": \"Auto Selection\","
       "       \"type\": \"auto\","
-      "       \"source\": [\"gss\", \"code\"],"
       "       \"coordinates\": [1, 2],"
       "       \"should-title\": false,"
-      "       \"autos\": {"
-      "         \"LL\": [\"IDK\", \"IDK2\"],"
-      "         \"RR\": [\"AAAA\"]"
-      "       }"
+      "       \"autos\": ["
+      "         \"NONE\","
+      "         \"TEST\","
+      "         \"TEST2\""
+      "       ]"
       "     },"
       "     {"
       "       \"name\": \"Encouragment\","
