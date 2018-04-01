@@ -46,7 +46,7 @@ static constexpr double kHoldingVoltage = 1.5;
 static constexpr double kMaxVoltage = 12;
 
 // Has Cube encoder stuff
-static constexpr int kNumHasCubeTicks = 10;
+static constexpr int kNumHasCubeTicks = 100;
 
 class WristController {
  public:

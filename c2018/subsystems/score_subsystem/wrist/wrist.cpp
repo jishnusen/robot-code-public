@@ -63,7 +63,7 @@ void WristController::Update(ScoreSubsystemInputProto input,
       if (input->has_cube()) {
         has_cube_for_ticks_--;
       } else {
-        has_cube_for_ticks_ = 100;
+        has_cube_for_ticks_ = kNumHasCubeTicks;
       }
       if (has_cube_for_ticks_ < 0) {
         pinch_state_ = IDLE_WITH_CUBE;
