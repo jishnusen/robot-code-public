@@ -2,7 +2,9 @@
 #include "gtest/gtest.h"
 
 namespace c2018 {
+
 namespace score_subsystem {
+
 namespace wrist {
 
 class WristTest : public ::testing::Test {
@@ -231,5 +233,7 @@ TEST_F(WristTest, CanCapAngle) {
 }
 
 }  // namespace wrist
+
 }  // namespace score_subsystem
+
 }  // namespace c2018
