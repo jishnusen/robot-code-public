@@ -24,8 +24,7 @@ namespace elevator {
 constexpr double kElevatorMaxAcceleration = 4.0 * muan::units::mps2;
 constexpr double kElevatorMaxVelocity = 2.5 * muan::units::mps;
 constexpr muan::control::MotionProfileConstraints kElevatorConstraints = {
-    .max_velocity = kElevatorMaxVelocity,
-    .max_acceleration = kElevatorMaxAcceleration};
+    kElevatorMaxVelocity, kElevatorMaxAcceleration};
 
 // Capping stuff so it doesn't go boom
 constexpr double kElevatorMinHeight = 0.0;
@@ -51,8 +50,10 @@ class ElevatorController {
               bool outputs_enabled);  // Figures out what the elevator should do
                                       // and what it's doing based on the
                                       // outside data
-  void SetGoal(double goal);  // Setter for unprofiled_goal_ that also caps it
-                              // to kElevatorMin and Max Height
+  void SetGoal(
+      muan::control::MotionProfilePosition goal,
+      bool god_mode = false);  // Setter for unprofiled_goal_ that also caps it
+                               // to kElevatorMin and Max Height
 
   muan::units::Time TimeLeftUntil(muan::units::Length target,
                                   muan::units::Length final_goal);
@@ -86,6 +87,8 @@ class ElevatorController {
   bool encoder_fault_detected_ = false;
   int num_encoder_fault_ticks_ = 0;
   double old_pos_;
+
+  bool god_mode_ = false;
 };
 
 }  // namespace elevator

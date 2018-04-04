@@ -12,7 +12,7 @@ from muan.control.controls import *
 dt = 0.005
 
 
-def make_gains(has_cube, subname='gains'):
+def make_gains(has_cube, god_mode, subname='gains'):
     # x = |       Angle      |
     #     | Angular velocity |
     # u = voltage
@@ -22,7 +22,7 @@ def make_gains(has_cube, subname='gains'):
 
     # Moment of inertia constants
     # M= mass and L = length
-    M = 6.0
+    M = 5.0
 
     if has_cube:
         M += 1.59
@@ -32,7 +32,7 @@ def make_gains(has_cube, subname='gains'):
     # Parameters
     moment_inertia = M * L * L
     gear_ratio = (12.0 / 100.0) * (14.0 / 72.0) * (18.0 / 60.0)
-    efficiency = .9
+    efficiency = .7
 
     # motor characteristics
     free_speed = 18730.0 * 2 * math.pi / 60
@@ -91,8 +91,22 @@ def make_gains(has_cube, subname='gains'):
         [0., 1.]
     ])
 
+    Q_controller = np.asmatrix([
+        [0., 0.],
+        [0., 5e-3]
+    ])
+
+    R_controller = np.asmatrix([
+        [1e-3],
+    ])
+
     A_d, B_d, Q_d, R_d = c2d(A_c, B_c, dt, Q_noise, R_noise)
-    K = place(A_c, B_c, [-27.0 + 3.j, -27.0 - 3.j])
+
+    if not god_mode:
+        K = place(A_c, B_c, [-37.0, -27.0])
+    else:
+        K = clqr(A_c, B_c, Q_controller, R_controller)
+
     Kff = feedforwards(A_d, B_d, Q_ff)
     L = dkalman(A_d, C, Q_d, R_d)
 
@@ -105,8 +119,8 @@ def make_gains(has_cube, subname='gains'):
     return gains
 
 
-def make_augmented_gains(has_cube, subname):
-    unaugmented_gains = make_gains(has_cube, subname)
+def make_augmented_gains(has_cube, god_mode, subname):
+    unaugmented_gains = make_gains(has_cube, god_mode, subname)
 
     dt = unaugmented_gains.dt
 
@@ -163,8 +177,10 @@ def make_augmented_gains(has_cube, subname):
 u_max = np.asmatrix([12.]).T
 x0 = np.asmatrix([0., 0., 0.]).T
 
-gains = [make_augmented_gains(False, 'no_cube'), make_augmented_gains(True,
-                                                                      'cube')]
+gains = [make_augmented_gains(True, False, 'cube'),
+         make_augmented_gains(False, False, 'no_cube'),
+         make_augmented_gains(True, True, 'god_mode_cube'),
+         make_augmented_gains(False, True, 'god_mode_no_cube')]
 
 plant = StateSpacePlant(gains, x0)
 controller = StateSpaceController(gains, -u_max, u_max)

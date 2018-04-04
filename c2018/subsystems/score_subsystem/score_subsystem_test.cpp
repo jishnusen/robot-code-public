@@ -189,12 +189,12 @@ class ScoreSubsystemTest : public ::testing::Test {
 
   void SetWeights(bool second_stage, bool has_cube) {
     if (second_stage && has_cube) {
-      elevator_plant_.A() = frc1678::elevator::controller::
-          second_stage_cube_integral::A();
-      elevator_plant_.B() = frc1678::elevator::controller::
-          second_stage_cube_integral::B();
-      elevator_plant_.C() = frc1678::elevator::controller::
-          second_stage_cube_integral::C();
+      elevator_plant_.A() =
+          frc1678::elevator::controller::second_stage_cube_integral::A();
+      elevator_plant_.B() =
+          frc1678::elevator::controller::second_stage_cube_integral::B();
+      elevator_plant_.C() =
+          frc1678::elevator::controller::second_stage_cube_integral::C();
     } else if (second_stage && !has_cube) {
       elevator_plant_.A() =
           frc1678::elevator::controller::second_stage_integral::A();
@@ -203,12 +203,12 @@ class ScoreSubsystemTest : public ::testing::Test {
       elevator_plant_.C() =
           frc1678::elevator::controller::second_stage_integral::C();
     } else if (!second_stage && has_cube) {
-      elevator_plant_.A() = frc1678::elevator::controller::
-          first_stage_cube_integral::A();
-      elevator_plant_.B() = frc1678::elevator::controller::
-          first_stage_cube_integral::B();
-      elevator_plant_.C() = frc1678::elevator::controller::
-          first_stage_cube_integral::C();
+      elevator_plant_.A() =
+          frc1678::elevator::controller::first_stage_cube_integral::A();
+      elevator_plant_.B() =
+          frc1678::elevator::controller::first_stage_cube_integral::B();
+      elevator_plant_.C() =
+          frc1678::elevator::controller::first_stage_cube_integral::C();
     } else if (!second_stage && !has_cube) {
       elevator_plant_.A() =
           frc1678::elevator::controller::first_stage_integral::A();

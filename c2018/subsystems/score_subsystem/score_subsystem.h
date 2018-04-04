@@ -49,7 +49,8 @@ class ScoreSubsystem {
 
  private:
   void SetGoal(const ScoreSubsystemGoalProto& goal);
-  void GoToState(ScoreSubsystemState state, IntakeGoal intake = IntakeGoal::INTAKE_NONE);
+  void GoToState(ScoreSubsystemState state,
+                 IntakeGoal intake = IntakeGoal::INTAKE_NONE);
   void RunStateMachine();
 
   void BoundGoal(double* elevator_goal, double* wrist_goal);

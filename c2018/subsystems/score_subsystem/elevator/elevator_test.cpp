@@ -25,7 +25,7 @@ class ElevatorControllerTest : public ::testing::Test {
                       .finished());
   }
 
-  void SetGoal(double goal) { elevator_.SetGoal(goal); }
+  void SetGoal(double goal) { elevator_.SetGoal({goal, 0}); }
 
   void SetInput(double position, bool hall) {
     elevator_input_proto_->set_elevator_encoder(position);
@@ -216,4 +216,97 @@ TEST_F(ElevatorControllerTest, HeightTooHigh) {
               c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_profiled_goal(),
               c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+}
+
+TEST_F(ElevatorControllerTest, GodModePositiveVelocity) {
+  CalibrateDisabled();
+
+  outputs_enabled_ = true;
+
+  elevator_.SetGoal({0., 1.5}, true);
+  for (int i = 0;
+       i < 1000 &&
+       elevator_status_proto_->elevator_actual_height() <
+           c2018::score_subsystem::elevator::kElevatorMaxHeight - 0.5;
+       i++) {
+    elevator_input_proto_->set_elevator_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(elevator_output_proto_->elevator_voltage(), 0, 12);
+  }
+
+  EXPECT_NEAR(elevator_status_proto_->estimated_velocity(), 1.5, 1e-3);
+  EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal(), 0., 1e-3);
+  EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(), 1.5,
+              1e-3);
+  EXPECT_TRUE(elevator_status_proto_->elevator_god_mode());
+}
+
+TEST_F(ElevatorControllerTest, GodModeNegativeVelocity) {
+  CalibrateDisabled();
+
+  outputs_enabled_ = true;
+
+  elevator_.SetGoal({0., -1.5}, true);
+  for (int i = 0;
+       i < 1000 && elevator_status_proto_->elevator_actual_height() > 0.1;
+       i++) {
+    elevator_input_proto_->set_elevator_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(elevator_output_proto_->elevator_voltage(), 0, 12);
+  }
+
+  EXPECT_NEAR(elevator_status_proto_->estimated_velocity(), -1.5, 1e-3);
+  EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal(), 0., 1e-3);
+  EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(), -1.5,
+              1e-3);
+  EXPECT_TRUE(elevator_status_proto_->elevator_god_mode());
+}
+
+TEST_F(ElevatorControllerTest, GodModeCappingTop) {
+  CalibrateDisabled();
+
+  outputs_enabled_ = true;
+
+  elevator_.SetGoal({0., 20000.}, true);
+
+  for (int i = 0; i < 1000; i++) {
+    elevator_input_proto_->set_elevator_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(elevator_output_proto_->elevator_voltage(), 0, 12);
+
+    EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(), 0.,
+                c2018::score_subsystem::elevator::kElevatorMaxVelocity);
+
+    if (elevator_status_proto_->elevator_actual_height() >
+        c2018::score_subsystem::elevator::kElevatorMaxHeight - 1e-2) {
+      EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(),
+                  0., 1e-7);
+    }
+  }
+
+  EXPECT_LE(elevator_status_proto_->estimated_velocity(), 1e-7);
+}
+
+TEST_F(ElevatorControllerTest, GodModeCappingBottom) {
+  CalibrateDisabled();
+
+  outputs_enabled_ = true;
+
+  elevator_.SetGoal({0., -20000.}, true);
+
+  for (int i = 0; i < 1000; i++) {
+    elevator_input_proto_->set_elevator_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(elevator_output_proto_->elevator_voltage(), 0, 12);
+
+    EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(), 0.,
+                c2018::score_subsystem::elevator::kElevatorMaxVelocity);
+
+    if (elevator_status_proto_->elevator_actual_height() < 1e-2) {
+      EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(),
+                  0., 1e-7);
+    }
+  }
+
+  EXPECT_GE(elevator_status_proto_->estimated_velocity(), -1e-7);
 }

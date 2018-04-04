@@ -23,16 +23,29 @@ WristController::WristController() {
       wrist_plant, frc1678::wrist::controller::cube_integral::L());
 }
 
-void WristController::SetGoal(double wrist_angle, IntakeGoal intake_mode) {
-  if (std::abs(wrist_angle - unprofiled_goal_.position) > 1e-10) {
+void WristController::SetGoal(muan::control::MotionProfilePosition wrist_angle,
+                              IntakeGoal intake_mode, bool god_mode) {
+  if (std::abs(wrist_angle.position - unprofiled_goal_.position) > 1e-10) {
     profile_time_ = 0.;
     profile_initial_ = {wrist_observer_.x()(0, 0), wrist_observer_.x()(1, 0)};
   }
-  // Cap unprofiled goal to keep things safe
-  unprofiled_goal_ = {
-      muan::utils::Cap(wrist_angle, kWristMinAngle, kWristMaxAngle), 0.};
+
+  if (!god_mode) {
+    // Cap unprofiled goal to keep things safe
+    unprofiled_goal_ = {
+        muan::utils::Cap(wrist_angle.position, kWristMinAngle, kWristMaxAngle),
+        0.};
+  } else {
+    profile_time_ = 0.;
+    profile_initial_ = {wrist_observer_.x()(0, 0) * muan::units::m,
+                        wrist_observer_.x()(1, 0) * muan::units::mps};
+    unprofiled_goal_ = {
+        0., muan::utils::Cap(wrist_angle.velocity, -kMaxWristVelocity,
+                             kMaxWristVelocity)};
+  }
   // Set the goal intake mode
   intake_mode_ = intake_mode;
+  god_mode_ = god_mode;
 }
 
 void WristController::Update(ScoreSubsystemInputProto input,
@@ -145,17 +158,32 @@ void WristController::Update(ScoreSubsystemInputProto input,
     plant_.x()(0, 0) += hall_calibration_.offset();
   }
 
+  Eigen::Matrix<double, 3, 1> wrist_r;
   UpdateProfiledGoal(outputs_enabled);
-  Eigen::Matrix<double, 3, 1> wrist_r =
-      (Eigen::Matrix<double, 3, 1>() << profiled_goal_.position, 0.0, 0.0)
-          .finished();
-
-  wrist_controller_.r() = wrist_r;
+  if (!god_mode_) {
+    wrist_r = (Eigen::Matrix<double, 3, 1>() << profiled_goal_.position,
+               profiled_goal_.velocity, 0.0)
+                  .finished();
+  } else {
+    profile_time_ = 0.;
+    profile_initial_ = {wrist_observer_.x()(0, 0), wrist_observer_.x()(1, 0)};
+    if (wrist_observer_.x()(0, 0) > kWristMaxAngle - 5e-2) {
+      unprofiled_goal_.velocity =
+          muan::utils::Cap(unprofiled_goal_.velocity, -kMaxWristVelocity, 0.);
+    } else if (wrist_observer_.x()(0, 0) < 5e-2) {
+      unprofiled_goal_.velocity =
+          muan::utils::Cap(unprofiled_goal_.velocity, 0., kMaxWristVelocity);
+    }
+    wrist_r = (Eigen::Matrix<double, 3, 1>() << unprofiled_goal_.position,
+               unprofiled_goal_.velocity, 0.0)
+                  .finished();
+  }
 
   // Get voltage from the controller
   wrist_voltage = wrist_controller_.Update(wrist_observer_.x(), wrist_r)(0, 0);
 
-  if (hall_calibration_.is_calibrated() && wrist_r(0) <= 1e-5) {
+  if (hall_calibration_.is_calibrated() && wrist_r(0) <= 1e-5 &&
+      std::abs(wrist_r(1)) <= 1e-5) {
     // If we're trying to stay at 0, set 0 voltage automatically
     wrist_voltage = 0.0;
   }
@@ -179,7 +207,10 @@ void WristController::Update(ScoreSubsystemInputProto input,
   (*output)->set_wrist_solenoid_close(wrist_solenoid_close);
   (*status)->set_wrist_calibrated(hall_calibration_.is_calibrated());
   (*status)->set_wrist_angle(wrist_observer_.x()(0, 0));
+  (*status)->set_wrist_velocity(wrist_observer_.x()(1, 0));
+  (*status)->set_wrist_unprofiled_goal_velocity(unprofiled_goal_.velocity);
   (*status)->set_has_cube(has_cube);
+  (*status)->set_wrist_god_mode(god_mode_);
   (*status)->set_wrist_profiled_goal(profiled_goal_.position);
   (*status)->set_wrist_unprofiled_goal(unprofiled_goal_.position);
   (*status)->set_wrist_calibration_offset(hall_calibration_.offset());
@@ -218,7 +249,7 @@ bool WristController::is_calibrated() const {
 }
 
 void WristController::SetWeights(bool has_cube) {
-  if (has_cube) {
+  if (has_cube && !god_mode_) {
     wrist_controller_.A() = frc1678::wrist::controller::cube_integral::A();
     wrist_controller_.K() = frc1678::wrist::controller::cube_integral::K();
     wrist_controller_.Kff() = frc1678::wrist::controller::cube_integral::Kff();
@@ -228,7 +259,7 @@ void WristController::SetWeights(bool has_cube) {
     plant_.A() = frc1678::wrist::controller::cube_integral::A();
     plant_.B() = frc1678::wrist::controller::cube_integral::B();
     plant_.C() = frc1678::wrist::controller::cube_integral::C();
-  } else {
+  } else if (!has_cube && !god_mode_) {
     wrist_controller_.A() = frc1678::wrist::controller::no_cube_integral::A();
     wrist_controller_.K() = frc1678::wrist::controller::no_cube_integral::K();
     wrist_controller_.Kff() =
@@ -239,6 +270,34 @@ void WristController::SetWeights(bool has_cube) {
     plant_.A() = frc1678::wrist::controller::no_cube_integral::A();
     plant_.B() = frc1678::wrist::controller::no_cube_integral::B();
     plant_.C() = frc1678::wrist::controller::no_cube_integral::C();
+  } else if (has_cube && god_mode_) {
+    wrist_controller_.A() =
+        frc1678::wrist::controller::god_mode_cube_integral::A();
+    wrist_controller_.K() =
+        frc1678::wrist::controller::god_mode_cube_integral::K();
+    wrist_controller_.Kff() =
+        frc1678::wrist::controller::god_mode_cube_integral::Kff();
+
+    wrist_observer_.L() =
+        frc1678::wrist::controller::god_mode_cube_integral::L();
+
+    plant_.A() = frc1678::wrist::controller::god_mode_cube_integral::A();
+    plant_.B() = frc1678::wrist::controller::god_mode_cube_integral::B();
+    plant_.C() = frc1678::wrist::controller::god_mode_cube_integral::C();
+  } else if (!has_cube && god_mode_) {
+    wrist_controller_.A() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::A();
+    wrist_controller_.K() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::K();
+    wrist_controller_.Kff() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::Kff();
+
+    wrist_observer_.L() =
+        frc1678::wrist::controller::god_mode_no_cube_integral::L();
+
+    plant_.A() = frc1678::wrist::controller::god_mode_no_cube_integral::A();
+    plant_.B() = frc1678::wrist::controller::god_mode_no_cube_integral::B();
+    plant_.C() = frc1678::wrist::controller::god_mode_no_cube_integral::C();
   }
 }
 

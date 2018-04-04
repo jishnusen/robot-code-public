@@ -32,7 +32,20 @@ class WristTest : public ::testing::Test {
   }
 
   void SetGoal(double angle, IntakeGoal intake_mode) {
-    wrist_.SetGoal(angle, intake_mode);
+    wrist_.SetGoal({angle, 0.}, intake_mode);
+  }
+
+  void CalibrateDisabled() {
+    outputs_enabled_ = false;
+
+    for (int i = 0; i < 2000; i++) {
+      double a = i * (kHallEffectAngle / 2000.);
+      plant_.x(0) = a;
+      wrist_input_proto_->set_wrist_encoder(plant_.y(0));
+      Update();
+    }
+
+    EXPECT_TRUE(wrist_status_proto_->wrist_calibrated());
   }
 
   ScoreSubsystemInputProto wrist_input_proto_;
@@ -230,6 +243,93 @@ TEST_F(WristTest, CanCapAngle) {
   EXPECT_TRUE(wrist_status_proto_->wrist_unprofiled_goal() >= kWristMinAngle);
   EXPECT_TRUE(wrist_status_proto_->wrist_profiled_goal() <= kWristMaxAngle);
   EXPECT_TRUE(wrist_status_proto_->wrist_unprofiled_goal() >= kWristMinAngle);
+}
+
+TEST_F(WristTest, GodModePositiveVelocity) {
+  CalibrateDisabled();
+
+  outputs_enabled_ = true;
+
+  wrist_.SetGoal({0., 0.1}, IntakeGoal::INTAKE_NONE, true);
+
+  for (int i = 0;
+       i < 1000 && wrist_status_proto_->wrist_angle() < kWristMaxAngle - 0.1;
+       i++) {
+    wrist_input_proto_->set_wrist_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(wrist_output_proto_->wrist_voltage(), 0, 12);
+  }
+
+  EXPECT_NEAR(wrist_status_proto_->wrist_velocity(), 0.1, 1e-3);
+  EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal(), 0., 1e-3);
+  EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal_velocity(), 0.1, 1e-3);
+  EXPECT_TRUE(wrist_status_proto_->wrist_god_mode());
+}
+
+TEST_F(WristTest, GodModeNegativeVelocity) {
+  CalibrateDisabled();
+
+  outputs_enabled_ = true;
+
+  wrist_.SetGoal({0., -0.1}, IntakeGoal::INTAKE_NONE, true);
+
+  for (int i = 0; i < 1000 && wrist_status_proto_->wrist_angle() > 0.1; i++) {
+    wrist_input_proto_->set_wrist_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(wrist_output_proto_->wrist_voltage(), 0, 12);
+  }
+
+  EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal_velocity(), -0.1,
+              1e-3);
+  EXPECT_NEAR(wrist_status_proto_->wrist_velocity(), -0.1, 1e-3);
+  EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal(), 0., 1e-3);
+  EXPECT_TRUE(wrist_status_proto_->wrist_god_mode());
+}
+
+TEST_F(WristTest, GodModeCappingTop) {
+  CalibrateDisabled();
+
+  outputs_enabled_ = true;
+
+  wrist_.SetGoal({0., 20000.}, IntakeGoal::INTAKE_NONE, true);
+
+  for (int i = 0; i < 1000; i++) {
+    wrist_input_proto_->set_wrist_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(wrist_output_proto_->wrist_voltage(), 0, 12);
+
+    EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal_velocity(), 0.,
+                kMaxWristVelocity);
+
+    if (wrist_status_proto_->wrist_angle() > kWristMaxAngle - 1e-2) {
+      EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal_velocity(), 0.,
+                  1e-7);
+    }
+  }
+
+  EXPECT_LE(wrist_status_proto_->wrist_velocity(), 1e-7);
+}
+
+TEST_F(WristTest, GodModeCappingBottom) {
+  outputs_enabled_ = true;
+
+  wrist_.SetGoal({0., -20000.}, IntakeGoal::INTAKE_NONE, true);
+
+  for (int i = 0; i < 1000; i++) {
+    wrist_input_proto_->set_wrist_encoder(plant_.y(0));
+    Update();
+    EXPECT_NEAR(wrist_output_proto_->wrist_voltage(), 0, 12);
+
+    EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal_velocity(), 0.,
+                kMaxWristVelocity);
+
+    if (wrist_status_proto_->wrist_angle() < 1e-2) {
+      EXPECT_NEAR(wrist_status_proto_->wrist_unprofiled_goal_velocity(), 0.,
+                  1e-7);
+    }
+  }
+
+  EXPECT_GE(wrist_status_proto_->wrist_velocity(), -1e-7);
 }
 
 }  // namespace wrist
