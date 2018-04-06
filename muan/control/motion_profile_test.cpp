@@ -4,8 +4,8 @@
 #include "muan/utils/math_utils.h"
 
 using muan::control::MotionProfile;
-using muan::control::MotionProfilePosition;
 using muan::control::MotionProfileConstraints;
+using muan::control::MotionProfilePosition;
 using muan::control::TrapezoidalMotionProfile;
 
 using namespace muan::units;  // NOLINT
@@ -20,8 +20,15 @@ class MotionProfileTest : public ::testing::Test {
   void RunTest() {
     muan::control::TrapezoidalMotionProfile profile{constraints, goal,
                                                     initial_position};
+    muan::control::TrapezoidalMotionProfile timer{constraints, goal,
+                                                  initial_position};
     const Time dt = 0.005 * s;
     const Velocity discrete_error = 0.0026 * m / s;
+
+    bool timing_this_test = !(initial_position.velocity != 0. &&
+                              initial_position.position == goal.position) &&
+                            (std::abs(goal.velocity) < 1e-10);
+
     // Discrete time differentiation leaves a bit of over/undershoot.
 
     EXPECT_NEAR(profile.Calculate(0 * s).position, initial_position.position,
@@ -35,6 +42,12 @@ class MotionProfileTest : public ::testing::Test {
       Velocity estimated_velocity =
           (profile.Calculate(t).position - profile.Calculate(t - dt).position) /
           (dt);
+
+      if ((std::abs(profile.Calculate(t).position - goal.position) < 1e-3) &&
+          timing_this_test) {
+        EXPECT_NEAR(timer.TimeLeftUntil(profile.Calculate(t).position), t,
+                    5e-2);
+      }
 
       EXPECT_GE(constraints.max_velocity,
                 std::abs(profile.Calculate(t).velocity));
