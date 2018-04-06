@@ -32,7 +32,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
                                 ScoreSubsystemOutputProto* output,
                                 ScoreSubsystemStatusProto* status,
                                 bool outputs_enabled) {
-  Eigen::Matrix<double, 3, 1> elevator_r_;
+  Eigen::Matrix<double, 3, 1> elevator_r;
 
   bool was_calibrated = hall_calib_.is_calibrated();
 
@@ -68,7 +68,7 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
 
   // Make an R matrix from the new profiled goal
   if (!god_mode_) {
-    elevator_r_ = (Eigen::Matrix<double, 3, 1>() << profiled_goal_.position,
+    elevator_r = (Eigen::Matrix<double, 3, 1>() << profiled_goal_.position,
                    profiled_goal_.velocity, 0.0)
                       .finished();
   } else {
@@ -82,14 +82,14 @@ void ElevatorController::Update(const ScoreSubsystemInputProto& input,
       unprofiled_goal_.velocity =
           muan::utils::Cap(unprofiled_goal_.velocity, 0., kElevatorMaxVelocity);
     }
-    elevator_r_ =
+    elevator_r =
         (Eigen::Matrix<double, 3, 1>() << 0., unprofiled_goal_.velocity, 0.0)
             .finished();
   }
 
   // Get output in volts from the controller
   auto elevator_u =
-      elevator_controller_.Update(elevator_observer_.x(), elevator_r_)(0, 0);
+      elevator_controller_.Update(elevator_observer_.x(), elevator_r)(0, 0);
 
   if (!outputs_enabled) {
     // Make elevator volts reflect reality

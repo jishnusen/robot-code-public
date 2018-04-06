@@ -2,9 +2,7 @@
 #include "gtest/gtest.h"
 
 namespace c2018 {
-
 namespace score_subsystem {
-
 namespace elevator {
 
 class ElevatorControllerTest : public ::testing::Test {
@@ -315,7 +313,5 @@ TEST_F(ElevatorControllerTest, GodModeCappingBottom) {
 }
 
 }  // namespace elevator
-
 }  // namespace score_subsystem
-
 }  // namespace c2018
