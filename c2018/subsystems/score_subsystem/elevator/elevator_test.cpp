@@ -1,6 +1,12 @@
 #include "c2018/subsystems/score_subsystem/elevator/elevator.h"
 #include "gtest/gtest.h"
 
+namespace c2018 {
+
+namespace score_subsystem {
+
+namespace elevator {
+
 class ElevatorControllerTest : public ::testing::Test {
  public:
   ElevatorControllerTest() {
@@ -15,8 +21,7 @@ class ElevatorControllerTest : public ::testing::Test {
       plant_.x(0) = 0;
     }
     elevator_input_proto_->set_elevator_hall(
-        std::abs(plant_.x(0) -
-                 c2018::score_subsystem::elevator::kHallEffectHeight) < 2e-2);
+        std::abs(plant_.x(0) - kHallEffectHeight) < 2e-2);
     elevator_.Update(elevator_input_proto_, &elevator_output_proto_,
                      &elevator_status_proto_, outputs_enabled_);
     SetWeights(plant_.x()(0, 0) >= 1.0, elevator_input_proto_->has_cube());
@@ -51,7 +56,7 @@ class ElevatorControllerTest : public ::testing::Test {
 
  protected:
   muan::control::StateSpacePlant<1, 3, 1> plant_;
-  c2018::score_subsystem::elevator::ElevatorController elevator_;
+  ElevatorController elevator_;
 
  private:
   void SetWeights(bool second_stage, bool has_cube) {
@@ -99,7 +104,7 @@ TEST_F(ElevatorControllerTest, Calibration) {
 
   double offset = 1.0;
 
-  SetGoal(c2018::score_subsystem::elevator::kElevatorMaxHeight);
+  SetGoal(kElevatorMaxHeight);
 
   for (int i = 0; i < 1000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0) + offset);
@@ -110,11 +115,11 @@ TEST_F(ElevatorControllerTest, Calibration) {
   EXPECT_TRUE(elevator_status_proto_->elevator_calibrated());
   EXPECT_TRUE(elevator_status_proto_->elevator_at_top());
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_profiled_goal(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
 }
 
 TEST_F(ElevatorControllerTest, AllHeights) {
@@ -137,7 +142,7 @@ TEST_F(ElevatorControllerTest, AllHeights) {
   EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal(), 0.6, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_profiled_goal(), 0.6, 1e-3);
 
-  SetGoal(c2018::score_subsystem::elevator::kElevatorMaxHeight);
+  SetGoal(kElevatorMaxHeight);
 
   for (int i = 0; i < 1000; i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0));
@@ -147,11 +152,11 @@ TEST_F(ElevatorControllerTest, AllHeights) {
 
   EXPECT_TRUE(elevator_status_proto_->elevator_at_top());
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_profiled_goal(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
   SetGoal(0);
 
   for (int i = 0; i < 1000; i++) {
@@ -183,7 +188,7 @@ TEST_F(ElevatorControllerTest, EncoderFault) {
   elevator_input_proto_->set_elevator_hall(false);
   outputs_enabled_ = true;
 
-  SetGoal(c2018::score_subsystem::elevator::kElevatorMaxHeight);
+  SetGoal(kElevatorMaxHeight);
 
   for (int i = 0; i < 400; i++) {
     elevator_input_proto_->set_elevator_encoder(0);
@@ -211,11 +216,11 @@ TEST_F(ElevatorControllerTest, HeightTooHigh) {
   }
 
   EXPECT_NEAR(elevator_status_proto_->elevator_actual_height(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
   EXPECT_NEAR(elevator_status_proto_->elevator_profiled_goal(),
-              c2018::score_subsystem::elevator::kElevatorMaxHeight, 1e-3);
+              kElevatorMaxHeight, 1e-3);
 }
 
 TEST_F(ElevatorControllerTest, GodModePositiveVelocity) {
@@ -224,10 +229,8 @@ TEST_F(ElevatorControllerTest, GodModePositiveVelocity) {
   outputs_enabled_ = true;
 
   elevator_.SetGoal({0., 1.5}, true);
-  for (int i = 0;
-       i < 1000 &&
-       elevator_status_proto_->elevator_actual_height() <
-           c2018::score_subsystem::elevator::kElevatorMaxHeight - 0.5;
+  for (int i = 0; i < 1000 && elevator_status_proto_->elevator_actual_height() <
+                                  kElevatorMaxHeight - 0.5;
        i++) {
     elevator_input_proto_->set_elevator_encoder(plant_.y(0));
     Update();
@@ -275,10 +278,10 @@ TEST_F(ElevatorControllerTest, GodModeCappingTop) {
     EXPECT_NEAR(elevator_output_proto_->elevator_voltage(), 0, 12);
 
     EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(), 0.,
-                c2018::score_subsystem::elevator::kElevatorMaxVelocity);
+                kElevatorMaxVelocity);
 
     if (elevator_status_proto_->elevator_actual_height() >
-        c2018::score_subsystem::elevator::kElevatorMaxHeight - 1e-2) {
+        kElevatorMaxHeight - 1e-2) {
       EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(),
                   0., 1e-7);
     }
@@ -300,7 +303,7 @@ TEST_F(ElevatorControllerTest, GodModeCappingBottom) {
     EXPECT_NEAR(elevator_output_proto_->elevator_voltage(), 0, 12);
 
     EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(), 0.,
-                c2018::score_subsystem::elevator::kElevatorMaxVelocity);
+                kElevatorMaxVelocity);
 
     if (elevator_status_proto_->elevator_actual_height() < 1e-2) {
       EXPECT_NEAR(elevator_status_proto_->elevator_unprofiled_goal_velocity(),
@@ -310,3 +313,9 @@ TEST_F(ElevatorControllerTest, GodModeCappingBottom) {
 
   EXPECT_GE(elevator_status_proto_->estimated_velocity(), -1e-7);
 }
+
+}  // namespace elevator
+
+}  // namespace score_subsystem
+
+}  // namespace c2018
