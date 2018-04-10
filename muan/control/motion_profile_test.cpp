@@ -20,8 +20,6 @@ class MotionProfileTest : public ::testing::Test {
   void RunTest() {
     muan::control::TrapezoidalMotionProfile profile{constraints, goal,
                                                     initial_position};
-    muan::control::TrapezoidalMotionProfile timer{constraints, goal,
-                                                  initial_position};
     const Time dt = 0.005 * s;
     const Velocity discrete_error = 0.0026 * m / s;
 
@@ -45,7 +43,7 @@ class MotionProfileTest : public ::testing::Test {
 
       if ((std::abs(profile.Calculate(t).position - goal.position) < 1e-3) &&
           timing_this_test) {
-        EXPECT_NEAR(timer.TimeLeftUntil(profile.Calculate(t).position), t,
+        EXPECT_NEAR(profile.TimeLeftUntil(profile.Calculate(t).position), t,
                     5e-2);
       }
 
