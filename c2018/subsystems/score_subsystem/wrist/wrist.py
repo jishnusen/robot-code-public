@@ -92,7 +92,7 @@ def make_gains(has_cube, subname='gains'):
     ])
 
     A_d, B_d, Q_d, R_d = c2d(A_c, B_c, dt, Q_noise, R_noise)
-    K = place(A_c, B_c, [-27.0 + 3.j, -27.0 - 3.j])
+    K = place(A_c, B_c, [-37.0 + 3.j, -37.0 - 3.j])
     Kff = feedforwards(A_d, B_d, Q_ff)
     L = dkalman(A_d, C, Q_d, R_d)
 
