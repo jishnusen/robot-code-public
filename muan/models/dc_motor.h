@@ -1,6 +1,8 @@
 #ifndef MUAN_MODELS_DC_MOTOR_H_
 #define MUAN_MODELS_DC_MOTOR_H_
 
+#include <algorithm>
+
 namespace muan {
 
 namespace models {
@@ -20,9 +22,9 @@ class DCMotor {
 
  private:
   double kv_;  // rad / s / V (no load)
-  double ks_;  // N * m / V (stall)
-  double ka_;  // V (overcome static friction)
-}
+  double ka_;  // N * m / V (stall)
+  double ks_;  // V (overcome static friction)
+};
 
 }  // namespace models
 

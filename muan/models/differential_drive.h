@@ -1,6 +1,8 @@
 #ifndef MUAN_MODELS_DIFFERENTIAL_DRIVE_H_
 #define MUAN_MODELS_DIFFERENTIAL_DRIVE_H_
 
+#include "muan/models/dc_motor.h"
+
 namespace muan {
 
 namespace models {
@@ -8,12 +10,12 @@ namespace models {
 struct ChassisState {
   double linear;
   double angular;
-}
+};
 
 struct WheelState {
   double left;
   double right;
-}
+};
 
 struct DriveDynamics {
   double curvature;                   // m^-1
@@ -24,17 +26,16 @@ struct DriveDynamics {
   WheelState wheel_acceleration;      // rad/s^2
   WheelState voltage;                 // V
   WheelState wheel_torque;            // N m
-}
+};
 
 struct DriveConstraints {
   double max;
   double min;
-}
+};
 
 class DifferentialDrive {
  public:
-  DifferentialDrive(double mass, double moment, double angular_drag,
-                    double wheel_radius, double wheelbase_radius,
+  DifferentialDrive(double mass, double moment, double angular_drag, double wheel_radius, double wheelbase_radius,
                     DCMotor left_transmission, DCMotor right_transmission);
 
   // Getters
@@ -51,20 +52,27 @@ class DifferentialDrive {
   WheelState InverseKinematics(ChassisState chassis_motion);
 
   // Solve for Dynamics
-  DriveDynamics ForwardDynamics(ChassisState chassis_velocity,
-                                WheelState voltage);
+  DriveDynamics ForwardDynamics(ChassisState chassis_velocity, WheelState voltage);
+  DriveDynamics ForwardDynamics(WheelState wheel_velocity, WheelState voltage);
   DriveDynamics ForwardDynamics(DriveDynamics dynamics);
 
-  DriveDynamics InverseDynamics(ChassisState chassis_velocity,
-                                ChassisState chassis_acceleration);
+  DriveDynamics InverseDynamics(ChassisState chassis_velocity, ChassisState chassis_acceleration);
+  DriveDynamics InverseDynamics(WheelState wheel_velocity, WheelState wheel_acceleration);
   DriveDynamics InverseDynamics(DriveDynamics dynamics);
 
   // Constraints
   double MaxVelocity(double curvature, double max_voltage);
-  DriveConstraints AccelerationConstraints(ChassisState chassis_velocity,
-                                           double curvature,
-                                           double max_voltage);
-}
+  DriveConstraints AccelerationConstraints(ChassisState chassis_velocity, double curvature, double max_voltage);
+
+ private:
+  double mass_;
+  double moment_;
+  double angular_drag_;
+  double wheel_radius_;
+  double wheelbase_radius_;
+  DCMotor left_transmission_;
+  DCMotor right_transmission_;
+};
 
 }  // namespace models
 
