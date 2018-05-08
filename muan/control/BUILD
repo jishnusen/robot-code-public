@@ -22,6 +22,16 @@ py_binary(
 )
 
 cc_library(
+  name = 'path',
+  srcs = ['path.cpp'],
+  hdrs = ['path.h'],
+  deps = [
+    '//third_party/eigen',
+  ],
+  linkopts = ['-lm'],
+)
+
+cc_library(
     name = "pid_controller",
     srcs = [
         "pid_controller.cpp",
