@@ -22,13 +22,24 @@ py_binary(
 )
 
 cc_library(
-  name = 'path',
-  srcs = ['path.cpp'],
-  hdrs = ['path.h'],
-  deps = [
-    '//third_party/eigen',
-  ],
-  linkopts = ['-lm'],
+    name = "pose",
+    srcs = ["pose.cpp"],
+    hdrs = ["pose.h"],
+    linkopts = ["-lm"],
+    deps = [
+        "//third_party/eigen",
+    ],
+)
+
+cc_library(
+    name = "spline",
+    srcs = ["spline.cpp"],
+    hdrs = ["spline.h"],
+    linkopts = ["-lm"],
+    deps = [
+        ":pose",
+        "//third_party/eigen",
+    ],
 )
 
 cc_library(

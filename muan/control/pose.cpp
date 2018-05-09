@@ -1,4 +1,4 @@
-#include "muan/control/path.h"
+#include "muan/control/pose.h"
 #include <Eigen/Geometry>
 
 namespace muan {

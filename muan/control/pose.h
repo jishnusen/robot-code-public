@@ -1,5 +1,5 @@
-#ifndef MUAN_CONTROL_PATH_H_
-#define MUAN_CONTROL_PATH_H_
+#ifndef MUAN_CONTROL_POSE_H_
+#define MUAN_CONTROL_POSE_H_
 
 #include "Eigen/Core"
 
@@ -39,4 +39,4 @@ class Pose {
 
 }  // namespace muan
 
-#endif  // MUAN_CONTROL_PATH_H_
+#endif  // MUAN_CONTROL_POSE_H_
