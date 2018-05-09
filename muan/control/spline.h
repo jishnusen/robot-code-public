@@ -28,8 +28,8 @@ class QuinticHermiteSpline {
 
   void ComputeCoefficients();
 
-  Eigen::Matrix<double, 2, 1> a_, b_, c_, d_, e_, f_;
-  Eigen::Matrix<double, 6, 1> p0_, p1_;  // (x, y, x', y', x'', y'')
+  Eigen::Vector2d a_, b_, c_, d_, e_, f_;
+  Eigen::Vector6d p0_, p1_;  // (x, y, x', y', x'', y'')
 };
 
 }  // namespace control

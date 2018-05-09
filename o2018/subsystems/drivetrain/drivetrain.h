@@ -1,6 +1,7 @@
 #ifndef O2018_SUBSYSTEMS_DRIVETRAIN_DRIVETRAIN_H_
 #define O2018_SUBSYSTEMS_DRIVETRAIN_DRIVETRAIN_H_
 
+#include <mutex>
 #include "ctre/Phoenix.h"
 
 namespace o2018 {
@@ -62,6 +63,8 @@ class Drivetrain {
   static TalonSRX* right_slave_b_;
   static TalonSRX* left_slave_a_;
   static TalonSRX* left_slave_b_;
+
+  std::mutex talon_lock_;
 };
 
 }  // namespace drivetrain

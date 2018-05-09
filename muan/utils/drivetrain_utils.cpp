@@ -1,23 +1,23 @@
-#include "muan/control/pose.h"
+#include "muan/utils/drivetrain_utils.h"
 #include <Eigen/Geometry>
 
 namespace muan {
 
-namespace control {
+namespace util {
 
 Eigen::Vector2d Projection(Eigen::Vector2d a, Eigen::Vector2d direction) {
   return a.dot(direction) * direction.dot(direction) * direction;
 }
 
-Eigen::Vector2d FromMagDirection(double magnitude, double direction) {
+Position FromMagDirection(double magnitude, double direction) {
   return magnitude *
-         (Eigen::Vector2d() << ::std::cos(direction), ::std::sin(direction))
+         (Position() << ::std::cos(direction), ::std::sin(direction))
              .finished();
 }
 
 Pose::Pose(Eigen::Vector3d values) : values_(values) {}
 
-Pose::Pose(Eigen::Vector2d pos, double theta) {
+Pose::Pose(Position pos, double theta) {
   values_.block<2, 1>(0, 0) = pos;
   values_(2) = remainder(theta, 2 * M_PI);
 }
@@ -31,7 +31,7 @@ Pose Pose::operator+(const Pose &other) const {
   return Pose(new_values);
 }
 
-Pose Pose::TranslateBy(const Eigen::Vector2d &delta) const {
+Pose Pose::TranslateBy(const Position &delta) const {
   Eigen::Vector3d new_values = values_;
   new_values.block<2, 1>(0, 0) += delta;
   return Pose(new_values);
@@ -60,6 +60,6 @@ Pose Pose::Compose(const Pose &other) const {
   return other.RotateBy(heading()).TranslateBy(translational());
 }
 
-}  // namespace control
+}  // namespace util
 
 }  // namespace muan

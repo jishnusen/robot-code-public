@@ -4,9 +4,9 @@ namespace muan {
 
 namespace control {
 
-Position FromMagDirection(double magnitude, double direction) {
+Eigen::Vector2d FromMagDirection(double magnitude, double direction) {
   return magnitude *
-         (Position() << ::std::cos(direction), ::std::sin(direction))
+         (Eigen::Vector2d() << ::std::cos(direction), ::std::sin(direction))
              .finished();
 }
 
