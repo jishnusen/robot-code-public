@@ -42,6 +42,85 @@ void QuinticHermiteSpline::ComputeCoefficients() {
   f_ = position_0_;
 }
 
+Eigen::Vector2d QuinticHermiteSpline::PointAt(double t) {
+  return a_ * t * t * t * t * t + b_ * t * t * t * t + c_ * t * t * t +
+         d_ * t * t + e_ * t + f_;
+}
+
+Eigen::Vector2d QuinticHermiteSpline::VelocityAt(double t) {
+  return 5 * a_ * t * t * t * t + 4 * b_ * t * t * t + 3 * c_ * t * t +
+         2 * d_ * t + e_;
+}
+
+Eigen::Vector2d QuinticHermiteSpline::AccelAt(double t) {
+  return 20 * a_ * t * t * t + 12 * b_ * t * t + 6 * c_ * t + 2 * d_;
+}
+
+Eigen::Vector2d QuinticHermiteSpline::JerkAt(double t) {
+  return 60 * a_ * t * t + 24 * b_ * t + 6 * c_;
+}
+
+double QuinticHermiteSpline::HeadingAt(double t) {
+  return remainder(::std::atan2(VelocityAt(t)(1), VelocityAt(t)(0)), M_PI);
+}
+
+double QuinticHermiteSpline::CurvatureAt(double t) {
+  double dx = VelocityAt(t)(0);
+  double dy = VelocityAt(t)(1);
+  double ddx = AccelAt(t)(0);
+  double ddy = AccelAt(t)(1);
+
+  return (dx * ddy - ddx * dy) /
+         ((dx * dx + dy * dy) * ::std::sqrt((dx * dx + dy * dy)));
+}
+
+double QuinticHermiteSpline::DCurvatureAt(double t) {
+  double dx = VelocityAt(t)(0);
+  double dy = VelocityAt(t)(1);
+  double ddx = AccelAt(t)(0);
+  double ddy = AccelAt(t)(1);
+  double dddx = JerkAt(t)(0);
+  double dddy = JerkAt(t)(1);
+  double dx2dy2 = (dx * dx + dy * dy);
+  double num = (dx * dddy - dddx * dy) * dx2dy2 -
+               3 * (dx * ddy - ddx * dy) * (dx * ddx + dy * ddy);
+  return num / (dx2dy2 * dx2dy2 * ::std::sqrt(dx2dy2));
+}
+
+double QuinticHermiteSpline::DCurvature2At(double t) {
+  double dx = VelocityAt(t)(0);
+  double dy = VelocityAt(t)(1);
+  double ddx = AccelAt(t)(0);
+  double ddy = AccelAt(t)(1);
+  double dddx = JerkAt(t)(0);
+  double dddy = JerkAt(t)(1);
+  double dx2dy2 = (dx * dx + dy * dy);
+  double num = (dx * dddy - dddx * dy) * dx2dy2 -
+               3 * (dx * ddy - ddx * dy) * (dx * ddx + dy * ddy);
+  return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
+}
+
+double QuinticHermiteSpline::SumDCurvature2() {
+  double dt = 1.0 / kSamples;
+  double sum = 0;
+  for (double t = 0; t < 1.0; t += dt) {
+    sum += (dt * DCurvature2At(t));
+  }
+  return sum;
+}
+
+double QuinticHermiteSpline::SumDCurvature2(
+    std::vector<QuinticHermiteSpline> splines) {
+  double sum = 0;
+  for (QuinticHermiteSpline spline : splines) {
+    sum += spline.SumDCurvature2()
+  }
+  return sum;
+}
+
+double QuinticHermiteSpline::OptimizeSpline(
+    std::vector<QuinticHermiteSpline> splines) {}
+
 }  // namespace control
 
 }  // namespace muan

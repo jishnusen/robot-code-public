@@ -26,58 +26,20 @@ class QuinticHermiteSpline {
     return Pose(position_1_, ::std::atan2(position_1_(1), position_1_(0)));
   }
 
-  Eigen::Vector2d PointAt(double t) {
-    return a_ * t * t * t * t * t + b_ * t * t * t * t + c_ * t * t * t +
-           d_ * t * t + e_ * t + f_;
-  }
+  Eigen::Vector2d PointAt(double t);
+  Eigen::Vector2d VelocityAt(double t);
+  Eigen::Vector2d AccelAt(double t);
+  Eigen::Vector2d JerkAt(double t);
 
-  Eigen::Vector2d VelocityAt(double t) {
-    return 5 * a_ * t * t * t * t + 4 * b_ * t * t * t + 3 * c_ * t * t +
-           2 * d_ * t + e_;
-  }
+  double HeadingAt(double t);
+  double CurvatureAt(double t);
+  double DCurvatureAt(double t);
+  double DCurvature2At(double t);
 
-  Eigen::Vector2d AccelAt(double t) {
-    return 20 * a_ * t * t * t + 12 * b_ * t * t + 6 * c_ * t + 2 * d_;
-  }
+  double SumDCurvature2();
+  double SUmDCurvature2(std::vector<QuinticHermiteSpline> splines);
 
-  Eigen::Vector2d JerkAt(double t) {
-    return 60 * a_ * t * t + 24 * b_ * t + 6 * c_;
-  }
-
-  double CurvatureAt(double t) {
-    double dx = VelocityAt(t)(0);
-    double dy = VelocityAt(t)(1);
-    double ddx = AccelAt(t)(0);
-    double ddy = AccelAt(t)(1);
-
-    return (dx * ddy - ddx * dy) /
-           ((dx * dx + dy * dy) * ::std::sqrt((dx * dx + dy * dy)));
-  }
-  double DCurvatureAt(double t) {
-    double dx = VelocityAt(t)(0);
-    double dy = VelocityAt(t)(1);
-    double ddx = AccelAt(t)(0);
-    double ddy = AccelAt(t)(1);
-    double dddx = JerkAt(t)(0);
-    double dddy = JerkAt(t)(1);
-    double dx2dy2 = (dx * dx + dy * dy);
-    double num = (dx * dddy - dddx * dy) * dx2dy2 -
-                 3 * (dx * ddy - ddx * dy) * (dx * ddx + dy * ddy);
-    return num / (dx2dy2 * dx2dy2 * ::std::sqrt(dx2dy2));
-  }
-
-  double DCurvature2At(double t) {
-    double dx = VelocityAt(t)(0);
-    double dy = VelocityAt(t)(1);
-    double ddx = AccelAt(t)(0);
-    double ddy = AccelAt(t)(1);
-    double dddx = JerkAt(t)(0);
-    double dddy = JerkAt(t)(1);
-    double dx2dy2 = (dx * dx + dy * dy);
-    double num = (dx * dddy - dddx * dy) * dx2dy2 -
-                 3 * (dx * ddy - ddx * dy) * (dx * ddx + dy * ddy);
-    return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
-  }
+  double OptimizeSpline(std::vector<QuinticHermiteSpline> splines);
 
  private:
   QuinticHermiteSpline(Eigen::Matrix<double, 6, 1> p0,
