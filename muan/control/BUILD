@@ -22,6 +22,28 @@ py_binary(
 )
 
 cc_library(
+    name = "pose",
+    srcs = ["pose.cpp"],
+    hdrs = ["pose.h"],
+    linkopts = ["-lm"],
+    deps = [
+        "//third_party/eigen",
+    ],
+)
+
+cc_library(
+    name = "spline",
+    srcs = ["spline.cpp"],
+    hdrs = ["spline.h"],
+    linkopts = ["-lm"],
+    deps = [
+        ":pose",
+        "//muan/utils:math_utils",
+        "//third_party/eigen",
+    ],
+)
+
+cc_library(
     name = "pid_controller",
     srcs = [
         "pid_controller.cpp",
@@ -90,6 +112,15 @@ cc_test(
     srcs = ["state_space_test.cpp"],
     deps = [
         ":state_space",
+        "//third_party/google/googletest",
+    ],
+)
+
+cc_test(
+    name = "spline_test",
+    srcs = ["spline_test.cpp"],
+    deps = [
+        ":spline",
         "//third_party/google/googletest",
     ],
 )
