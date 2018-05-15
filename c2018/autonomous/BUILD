@@ -33,17 +33,17 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
-cc_binary(
-    name = "autonomous_simulation",
-    srcs = ["autonomous_simulation.cpp"],
-    deps = [
-        ":autonomous_runner",
-        "//third_party/frc971/control_loops/drivetrain:drivetrain_simulation",
-        "//muan/utils:string_utils",
-        "//c2018/subsystems/drivetrain:drivetrain_base",
-        "//c2018/subsystems/drivetrain:polydrivetrain_plants",
-    ],
-)
+# cc_binary(
+#     name = "autonomous_simulation",
+#     srcs = ["autonomous_simulation.cpp"],
+#     deps = [
+#         ":autonomous_runner",
+#         "//third_party/frc971/control_loops/drivetrain:drivetrain_simulation",
+#         "//muan/utils:string_utils",
+#         "//c2018/subsystems/drivetrain:drivetrain_base",
+#         "//c2018/subsystems/drivetrain:polydrivetrain_plants",
+#     ],
+# )
 
 cc_test(
     name = "autonomous_base_test",
