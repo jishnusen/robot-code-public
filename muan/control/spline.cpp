@@ -159,7 +159,7 @@ std::vector<PoseWithCurvature> SplineGenerator::ParametrizeSplines(
   if (splines.empty()) {
     return result;
   }
-  result.push_back(splines.at(0).PoseWithCurvatureAt(0.));
+  result.push_back(splines[0].PoseWithCurvatureAt(0.));
   for (HermiteSpline spline : splines) {
     std::vector<PoseWithCurvature> samples = ParametrizeSpline(spline);
     samples.erase(samples.begin());
