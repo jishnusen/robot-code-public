@@ -97,6 +97,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "trajectory",
+    srcs = [
+        "trajectory.hpp",
+    ],
+    hdrs = [
+        "trajectory.h",
+    ],
+)
+
 cc_test(
     name = "motion_profile_test",
     srcs = ["motion_profile_test.cpp"],
@@ -120,6 +130,16 @@ cc_test(
     name = "spline_test",
     srcs = ["spline_test.cpp"],
     deps = [
+        ":spline",
+        "//third_party/google/googletest",
+    ],
+)
+
+cc_test(
+    name = "trajectory_test",
+    srcs = ["trajectory_test.cpp"],
+    deps = [
+        ":trajectory",
         ":spline",
         "//third_party/google/googletest",
     ],
