@@ -59,6 +59,19 @@ Pose Pose::Compose(const Pose &other) const {
   return other.RotateBy(heading()).TranslateBy(translational());
 }
 
+Pose Pose::Interpolate(Pose other, double frac) {
+  if (frac <= 0) {
+    return Pose(Get());
+  } else if (frac >= 1) {
+    return Pose(other.Get());
+  }
+  Pose delta = Pose((other.translational() - translational()) * frac,
+                    remainder((other.heading() - heading()) * frac, 2 * M_PI));
+  Pose result = Compose(delta);
+
+  return result;
+}
+
 PoseWithCurvature::PoseWithCurvature(Pose pose, double curvature,
                                      double dcurvature_ds)
     : pose_(pose), curvature_(curvature), dcurvature_ds_(dcurvature_ds) {}
@@ -78,6 +91,14 @@ PoseWithCurvature PoseWithCurvature::TranslateBy(
   Eigen::Vector2d new_values = pose_.translational() + delta;
   return PoseWithCurvature(Pose(new_values, pose_.heading()), curvature_,
                            dcurvature_ds_);
+}
+
+PoseWithCurvature PoseWithCurvature::Interpolate(PoseWithCurvature other,
+                                                 double frac) {
+  return PoseWithCurvature(
+      pose_.Interpolate(other.pose(), frac),
+      curvature_ + ((other.curvature() - curvature_) * frac),
+      dcurvature_ds_ + ((other.dcurvature_ds() - dcurvature_ds_) * frac));
 }
 
 }  // namespace control
