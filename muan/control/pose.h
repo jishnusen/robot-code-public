@@ -24,6 +24,8 @@ class Pose {
   Pose TranslateBy(const Eigen::Vector2d &delta) const;
   Pose RotateBy(double theta) const;
 
+  Pose Interpolate(Pose other, double frac);
+
   // Compose this pose with another. Treat the new pose as an offset, using this
   // pose as the origin (theta=x axis)
   Pose Compose(const Pose &other) const;
@@ -34,12 +36,15 @@ class Pose {
 
 class PoseWithCurvature {
  public:
+  PoseWithCurvature() = default;
   PoseWithCurvature(Pose pose, double curvature, double dcurvature_ds);
   
   PoseWithCurvature operator+(const PoseWithCurvature &other) const;
   PoseWithCurvature operator-(const PoseWithCurvature &other) const;
 
   PoseWithCurvature TranslateBy(const Eigen::Vector2d &delta) const;
+
+  PoseWithCurvature Interpolate(PoseWithCurvature other, double frac);
 
   inline PoseWithCurvature Get() const {
     return PoseWithCurvature(pose_, curvature_, dcurvature_ds_);
