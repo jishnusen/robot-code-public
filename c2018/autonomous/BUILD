@@ -14,6 +14,7 @@ cc_library(
         "//muan/logging:logger",
     ],
     visibility = ["//visibility:public"],
+    restricted_to = ["//tools:roborio"],
 )
 
 cc_library(
