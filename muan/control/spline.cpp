@@ -131,42 +131,5 @@ double HermiteSpline::SumDCurvature2(std::vector<HermiteSpline> splines) {
   return sum;
 }
 
-void SplineGenerator::GetSegmentArc(HermiteSpline spline, std::vector<PoseWithCurvature>& result,
-                   double t0, double t1) {
-  Eigen::Vector3d delta = (spline.PoseAt(t1) - spline.PoseAt(t0)).Get();
-  if (::std::abs(delta(0)) > kMaxDx || ::std::abs(delta(1)) > kMaxDy || delta(2) > kMaxDTheta) {
-    GetSegmentArc(spline, result, t0, (t0 + t1) / 2);
-    GetSegmentArc(spline, result, (t0 + t1) / 2, t1);
-  } else {
-    result.push_back(spline.PoseWithCurvatureAt(t1));
-  }
-}
-
-std::vector<PoseWithCurvature> SplineGenerator::ParametrizeSpline(HermiteSpline spline) {
-  std::vector<PoseWithCurvature> result = std::vector<PoseWithCurvature>();
-  double dt = 1. / kMinSampleSize;
-
-  for (double t = 0; t < 1.; t += dt) {
-    GetSegmentArc(spline, result, t, t + dt);
-  }
-
-  return result;
-}
-
-std::vector<PoseWithCurvature> SplineGenerator::ParametrizeSplines(
-    std::vector<HermiteSpline> splines) {
-  std::vector<PoseWithCurvature> result = std::vector<PoseWithCurvature>();
-  if (splines.empty()) {
-    return result;
-  }
-  result.push_back(splines[0].PoseWithCurvatureAt(0.));
-  for (HermiteSpline spline : splines) {
-    std::vector<PoseWithCurvature> samples = ParametrizeSpline(spline);
-    samples.erase(samples.begin());
-    result.insert(result.end(), samples.begin(), samples.end());
-  }
-  return result;
-}
-
 }  // namespace control
 }  // namespace muan
