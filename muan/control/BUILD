@@ -111,6 +111,15 @@ cc_library(
 )
 
 cc_test(
+    name = "pose_test",
+    srcs = ["pose_test.cpp"],
+    deps = [
+        ":pose",
+        "//third_party/google/googletest",
+    ],
+)
+
+cc_test(
     name = "motion_profile_test",
     srcs = ["motion_profile_test.cpp"],
     deps = [
