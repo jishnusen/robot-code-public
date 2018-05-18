@@ -11,13 +11,6 @@ namespace control {
 // Spline generation
 constexpr int kSamples = 100;
 
-// Spline parametrization
-constexpr double kMaxDx = 0.05;
-constexpr double kMaxDy = 0.005;
-constexpr double kMaxDTheta = 5.0 * M_PI / 180.;
-
-constexpr int kMinSampleSize = 1;
-
 class HermiteSpline {
  public:
   HermiteSpline(Pose p0, Pose p1);
@@ -54,13 +47,6 @@ class HermiteSpline {
   Eigen::Vector2d position_0_, position_1_;  // (x, y)
   Eigen::Vector2d velocity_0_, velocity_1_;  // (x', y')
   Eigen::Vector2d accel_0_, accel_1_;        // (x'', y'')
-};
-
-class SplineGenerator {
- public:
-  std::vector<PoseWithCurvature> ParametrizeSpline(HermiteSpline spline);
-  std::vector<PoseWithCurvature> ParametrizeSplines(std::vector<HermiteSpline> splines);
-  void GetSegmentArc(HermiteSpline spline, std::vector<PoseWithCurvature>& result, double t0, double t1);
 };
 
 }  // namespace control
