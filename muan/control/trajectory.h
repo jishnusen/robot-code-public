@@ -1,6 +1,7 @@
 #ifndef MUAN_CONTROL_TRAJECTORY_H_
 #define MUAN_CONTROL_TRAJECTORY_H_
 
+#include <cmath>
 #include <vector>
 
 namespace muan {
@@ -32,7 +33,7 @@ class Trajectory {
   TrajectorySamplePoint<T> Interpolate(double index);
 
   bool empty() const { return points_.empty(); }
-  int length() const { return points_.size(); }
+  int length() const { return static_cast<int>(points_.size()); }
   T first_state() const;
   T last_state() const;
 
@@ -41,24 +42,32 @@ class Trajectory {
 };
 
 template <typename T>
-class TrajectoryView {
+class IndexView {
  public:
-  virtual TrajectorySamplePoint<T> sample(double interpolant) = 0;
-  virtual double first_interpolant() = 0;
-  virtual double last_interpolant() = 0;
-  virtual Trajectory<T> trajectory() = 0;
+  IndexView(Trajectory<T> trajectory);
+
+  TrajectorySamplePoint<T> Sample(double interpolant) {
+    return trajectory_.Interpolate(interpolant);
+  };
+
+  double first_interpolant() const { return 0.; }
+  double last_interpolant() const { return ::std::max(0., static_cast<double>(trajectory_.length() - 1)); }
+  Trajectory<T> trajectory() const { return trajectory_; }
+
+ private:
+  Trajectory<T> trajectory_;
 };
 
 template <typename T>
-class DistanceView : TrajectoryView<T> {
+class DistanceView {
  public:
   DistanceView(Trajectory<T> trajectory);
 
   TrajectorySamplePoint<T> Sample(double interpolant);
 
-  double first_interpolant() { return 0.; }
-  double last_interpolant() { return distances_[distances_.size() - 1]; }
-  Trajectory<T> trajectory() { return trajectory_; }
+  double first_interpolant() const { return 0.; }
+  double last_interpolant() const { return distances_[distances_.size() - 1]; }
+  Trajectory<T> trajectory() const { return trajectory_; }
 
  private:
   Trajectory<T> trajectory_;
@@ -66,28 +75,28 @@ class DistanceView : TrajectoryView<T> {
 };
 
 template <typename T>
-class TimedView : TrajectoryView<T> {
+class TimedView {
  public:
   TimedView(Trajectory<T> trajectory);
 
   TrajectorySamplePoint<T> Sample(double interpolant);
 
-  double first_interpolant() { return start_t_; }
-  double last_interpolant() { return end_t_; }
-  Trajectory<T> trajectory() { return trajectory_; }
+  double first_interpolant() const { return start_t_; }
+  double last_interpolant() const { return end_t_; }
+  Trajectory<T> trajectory() const { return trajectory_; }
 
  private:
   Trajectory<T> trajectory_;
   double start_t_, end_t_;
 };
 
-template <typename T>
+template <typename T, typename S>
 class TrajectoryIterator {
  public:
-  TrajectoryIterator(TrajectoryView<T> view);
+  TrajectoryIterator(S view);
 
   bool done() const { return remaining_progress() < 1e-10; }
-  double progress() const { return progress(); }
+  double progress() const { return progress_; }
   double remaining_progress() const {
     return view_.last_interpolant() - progress_;
   }
@@ -101,9 +110,9 @@ class TrajectoryIterator {
   TrajectorySamplePoint<T> Preview(double additional_progress);
 
  private:
-  double progress_ = 0.0;
+  double progress_;
   TrajectorySamplePoint<T> current_sample_;
-  TrajectoryView<T> view_;
+  S view_;
 };
 
 }  // namespace control
