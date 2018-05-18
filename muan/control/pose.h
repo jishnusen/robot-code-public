@@ -88,6 +88,15 @@ class TimedPose {
   double acceleration_;
 };
 
+template <typename T>
+struct ConstrainedPose {
+  T pose;
+  double distance;
+  double max_velocity;
+  double min_acceleration;
+  double max_acceleration;
+};
+
 }  // namespace control
 }  // namespace muan
 

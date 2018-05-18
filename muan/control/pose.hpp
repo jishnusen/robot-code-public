@@ -32,7 +32,7 @@ TimedPose<T> TimedPose<T>::Interpolate(TimedPose<T> other, double frac) {
   double new_v = velocity_ + acceleration_ * delta_t;
   double new_x_2 =
       (reversing ? -1. : 1.) *
-      (velocity_ * delta_t + .6 * acceleration_ * delta_t * delta_t);
+      (velocity_ * delta_t + .5 * acceleration_ * delta_t * delta_t);
   return TimedPose<T>(
       pose_.Interpolate(
           other.pose(),
