@@ -23,7 +23,10 @@ py_binary(
 
 cc_library(
     name = "pose",
-    srcs = ["pose.cpp"],
+    srcs = [
+        "pose.cpp",
+        "pose.hpp",
+    ],
     hdrs = ["pose.h"],
     linkopts = ["-lm"],
     deps = [
@@ -139,8 +142,9 @@ cc_test(
     name = "trajectory_test",
     srcs = ["trajectory_test.cpp"],
     deps = [
-        ":trajectory",
         ":spline",
+        ":trajectory",
+        "//muan/utils:trajectory_utils",
         "//third_party/google/googletest",
     ],
 )
