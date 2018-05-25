@@ -1,24 +1,26 @@
-#include "c2018/subsystems/subsystem_runner.h"
-
+#include "c2018_rewrite/subsystems/subsystem_runner.h"
+#include "WPILib.h"
 #include "muan/utils/threading_utils.h"
 
 namespace c2018 {
+namespace subsystems {
 
-SubsystemRunner::SubsystemRunner()
-    : drivetrain_(drivetrain::Drivetrain::GetInstance()) {}
+SubsystemRunner::SubsystemRunner() : drivetrain_(Drivetrain::GetInstance()) {}
 
 void SubsystemRunner::operator()() {
-  aos::time::PhasedLoop phased_loop(kCANIORate);
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
   aos::SetCurrentThreadRealtimePriority(50);
   muan::utils::SetCurrentThreadName("SubsystemRunner");
 
   running_ = true;
 
   while (running_) {
-    drivetrain_.Update();
+    bool outputs_enabled = RobotController::IsSysActive();
+    drivetrain_.Update(outputs_enabled);
 
     phased_loop.SleepUntilNext();
   }
 }
 
+}  // namespace subsystems
 }  // namespace c2018
