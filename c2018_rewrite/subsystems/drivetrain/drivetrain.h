@@ -6,7 +6,7 @@
 #include "ctre/Phoenix.h"
 #include "muan/control/pose.h"
 #include "muan/control/trajectory.h"
-#include "c2018/subsystems/constants.h"
+#include "c2018_rewrite/subsystems/constants.h"
 
 namespace c2018 {
 namespace subsystems {
@@ -34,11 +34,11 @@ struct DrivetrainGoal {  // From path follower
   double right_ff;
 };
 
-enum class DriveControlMode { OPEN_LOOP, PATH_FOLLOWING };
+enum DriveControlMode { OPEN_LOOP, PATH_FOLLOWING };
 
 class Drivetrain {
  public:
-  Drivetrain& GetInstance();
+  static Drivetrain& GetInstance();
   void Update(bool outputs_enabled);
   void SetControlMode(DriveControlMode control_mode) {
     control_mode_ = control_mode;

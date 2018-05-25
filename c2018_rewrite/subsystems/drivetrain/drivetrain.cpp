@@ -1,4 +1,4 @@
-#include "c2018/subsystems/drivetrain/drivetrain.h"
+#include "c2018_rewrite/subsystems/drivetrain/drivetrain.h"
 
 namespace c2018 {
 namespace subsystems {
@@ -66,16 +66,16 @@ void Drivetrain::Update(bool outputs_enabled) {
   }
 }
 
-void Drivetrain::ReadInputs(DrivetrainInput& input) {
-  input.left_encoder = left_master_->GetSelectedSensorPosition(0);
-  input.left_velocity = left_master_->GetSelectedSensorVelocity(0);
-  input.right_encoder = right_master_->GetSelectedSensorPosition(0);
-  input.right_velocity = right_master_->GetSelectedSensorVelocity(0);
+void Drivetrain::ReadInputs() {
+  input_.left_encoder = left_master_->GetSelectedSensorPosition(0);
+  input_.left_velocity = left_master_->GetSelectedSensorVelocity(0);
+  input_.right_encoder = right_master_->GetSelectedSensorPosition(0);
+  input_.right_velocity = right_master_->GetSelectedSensorVelocity(0);
 
   if (pigeon_->GetState() == PigeonIMU::Ready) {
     PigeonIMU::FusionStatus status = PigeonIMU::FusionStatus();
     pigeon_->GetFusedHeading(status);
-    input.heading = status.heading;
+    input_.heading = status.heading;
   }
 }
 
