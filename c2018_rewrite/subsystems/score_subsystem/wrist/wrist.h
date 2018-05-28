@@ -140,7 +140,7 @@ class Wrist {
 
  private:
   Wrist();
-  double CalculateFeedForwards();
+  double CalculateFeedForwards(double ka);
   void SetGains(bool has_cube);
   void UpdateProfiledGoal(bool outputs_enabled);
   void ReadInputs();

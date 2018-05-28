@@ -164,7 +164,10 @@ void Wrist::UpdateProfiledGoal(bool outputs_enabled) {
   }
 }
 
-double Wrist::CalculateFeedForwards() { return 0.; }
+double Wrist::CalculateFeedForwards(double ka) {
+  // (elevator_acceleration * carriage_m * magic_factor) + carriage_accel * ka
+  return 0.;
+}
 
 double Wrist::TimeLeftUntil(double angle, double final_angle) {
   if (profiled_goal_.position > angle) {
