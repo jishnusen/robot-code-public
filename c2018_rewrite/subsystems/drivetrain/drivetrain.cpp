@@ -2,10 +2,12 @@
 
 namespace c2018 {
 namespace subsystems {
+namespace drivetrain {
 
 Drivetrain::Drivetrain() {
   ConfigureMaster(left_master_);
   ConfigureMaster(right_master_);
+  ReloadGains();
 
   std::lock_guard<std::mutex> lock(talon_lock);
 
@@ -18,16 +20,15 @@ Drivetrain::Drivetrain() {
 
 void Drivetrain::ConfigureMaster(TalonSRX* talon) {
   std::lock_guard<std::mutex> lock(talon_lock);
-  talon->SetStatusFramePeriod(Status_2_Feedback0, 5, kLongTimeout);
+  talon->SetStatusFramePeriod(Status_2_Feedback0, 5, 100);
   talon->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
-                                      0, kLongTimeout);
+                                      0, 100);
   talon->SetSensorPhase(true);
   talon->EnableVoltageCompensation(true);
-  talon->ConfigVoltageCompSaturation(12., kLongTimeout);
-  talon->ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_50Ms,
-                                         kLongTimeout);
-  talon->ConfigVelocityMeasurementWindow(1, kLongTimeout);
-  talon->ConfigClosedloopRamp(kDriveRampRate, kLongTimeout);
+  talon->ConfigVoltageCompSaturation(12., 100);
+  talon->ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_50Ms, 100);
+  talon->ConfigVelocityMeasurementWindow(1, 100);
+  talon->ConfigClosedloopRamp(kRampRate, 100);
   talon->ConfigNeutralDeadband(0.04, 0);
 }
 
@@ -46,10 +47,10 @@ void Drivetrain::SetVelocity(DrivetrainGoal goal) {
   std::lock_guard<std::mutex> lock(talon_lock);
   left_master_->Set(ControlMode::Velocity, goal.left_velocity,
                     DemandType_ArbitraryFeedForward,
-                    goal.left_ff + goal.left_accel * kDriveDLow);
+                    goal.left_ff + goal.left_accel * kDLow);
   right_master_->Set(ControlMode::Velocity, goal.right_velocity,
                      DemandType_ArbitraryFeedForward,
-                     goal.right_ff + goal.right_accel * kDriveDLow);
+                     goal.right_ff + goal.right_accel * kDLow);
 }
 
 void Drivetrain::Update(bool outputs_enabled) {
@@ -86,5 +87,22 @@ void Drivetrain::ResetEncoders() {
 
 void Drivetrain::ResetGyro() { pigeon_->SetFusedHeading(0., 0); }
 
+void Drivetrain::ReloadGains() {
+  std::lock_guard<std::mutex> lock(talon_lock);
+
+  left_master_->Config_kP(0, kPLow, 100);
+  left_master_->Config_kI(0, kILow, 100);
+  left_master_->Config_kD(0, kDLow, 100);
+  left_master_->Config_kF(0, kFLow, 100);
+  left_master_->Config_IntegralZone(0, kIZoneLow, 100);
+
+  right_master_->Config_kP(0, kPLow, 100);
+  right_master_->Config_kI(0, kILow, 100);
+  right_master_->Config_kD(0, kDLow, 100);
+  right_master_->Config_kF(0, kFLow, 100);
+  right_master_->Config_IntegralZone(0, kIZoneLow, 100);
+}
+
+}  // namespace drivetrain
 }  // namespace subsystems
 }  // namespace c2018

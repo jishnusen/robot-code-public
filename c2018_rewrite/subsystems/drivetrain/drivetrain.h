@@ -6,10 +6,26 @@
 #include "ctre/Phoenix.h"
 #include "muan/control/pose.h"
 #include "muan/control/trajectory.h"
-#include "c2018_rewrite/subsystems/constants.h"
 
 namespace c2018 {
 namespace subsystems {
+namespace drivetrain {
+
+// Port Numbers
+constexpr int kLeftMasterId = 1;
+constexpr int kLeftSlaveAId = 2;
+constexpr int kLeftSlaveBId = 3;
+constexpr int kRightMasterId = 4;
+constexpr int kRightSlaveAId = 5;
+constexpr int kRightSlaveBId = 6;
+
+// PID Gains: Low Gear
+constexpr double kPLow = 0.9;
+constexpr double kILow = 0.;
+constexpr double kDLow = 10.;
+constexpr double kFLow = 0.;
+constexpr double kIZoneLow = 0.;
+constexpr double kRampRate = 0.;
 
 struct DrivetrainInput {  // Raw input
   double left_encoder;
@@ -63,6 +79,7 @@ class Drivetrain {
   void SetOpenLoop(Eigen::Vector2d output);
   void SetVelocity(DrivetrainGoal goal);
   void ConfigureMaster(TalonSRX* talon);
+  void ReloadGains();
 
   DriveControlMode control_mode_;
 
@@ -85,6 +102,7 @@ class Drivetrain {
   PigeonIMU* pigeon_ = new PigeonIMU(left_slave_a_);
 };
 
+}  // namespace drivetrain
 }  // namespace subsystems
 }  // namespace c2018
 
