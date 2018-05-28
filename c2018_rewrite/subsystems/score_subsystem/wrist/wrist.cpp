@@ -6,25 +6,9 @@ namespace wrist {
 
 Wrist::Wrist() {
   std::lock_guard<std::mutex> lock(talon_lock_);
-  claw_->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
-                                       0, 100);
-  claw_->Config_kP(kNoCubeSlot, kPNoCube, 100);
-  claw_->Config_kI(kNoCubeSlot, kINoCube, 100);
-  claw_->Config_kD(kNoCubeSlot, kDNoCube, 100);
-  claw_->Config_kF(kNoCubeSlot, kFNoCube, 100);
-
-  claw_->ConfigMaxIntegralAccumulator(kNoCubeSlot, kMaxIntegral, 100);
-  claw_->Config_IntegralZone(kNoCubeSlot, kIZone, 100);
-  claw_->ConfigAllowableClosedloopError(kNoCubeSlot, kDeadband, 100);
-
-  claw_->Config_kP(kCubeSlot, kPCube, 100);
-  claw_->Config_kI(kCubeSlot, kICube, 100);
-  claw_->Config_kD(kCubeSlot, kDCube, 100);
-  claw_->Config_kF(kCubeSlot, kFCube, 100);
-
-  claw_->ConfigMaxIntegralAccumulator(kCubeSlot, kMaxIntegral, 100);
-  claw_->Config_IntegralZone(kCubeSlot, kIZone, 100);
-  claw_->ConfigAllowableClosedloopError(kCubeSlot, kDeadband, 100);
+  claw_.SetFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
+  claw_.SetGains(kCubeGains, kCubeSlot);
+  claw_.SetGains(kNoCubeGains, kNoCubeSlot);
 }
 
 Wrist& Wrist::GetInstance() {
@@ -33,7 +17,7 @@ Wrist& Wrist::GetInstance() {
 }
 
 void Wrist::ReadInputs() {
-  input_.encoder = claw_->GetSelectedSensorPosition(0);
+  input_.encoder = claw_.position();
   input_.cube_proxy = carriage_canifier_.input().cube_proxy;
   input_.hall_effect = carriage_canifier_.input().wrist_hall_effect;
 }
@@ -57,14 +41,14 @@ void Wrist::Update(bool outputs_enabled) {
       hall_calibration_.Update(input_.encoder, input_.hall_effect);
 
   if (!outputs_enabled) {
-    profiled_goal_ = {claw_->GetSelectedSensorPosition(0) * kAngleFactor,
-                      claw_->GetSelectedSensorVelocity(0) * kVelFactor};
+    profiled_goal_ = {claw_.position() * kAngleFactor,
+                      claw_.velocity() * kVelFactor};
   }
 
   if (!was_calibrated && is_calibrated()) {
-    claw_->SetSelectedSensorPosition(calibrated_encoder, 0, 0);
-    profiled_goal_ = {claw_->GetSelectedSensorPosition(0) * kAngleFactor,
-                      claw_->GetSelectedSensorVelocity(0) * kVelFactor};
+    claw_.ResetSensor(calibrated_encoder);
+    profiled_goal_ = {claw_.position() * kAngleFactor,
+                      claw_.velocity() * kVelFactor};
   }
 
   bool has_cube = pinch_state_ == IDLE_WITH_CUBE && input_.cube_proxy;
@@ -144,10 +128,10 @@ void Wrist::Update(bool outputs_enabled) {
   if (is_calibrated()) {
     UpdateProfiledGoal(outputs_enabled);
 
-    claw_->Set(ControlMode::Position, profiled_goal_.position / kAngleFactor,
-                DemandType_ArbitraryFeedForward, CalculateFeedForwards());
+    claw_.SetPosition(profiled_goal_.position / kAngleFactor,
+                      CalculateFeedForwards());
   } else {
-    claw_->Set(ControlMode::PercentOutput, kCalibVoltage / 12.);
+    claw_.SetOpenloop(kCalibVoltage / 12.);
   }
 
   intake_->Set(ControlMode::PercentOutput, intake_voltage_ / 12.);
@@ -158,9 +142,9 @@ void Wrist::Update(bool outputs_enabled) {
   status_.unprofiled_goal = unprofiled_goal_.position;
   status_.profiled_goal = profiled_goal_.position;
 
-  output_.claw_voltage = claw_->GetMotorOutputVoltage();
-  output_.claw_percent = claw_->GetMotorOutputPercent();
-  output_.claw_current = claw_->GetOutputCurrent();
+  output_.claw_voltage = claw_.voltage();
+  output_.claw_percent = claw_.percent();
+  output_.claw_current = claw_.current();
 
   output_.intake_voltage = intake_->GetMotorOutputVoltage();
   output_.intake_percent = intake_->GetMotorOutputPercent();
@@ -185,7 +169,7 @@ double Wrist::CalculateFeedForwards() { return 0.; }
 
 double Wrist::TimeLeftUntil(double angle, double final_angle) {
   if (profiled_goal_.position > angle) {
-    return 0.; // We don't care about the backwards profile; we're safe
+    return 0.;  // We don't care about the backwards profile; we're safe
   }
 
   muan::control::TrapezoidalMotionProfile profile =
@@ -195,7 +179,7 @@ double Wrist::TimeLeftUntil(double angle, double final_angle) {
 }
 
 void Wrist::SetGains(bool has_cube) {
-  claw_->SelectProfileSlot(has_cube ? kCubeSlot : kNoCubeSlot, 0);
+  claw_.SelectGains(has_cube ? kCubeSlot : kNoCubeSlot);
 }
 
 }  // namespace wrist

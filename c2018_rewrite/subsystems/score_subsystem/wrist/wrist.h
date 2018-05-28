@@ -6,7 +6,7 @@
 #include "ctre/Phoenix.h"
 #include "muan/control/calibration/hall_calibration.h"
 #include "muan/control/trapezoidal_motion_profile.h"
-#include "muan/phoenix/sp_factory.h"
+#include "muan/phoenix/talon_wrapper.h"
 #include "muan/units/units.h"
 #include "muan/utils/math_utils.h"
 
@@ -42,7 +42,7 @@ constexpr double kMaxVoltage = 12;
 constexpr int kNumHasCubeTicks = 150;
 
 // CAN ID
-constexpr int kWristId = 7;
+constexpr int kClawId = 7;
 constexpr int kIntakeId = 8;
 
 // PID Gains
@@ -55,10 +55,30 @@ constexpr double kINoCube = 0.;
 constexpr double kDNoCube = 50.;
 constexpr double kFNoCube = 1.05;
 
+constexpr muan::phoenix::SPGains kNoCubeGains{
+    .p = kPNoCube,
+    .i = kINoCube,
+    .d = kDNoCube,
+    .f = kFNoCube,
+    .i_zone = kIZone,
+    .max_integral = kMaxIntegral,
+    .deadband = kDeadband,
+};
+
 constexpr double kPCube = 3.;
 constexpr double kICube = 0.;
 constexpr double kDCube = 50.;
 constexpr double kFCube = 1.05;
+
+constexpr muan::phoenix::SPGains kCubeGains{
+    .p = kPCube,
+    .i = kICube,
+    .d = kDCube,
+    .f = kFCube,
+    .i_zone = kIZone,
+    .max_integral = kMaxIntegral,
+    .deadband = kDeadband,
+};
 
 // PID misc
 constexpr double kSensorRatio = 17.04;
@@ -135,9 +155,8 @@ class Wrist {
   void UpdateProfiledGoal(bool outputs_enabled);
   void ReadInputs();
 
-  TalonSRX* claw_ =
-      muan::phoenix::CreateTalon(kWristId, muan::phoenix::SPConfig());
-  TalonSRX* intake_ = new TalonSRX(kIntakeId);
+  muan::phoenix::TalonWrapper claw_ = muan::phoenix::TalonWrapper(kClawId);
+  TalonSRX* intake_ = new TalonSRX(kIntakeId);  // No need to wrap this, its V
 
   muan::control::MotionProfilePosition unprofiled_goal_;
   muan::control::MotionProfilePosition profiled_goal_;

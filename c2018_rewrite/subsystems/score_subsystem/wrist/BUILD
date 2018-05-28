@@ -9,7 +9,7 @@ cc_library(
         "//c2018_rewrite/subsystems/score_subsystem/carriage_canifier",
         "//muan/control:motion_profiles",
         "//muan/control/calibration:hall_calibration",
-        "//muan/phoenix:sp_factory",
+        "//muan/phoenix:talon_wrapper",
         "//muan/units",
         "//muan/utils:math_utils",
         "//third_party/phoenixsuite:phoenix",
