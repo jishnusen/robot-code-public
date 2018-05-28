@@ -5,8 +5,6 @@
 namespace c2018 {
 namespace subsystems {
 
-SubsystemRunner::SubsystemRunner() : drivetrain_(Drivetrain::GetInstance()) {}
-
 void SubsystemRunner::operator()() {
   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
   aos::SetCurrentThreadRealtimePriority(50);

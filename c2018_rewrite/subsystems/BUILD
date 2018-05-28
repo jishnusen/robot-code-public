@@ -5,20 +5,10 @@ cc_library(
     restricted_to = ["//tools:roborio"],
     visibility = ["//visibility:public"],
     deps = [
-        ":constants",
         "//c2018_rewrite/subsystems/drivetrain",
         "//muan/utils:threading_utils",
         "//third_party/aos/common:time",
         "//third_party/aos/common/util:phased_loop",
         "//third_party/aos/linux_code:init",
-    ],
-)
-
-cc_library(
-    name = "constants",
-    hdrs = ["constants.h"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//muan/units",
     ],
 )
