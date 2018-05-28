@@ -7,8 +7,7 @@ namespace wrist {
 Wrist::Wrist() {
   std::lock_guard<std::mutex> lock(talon_lock_);
   claw_.SetFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative);
-  claw_.SetGains(kCubeGains, kCubeSlot);
-  claw_.SetGains(kNoCubeGains, kNoCubeSlot);
+  claw_.SetGains(kGains, 0);
 }
 
 Wrist& Wrist::GetInstance() {
@@ -176,10 +175,6 @@ double Wrist::TimeLeftUntil(double angle, double final_angle) {
       muan::control::TrapezoidalMotionProfile(kConstraints, {final_angle, 0},
                                               profiled_goal_);
   return profile.TimeLeftUntil(angle);
-}
-
-void Wrist::SetGains(bool has_cube) {
-  claw_.SelectGains(has_cube ? kCubeSlot : kNoCubeSlot);
 }
 
 }  // namespace wrist

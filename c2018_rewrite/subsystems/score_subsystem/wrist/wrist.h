@@ -50,35 +50,25 @@ constexpr double kMaxIntegral = 500000.;
 constexpr double kIZone = 500.;
 constexpr double kDeadband = 5;
 
-constexpr double kPNoCube = 3.;
-constexpr double kINoCube = 0.;
-constexpr double kDNoCube = 50.;
-constexpr double kFNoCube = 1.05;
+constexpr double kP = 3.;
+constexpr double kI = 0.;
+constexpr double kD = 50.;
+constexpr double kF = 1.05;
 
-constexpr muan::phoenix::SPGains kNoCubeGains{
-    .p = kPNoCube,
-    .i = kINoCube,
-    .d = kDNoCube,
-    .f = kFNoCube,
+constexpr muan::phoenix::SPGains kGains{
+    .p = kP,
+    .i = kI,
+    .d = kD,
+    .f = kF,
     .i_zone = kIZone,
     .max_integral = kMaxIntegral,
     .deadband = kDeadband,
 };
 
-constexpr double kPCube = 3.;
-constexpr double kICube = 0.;
-constexpr double kDCube = 50.;
-constexpr double kFCube = 1.05;
-
-constexpr muan::phoenix::SPGains kCubeGains{
-    .p = kPCube,
-    .i = kICube,
-    .d = kDCube,
-    .f = kFCube,
-    .i_zone = kIZone,
-    .max_integral = kMaxIntegral,
-    .deadband = kDeadband,
-};
+constexpr double kCubeKa = 0.006;
+constexpr double kNoCubeKa = 0.003;
+constexpr double kCubeMagic = 0.15;
+constexpr double kNoCubeMagic = 0.1;
 
 // PID misc
 constexpr double kSensorRatio = 17.04;
