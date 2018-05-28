@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 
 namespace muan {
-namespace utils {
+namespace control {
 
 TEST(Spline, StartToFinish) {
   Pose initial_pose =
@@ -19,5 +19,5 @@ TEST(Spline, StartToFinish) {
   EXPECT_NEAR(spline.HeadingAt(1), final_pose.heading(), 1e-10);
 }
 
-}  // namespace utils
+}  // namespace control
 }  // namespace muan
