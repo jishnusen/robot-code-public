@@ -6,9 +6,10 @@ cc_library(
     hdrs = ["wrist.h"],
     restricted_to = ["//tools:roborio"],
     deps = [
-        "//c2018_rewrite/subsystems:constants",
+        "//c2018_rewrite/subsystems/score_subsystem/carriage_canifier",
         "//muan/control:motion_profiles",
         "//muan/control/calibration:hall_calibration",
+        "//muan/phoenix:sp_factory",
         "//muan/units",
         "//muan/utils:math_utils",
         "//third_party/phoenixsuite:phoenix",
