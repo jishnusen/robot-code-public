@@ -9,3 +9,13 @@ cc_library(
         "//third_party/phoenixsuite:phoenix",
     ],
 )
+
+cc_library(
+    name = "talon_wrapper",
+    srcs = ["talon_wrapper.cpp"],
+    hdrs = ["talon_wrapper.h"],
+    restricted_to = ["//tools:roborio"],
+    deps = [
+        ":sp_factory",
+    ],
+)
