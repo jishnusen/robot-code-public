@@ -40,7 +40,7 @@ constexpr double kWristSafeAngle = 90 * (M_PI / 180);
 constexpr double kWristShootAngle = 140 * (M_PI / 180);
 
 enum ScoreGoal {
-  SCORE_NONE = 0; // Let the state machine progress
+  SCORE_NONE = 0;  // Let the state machine progress
   INTAKE_0 = 1;
   INTAKE_1 = 2;
   INTAKE_2 = 3;
@@ -73,7 +73,8 @@ class ScoreSubsystem {
   void SetGoal(ScoreSubsystemGoal goal);
 
  private:
-  void GoToState(ScoreSubsystemState state, IntakeGoal intake = IntakeGoal::INTAKE_NONE);
+  void GoToState(ScoreSubsystemState state,
+                 IntakeGoal intake = IntakeGoal::INTAKE_NONE);
   void RunStateMachine();
 
   void BoundGoal(double& elevator_goal, double& wrist_goal);
@@ -89,6 +90,8 @@ class ScoreSubsystem {
   ScoreSubsystemState state_ = ScoreSubsystemState::CALIBRATING;
   // Only valid if `state_` is INTAKE_RUNNING
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
+
+  Wrist& wrist_ = Wrist::GetInstance();
 };
 
 }  // namespace score_subsystem
