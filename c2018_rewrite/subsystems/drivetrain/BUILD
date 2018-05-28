@@ -6,7 +6,6 @@ cc_library(
     hdrs = ["drivetrain.h"],
     restricted_to = ["//tools:roborio"],
     deps = [
-        "//c2018_rewrite/subsystems:constants",
         "//muan/control:pose",
         "//muan/control:trajectory",
         "//muan/utils:math_utils",
