@@ -18,6 +18,7 @@ struct SPGains {
 
 class TalonWrapper {
  public:
+  TalonWrapper() = default;
   explicit TalonWrapper(int id);          // Default config (see sp_factory.h)
   TalonWrapper(int id, SPConfig config);  // Specified config
 
