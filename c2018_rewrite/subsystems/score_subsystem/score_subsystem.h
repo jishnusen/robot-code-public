@@ -1,12 +1,14 @@
-#ifndef C2018_SUBSYSTEMS_SCORE_SUBSYSTEM_SCORE_SUBSYSTEM_H_
-#define C2018_SUBSYSTEMS_SCORE_SUBSYSTEM_SCORE_SUBSYSTEM_H_
+#ifndef C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_SCORE_SUBSYSTEM_H_
+#define C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_SCORE_SUBSYSTEM_H_
 
 #include <cmath>
-#include "c2018/subsystems/score_subsystem/elevator/elevator.h"
-#include "c2018/subsystems/score_subsystem/wrist/wrist.h"
+#include "c2018_rewrite/subsystems/score_subsystem/claw/claw.h"
+#include "c2018_rewrite/subsystems/score_subsystem/elevator/elevator.h"
 
 namespace c2018 {
-namespace score_subsystem {
+namespace subsystems {
+
+using claw::IntakeGoal;
 
 constexpr double kElevatorBottom = 0;
 constexpr double kElevatorFirstStage = 1;
@@ -27,74 +29,86 @@ constexpr double kCubeHeight = 0.27;
 
 constexpr double kElevatorStow = 0.0;
 
-constexpr double kElevatorWristSafeHeight = 0.93;
+constexpr double kElevatorClawSafeHeight = 0.93;
 constexpr double kElevatorExchangeHeight = 0.05;
 
-constexpr double kWristForwardAngle = 0 * (M_PI / 180);
-constexpr double kWristTiltUpAngle = 30 * (M_PI / 180);
-constexpr double kWristPortalAngle = 20 * (M_PI / 180);
-constexpr double kWristStowAngle = 80 * (M_PI / 180);
-constexpr double kWristBackwardAngle = 160 * (M_PI / 180);
-constexpr double kWristSafeAngle = 90 * (M_PI / 180);
+constexpr double kClawForwardAngle = 0 * (M_PI / 180);
+constexpr double kClawTiltUpAngle = 30 * (M_PI / 180);
+constexpr double kClawPortalAngle = 20 * (M_PI / 180);
+constexpr double kClawStowAngle = 80 * (M_PI / 180);
+constexpr double kClawBackwardAngle = 160 * (M_PI / 180);
+constexpr double kClawSafeAngle = 90 * (M_PI / 180);
 
-constexpr double kWristShootAngle = 140 * (M_PI / 180);
+constexpr double kClawShootAngle = 140 * (M_PI / 180);
 
 enum ScoreGoal {
-  SCORE_NONE = 0;  // Let the state machine progress
-  INTAKE_0 = 1;
-  INTAKE_1 = 2;
-  INTAKE_2 = 3;
-  STOW = 4;
-  SWITCH = 5;
-  EXCHANGE = 6;
-  PORTAL = 7;
-  SCALE_LOW_FORWARD = 8;
-  SCALE_LOW_REVERSE = 9;
-  SCALE_MID_FORWARD = 10;
-  SCALE_MID_REVERSE = 11;
-  SCALE_HIGH_FORWARD = 12;
-  SCALE_HIGH_REVERSE = 13;
-  SCALE_SUPER_HIGH_FORWARD = 14;
-  SCALE_SUPER_HIGH_REVERSE = 15;
-  SCALE_SHOOT = 16;
-}
+  SCORE_NONE,  // Let the state machine progress
+  INTAKE_0,
+  INTAKE_1,
+  INTAKE_2,
+  STOW,
+  SWITCH,
+  EXCHANGE,
+  PORTAL,
+  SCALE_LOW_FORWARD,
+  SCALE_LOW_REVERSE,
+  SCALE_MID_FORWARD,
+  SCALE_MID_REVERSE,
+  SCALE_HIGH_FORWARD,
+  SCALE_HIGH_REVERSE,
+  SCALE_SUPER_HIGH_FORWARD,
+  SCALE_SUPER_HIGH_REVERSE,
+  SCALE_SHOOT,
+};
 
-struct ScoreSubsytemGoal {
+enum ScoreSubsystemState {
+  CALIBRATING,
+  HOLDING,
+  INTAKING_TO_STOW,
+  INTAKING_ONLY,
+};
+
+struct ScoreSubsystemGoal {
   ScoreGoal score_goal;
-  wrist::IntakeGoal intake_goal;
+  IntakeGoal intake_goal;
   double elevator_god_mode_goal;
-  double wrist_god_mode_goal;
-}
+  double claw_god_mode_goal;
+};
+
+struct ScoreSubsystemStatus {
+  ScoreSubsystemState state;
+  IntakeGoal intake_state;
+};
 
 class ScoreSubsystem {
  public:
-  ScoreSubsystem();
-  void Update();
+  static ScoreSubsystem& GetInstance();
+  void Update(bool outputs_enabled);
   void SetGoal(ScoreSubsystemGoal goal);
 
  private:
+  ScoreSubsystem();
   void GoToState(ScoreSubsystemState state,
                  IntakeGoal intake = IntakeGoal::INTAKE_NONE);
   void RunStateMachine();
 
-  void BoundGoal(double& elevator_goal, double& wrist_goal);
-
-  elevator::ElevatorController& elevator_;
-  wrist::WristController& wrist_;
+  void BoundGoal(double* elevator_goal, double* claw_goal);
 
   double elevator_height_;
-  double wrist_angle_;
+  double claw_angle_;
 
   bool whisker_ = false;
 
   ScoreSubsystemState state_ = ScoreSubsystemState::CALIBRATING;
-  // Only valid if `state_` is INTAKE_RUNNING
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
 
-  Wrist& wrist_ = Wrist::GetInstance();
+  ScoreSubsystemStatus status_;
+
+  claw::Claw& claw_ = claw::Claw::GetInstance();
+  elevator::Elevator& elevator_ = elevator::Elevator::GetInstance();
 };
 
-}  // namespace score_subsystem
+}  // namespace subsystems
 }  // namespace c2018
 
-#endif  // C2018_SUBSYSTEMS_SCORE_SUBSYSTEM_SCORE_SUBSYSTEM_H_
+#endif  // C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_SCORE_SUBSYSTEM_H_
