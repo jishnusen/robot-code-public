@@ -4,6 +4,7 @@
 #include <atomic>
 
 #include "c2018_rewrite/subsystems/drivetrain/drivetrain.h"
+#include "c2018_rewrite/subsystems/score_subsystem/score_subsystem.h"
 #include "third_party/aos/common/time.h"
 #include "third_party/aos/common/util/phased_loop.h"
 #include "third_party/aos/linux_code/init.h"
@@ -19,7 +20,7 @@ class SubsystemRunner {
 
  private:
   drivetrain::Drivetrain& drivetrain_ = drivetrain::Drivetrain::GetInstance();
-  /* ScoreSubsystem& score_subsystem_ = ScoreSubsystem::GetInstance(); */
+  ScoreSubsystem& score_subsystem_ = ScoreSubsystem::GetInstance();
   std::atomic<bool> running_;
 };
 

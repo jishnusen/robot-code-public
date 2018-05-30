@@ -15,6 +15,7 @@ void SubsystemRunner::operator()() {
   while (running_) {
     bool outputs_enabled = RobotController::IsSysActive();
     drivetrain_.Update(outputs_enabled);
+    score_subsystem_.Update(outputs_enabled);
 
     phased_loop.SleepUntilNext();
   }

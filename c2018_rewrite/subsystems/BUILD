@@ -6,6 +6,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//c2018_rewrite/subsystems/drivetrain",
+        "//c2018_rewrite/subsystems/score_subsystem",
         "//muan/utils:threading_utils",
         "//third_party/aos/common:time",
         "//third_party/aos/common/util:phased_loop",
