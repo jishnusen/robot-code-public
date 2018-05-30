@@ -4,11 +4,14 @@ cc_library(
     name = "elevator",
     srcs = ["elevator.cpp"],
     hdrs = ["elevator.h"],
+    restricted_to = ["//tools:roborio"],
     deps = [
+        "//c2018_rewrite/subsystems/score_subsystem/carriage_canifier",
         "//muan/control:motion_profiles",
-        "//muan/control:state_space",
         "//muan/control/calibration:hall_calibration",
+        "//muan/phoenix:talon_wrapper",
         "//muan/units",
         "//muan/utils:math_utils",
+        "//third_party/phoenixsuite:phoenix",
     ],
 )
