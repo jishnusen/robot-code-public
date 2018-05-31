@@ -3,7 +3,7 @@
 namespace muan {
 namespace phoenix {
 
-TalonWrapper::TalonWrapper(int id, SPConfig config) : talon_(id) {
+TalonWrapper::TalonWrapper(int id, Config config) : talon_(id) {
   talon_.Set(ControlMode::PercentOutput, 0.);  // Safety first!
 
   talon_.ChangeMotionControlFramePeriod(config.motion_control_frame_period);
@@ -89,7 +89,7 @@ void TalonWrapper::SetVelocity(double setpoint, double setpoint_ff) {
              setpoint_ff);
 }
 
-void TalonWrapper::SetGains(SPGains gains, int slot) {
+void TalonWrapper::SetGains(Gains gains, int slot) {
   talon_.Config_kP(slot, gains.p, 100);
   talon_.Config_kI(slot, gains.i, 100);
   talon_.Config_kD(slot, gains.d, 100);
