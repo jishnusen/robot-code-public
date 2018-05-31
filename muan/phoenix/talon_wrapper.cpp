@@ -13,17 +13,13 @@ TalonWrapper::TalonWrapper(int id, Config config) : talon_(id) {
   talon_.ClearStickyFaults(100);
 
   talon_.ConfigForwardLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
-                                        LimitSwitchNormal_NormallyOpen,
-                                        100);
+                                        LimitSwitchNormal_NormallyOpen, 100);
   talon_.ConfigReverseLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
-                                        LimitSwitchNormal_NormallyOpen,
-                                        100);
+                                        LimitSwitchNormal_NormallyOpen, 100);
   talon_.OverrideLimitSwitchesEnable(config.enable_limit_switch);
 
-  talon_.ConfigSetParameter(ParamEnum::eClearPositionOnLimitF, 0, 0, 0,
-                            100);
-  talon_.ConfigSetParameter(ParamEnum::eClearPositionOnLimitR, 0, 0, 0,
-                            100);
+  talon_.ConfigSetParameter(ParamEnum::eClearPositionOnLimitF, 0, 0, 0, 100);
+  talon_.ConfigSetParameter(ParamEnum::eClearPositionOnLimitR, 0, 0, 0, 100);
 
   talon_.ConfigNominalOutputForward(0, 100);
   talon_.ConfigNominalOutputReverse(0, 100);
@@ -66,8 +62,7 @@ TalonWrapper::TalonWrapper(int id, Config config) : talon_(id) {
   talon_.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature,
                               config.quadrature_status_frame_rate, 100);
   talon_.SetStatusFramePeriod(StatusFrameEnhanced::Status_4_AinTempVbat,
-                              config.analog_temp_vbat_status_frame_rate,
-                              100);
+                              config.analog_temp_vbat_status_frame_rate, 100);
   talon_.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth,
                               config.pwm_status_frame_rate, 100);
 
