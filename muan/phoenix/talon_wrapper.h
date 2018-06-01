@@ -54,6 +54,7 @@ class TalonWrapper {
   };
 
   TalonWrapper(int id, Config config);  // Specified config
+  void LoadConfig(Config config);
 
   // Set talon output
   void SetOpenloop(double setpoint);

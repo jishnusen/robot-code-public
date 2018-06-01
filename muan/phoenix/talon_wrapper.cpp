@@ -4,6 +4,10 @@ namespace muan {
 namespace phoenix {
 
 TalonWrapper::TalonWrapper(int id, Config config) : talon_(id) {
+  LoadConfig(config);
+}
+
+void TalonWrapper::LoadConfig(Config config) {
   talon_.Set(ControlMode::PercentOutput, 0.);  // Safety first!
 
   talon_.ChangeMotionControlFramePeriod(config.motion_control_frame_period);
