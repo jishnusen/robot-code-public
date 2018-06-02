@@ -6,9 +6,12 @@
 namespace muan {
 namespace phoenix {
 
+constexpr int kTalonSetupTimeout = 100;
+constexpr int kTalonRegularTimeout = 0;
+
 class TalonWrapper {
  public:
-  struct Gains {
+  struct Gains {  // SI Units, mechanism specific
     double p;
     double i;
     double d;
@@ -30,9 +33,8 @@ class TalonWrapper {
     int forward_soft_limit = 0;
     int reverse_soft_limit = 0;
 
-    // Phases
-    bool inverted = false;
-    bool sensor_phase = false;
+    bool motor_inverted = false;
+    bool sensor_inverted = false;
 
     // Frame periods (ms)
     int control_frame_period = 5;
@@ -46,32 +48,33 @@ class TalonWrapper {
     // Velocity Measurement
     VelocityMeasPeriod velocity_measurement_period =
         VelocityMeasPeriod::Period_100Ms;
-    int velocity_measurement_window = 64;
+    int velocity_measurement_window = 32;  // samples / period
 
     // Ramp rates
-    double open_loop_ramp_rate = 0.;
-    double closed_loop_ramp_rate = 0.;
+    double open_loop_ramp_rate = 0.;    // seconds to 12V
+    double closed_loop_ramp_rate = 0.;  // seconds to 12V
   };
 
   TalonWrapper(int id, Config config);  // Specified config
   void LoadConfig(Config config);
 
   // Set talon output
-  void SetOpenloop(double setpoint);
-  void SetPosition(double setpoint, double setpoint_ff);
-  void SetVelocity(double setpoint, double setpoint_ff);
+  void SetOpenloopGoal(double setpoint);
+  void SetPositionGoal(double setpoint, double setpoint_ff);
+  void SetVelocityGoal(double setpoint, double setpoint_ff);
 
   // PID gains for a given slot
   void SetGains(Gains gains, int slot);
   void SelectGains(int slot);
 
-  void SetFeedbackSensor(FeedbackDevice sensor);
+  void SetFeedbackSensor(FeedbackDevice sensor, double pos_conversion_factor);
   void ResetSensor(double value = 0) {
-    talon_.SetSelectedSensorPosition(value, 0, 0);
+    talon_.SetSelectedSensorPosition(value, 0, kTalonRegularTimeout);
   }
 
   // Getters
   inline Gains gains() { return gains_; }
+  inline Config config() { return config_; }
   inline double position() { return talon_.GetSelectedSensorPosition(0); }
   inline double velocity() { return talon_.GetSelectedSensorVelocity(0); }
   inline double voltage() { return talon_.GetMotorOutputVoltage(); }
@@ -81,6 +84,9 @@ class TalonWrapper {
  private:
   TalonSRX talon_;
   Gains gains_;
+  Config config_;
+
+  double conversion_factor_;  // native / actual
 };
 
 }  // namespace phoenix

@@ -8,6 +8,7 @@ cc_library(
     hdrs = ["talon_wrapper.h"],
     restricted_to = ["//tools:roborio"],
     deps = [
+        "//muan/units",
         "//third_party/phoenixsuite:phoenix",
     ],
 )
