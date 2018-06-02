@@ -51,6 +51,7 @@ constexpr Current A = 1;
 
 constexpr Voltage V = kg * m * m / (A * s * s * s);
 constexpr Voltage pwm = 12 * V;
+constexpr Voltage talon = (12 * V) / 1023.;
 
 constexpr double convert(double val, double unit) { return val / unit; }
 
