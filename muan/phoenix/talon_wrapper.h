@@ -10,6 +10,12 @@ constexpr int kTalonSetupTimeout = 100;
 constexpr int kTalonRegularTimeout = 10;
 constexpr int kTalonOutput = 1023. / 12.;  // Per volt
 
+enum class FeedbackSensor {
+  kMagEncoderRelative,
+  kMagEncoderAbsolute,
+  kNone,
+};
+
 class TalonWrapper {
  public:
   struct Gains {  // SI Units, mechanism specific
@@ -54,6 +60,9 @@ class TalonWrapper {
     // Ramp rates
     double open_loop_ramp_time = 0.;    // seconds to 12V
     double closed_loop_ramp_time = 0.;  // seconds to 12V
+
+    double conversion_factor = 1.;  // native / actual
+    FeedbackSensor sensor = FeedbackSensor::kNone;
   };
 
   TalonWrapper(int id, Config config);  // Specified config
@@ -69,13 +78,11 @@ class TalonWrapper {
   void SetGains(Gains gains, int slot);
   void SelectGains(int slot);
 
-  void SetFeedbackSensor(FeedbackDevice sensor, double pos_conversion_factor);
   void ResetSensor(double value = 0) {
     talon_.SetSelectedSensorPosition(value, 0, kTalonRegularTimeout);
   }
 
   // Getters
-  inline Gains gains() { return gains_; }
   inline Config config() { return config_; }
   inline double position() { return talon_.GetSelectedSensorPosition(0); }
   inline double velocity() { return talon_.GetSelectedSensorVelocity(0); }
@@ -85,7 +92,6 @@ class TalonWrapper {
 
  private:
   TalonSRX talon_;
-  Gains gains_;
   Config config_;
 
   double conversion_factor_;  // native / actual

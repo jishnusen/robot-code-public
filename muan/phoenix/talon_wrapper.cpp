@@ -4,13 +4,27 @@
 namespace muan {
 namespace phoenix {
 
-TalonWrapper::TalonWrapper(int id, Config config) : talon_(id) {
+TalonWrapper::TalonWrapper(int id, Config config)
+    : talon_(id), conversion_factor_(config.conversion_factor) {
   LoadConfig(config);
 }
 
 void TalonWrapper::LoadConfig(Config config) {
   config_ = config;
   talon_.Set(ControlMode::PercentOutput, 0.);  // Safety first!
+
+  switch (config.sensor) {
+    case FeedbackSensor::kMagEncoderRelative:
+      talon_.ConfigSelectedFeedbackSensor(
+          FeedbackDevice::CTRE_MagEncoder_Relative, 0, kTalonSetupTimeout);
+      break;
+    case FeedbackSensor::kMagEncoderAbsolute:
+      talon_.ConfigSelectedFeedbackSensor(
+          FeedbackDevice::CTRE_MagEncoder_Absolute, 0, kTalonSetupTimeout);
+      break;
+    case FeedbackSensor::kNone:
+      break;
+  };
 
   talon_.ChangeMotionControlFramePeriod(config.motion_control_frame_period);
   talon_.ClearMotionProfileHasUnderrun(kTalonSetupTimeout);
@@ -40,13 +54,13 @@ void TalonWrapper::LoadConfig(Config config) {
 
   talon_.SetNeutralMode(config.neutral_mode);
 
-  talon_.ConfigForwardSoftLimitThreshold(config.forward_soft_limit,
-                                         kTalonSetupTimeout);
+  talon_.ConfigForwardSoftLimitThreshold(
+      config.forward_soft_limit * conversion_factor_, kTalonSetupTimeout);
   talon_.ConfigForwardSoftLimitEnable(config.enable_soft_limit,
                                       kTalonSetupTimeout);
 
-  talon_.ConfigReverseSoftLimitThreshold(config.reverse_soft_limit,
-                                         kTalonSetupTimeout);
+  talon_.ConfigReverseSoftLimitThreshold(
+      config.reverse_soft_limit * conversion_factor_, kTalonSetupTimeout);
   talon_.ConfigReverseSoftLimitEnable(config.enable_soft_limit,
                                       kTalonSetupTimeout);
 
@@ -122,17 +136,9 @@ void TalonWrapper::SetGains(Gains gains, int slot) {
 
   talon_.ConfigAllowableClosedloopError(slot, gains.deadband,
                                         kTalonSetupTimeout);
-
-  gains_ = gains;
 }
 
 void TalonWrapper::SelectGains(int slot) { talon_.SelectProfileSlot(slot, 0); }
-
-void TalonWrapper::SetFeedbackSensor(FeedbackDevice sensor,
-                                     double conversion_factor) {
-  talon_.ConfigSelectedFeedbackSensor(sensor, 0, kTalonSetupTimeout);
-  conversion_factor_ = conversion_factor;
-}
 
 }  // namespace phoenix
 }  // namespace muan
