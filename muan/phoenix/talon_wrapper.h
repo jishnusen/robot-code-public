@@ -83,6 +83,7 @@ class TalonWrapper {
   }
 
   // Getters
+  inline int id() { return talon_.GetDeviceID(); }
   inline Config config() { return config_; }
   inline double position() { return talon_.GetSelectedSensorPosition(0); }
   inline double velocity() { return talon_.GetSelectedSensorVelocity(0); }
