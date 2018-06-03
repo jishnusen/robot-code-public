@@ -43,6 +43,16 @@ cc_library(
         ":pose",
         "//muan/utils:math_utils",
         "//third_party/eigen",
+    ]
+)
+
+cc_library(
+    name = "drivetrain_model",
+    srcs = ["drivetrain_model.cpp"],
+    hdrs = ["drivetrain_model.h"],
+    deps = [
+        "//muan/utils:math_utils",
+        "//third_party/eigen",
     ],
 )
 
@@ -115,6 +125,15 @@ cc_test(
     srcs = ["pose_test.cpp"],
     deps = [
         ":pose",
+        "//third_party/google/googletest",
+    ],
+)
+
+cc_test(
+    name = "drivetrain_model_test",
+    srcs = ["drivetrain_model_test.cpp"],
+    deps = [
+        ":drivetrain_model",
         "//third_party/google/googletest",
     ],
 )
