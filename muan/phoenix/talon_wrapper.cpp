@@ -17,10 +17,14 @@ void TalonWrapper::LoadConfig(Config config) {
     case FeedbackSensor::kMagEncoderRelative:
       talon_.ConfigSelectedFeedbackSensor(
           FeedbackDevice::CTRE_MagEncoder_Relative, 0, kTalonSetupTimeout);
+      talon_.ConfigSelectedFeedbackSensor(
+          FeedbackDevice::CTRE_MagEncoder_Relative, 1, kTalonSetupTimeout);
       break;
     case FeedbackSensor::kMagEncoderAbsolute:
       talon_.ConfigSelectedFeedbackSensor(
           FeedbackDevice::CTRE_MagEncoder_Absolute, 0, kTalonSetupTimeout);
+      talon_.ConfigSelectedFeedbackSensor(
+          FeedbackDevice::CTRE_MagEncoder_Absolute, 1, kTalonSetupTimeout);
       break;
     case FeedbackSensor::kNone:
       break;
