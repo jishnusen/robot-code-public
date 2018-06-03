@@ -1,4 +1,5 @@
 #include "muan/control/drivetrain_model.h"
+#include <algorithm>
 #include "muan/utils/math_utils.h"
 
 namespace muan {

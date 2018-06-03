@@ -36,7 +36,7 @@ class DriveTransmission {
     double efficiency = 1;
   };
 
-  DriveTransmission(Properties properties);
+  explicit DriveTransmission(Properties properties);
 
   double CalculateTorque(double velocity, double voltage) const;
   double VoltageFromTorque(double velocity, double torque) const;
