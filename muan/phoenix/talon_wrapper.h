@@ -60,6 +60,7 @@ class TalonWrapper {
   void LoadConfig(Config config);
 
   // Set talon output
+  void SetFollower(int id) { talon_.Set(ControlMode::Follower, id); }
   void SetOpenloopGoal(double setpoint);
   void SetPositionGoal(double setpoint, double setpoint_ff);
   void SetVelocityGoal(double setpoint, double setpoint_ff);
