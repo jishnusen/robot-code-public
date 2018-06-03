@@ -52,8 +52,8 @@ class TalonWrapper {
     int velocity_measurement_window = 32;  // samples / period
 
     // Ramp rates
-    double open_loop_ramp_rate = 0.;    // seconds to 12V
-    double closed_loop_ramp_rate = 0.;  // seconds to 12V
+    double open_loop_ramp_time = 0.;    // seconds to 12V
+    double closed_loop_ramp_time = 0.;  // seconds to 12V
   };
 
   TalonWrapper(int id, Config config);  // Specified config

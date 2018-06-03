@@ -62,8 +62,8 @@ void TalonWrapper::LoadConfig(Config config) {
   talon_.ConfigVelocityMeasurementWindow(config.velocity_measurement_window,
                                          kTalonSetupTimeout);
 
-  talon_.ConfigOpenloopRamp(config.open_loop_ramp_rate, kTalonSetupTimeout);
-  talon_.ConfigClosedloopRamp(config.closed_loop_ramp_rate, kTalonSetupTimeout);
+  talon_.ConfigOpenloopRamp(config.open_loop_ramp_time, kTalonSetupTimeout);
+  talon_.ConfigClosedloopRamp(config.closed_loop_ramp_time, kTalonSetupTimeout);
 
   talon_.ConfigVoltageCompSaturation(0., kTalonSetupTimeout);
   talon_.ConfigVoltageMeasurementFilter(32, kTalonSetupTimeout);
