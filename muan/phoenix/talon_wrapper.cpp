@@ -103,15 +103,15 @@ void TalonWrapper::SetVelocityGoal(double setpoint, double setpoint_ff) {
 }
 
 void TalonWrapper::SetGains(Gains gains, int slot) {
-  talon_.Config_kP(slot, gains.p * muan::units::talon / conversion_factor_,
+  talon_.Config_kP(slot, gains.p * kTalonOutput / conversion_factor_,
                    kTalonSetupTimeout);
   talon_.Config_kI(
-      slot, gains.i * muan::units::talon / conversion_factor_ * muan::units::ms,
+      slot, gains.i * kTalonOutput / conversion_factor_ * muan::units::ms,
       kTalonSetupTimeout);
   talon_.Config_kD(
-      slot, gains.d * muan::units::talon / conversion_factor_ / muan::units::ms,
+      slot, gains.d * kTalonOutput / conversion_factor_ / muan::units::ms,
       kTalonSetupTimeout);
-  talon_.Config_kF(slot, gains.f * muan::units::talon / conversion_factor_,
+  talon_.Config_kF(slot, gains.f * kTalonOutput / conversion_factor_,
                    kTalonSetupTimeout);
 
   if (::std::abs(gains.i) > 0.) {
