@@ -109,6 +109,7 @@ double HermiteSpline::DCurvature2At(double t) {
 }
 
 Pose HermiteSpline::PoseAt(double t) { return Pose(PointAt(t), HeadingAt(t)); }
+
 PoseWithCurvature HermiteSpline::PoseWithCurvatureAt(double t) {
   return PoseWithCurvature(PoseAt(t), CurvatureAt(t),
                            DCurvatureAt(t) / VelocityAt(t).norm());
