@@ -116,11 +116,9 @@ void TalonWrapper::SetGains(Gains gains, int slot) {
   talon_.Config_kF(slot, gains.f * kTalonOutput / conversion_factor_,
                    kTalonSetupTimeout);
 
-  if (::std::abs(gains.i) > 0.) {
-    talon_.ConfigMaxIntegralAccumulator(slot, gains.max_integral,
-                                        kTalonSetupTimeout);
-    talon_.Config_IntegralZone(slot, gains.i_zone, kTalonSetupTimeout);
-  }
+  talon_.ConfigMaxIntegralAccumulator(slot, gains.max_integral,
+                                      kTalonSetupTimeout);
+  talon_.Config_IntegralZone(slot, gains.i_zone, kTalonSetupTimeout);
 
   talon_.ConfigAllowableClosedloopError(slot, gains.deadband,
                                         kTalonSetupTimeout);

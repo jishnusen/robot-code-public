@@ -8,7 +8,7 @@ namespace phoenix {
 
 constexpr int kTalonSetupTimeout = 100;
 constexpr int kTalonRegularTimeout = 10;
-constexpr int kTalonOutput = 1023. / 12.; // Per volt
+constexpr int kTalonOutput = 1023. / 12.;  // Per volt
 
 class TalonWrapper {
  public:
