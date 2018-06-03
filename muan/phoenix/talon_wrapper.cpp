@@ -83,9 +83,9 @@ void TalonWrapper::LoadConfig(Config config) {
   talon_.ConfigOpenloopRamp(config.open_loop_ramp_time, kTalonSetupTimeout);
   talon_.ConfigClosedloopRamp(config.closed_loop_ramp_time, kTalonSetupTimeout);
 
-  talon_.ConfigVoltageCompSaturation(0., kTalonSetupTimeout);
+  talon_.ConfigVoltageCompSaturation(config.max_voltage, kTalonSetupTimeout);
   talon_.ConfigVoltageMeasurementFilter(32, kTalonSetupTimeout);
-  talon_.EnableVoltageCompensation(false);
+  talon_.EnableVoltageCompensation(config.compensate_voltage);
 
   talon_.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General,
                               config.general_status_frame_rate,

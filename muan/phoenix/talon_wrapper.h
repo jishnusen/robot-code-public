@@ -63,6 +63,9 @@ class TalonWrapper {
 
     double conversion_factor = 1.;  // native / actual
     FeedbackSensor sensor = FeedbackSensor::kNone;
+
+    bool compensate_voltage = true;
+    double max_voltage = 12.;
   };
 
   TalonWrapper(int id, Config config);  // Specified config
