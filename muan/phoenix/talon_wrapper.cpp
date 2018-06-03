@@ -106,8 +106,8 @@ void TalonWrapper::LoadConfig(Config config) {
                                config.control_frame_period);
 }
 
-void TalonWrapper::SetOpenloopGoal(double setpoint) {
-  talon_.Set(ControlMode::PercentOutput, setpoint);
+void TalonWrapper::SetOpenloopGoal(double setpoint) { // Voltage
+  talon_.Set(ControlMode::PercentOutput, setpoint / 12.);
 }
 
 void TalonWrapper::SetPositionGoal(double setpoint,
