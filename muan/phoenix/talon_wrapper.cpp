@@ -28,7 +28,7 @@ void TalonWrapper::LoadConfig(Config config) {
       break;
     case FeedbackSensor::kNone:
       break;
-  };
+  }
 
   talon_.ChangeMotionControlFramePeriod(config.motion_control_frame_period);
   talon_.ClearMotionProfileHasUnderrun(kTalonSetupTimeout);
