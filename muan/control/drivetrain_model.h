@@ -10,10 +10,6 @@ enum class ShifterRequest { kAutoShift, kLowGear, kHighGear };
 
 enum class DrivetrainControlMode { kNone, kFollowingPath, kOpenLoop };
 
-struct DrivetrainLogging {
-  // Relevant things for logging in the drivetrain
-};
-
 class DriveTransmission {
  public:
   struct Properties {
