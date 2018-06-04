@@ -16,10 +16,10 @@ TEST(SplineUtils, OneSpline) {
   HermiteSpline spline = HermiteSpline(initial_pose, final_pose);
 
   std::vector<PoseWithCurvature> samples = ParametrizeSpline(spline, kMaxDx, kMaxDy, kMaxDTheta);
-  PoseWithCurvature previous = samples.at(0);
+  PoseWithCurvature previous = samples.front();
 
-  EXPECT_NEAR(samples.at(0).pose().Get()(0), spline.PointAt(0)(0), 5e-3);
-  EXPECT_NEAR(samples.at(0).pose().Get()(1), spline.PointAt(0)(1), 5e-3);
+  EXPECT_NEAR(samples.front().pose().Get()(0), spline.PointAt(0)(0), 5e-3);
+  EXPECT_NEAR(samples.front().pose().Get()(1), spline.PointAt(0)(1), 5e-3);
   EXPECT_NEAR(samples.back().pose().Get()(0), spline.PointAt(1)(0), 5e-3);
   EXPECT_NEAR(samples.back().pose().Get()(1), spline.PointAt(1)(1), 5e-3);
 
@@ -46,10 +46,10 @@ TEST(SplineUtils, TwoSplines) {
 
   std::vector<HermiteSpline> splines = {spline_a, spline_b};
   std::vector<PoseWithCurvature> samples = ParametrizeSplines(splines, kMaxDx, kMaxDy, kMaxDTheta);
-  PoseWithCurvature previous = samples.at(0);
+  PoseWithCurvature previous = samples.front();
 
-  EXPECT_NEAR(samples.at(0).pose().Get()(0), spline_a.PointAt(0)(0), 5e-3);
-  EXPECT_NEAR(samples.at(0).pose().Get()(1), spline_a.PointAt(0)(1), 5e-3);
+  EXPECT_NEAR(samples.front().pose().Get()(0), spline_a.PointAt(0)(0), 5e-3);
+  EXPECT_NEAR(samples.front().pose().Get()(1), spline_a.PointAt(0)(1), 5e-3);
   EXPECT_NEAR(samples.back().pose().Get()(0), spline_b.PointAt(1)(0), 5e-3);
   EXPECT_NEAR(samples.back().pose().Get()(1), spline_b.PointAt(1)(1), 5e-3);
 

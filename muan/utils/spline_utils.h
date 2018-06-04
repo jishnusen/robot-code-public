@@ -45,7 +45,7 @@ std::vector<PoseWithCurvature> ParametrizeSplines(
   if (splines.empty()) {
     return result;
   }
-  result.push_back(splines[0].PoseWithCurvatureAt(0.));
+  result.push_back(splines.front().PoseWithCurvatureAt(0.));
   for (HermiteSpline spline : splines) {
     std::vector<PoseWithCurvature> samples =
         ParametrizeSpline(spline, max_dx, max_dy, max_dtheta);

@@ -87,11 +87,11 @@ cc_library(
 
 cc_library(
     name = "trajectory_utils",
-    hdrs = [
-        "trajectory_utils.h",
-    ],
+    srcs = ["trajectory_utils.cpp"],
+    hdrs = ["trajectory_utils.h"],
     deps = [
         ":spline_utils",
+        "//muan/control:drivetrain_model",
         "//muan/control:trajectory",
     ],
 )

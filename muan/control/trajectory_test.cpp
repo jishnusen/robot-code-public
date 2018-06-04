@@ -57,12 +57,12 @@ TEST(DistanceView, InterpolatingWayPoints) {
   EXPECT_NEAR(0., distance_view.first_interpolant(), 1e-9);
   EXPECT_NEAR(84., distance_view.last_interpolant(), 1e-9);
 
-  EXPECT_NEAR(waypoints.at(0).Get()(0), distance_view.Sample(0.).state.Get()(0),
+  EXPECT_NEAR(waypoints.front().Get()(0), distance_view.Sample(0.).state.Get()(0),
               1e-9);
-  EXPECT_NEAR(waypoints.at(0).Get()(1), distance_view.Sample(0.).state.Get()(1),
+  EXPECT_NEAR(waypoints.front().Get()(1), distance_view.Sample(0.).state.Get()(1),
               1e-9);
 
-  EXPECT_NEAR(waypoints.at(0).Interpolate(waypoints.at(1), 0.5).Get()(0),
+  EXPECT_NEAR(waypoints.front().Interpolate(waypoints.at(1), 0.5).Get()(0),
               distance_view.Sample(12.).state.Get()(0), 1e-9);
   EXPECT_NEAR(waypoints.at(1).Interpolate(waypoints.at(1), 0.5).Get()(1),
               distance_view.Sample(12.).state.Get()(1), 1e-9);
@@ -91,15 +91,15 @@ TEST(TrajectoryIterator, Complete) {
   EXPECT_NEAR(3., iterator.remaining_progress(), 1e-9);
 
   // Preview Forwards
-  EXPECT_NEAR(waypoints.at(0).Interpolate(waypoints.at(1), 0.5).Get()(0),
+  EXPECT_NEAR(waypoints.front().Interpolate(waypoints.at(1), 0.5).Get()(0),
               iterator.Preview(0.5).state.Get()(0), 1e-9);
-  EXPECT_NEAR(waypoints.at(0).Interpolate(waypoints.at(1), 0.5).Get()(1),
+  EXPECT_NEAR(waypoints.front().Interpolate(waypoints.at(1), 0.5).Get()(1),
               iterator.Preview(0.5).state.Get()(1), 1e-9);
 
   // Advance Forwards
-  EXPECT_NEAR(waypoints.at(0).Interpolate(waypoints.at(1), 0.5).Get()(0),
+  EXPECT_NEAR(waypoints.front().Interpolate(waypoints.at(1), 0.5).Get()(0),
               iterator.Advance(0.5).state.Get()(0), 1e-9);
-  EXPECT_NEAR(waypoints.at(0).Interpolate(waypoints.at(1), 0.5).Get()(1),
+  EXPECT_NEAR(waypoints.front().Interpolate(waypoints.at(1), 0.5).Get()(1),
               iterator.Advance(0.5).state.Get()(1), 1e-9);
 }
 
