@@ -10,7 +10,7 @@ class Pose {
  public:
   Pose() = default;
   Pose(Eigen::Vector2d position, double theta);
-  Pose(Eigen::Vector3d values);
+  explicit Pose(Eigen::Vector3d values);
 
   Pose operator+(const Pose &other) const;
   Pose operator-(const Pose &other) const;
@@ -68,7 +68,7 @@ template <typename T>
 class TimedPose {
  public:
   TimedPose() = default;
-  TimedPose(T pose);
+  explicit TimedPose(T pose);
   TimedPose(T pose, double t, double velocity, double acceleration);
 
   inline T pose();

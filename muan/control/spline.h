@@ -40,7 +40,6 @@ class HermiteSpline {
   double SumDCurvature2(std::vector<HermiteSpline> splines);
 
  private:
-  void OptimizationIteration(std::vector<HermiteSpline>& splines);
   void ComputeCoefficients();
 
   Eigen::Vector2d a_, b_, c_, d_, e_, f_;

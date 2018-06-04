@@ -1,7 +1,7 @@
 #ifndef MUAN_CONTROL_TRAJECTORY_H_
 #define MUAN_CONTROL_TRAJECTORY_H_
 
-#include <cmath>
+#include <algorithm>
 #include <vector>
 
 namespace muan {
@@ -18,14 +18,14 @@ struct TrajectorySamplePoint {
   T state;
   int index_floor;
   int index_ceil;
-  TrajectorySamplePoint(TrajectoryPoint<T> sample_point);
+  explicit TrajectorySamplePoint(TrajectoryPoint<T> sample_point);
   TrajectorySamplePoint(T sample_state, int sample_floor, int sample_ceil);
 };
 
 template <typename T>
 class Trajectory {
  public:
-  Trajectory(std::vector<T> states);
+  explicit Trajectory(std::vector<T> states);
 
   TrajectoryPoint<T> GetPoint(int index) const;
   T GetState(int index) const;
@@ -44,11 +44,11 @@ class Trajectory {
 template <typename T>
 class IndexView {
  public:
-  IndexView(Trajectory<T> trajectory);
+  explicit IndexView(Trajectory<T> trajectory);
 
   TrajectorySamplePoint<T> Sample(double interpolant) {
     return trajectory_.Interpolate(interpolant);
-  };
+  }
 
   double first_interpolant() const { return 0.; }
   double last_interpolant() const {
@@ -63,7 +63,7 @@ class IndexView {
 template <typename T>
 class DistanceView {
  public:
-  DistanceView(Trajectory<T> trajectory);
+  explicit DistanceView(Trajectory<T> trajectory);
 
   TrajectorySamplePoint<T> Sample(double interpolant);
 
@@ -81,7 +81,7 @@ class DistanceView {
 template <typename T>
 class TimedView {
  public:
-  TimedView(Trajectory<T> trajectory);
+  explicit TimedView(Trajectory<T> trajectory);
 
   TrajectorySamplePoint<T> Sample(double interpolant);
 
@@ -97,7 +97,7 @@ class TimedView {
 template <typename T, typename S>
 class TrajectoryIterator {
  public:
-  TrajectoryIterator(S view);
+  explicit TrajectoryIterator(S view);
 
   bool done() const { return remaining_progress() < 1e-10; }
   double progress() const { return progress_; }
@@ -124,4 +124,4 @@ class TrajectoryIterator {
 
 #include "muan/control/trajectory.hpp"
 
-#endif  // MUAN_CONTROL_TRAJECTORY_H
+#endif  // MUAN_CONTROL_TRAJECTORY_H_

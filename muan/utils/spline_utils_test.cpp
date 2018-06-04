@@ -1,4 +1,5 @@
 #include "muan/utils/spline_utils.h"
+#include <vector>
 #include "gtest/gtest.h"
 
 constexpr double kMaxDx = 0.05;

@@ -1,5 +1,6 @@
 #include "muan/utils/trajectory_utils.h"
 #include <algorithm>
+#include <vector>
 
 namespace muan {
 namespace utils {

@@ -1,6 +1,9 @@
 #ifndef MUAN_CONTROL_TRAJECTORY_HPP_
 #define MUAN_CONTROL_TRAJECTORY_HPP_
 
+#include <algorithm>
+#include <cmath>
+#include <vector>
 #include "muan/control/trajectory.h"
 
 namespace muan {
@@ -23,30 +26,30 @@ Trajectory<T>::Trajectory(std::vector<T> states) {
   points_ = std::vector<TrajectoryPoint<T>>(states.size());
   int i = 0;
   for (T state : states) {
-    points_.at(i) = TrajectoryPoint<T>{state, i};
+    points_.at(i) = {state, i};
     i++;
   }
-};
+}
 
 template <typename T>
 TrajectoryPoint<T> Trajectory<T>::GetPoint(int index) const {
   return points_.at(index);
-};
+}
 
 template <typename T>
 T Trajectory<T>::GetState(int index) const {
   return GetPoint(index).state;
-};
+}
 
 template <typename T>
 T Trajectory<T>::first_state() const {
   return GetState(0);
-};
+}
 
 template <typename T>
 T Trajectory<T>::last_state() const {
   return GetState(points_.size() - 1);
-};
+}
 
 template <typename T>
 TrajectorySamplePoint<T> Trajectory<T>::Interpolate(double index) {
@@ -65,7 +68,7 @@ TrajectorySamplePoint<T> Trajectory<T>::Interpolate(double index) {
     return TrajectorySamplePoint<T>(
         GetState(i).Interpolate(GetState(i + 1), frac), i, i + 1);
   }
-};
+}
 
 template <typename T>
 IndexView<T>::IndexView(Trajectory<T> trajectory) : trajectory_(trajectory) {}
