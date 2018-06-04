@@ -27,8 +27,8 @@ class Trajectory {
  public:
   Trajectory(std::vector<T> states);
 
-  TrajectoryPoint<T> GetPoint(int index);
-  T GetState(int index);
+  TrajectoryPoint<T> GetPoint(int index) const;
+  T GetState(int index) const;
 
   TrajectorySamplePoint<T> Interpolate(double index);
 
@@ -51,7 +51,9 @@ class IndexView {
   };
 
   double first_interpolant() const { return 0.; }
-  double last_interpolant() const { return ::std::max(0., static_cast<double>(trajectory_.length() - 1)); }
+  double last_interpolant() const {
+    return ::std::max(0., static_cast<double>(trajectory_.length() - 1));
+  }
   Trajectory<T> trajectory() const { return trajectory_; }
 
  private:
@@ -66,7 +68,9 @@ class DistanceView {
   TrajectorySamplePoint<T> Sample(double interpolant);
 
   double first_interpolant() const { return 0.; }
-  double last_interpolant() const { return distances_[distances_.size() - 1]; }
+  double last_interpolant() const {
+    return distances_.at(distances_.size() - 1.);
+  }
   Trajectory<T> trajectory() const { return trajectory_; }
 
  private:
