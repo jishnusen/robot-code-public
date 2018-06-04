@@ -15,7 +15,8 @@ TEST(SplineUtils, OneSpline) {
       Pose((Eigen::Matrix<double, 3, 1>() << 1, 1, M_PI).finished());
   HermiteSpline spline = HermiteSpline(initial_pose, final_pose);
 
-  std::vector<PoseWithCurvature> samples = ParametrizeSpline(spline, kMaxDx, kMaxDy, kMaxDTheta);
+  std::vector<PoseWithCurvature> samples =
+      ParametrizeSpline(spline, kMaxDx, kMaxDy, kMaxDTheta);
   PoseWithCurvature previous = samples.front();
 
   EXPECT_NEAR(samples.front().pose().Get()(0), spline.PointAt(0)(0), 5e-3);
@@ -45,7 +46,8 @@ TEST(SplineUtils, TwoSplines) {
   HermiteSpline spline_b = HermiteSpline(initial_pose_b, final_pose_b);
 
   std::vector<HermiteSpline> splines = {spline_a, spline_b};
-  std::vector<PoseWithCurvature> samples = ParametrizeSplines(splines, kMaxDx, kMaxDy, kMaxDTheta);
+  std::vector<PoseWithCurvature> samples =
+      ParametrizeSplines(splines, kMaxDx, kMaxDy, kMaxDTheta);
   PoseWithCurvature previous = samples.front();
 
   EXPECT_NEAR(samples.front().pose().Get()(0), spline_a.PointAt(0)(0), 5e-3);

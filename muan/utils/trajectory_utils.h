@@ -1,14 +1,14 @@
 #ifndef MUAN_UTILS_TRAJECTORY_UTILS_H_
 #define MUAN_UTILS_TRAJECTORY_UTILS_H_
 
+#include "muan/control/drivetrain_model.h"
 #include "muan/control/trajectory.h"
 #include "muan/utils/spline_utils.h"
-#include "muan/control/drivetrain_model.h"
 
 namespace muan {
 namespace utils {
 
-using namespace muan::control; // NOLINT
+using namespace muan::control;  // NOLINT
 
 Trajectory<PoseWithCurvature> TrajectoryFromSplines(
     std::vector<HermiteSpline> splines, double max_dx, double max_dy,

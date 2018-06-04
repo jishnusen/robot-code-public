@@ -1,4 +1,5 @@
 #include "muan/utils/trajectory_utils.h"
+#include <algorithm>
 
 namespace muan {
 namespace utils {
@@ -121,10 +122,13 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
     ConstrainedPose<PoseWithCurvature> constrained_pose =
         constrained_poses.at(i);
     double ds = constrained_pose.distance - s;
-    double accel = (constrained_pose.max_velocity * constrained_pose.max_velocity - v * v) / (2. * ds);
+    double accel =
+        (constrained_pose.max_velocity * constrained_pose.max_velocity -
+         v * v) /
+        (2. * ds);
     double dt = 0.;
     if (i > 0) {
-      timed_poses.at(i - 1).set_acceleration(backwards ? - accel : accel);
+      timed_poses.at(i - 1).set_acceleration(backwards ? -accel : accel);
       if (std::abs(accel) > 1e-6) {
         dt = (constrained_pose.max_velocity - v) / accel;
       } else if (std::abs(v) > 1e-6) {
@@ -132,10 +136,12 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
       }
     }
     t += dt;
-    
+
     v = constrained_pose.max_velocity;
     s = constrained_pose.distance;
-    timed_poses.at(i) = TimedPose<PoseWithCurvature>(constrained_pose.pose, t, backwards ? -v : v, backwards ? -accel : accel);
+    timed_poses.at(i) = TimedPose<PoseWithCurvature>(
+        constrained_pose.pose, t, backwards ? -v : v,
+        backwards ? -accel : accel);
   }
   return Trajectory<TimedPose<PoseWithCurvature>>(timed_poses);
 }
