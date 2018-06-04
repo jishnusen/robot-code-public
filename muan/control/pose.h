@@ -67,6 +67,7 @@ class PoseWithCurvature {
 template <typename T>
 class TimedPose {
  public:
+  TimedPose() = default;
   TimedPose(T pose);
   TimedPose(T pose, double t, double velocity, double acceleration);
 
