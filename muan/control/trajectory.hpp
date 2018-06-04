@@ -23,18 +23,18 @@ Trajectory<T>::Trajectory(std::vector<T> states) {
   points_ = std::vector<TrajectoryPoint<T>>(states.size());
   int i = 0;
   for (T state : states) {
-    points_[i] = TrajectoryPoint<T>{state, i};
+    points_.at(i) = TrajectoryPoint<T>{state, i};
     i++;
   }
 };
 
 template <typename T>
-TrajectoryPoint<T> Trajectory<T>::GetPoint(int index) {
-  return points_[index];
+TrajectoryPoint<T> Trajectory<T>::GetPoint(int index) const {
+  return points_.at(index);
 };
 
 template <typename T>
-T Trajectory<T>::GetState(int index) {
+T Trajectory<T>::GetState(int index) const {
   return GetPoint(index).state;
 };
 
@@ -75,10 +75,10 @@ DistanceView<T>::DistanceView(Trajectory<T> trajectory)
     : trajectory_(trajectory) {
   distances_ = std::vector<double>(trajectory.length());
   for (int i = 1; i < trajectory.length(); i++) {
-    distances_[i] = distances_[i - 1] +
-                    (trajectory_.GetState(i) - trajectory_.GetState(i - 1))
-                        .translational()
-                        .norm();
+    distances_.at(i) = distances_.at(i - 1) +
+                       (trajectory_.GetState(i) - trajectory_.GetState(i - 1))
+                           .translational()
+                           .norm();
   }
 }
 
@@ -92,15 +92,15 @@ TrajectorySamplePoint<T> DistanceView<T>::Sample(double interpolant) {
   }
   for (int i = 1; i < static_cast<int>(distances_.size()); i++) {
     TrajectoryPoint<T> sample = trajectory_.GetPoint(i);
-    if (distances_[i] > interpolant) {
-      if (::std::abs(distances_[i] - distances_[i - 1]) < 1e-9) {
+    if (distances_.at(i) > interpolant) {
+      if (::std::abs(distances_.at(i) - distances_.at(i - 1)) < 1e-9) {
         return TrajectorySamplePoint<T>(sample);
       } else {
         TrajectoryPoint<T> prev_sample = trajectory_.GetPoint(i - 1);
         return TrajectorySamplePoint<T>(
             prev_sample.state.Interpolate(
-                sample.state, (interpolant - distances_[i - 1]) /
-                                  (distances_[i] - distances_[i - 1])),
+                sample.state, (interpolant - distances_.at(i - 1)) /
+                                  (distances_.at(i) - distances_.at(i - 1))),
             i - 1, i);
       }
     }
@@ -112,15 +112,15 @@ template <typename T>
 TimedView<T>::TimedView(Trajectory<T> trajectory)
     : trajectory_(trajectory),
       start_t_(trajectory.first_state().t()),
-      end_t_(trajectory_.last_state().t()) {}
+      end_t_(trajectory.last_state().t()) {}
 
 template <typename T>
 TrajectorySamplePoint<T> TimedView<T>::Sample(double interpolant) {
   if (interpolant >= end_t_) {
-    return TrajectorySamplePoint<T>(trajectory_.GetPoint(0));
-  } else if (interpolant <= start_t_) {
     return TrajectorySamplePoint<T>(
         trajectory_.GetPoint(trajectory_.length() - 1));
+  } else if (interpolant <= start_t_) {
+    return TrajectorySamplePoint<T>(trajectory_.GetPoint(0));
   }
   for (int i = 1; i < trajectory_.length(); i++) {
     TrajectoryPoint<T> sample = trajectory_.GetPoint(i);
@@ -131,8 +131,8 @@ TrajectorySamplePoint<T> TimedView<T>::Sample(double interpolant) {
       } else {
         return TrajectorySamplePoint<T>(
             prev_sample.state.Interpolate(
-                sample.state(), (interpolant - prev_sample.t()) /
-                                    (sample.state.t() - prev_sample.state.t())),
+                sample.state, (interpolant - prev_sample.state.t()) /
+                                  (sample.state.t() - prev_sample.state.t())),
             i - 1, i);
       }
     }
