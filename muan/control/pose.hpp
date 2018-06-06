@@ -15,11 +15,6 @@ TimedPose<T>::TimedPose(T pose, double t, double velocity, double acceleration)
     : pose_(pose), t_(t), velocity_(velocity), acceleration_(acceleration) {}
 
 template <typename T>
-T TimedPose<T>::pose() {
-  return pose_;
-}
-
-template <typename T>
 TimedPose<T> TimedPose<T>::Interpolate(TimedPose<T> other, double frac) {
   double new_t = t_ + ((other.t() - t_) * frac);
   double delta_t = new_t - t_;

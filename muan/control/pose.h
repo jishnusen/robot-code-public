@@ -71,10 +71,10 @@ class TimedPose {
   explicit TimedPose(T pose);
   TimedPose(T pose, double t, double velocity, double acceleration);
 
-  inline T pose();
-  inline double t() { return t_; }
-  inline double velocity() { return velocity_; }
-  inline double acceleration() { return acceleration_; }
+  inline T pose() const { return pose_; }
+  inline double t() const { return t_; }
+  inline double velocity() const { return velocity_; }
+  inline double acceleration() const { return acceleration_; }
 
   void set_t(double t) { t_ = t; }
   void set_velocity(double velocity) { velocity_ = velocity; }
