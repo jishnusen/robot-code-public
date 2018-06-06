@@ -2,6 +2,7 @@
 #define MUAN_PHOENIX_TALON_WRAPPER_H_
 
 #include "ctre/Phoenix.h"
+#include "muan/units/units.h"
 
 namespace muan {
 namespace phoenix {
