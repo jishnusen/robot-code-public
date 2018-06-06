@@ -20,10 +20,12 @@ TEST(TrajectoryUtils, FromWaypoints) {
   Trajectory<PoseWithCurvature> trajectory =
       TrajectoryFromWaypoints(waypoints, kMaxDx, kMaxDy, kMaxDTheta);
 
-  EXPECT_NEAR(trajectory.Interpolate(0.).state.Get()(0),
-              waypoints.front().Get()(0), 1e-9);
-  EXPECT_NEAR(trajectory.Interpolate(trajectory.length() - 1).state.Get()(0),
-              waypoints.at(4).Get()(0), 1e-9);
+  EXPECT_TRUE(trajectory.GetPose(0).pose().Get().isApprox(
+      waypoints.front().Get(), 1e-9));
+  EXPECT_TRUE(trajectory.GetPose(trajectory.length() - 1)
+                  .pose()
+                  .Get()
+                  .isApprox(waypoints.back().Get(), 1e-9));
 }
 
 TEST(TrajectoryUtils, Reparametrize) {

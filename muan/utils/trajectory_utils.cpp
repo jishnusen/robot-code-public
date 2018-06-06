@@ -6,18 +6,15 @@ namespace muan {
 namespace utils {
 
 Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
-    bool backwards, DistanceView<PoseWithCurvature> distance_view,
-    double step_size, double initial_velocity, double final_velocity,
-    double max_velocity, double max_acceleration,
-    double max_centripetal_acceleration, DrivetrainModel drivetrain_model,
-    double max_voltage, bool high_gear) {
-  int num_poses = distance_view.trajectory().length();
+    bool backwards, Trajectory<PoseWithCurvature> trajectory, double step_size,
+    double initial_velocity, double final_velocity, double max_velocity,
+    double max_acceleration, double max_centripetal_acceleration,
+    DrivetrainModel drivetrain_model, double max_voltage, bool high_gear) {
+  int num_poses = trajectory.length();
   std::vector<PoseWithCurvature> poses(num_poses);
   for (int i = 0; i < num_poses; i++) {
-    poses.at(i) =
-        distance_view
-            .Sample(std::min(i * step_size, distance_view.last_interpolant()))
-            .state;
+    poses.at(i) = trajectory.SampleDistance(
+        std::min(i * step_size, trajectory.total_distance()));
   }
 
   std::vector<ConstrainedPose<PoseWithCurvature>> constrained_poses(num_poses);

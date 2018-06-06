@@ -29,11 +29,10 @@ Trajectory<PoseWithCurvature> TrajectoryFromWaypoints(
 }
 
 Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
-    bool backwards, DistanceView<PoseWithCurvature> distance_view,
-    double step_size, double initial_velocity, double final_velocity,
-    double max_velocity, double max_acceleration,
-    double max_centripetal_acceleration, DrivetrainModel drivetrain_model,
-    double max_voltage, bool high_gear);
+    bool backwards, Trajectory<PoseWithCurvature> trajectory, double step_size,
+    double initial_velocity, double final_velocity, double max_velocity,
+    double max_acceleration, double max_centripetal_acceleration,
+    DrivetrainModel drivetrain_model, double max_voltage, bool high_gear);
 
 }  // namespace utils
 }  // namespace muan
