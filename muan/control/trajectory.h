@@ -25,7 +25,7 @@ class Trajectory {
   inline int length() const { return static_cast<int>(poses_.size()); }
   inline T first_pose() const { return poses_.front(); }
   inline T last_pose() const { return poses_.back(); }
-  inline double total_distance() const { return CalculateDistances().back(); };
+  inline double total_distance() const { return CalculateDistances().back(); }
   inline double start_t() const { return poses_.front().t(); }
   inline double end_t() const { return poses_.back().t(); }
 
