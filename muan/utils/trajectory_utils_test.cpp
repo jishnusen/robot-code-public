@@ -59,15 +59,18 @@ TEST(TrajectoryUtils, Reparametrize) {
 
   std::vector<Pose> waypoints = {
       Pose((Eigen::Vector3d() << 0., 0., 0.).finished()),
+      Pose((Eigen::Vector3d() << 2.4, 0., 0.).finished()),
+      Pose((Eigen::Vector3d() << 3.6, 0., 0.).finished()),
       Pose((Eigen::Vector3d() << 3.6, 2.4, 0.).finished()),
+      Pose((Eigen::Vector3d() << 6.0, 2.4, 0.).finished()),
   };
 
   Trajectory<PoseWithCurvature> unconstrained =
       TrajectoryFromWaypoints(waypoints, kMaxDx, kMaxDy, kMaxDTheta);
 
   Trajectory<TimedPose<PoseWithCurvature>> constrained =
-      TimeParametrizeTrajectory(false, unconstrained, 0.01, 0., 0., 3., 3.,
-                                1.75, model, 12, true);
+      TimeParametrizeTrajectory(false, &unconstrained, kMaxDx, 0., 0., 3., 3.,
+                                1.75, &model, 12, true);
 
   for (double i = constrained.start_t(); i < constrained.end_t(); i += 0.01) {
     auto current = constrained.SampleTime(i);

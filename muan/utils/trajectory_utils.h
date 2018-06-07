@@ -21,18 +21,18 @@ Trajectory<PoseWithCurvature> TrajectoryFromSplines(
 Trajectory<PoseWithCurvature> TrajectoryFromWaypoints(
     std::vector<Pose> waypoints, double max_dx, double max_dy,
     double max_dtheta) {
-  std::vector<HermiteSpline> splines = std::vector<HermiteSpline>();
-  for (int i = 1; i < static_cast<int>(waypoints.size()); i++) {
-    splines.push_back(HermiteSpline(waypoints.at(i - 1), waypoints.at(i)));
+  std::vector<HermiteSpline> splines(waypoints.size() - 1);
+  for (int i = 0; i < static_cast<int>(splines.size()); i++) {
+    splines.at(i) = HermiteSpline(waypoints.at(i), waypoints.at(i + 1));
   }
   return TrajectoryFromSplines(splines, max_dx, max_dy, max_dtheta);
 }
 
 Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
-    bool backwards, Trajectory<PoseWithCurvature> trajectory, double step_size,
+    bool backwards, Trajectory<PoseWithCurvature>* trajectory, double step_size,
     double initial_velocity, double final_velocity, double max_velocity,
     double max_acceleration, double max_centripetal_acceleration,
-    DrivetrainModel drivetrain_model, double max_voltage, bool high_gear);
+    DrivetrainModel* drivetrain_model, double max_voltage, bool high_gear);
 
 }  // namespace utils
 }  // namespace muan

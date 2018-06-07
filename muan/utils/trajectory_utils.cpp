@@ -1,20 +1,21 @@
 #include "muan/utils/trajectory_utils.h"
 #include <algorithm>
 #include <vector>
+#include <iostream>
 
 namespace muan {
 namespace utils {
 
 Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
-    bool backwards, Trajectory<PoseWithCurvature> trajectory, double step_size,
+    bool backwards, Trajectory<PoseWithCurvature>* trajectory, double step_size,
     double initial_velocity, double final_velocity, double max_velocity,
     double max_acceleration, double max_centripetal_acceleration,
-    DrivetrainModel drivetrain_model, double max_voltage, bool high_gear) {
+    DrivetrainModel* drivetrain_model, double max_voltage, bool high_gear) {
   std::vector<PoseWithCurvature> poses(
-      floor(trajectory.total_distance() / step_size));
+      ceil(trajectory->total_distance() / step_size));
 
   for (double i = 0; i < poses.size(); i++) {
-    poses.at(i) = trajectory.SampleDistance(i * step_size);
+    poses.at(i) = trajectory->SampleDistance(i * step_size);
   }
 
   int num_poses = poses.size();
@@ -58,7 +59,7 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
                                  constrained_pose.pose.curvature() *
                                  (backwards ? -1. : 1.);
 
-    Bounds min_max_accel = drivetrain_model.CalculateMinMaxAcceleration(
+    Bounds min_max_accel = drivetrain_model->CalculateMinMaxAcceleration(
         linear_angular_velocity, constrained_pose.pose.curvature(), max_voltage,
         high_gear);
 
@@ -100,7 +101,7 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
                                  constrained_pose.pose.curvature() *
                                  (backwards ? -1. : 1.);
 
-    Bounds min_max_accel = drivetrain_model.CalculateMinMaxAcceleration(
+    Bounds min_max_accel = drivetrain_model->CalculateMinMaxAcceleration(
         linear_angular_velocity, constrained_pose.pose.curvature(), max_voltage,
         high_gear);
 
