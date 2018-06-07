@@ -13,6 +13,7 @@ constexpr int kSamples = 100;
 
 class HermiteSpline {
  public:
+  HermiteSpline() = default;
   HermiteSpline(Pose p0, Pose p1);
 
   Pose get_start_pose() const {
