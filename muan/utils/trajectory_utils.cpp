@@ -10,12 +10,14 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
     double initial_velocity, double final_velocity, double max_velocity,
     double max_acceleration, double max_centripetal_acceleration,
     DrivetrainModel drivetrain_model, double max_voltage, bool high_gear) {
-  int num_poses = trajectory.length();
-  std::vector<PoseWithCurvature> poses(num_poses);
-  for (int i = 0; i < num_poses; i++) {
-    poses.at(i) = trajectory.SampleDistance(
-        std::min(i * step_size, trajectory.total_distance()));
+  std::vector<PoseWithCurvature> poses(
+      floor(trajectory.total_distance() / step_size));
+
+  for (double i = 0; i < poses.size(); i++) {
+    poses.at(i) = trajectory.SampleDistance(i * step_size);
   }
+
+  int num_poses = poses.size();
 
   std::vector<ConstrainedPose<PoseWithCurvature>> constrained_poses(num_poses);
 
@@ -24,15 +26,16 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
   };
 
   // Forward pass
-  for (int i = 0; i < num_poses; i++) {
+  for (int i = 1; i < num_poses; i++) {
     // Convenience
     ConstrainedPose<PoseWithCurvature>& constrained_pose =
         constrained_poses.at(i);
 
     // Begin constraining based on predecessor
     constrained_pose.pose = poses.at(i);
-    double ds =
-        (constrained_pose.pose - predecessor.pose).translational().norm();
+    double ds = (constrained_pose.pose.translational() -
+                 predecessor.pose.translational())
+                    .norm();
     constrained_pose.distance = ds + predecessor.distance;
 
     constrained_pose.max_velocity =
@@ -64,7 +67,7 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
                  backwards ? -min_max_accel.max : min_max_accel.min);
 
     constrained_pose.max_acceleration =
-        std::max(constrained_pose.max_acceleration,
+        std::min(constrained_pose.max_acceleration,
                  backwards ? -min_max_accel.min : min_max_accel.max);
 
     predecessor = constrained_pose;
@@ -106,7 +109,7 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
                  backwards ? -min_max_accel.max : min_max_accel.min);
 
     constrained_pose.max_acceleration =
-        std::max(constrained_pose.max_acceleration,
+        std::min(constrained_pose.max_acceleration,
                  backwards ? -min_max_accel.min : min_max_accel.max);
 
     successor = constrained_pose;
@@ -133,6 +136,7 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
         dt = ds / v;
       }
     }
+
     t += dt;
 
     v = constrained_pose.max_velocity;

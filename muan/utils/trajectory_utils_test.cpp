@@ -59,31 +59,33 @@ TEST(TrajectoryUtils, Reparametrize) {
 
   std::vector<Pose> waypoints = {
       Pose((Eigen::Vector3d() << 0., 0., 0.).finished()),
-      Pose((Eigen::Vector3d() << 2.4, 0., 0.).finished()),
-      Pose((Eigen::Vector3d() << 3.6, 0., 0.).finished()),
       Pose((Eigen::Vector3d() << 3.6, 2.4, 0.).finished()),
-      Pose((Eigen::Vector3d() << 6.0, 2.4, 0.).finished()),
   };
 
   Trajectory<PoseWithCurvature> unconstrained =
       TrajectoryFromWaypoints(waypoints, kMaxDx, kMaxDy, kMaxDTheta);
 
   Trajectory<TimedPose<PoseWithCurvature>> constrained =
-      TimeParametrizeTrajectory(false,
-                                DistanceView<PoseWithCurvature>(unconstrained),
-                                kMaxDx, 0., 0., 3., 3., 1.75, model, 12, true);
+      TimeParametrizeTrajectory(false, unconstrained, 0.01, 0., 0., 3., 3.,
+                                1.75, model, 12, true);
 
-  TrajectoryIterator<TimedPose<PoseWithCurvature>,
-                     TimedView<TimedPose<PoseWithCurvature>>>
-      iterator{TimedView<TimedPose<PoseWithCurvature>>(constrained)};
-
-  while (!iterator.done()) {
-    auto current = iterator.Advance(0.01).state;
-    EXPECT_LT(current.velocity(), 3. + 1e-9);
+  for (double i = constrained.start_t(); i < constrained.end_t(); i += 0.01) {
+    auto current = constrained.SampleTime(i);
+    EXPECT_LT(std::abs(current.velocity()), 3. + 1e-9);
+    EXPECT_LT(current.acceleration(), 3. + 1e-9);
   }
 
-  auto last_pose = iterator.current_sample().state.pose();
-  EXPECT_TRUE(last_pose.pose().Get().isApprox(waypoints.back().Get(), 1e-9));
+  EXPECT_TRUE(constrained.SampleTime(constrained.start_t())
+                  .pose()
+                  .pose()
+                  .Get()
+                  .isApprox(waypoints.front().Get(), 1e-2));
+
+  EXPECT_TRUE(constrained.SampleTime(constrained.end_t())
+                  .pose()
+                  .pose()
+                  .Get()
+                  .isApprox(waypoints.back().Get(), 1e-2));
 }
 
 }  // namespace utils
