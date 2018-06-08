@@ -74,8 +74,8 @@ TEST(TrajectoryUtils, Reparametrize) {
 
   for (double i = constrained.start_t(); i < constrained.end_t(); i += 0.01) {
     auto current = constrained.SampleTime(i);
-    EXPECT_LT(std::abs(current.velocity()), 3. + 1e-9);
-    EXPECT_LT(current.acceleration(), 3. + 1e-9);
+    EXPECT_NEAR(current.velocity(), 0., 3. + 1e-9);
+    EXPECT_NEAR(current.acceleration(), 0., 3. + 1e-9);
   }
 
   EXPECT_TRUE(constrained.SampleTime(constrained.start_t())

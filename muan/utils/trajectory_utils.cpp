@@ -1,7 +1,6 @@
 #include "muan/utils/trajectory_utils.h"
 #include <algorithm>
 #include <vector>
-#include <iostream>
 
 namespace muan {
 namespace utils {
@@ -23,7 +22,11 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
   std::vector<ConstrainedPose<PoseWithCurvature>> constrained_poses(num_poses);
 
   ConstrainedPose<PoseWithCurvature> predecessor{
-      poses.front(), 0., initial_velocity, -max_acceleration, max_acceleration,
+      .pose = poses.front(),
+      .distance = 0.,
+      .max_velocity = initial_velocity,
+      .min_acceleration = -max_acceleration,
+      .max_acceleration = max_acceleration,
   };
 
   // Forward pass
@@ -75,9 +78,11 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
   }
 
   ConstrainedPose<PoseWithCurvature> successor{
-      poses.back(),     constrained_poses.back().distance,
-      final_velocity,   -max_acceleration,
-      max_acceleration,
+      .pose = poses.front(),
+      .distance = constrained_poses.back().distance,
+      .max_velocity = final_velocity,
+      .min_acceleration = -max_acceleration,
+      .max_acceleration = max_acceleration,
   };
 
   // Backward pass
@@ -89,37 +94,36 @@ Trajectory<TimedPose<PoseWithCurvature>> TimeParametrizeTrajectory(
     double new_max_velocity =
         std::sqrt(successor.max_velocity * successor.max_velocity +
                   2. * successor.min_acceleration * ds);
-    if (new_max_velocity >= constrained_pose.max_velocity) {
-      continue;
+    if (new_max_velocity < constrained_pose.max_velocity) {
+      constrained_pose.max_velocity = new_max_velocity;
+
+      Eigen::Vector2d linear_angular_velocity;
+      linear_angular_velocity(0) =
+          constrained_pose.max_velocity * (backwards ? -1. : 1.);
+      linear_angular_velocity(1) = constrained_pose.max_velocity *
+                                   constrained_pose.pose.curvature() *
+                                   (backwards ? -1. : 1.);
+
+      Bounds min_max_accel = drivetrain_model->CalculateMinMaxAcceleration(
+          linear_angular_velocity, constrained_pose.pose.curvature(),
+          max_voltage, high_gear);
+
+      constrained_pose.min_acceleration =
+          std::max(constrained_pose.min_acceleration,
+                   backwards ? -min_max_accel.max : min_max_accel.min);
+
+      constrained_pose.max_acceleration =
+          std::min(constrained_pose.max_acceleration,
+                   backwards ? -min_max_accel.min : min_max_accel.max);
     }
-    constrained_pose.max_velocity = new_max_velocity;
-
-    Eigen::Vector2d linear_angular_velocity;
-    linear_angular_velocity(0) =
-        constrained_pose.max_velocity * (backwards ? -1. : 1.);
-    linear_angular_velocity(1) = constrained_pose.max_velocity *
-                                 constrained_pose.pose.curvature() *
-                                 (backwards ? -1. : 1.);
-
-    Bounds min_max_accel = drivetrain_model->CalculateMinMaxAcceleration(
-        linear_angular_velocity, constrained_pose.pose.curvature(), max_voltage,
-        high_gear);
-
-    constrained_pose.min_acceleration =
-        std::max(constrained_pose.min_acceleration,
-                 backwards ? -min_max_accel.max : min_max_accel.min);
-
-    constrained_pose.max_acceleration =
-        std::min(constrained_pose.max_acceleration,
-                 backwards ? -min_max_accel.min : min_max_accel.max);
 
     successor = constrained_pose;
   }
 
   std::vector<TimedPose<PoseWithCurvature>> timed_poses(num_poses);
-  double t = 0.;  // time
-  double s = 0.;  // distance
-  double v = 0.;  // velocity
+  double t = 0.;                // time
+  double s = 0.;                // distance
+  double v = initial_velocity;  // velocity
   for (int i = 0; i < num_poses; i++) {
     ConstrainedPose<PoseWithCurvature> constrained_pose =
         constrained_poses.at(i);
