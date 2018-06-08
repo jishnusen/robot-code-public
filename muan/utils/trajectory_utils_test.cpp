@@ -68,15 +68,28 @@ TEST(TrajectoryUtils, Reparametrize) {
   Trajectory<PoseWithCurvature> unconstrained =
       TrajectoryFromWaypoints(waypoints, kMaxDx, kMaxDy, kMaxDTheta);
 
+  bool backwards = false;
+  double step_size = kMaxDx;
+  double initial_vel = 0.;
+  double final_vel = 0.;
+  double max_vel = 3.;
+  double max_accel = 3.;
+  double max_angular_accel = 1.75;
+  double max_voltage = 12.;
+  bool high_gear = true;
+
   Trajectory<TimedPose<PoseWithCurvature>> constrained =
-      TimeParametrizeTrajectory(false, &unconstrained, kMaxDx, 0., 0., 3., 3.,
-                                1.75, &model, 12, true);
+      TimeParametrizeTrajectory(backwards, &unconstrained, step_size, initial_vel, final_vel, max_vel, max_accel,
+                                max_angular_accel, &model, max_voltage, high_gear);
 
   for (double i = constrained.start_t(); i < constrained.end_t(); i += 0.01) {
     auto current = constrained.SampleTime(i);
-    EXPECT_NEAR(current.velocity(), 0., 3. + 1e-9);
-    EXPECT_NEAR(current.acceleration(), 0., 3. + 1e-9);
+    EXPECT_NEAR(current.velocity(), 0., max_vel + 1e-9);
+    EXPECT_NEAR(current.acceleration(), 0., max_accel + 1e-9);
   }
+
+  EXPECT_NEAR(constrained.SampleTime(constrained.start_t()).velocity(), initial_vel, 1e-9);
+  EXPECT_NEAR(constrained.SampleTime(constrained.end_t()).velocity(), final_vel, 1e-9);
 
   EXPECT_TRUE(constrained.SampleTime(constrained.start_t())
                   .pose()
