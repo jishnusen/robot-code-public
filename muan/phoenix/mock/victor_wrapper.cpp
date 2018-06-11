@@ -15,7 +15,7 @@ void VictorWrapper::SetPositionGoal(double setpoint,
                                    double setpoint_ff) {  // Position, Voltage
   (void)setpoint_ff;
   prev_position_ = position_;
-  position_ = setpoint * conversion_factor_;
+  position_ = setpoint;
 }
 
 void VictorWrapper::SetVelocityGoal(double setpoint,
