@@ -1,5 +1,5 @@
-#ifndef MUAN_PHOENIX_TALON_WRAPPER_H_
-#define MUAN_PHOENIX_TALON_WRAPPER_H_
+#ifndef MUAN_PHOENIX_VICTOR_WRAPPER_H_
+#define MUAN_PHOENIX_VICTOR_WRAPPER_H_
 
 #include "ctre/Phoenix.h"
 #include "muan/units/units.h"
@@ -7,9 +7,9 @@
 namespace muan {
 namespace phoenix {
 
-constexpr int kTalonSetupTimeout = 100;
-constexpr int kTalonRegularTimeout = 10;
-constexpr int kTalonOutput = 1023. / 12.;  // Per volt
+constexpr int kVictorSetupTimeout = 100;
+constexpr int kVictorRegularTimeout = 10;
+constexpr int kVictorOutput = 1023. / 12.;  // Per volt
 
 using muan::units::ms;
 
@@ -19,7 +19,7 @@ enum class FeedbackSensor {
   kNone,
 };
 
-class TalonWrapper {
+class VictorWrapper {
  public:
   struct Gains {  // SI Units, mechanism specific
     double p;
@@ -71,11 +71,11 @@ class TalonWrapper {
     double max_voltage = 12.;
   };
 
-  TalonWrapper(int id, Config config);  // Specified config
+  VictorWrapper(int id, Config config);  // Specified config
   void LoadConfig(Config config);
 
-  // Set talon output
-  void SetFollower(int id) { talon_.Set(ControlMode::Follower, id); }
+  // Set victor output
+  void SetFollower(int id) { victor_.Set(ControlMode::Follower, id); }
   void SetOpenloopGoal(double setpoint);
   void SetPositionGoal(double setpoint, double setpoint_ff);
   void SetVelocityGoal(double setpoint, double setpoint_ff);
@@ -85,26 +85,26 @@ class TalonWrapper {
   void SelectGains(int slot);
 
   void ResetSensor(double value = 0) {
-    talon_.SetSelectedSensorPosition(value, 0, kTalonRegularTimeout);
+    victor_.SetSelectedSensorPosition(value, 0, kVictorRegularTimeout);
   }
 
   // Getters
-  inline int id() { return talon_.GetDeviceID(); }
+  inline int id() { return victor_.GetDeviceID(); }
   inline Config config() { return config_; }
   inline double position() {
-    return talon_.GetSelectedSensorPosition(0) / conversion_factor_;
+    return victor_.GetSelectedSensorPosition(0) / conversion_factor_;
   }
   inline double velocity() {
-    return talon_.GetSelectedSensorVelocity(0) /
+    return victor_.GetSelectedSensorVelocity(0) /
            (conversion_factor_ * 100 * ms);
   }
 
-  inline double voltage() { return talon_.GetMotorOutputVoltage(); }
-  inline double percent() { return talon_.GetMotorOutputPercent(); }
-  inline double current() { return talon_.GetOutputCurrent(); }
+  inline double voltage() { return victor_.GetMotorOutputVoltage(); }
+  inline double percent() { return victor_.GetMotorOutputPercent(); }
+  inline double current() { return victor_.GetOutputCurrent(); }
 
  private:
-  TalonSRX talon_;
+  VictorSPX victor_;
   Config config_;
 
   double conversion_factor_;  // native / actual
@@ -113,4 +113,4 @@ class TalonWrapper {
 }  // namespace phoenix
 }  // namespace muan
 
-#endif  //  MUAN_PHOENIX_TALON_WRAPPER_H_
+#endif  //  MUAN_PHOENIX_VICTOR_WRAPPER_H_
