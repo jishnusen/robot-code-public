@@ -75,27 +75,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "spline_utils",
-    hdrs = [
-        "spline_utils.h",
-    ],
-    deps = [
-        "//muan/control:spline",
-    ],
-)
-
-cc_library(
-    name = "trajectory_utils",
-    srcs = ["trajectory_utils.cpp"],
-    hdrs = ["trajectory_utils.h"],
-    deps = [
-        ":spline_utils",
-        "//muan/control:drivetrain_model",
-        "//muan/control:trajectory",
-    ],
-)
-
 cc_proto_library(
     name = "test_proto",
     srcs = ["test_proto.proto"],
@@ -147,24 +126,6 @@ cc_test(
     srcs = ["threading_utils_test.cpp"],
     deps = [
         ":threading_utils",
-        "//third_party/google/googletest",
-    ],
-)
-
-cc_test(
-    name = "spline_utils_test",
-    srcs = ["spline_utils_test.cpp"],
-    deps = [
-        ":spline_utils",
-        "//third_party/google/googletest",
-    ],
-)
-
-cc_test(
-    name = "trajectory_utils_test",
-    srcs = ["trajectory_utils_test.cpp"],
-    deps = [
-        ":trajectory_utils",
         "//third_party/google/googletest",
     ],
 )
