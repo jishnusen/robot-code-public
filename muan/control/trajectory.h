@@ -3,39 +3,59 @@
 
 #include <algorithm>
 #include <vector>
-#include "muan/control/pose.h"
+#include "muan/control/drivetrain_model.h"
+#include "muan/control/spline.h"
 
 namespace muan {
 namespace control {
 
-template <typename T>
 class Trajectory {
  public:
-  explicit Trajectory(std::vector<T> poses);
-  explicit Trajectory(std::vector<Pose> poses);
+  struct Constraints {
+    double max_velocity;
+    double max_voltage;
+    double max_acceleration;
+    double max_centripetal_acceleration;
 
-  T GetPose(int index) const;
+    double initial_velocity;
+    double final_velocity;
+  };
 
-  T SampleTime(double t) const;
-  T SampleDistance(double s) const;
+  struct ConstrainedPose {
+    PoseWithCurvature pose;
+    double distance;
+    double max_velocity;
+    double min_acceleration;
+    double max_acceleration;
+  };
 
-  std::vector<double> CalculateDistances() const;
+  struct TimedPose {
+    PoseWithCurvature pose;
+    double t;
+    double v;
+    double a;
+  };
 
-  inline bool empty() const { return poses_.empty(); }
-  inline int length() const { return static_cast<int>(poses_.size()); }
-  inline T first_pose() const { return poses_.front(); }
-  inline T last_pose() const { return poses_.back(); }
-  inline double total_distance() const { return CalculateDistances().back(); }
-  inline double start_t() const { return poses_.front().t(); }
-  inline double end_t() const { return poses_.back().t(); }
+  Trajectory(const HermiteSpline& spline, Constraints constraints,
+             bool high_gear, const DrivetrainModel& model);
 
- protected:
-  std::vector<T> poses_;
+  TimedPose SampleTime(double t) const;
+
+  TimedPose Advance(double t);
+  inline bool done() const { return 1 - progress_ < 1e-6; }
+
+  void TimeReparametrize(const HermiteSpline& spline,
+                         const DrivetrainModel& model, bool high_gear,
+                         Constraints constraints);
+
+ private:
+  std::array<TimedPose, kNumSamples> timed_poses_;
+
+  double progress_ = 0.;
+  TimedPose current_;
 };
 
 }  // namespace control
 }  // namespace muan
-
-#include "muan/control/trajectory.hpp"
 
 #endif  // MUAN_CONTROL_TRAJECTORY_H_

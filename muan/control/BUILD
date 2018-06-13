@@ -43,7 +43,7 @@ cc_library(
         ":pose",
         "//muan/utils:math_utils",
         "//third_party/eigen",
-    ]
+    ],
 )
 
 cc_library(
@@ -113,10 +113,14 @@ cc_library(
 cc_library(
     name = "trajectory",
     srcs = [
-        "trajectory.hpp",
+        "trajectory.cpp",
     ],
     hdrs = [
         "trajectory.h",
+    ],
+    deps = [
+        ":drivetrain_model",
+        ":spline",
     ],
 )
 
@@ -170,9 +174,7 @@ cc_test(
     name = "trajectory_test",
     srcs = ["trajectory_test.cpp"],
     deps = [
-        ":spline",
         ":trajectory",
-        "//muan/utils:trajectory_utils",
         "//third_party/google/googletest",
     ],
 )
