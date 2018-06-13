@@ -4,132 +4,158 @@
 namespace muan {
 namespace control {
 
-Eigen::Vector2d FromMagDirection(double magnitude, double direction) {
+Eigen::Vector2d Projection(Eigen::Vector2d a, Eigen::Vector2d direction) {
+  return a.dot(direction) * direction.dot(direction) * direction;
+}
+
+Position FromMagDirection(double magnitude, double direction) {
   return magnitude *
-         (Eigen::Vector2d() << ::std::cos(direction), ::std::sin(direction))
+         (Position() << ::std::cos(direction), ::std::sin(direction))
              .finished();
 }
 
-HermiteSpline::HermiteSpline(Pose p0, Pose p1) {
-  double scale =
-      1.2 * ::std::abs((p0.translational() - p1.translational()).norm());
+HermiteSpline::HermiteSpline(Pose initial, Pose final, double initial_velocity,
+                             double final_velocity, bool backwards,
+                             double extra_distance_initial,
+                             double extra_distance_final,
+                             double initial_angular_velocity,
+                             double final_angular_velocity)
+    : HermiteSpline(initial.translational(),
+                    FromMagDirection(1, initial.heading()),
+                    final.translational(), FromMagDirection(1, final.heading()),
+                    initial_velocity, final_velocity, backwards,
+                    extra_distance_initial, extra_distance_final,
+                    initial_angular_velocity, final_angular_velocity) {}
 
-  position_0_ = p0.translational();
-  velocity_0_ = FromMagDirection(scale, p0.heading());
-  accel_0_ = Eigen::Matrix<double, 2, 1>::Zero();
+HermiteSpline::HermiteSpline(
+    Position initial_position, Eigen::Vector2d initial_tangent,
+    Position final_position, Eigen::Vector2d final_tangent,
+    double initial_velocity, double final_velocity, bool backwards,
+    double extra_distance_initial, double extra_distance_final,
+    double initial_angular_velocity, double final_angular_velocity) {
+  backwards_ = backwards;
 
-  position_1_ = p1.translational();
-  velocity_1_ = FromMagDirection(scale, p1.heading());
-  accel_1_ = Eigen::Matrix<double, 2, 1>::Zero();
+  Eigen::Vector2d initial_derivative_basis;
+  Eigen::Vector2d final_derivative_basis;
+  double initial_deriv_magnitude;
+  double final_deriv_magnitude;
 
-  ComputeCoefficients();
-}
-
-void HermiteSpline::ComputeCoefficients() {
-  a_ = -6 * position_0_ - 3 * velocity_0_ - 0.5 * accel_0_ + 0.5 * accel_1_ -
-       3 * velocity_1_ + 6 * position_1_;
-
-  b_ = 15 * position_0_ + 8 * velocity_0_ + 1.5 * accel_0_ - accel_1_ +
-       7 * velocity_1_ - 15 * position_1_;
-
-  c_ = -10 * position_0_ - 6 * velocity_0_ - 1.5 * accel_0_ + 0.5 * accel_1_ -
-       4 * velocity_1_ + 10 * position_1_;
-
-  d_ = 0.5 * accel_0_;
-
-  e_ = velocity_0_;
-
-  f_ = position_0_;
-}
-
-Eigen::Vector2d HermiteSpline::PointAt(double t) {
-  return a_ * t * t * t * t * t + b_ * t * t * t * t + c_ * t * t * t +
-         d_ * t * t + e_ * t + f_;
-}
-
-Eigen::Vector2d HermiteSpline::VelocityAt(double t) {
-  return 5 * a_ * t * t * t * t + 4 * b_ * t * t * t + 3 * c_ * t * t +
-         2 * d_ * t + e_;
-}
-
-Eigen::Vector2d HermiteSpline::AccelAt(double t) {
-  return 20 * a_ * t * t * t + 12 * b_ * t * t + 6 * c_ * t + 2 * d_;
-}
-
-Eigen::Vector2d HermiteSpline::JerkAt(double t) {
-  return 60 * a_ * t * t + 24 * b_ * t + 6 * c_;
-}
-
-double HermiteSpline::HeadingAt(double t) {
-  Eigen::Vector2d velocity = VelocityAt(t);
-  if (::std::abs(velocity(0)) > 1e-10 &&
-      ::std::abs(velocity(1)) > 1e-10) {
-    return remainder(::std::atan2(velocity(1), velocity(0)), M_PI);
-  } else if (::std::abs(velocity(1)) > 1e-10) {
-    return (M_PI / 2.) * muan::utils::signum(velocity(1) > 0);
-  } else {
-    return M_PI * !(velocity(0) > 0);
+  {
+    Eigen::Vector2d distance = final_position - initial_position;
+    // How far to the side are we driving, relative to initial state?
+    Eigen::Vector2d sideways = distance - Projection(distance, initial_tangent);
+    // How far to the front is the sideways vector, relative to final state?
+    double forwards2 = sideways.dot(final_tangent);
+    if (backwards) {
+      forwards2 *= -1;
+    }
+    // Rough estimate of the curvature, this should be approximately
+    // correct as long as the curvature doesn't have excessively large changes.
+    double approx_curve = (sideways.norm() * 2 - forwards2) / distance.norm();
+    // Standard hermite spline uses tangent * |distance|, but initial velocity
+    // should be taken into account as well, although only sigmificantly if
+    // distance is short and initial velocity is high. This formula was found
+    // experimentally.
+    initial_deriv_magnitude =
+        distance.norm() + extra_distance_initial * 5.0 +
+        initial_velocity * initial_velocity * 0.5 * approx_curve * approx_curve;
+    final_deriv_magnitude =
+        distance.norm() + extra_distance_final * 5.0 +
+        final_velocity * final_velocity * 0.5 * approx_curve * approx_curve;
   }
-}
 
-double HermiteSpline::CurvatureAt(double t) {
-  double dx = VelocityAt(t)(0);
-  double dy = VelocityAt(t)(1);
-  double ddx = AccelAt(t)(0);
-  double ddy = AccelAt(t)(1);
+  initial_derivative_basis = initial_tangent * initial_deriv_magnitude;
+  final_derivative_basis = final_tangent * final_deriv_magnitude;
 
-  return (dx * ddy - ddx * dy) /
-         ((dx * dx + dy * dy) * ::std::sqrt((dx * dx + dy * dy)));
-}
-
-double HermiteSpline::DCurvatureAt(double t) {
-  double dx = VelocityAt(t)(0);
-  double dy = VelocityAt(t)(1);
-  double ddx = AccelAt(t)(0);
-  double ddy = AccelAt(t)(1);
-  double dddx = JerkAt(t)(0);
-  double dddy = JerkAt(t)(1);
-  double dx2dy2 = (dx * dx + dy * dy);
-  double num = (dx * dddy - dddx * dy) * dx2dy2 -
-               3 * (dx * ddy - ddx * dy) * (dx * ddx + dy * ddy);
-  return num / (dx2dy2 * dx2dy2 * ::std::sqrt(dx2dy2));
-}
-
-double HermiteSpline::DCurvature2At(double t) {
-  double dx = VelocityAt(t)(0);
-  double dy = VelocityAt(t)(1);
-  double ddx = AccelAt(t)(0);
-  double ddy = AccelAt(t)(1);
-  double dddx = JerkAt(t)(0);
-  double dddy = JerkAt(t)(1);
-  double dx2dy2 = (dx * dx + dy * dy);
-  double num = (dx * dddy - dddx * dy) * dx2dy2 -
-               3 * (dx * ddy - ddx * dy) * (dx * ddx + dy * ddy);
-  return num * num / (dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2 * dx2dy2);
-}
-
-Pose HermiteSpline::PoseAt(double t) { return Pose(PointAt(t), HeadingAt(t)); }
-
-PoseWithCurvature HermiteSpline::PoseWithCurvatureAt(double t) {
-  return PoseWithCurvature(PoseAt(t), CurvatureAt(t),
-                           DCurvatureAt(t) / VelocityAt(t).norm());
-}
-
-double HermiteSpline::SumDCurvature2() {
-  double dt = 1.0 / kSamples;
-  double sum = 0;
-  for (double t = 0; t < 1.0; t += dt) {
-    sum += (dt * DCurvature2At(t));
+  if (backwards_) {
+    initial_derivative_basis *= -1;
+    final_derivative_basis *= -1;
   }
-  return sum;
+
+  Eigen::Vector2d initial_acceleration = Eigen::Vector2d::Zero();
+  if (initial_velocity > 0.01 || initial_velocity < -0.01) {
+    initial_acceleration =
+        (Eigen::Vector2d() << -initial_tangent(1), initial_tangent(0))
+            .finished() *
+        initial_deriv_magnitude * final_deriv_magnitude *
+        initial_angular_velocity / initial_velocity;
+  } else if (initial_angular_velocity > 0.01 ||
+             initial_angular_velocity < -0.01) {
+  }
+
+  Eigen::Vector2d final_acceleration = Eigen::Vector2d::Zero();
+  if (final_velocity > 0.01 || final_velocity < -0.01) {
+    final_acceleration =
+        (Eigen::Vector2d() << -final_tangent(1), final_tangent(0)).finished() *
+        final_deriv_magnitude * final_deriv_magnitude * final_angular_velocity /
+        final_velocity;
+  } else if (final_angular_velocity > 0.01 || final_angular_velocity < -0.01) {
+  }
+
+  coefficients_ = Eigen::Matrix<double, 4, 6>::Zero();
+  coefficients_.block<2, 1>(0, 0) = initial_position;
+  coefficients_.block<2, 1>(0, 1) = initial_derivative_basis;
+  coefficients_.block<2, 1>(0, 2) = 0.5 * initial_acceleration;
+  coefficients_.block<2, 1>(0, 3) =
+      -10 * initial_position - 6 * initial_derivative_basis +
+      -1.5 * initial_acceleration + 0.5 * final_acceleration +
+      -4 * final_derivative_basis + 10 * final_position;
+  coefficients_.block<2, 1>(0, 4) =
+      15 * initial_position + 8 * initial_derivative_basis +
+      1.5 * initial_acceleration - 1 * final_acceleration +
+      7 * final_derivative_basis - 15 * final_position;
+  coefficients_.block<2, 1>(0, 5) =
+      -6 * initial_position - 3 * initial_derivative_basis +
+      -0.5 * initial_acceleration + 0.5 * final_acceleration +
+      -3 * final_derivative_basis + 6 * final_position;
+
+  for (int i = 0; i < 6; i++) {
+    coefficients_.block<2, 1>(2, i) = coefficients_.block<2, 1>(0, i) * i;
+  }
+
+  initial_heading_ =
+      remainder(::std::atan2(initial_tangent(1), initial_tangent(0)), 2 * M_PI);
 }
 
-double HermiteSpline::SumDCurvature2(std::vector<HermiteSpline> splines) {
-  double sum = 0;
-  for (HermiteSpline spline : splines) {
-    sum += spline.SumDCurvature2();
+std::array<PoseWithCurvature, kNumSamples> HermiteSpline::Populate(
+    double s_min, double s_max) const {
+  Eigen::Matrix<double, 6, 1> s_polynomial_bases;
+  double step = (s_max - s_min) / (kNumSamples - 1);
+  std::array<PoseWithCurvature, kNumSamples> pose_arr;
+  for (int i = 0; i < kNumSamples; i++) {
+    double s = s_min + i * step;
+    s_polynomial_bases << 1.0, s, s * s, s * s * s, s * s * s * s,
+        s * s * s * s * s;
+
+    Eigen::Vector4d combined = coefficients_ * s_polynomial_bases;
+
+    double heading;
+    double curvature;
+    if (s == 0) {
+      // When s is _exactly_ zero, we can't get the heading directly from
+      // the derivative (because it collapses to zero)! Let's use the cached
+      // value instead.
+      heading = initial_heading_;
+      curvature = 0;
+    } else {
+      heading = ::std::atan2(combined(3), combined(2));
+      if (backwards_) {
+        if (heading > 0) {
+          heading -= M_PI;
+        } else {
+          heading += M_PI;
+        }
+      }
+      curvature =
+          (heading - pose_arr.at(i - 1).heading()) /
+          ((combined.block<2, 1>(0, 0) - pose_arr.at(i - 1).translational())
+               .norm());
+    }
+
+    pose_arr.at(i) =
+        PoseWithCurvature(Pose(combined.block<2, 1>(0, 0), heading), curvature);
   }
-  return sum;
+  return pose_arr;
 }
 
 }  // namespace control

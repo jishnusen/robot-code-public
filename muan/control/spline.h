@@ -8,45 +8,35 @@
 namespace muan {
 namespace control {
 
-// Spline generation
-constexpr int kSamples = 100;
+using Position = Eigen::Vector2d;
+
+constexpr int kNumSamples = 1001;
 
 class HermiteSpline {
  public:
-  HermiteSpline() = default;
-  HermiteSpline(Pose p0, Pose p1);
+  HermiteSpline(Pose initial, Pose final, double initial_velocity,
+                double final_velocity, bool backwards,
+                double extra_distance_initial, double extra_distance_final,
+                double initial_angular_velocity, double final_angular_velocity);
+  HermiteSpline(Position initial_position, Eigen::Vector2d initial_tangent,
+                Position final_position, Eigen::Vector2d final_tangent,
+                double initial_velocity, double final_velocity, bool backwards,
+                double extra_distance_initial, double extra_distance_final,
+                double initial_angular_velocity, double final_angular_velocity);
 
-  Pose get_start_pose() const {
-    return Pose(position_0_, ::std::atan2(position_0_(1), position_0_(0)));
-  }
+  std::array<PoseWithCurvature, kNumSamples> Populate(double s_min,
+                                                      double s_max) const;
 
-  Pose get_end_pose() const {
-    return Pose(position_1_, ::std::atan2(position_1_(1), position_1_(0)));
-  }
-
-  Eigen::Vector2d PointAt(double t);
-  Eigen::Vector2d VelocityAt(double t);
-  Eigen::Vector2d AccelAt(double t);
-  Eigen::Vector2d JerkAt(double t);
-
-  double HeadingAt(double t);
-  double CurvatureAt(double t);
-  double DCurvatureAt(double t);
-  double DCurvature2At(double t);
-
-  Pose PoseAt(double t);
-  PoseWithCurvature PoseWithCurvatureAt(double t);
-
-  double SumDCurvature2();
-  double SumDCurvature2(std::vector<HermiteSpline> splines);
+  inline bool backwards() const { return backwards_; }
 
  private:
-  void ComputeCoefficients();
+  // (1, s, s^2, s^3, s^4, s^5) -> (x, y, x', y')
+  Eigen::Matrix<double, 4, 6> coefficients_;
 
-  Eigen::Vector2d a_, b_, c_, d_, e_, f_;
-  Eigen::Vector2d position_0_, position_1_;  // (x, y)
-  Eigen::Vector2d velocity_0_, velocity_1_;  // (x', y')
-  Eigen::Vector2d accel_0_, accel_1_;        // (x'', y'')
+  // Cached, because it is lost in the first-derivative at s=0
+  double initial_heading_;
+
+  bool backwards_;
 };
 
 }  // namespace control
