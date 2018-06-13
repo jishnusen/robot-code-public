@@ -25,7 +25,6 @@ cc_library(
     name = "pose",
     srcs = [
         "pose.cpp",
-        "pose.hpp",
     ],
     hdrs = ["pose.h"],
     linkopts = ["-lm"],
