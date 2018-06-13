@@ -27,24 +27,5 @@ TEST(Pose, Compose) {
   EXPECT_NEAR(c.heading(), -3.0 * M_PI / 4.0, 1e-6);
 }
 
-TEST(TimedPose, Interpolate) {
-  TimedPose<Pose> a = TimedPose<Pose>(
-      Pose((Eigen::Vector3d() << 0., 0., 0.).finished()), 0., 0., 1.);
-  TimedPose<Pose> b = TimedPose<Pose>(
-      Pose((Eigen::Vector3d() << 0.5, 0., 0.).finished()), 1., 1., 0.);
-
-  EXPECT_TRUE(a.pose().Get().isApprox(a.Interpolate(b, 0.).pose().Get(), 1e-9));
-  EXPECT_TRUE(b.pose().Get().isApprox(a.Interpolate(b, 1.).pose().Get(), 1e-9));
-  EXPECT_TRUE(b.pose().Get().isApprox(b.Interpolate(a, 0.).pose().Get(), 1e-9));
-  EXPECT_TRUE(a.pose().Get().isApprox(b.Interpolate(a, 1.).pose().Get(), 1e-9));
-
-  TimedPose<Pose> c = a.Interpolate(b, 0.5);
-
-  EXPECT_NEAR(0.5, c.t(), 1e-9);
-  EXPECT_NEAR(a.acceleration(), c.acceleration(), 1e-9);
-  EXPECT_NEAR(0.5, c.velocity(), 1e-9);
-  EXPECT_NEAR(0.125, c.pose().translational()(0), 1e-9);
-}
-
 }  // namespace control
 }  // namespace muan

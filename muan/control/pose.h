@@ -24,7 +24,7 @@ class Pose {
   Pose TranslateBy(const Eigen::Vector2d &delta) const;
   Pose RotateBy(double theta) const;
 
-  Pose Interpolate(Pose other, double frac);
+  Pose Interpolate(Pose other, double frac) const;
 
   // Compose this pose with another. Treat the new pose as an offset, using this
   // pose as the origin (theta=x axis)
@@ -37,70 +37,32 @@ class Pose {
 class PoseWithCurvature {
  public:
   PoseWithCurvature() = default;
-  PoseWithCurvature(Pose pose, double curvature, double dcurvature_ds);
+  PoseWithCurvature(Pose pose, double curvature);
 
   PoseWithCurvature operator+(const PoseWithCurvature &other) const;
   PoseWithCurvature operator-(const PoseWithCurvature &other) const;
 
   PoseWithCurvature TranslateBy(const Eigen::Vector2d &delta) const;
 
-  PoseWithCurvature Interpolate(PoseWithCurvature other, double frac);
+  PoseWithCurvature Interpolate(PoseWithCurvature other, double frac) const;
 
   inline Eigen::Vector2d translational() const { return pose_.translational(); }
   inline double heading() const { return pose_.heading(); }
 
-  inline Eigen::Matrix<double, 5, 1> Get() const {
-    return (Eigen::Matrix<double, 5, 1>() << pose_.Get(), curvature_,
-            dcurvature_ds_)
+  inline Eigen::Matrix<double, 4, 1> Get() const {
+    return (Eigen::Matrix<double, 4, 1>() << pose_.Get(), curvature_)
         .finished();
   }
+
   inline Pose pose() const { return pose_; }
   inline double curvature() const { return curvature_; }
-  inline double dcurvature_ds() const { return dcurvature_ds_; }
 
  private:
   Pose pose_;
   double curvature_;
-  double dcurvature_ds_;
-};
-
-template <typename T>
-class TimedPose {
- public:
-  TimedPose() = default;
-  explicit TimedPose(T pose);
-  TimedPose(T pose, double t, double velocity, double acceleration);
-
-  inline T pose() const { return pose_; }
-  inline double t() const { return t_; }
-  inline double velocity() const { return velocity_; }
-  inline double acceleration() const { return acceleration_; }
-
-  void set_t(double t) { t_ = t; }
-  void set_velocity(double velocity) { velocity_ = velocity; }
-  void set_acceleration(double acceleration) { acceleration_ = acceleration; }
-
-  TimedPose<T> Interpolate(TimedPose<T> other, double frac);
-
- private:
-  T pose_;
-  double t_;
-  double velocity_;
-  double acceleration_;
-};
-
-template <typename T>
-struct ConstrainedPose {
-  T pose;
-  double distance;
-  double max_velocity;
-  double min_acceleration;
-  double max_acceleration;
 };
 
 }  // namespace control
 }  // namespace muan
-
-#include "muan/control/pose.hpp"
 
 #endif  // MUAN_CONTROL_POSE_H_

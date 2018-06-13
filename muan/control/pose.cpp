@@ -59,7 +59,7 @@ Pose Pose::Compose(const Pose &other) const {
   return other.RotateBy(heading()).TranslateBy(translational());
 }
 
-Pose Pose::Interpolate(Pose other, double frac) {
+Pose Pose::Interpolate(Pose other, double frac) const {
   if (frac <= 0) {
     return Pose(Get());
   } else if (frac >= 1) {
@@ -72,33 +72,30 @@ Pose Pose::Interpolate(Pose other, double frac) {
   return result;
 }
 
-PoseWithCurvature::PoseWithCurvature(Pose pose, double curvature,
-                                     double dcurvature_ds)
-    : pose_(pose), curvature_(curvature), dcurvature_ds_(dcurvature_ds) {}
+PoseWithCurvature::PoseWithCurvature(Pose pose, double curvature)
+    : pose_(pose), curvature_(curvature) {}
 
 PoseWithCurvature PoseWithCurvature::operator+(
     const PoseWithCurvature &other) const {
-  return PoseWithCurvature(pose_ + other.pose_, curvature_, dcurvature_ds_);
+  return PoseWithCurvature(pose_ + other.pose_, curvature_);
 }
 
 PoseWithCurvature PoseWithCurvature::operator-(
     const PoseWithCurvature &other) const {
-  return PoseWithCurvature(pose_ - other.pose_, curvature_, dcurvature_ds_);
+  return PoseWithCurvature(pose_ - other.pose_, curvature_);
 }
 
 PoseWithCurvature PoseWithCurvature::TranslateBy(
     const Eigen::Vector2d &delta) const {
   Eigen::Vector2d new_values = pose_.translational() + delta;
-  return PoseWithCurvature(Pose(new_values, pose_.heading()), curvature_,
-                           dcurvature_ds_);
+  return PoseWithCurvature(Pose(new_values, pose_.heading()), curvature_);
 }
 
 PoseWithCurvature PoseWithCurvature::Interpolate(PoseWithCurvature other,
-                                                 double frac) {
+                                                 double frac) const {
   return PoseWithCurvature(
       pose_.Interpolate(other.pose(), frac),
-      curvature_ + ((other.curvature() - curvature_) * frac),
-      dcurvature_ds_ + ((other.dcurvature_ds() - dcurvature_ds_) * frac));
+      curvature_ + ((other.curvature() - curvature_) * frac));
 }
 
 }  // namespace control
