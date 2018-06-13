@@ -102,7 +102,7 @@ class DrivetrainModel {
   // same curvature. `curvature` must be consistent with `velocity` if velocity
   // is nonzero.
   Bounds CalculateMinMaxAcceleration(Eigen::Vector2d velocity, double curvature,
-                                     double max_voltage, bool high_gear);
+                                     double max_voltage, bool high_gear) const;
 
  private:
   double wheelbase_radius_;

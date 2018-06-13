@@ -179,7 +179,7 @@ Eigen::Vector2d DrivetrainModel::InverseDynamics(Eigen::Vector2d velocity,
 Bounds DrivetrainModel::CalculateMinMaxAcceleration(Eigen::Vector2d velocity,
                                                     double curvature,
                                                     double max_voltage,
-                                                    bool high_gear) {
+                                                    bool high_gear) const {
   Bounds bounds;
 
   DriveTransmission transmission =
