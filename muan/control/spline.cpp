@@ -124,6 +124,12 @@ std::array<PoseWithCurvature, kNumSamples> HermiteSpline::Populate(
   std::array<PoseWithCurvature, kNumSamples> pose_arr;
   for (int i = 0; i < kNumSamples; i++) {
     double s = s_min + i * step;
+
+    Eigen::Vector4d prev;
+    if (i > 0) {
+      prev = coefficients_ * s_polynomial_bases;
+    }
+
     s_polynomial_bases << 1.0, s, s * s, s * s * s, s * s * s * s,
         s * s * s * s * s;
 
@@ -146,10 +152,17 @@ std::array<PoseWithCurvature, kNumSamples> HermiteSpline::Populate(
           heading += M_PI;
         }
       }
-      curvature =
-          (heading - pose_arr.at(i - 1).heading()) /
-          ((combined.block<2, 1>(0, 0) - pose_arr.at(i - 1).translational())
-               .norm());
+
+      if (i > 0) {
+        Eigen::Vector2d dT =
+            combined.block<2, 1>(2, 0) - prev.block<2, 1>(2, 0);
+        double ds =
+            (combined.block<2, 1>(0, 0) - prev.block<2, 1>(0, 0)).norm();
+
+        curvature = (dT / ds).norm();
+      } else {
+        curvature = 0.;
+      }
     }
 
     pose_arr.at(i) =
