@@ -89,6 +89,21 @@ cc_library(
 )
 
 cc_library(
+    name = "nonlinear_feedback",
+    srcs = [
+        "nonlinear_feedback_controller.cpp",
+    ],
+    hdrs = [
+        "nonlinear_feedback_controller.h",
+    ],
+    deps = [
+        ":drivetrain_model",
+        ":pose",
+        "//third_party/eigen",
+    ],
+)
+
+cc_library(
     name = "state_space",
     srcs = [
         "state_space_controller.hpp",
@@ -147,6 +162,16 @@ cc_test(
     deps = [
         ":motion_profiles",
         "//muan/utils:math_utils",
+        "//third_party/google/googletest",
+    ],
+)
+
+cc_test(
+    name = "nonlinear_feedback_test",
+    srcs = ["nonlinear_feedback_controller_test.cpp"],
+    deps = [
+        ":nonlinear_feedback",
+        ":trajectory",
         "//third_party/google/googletest",
     ],
 )
