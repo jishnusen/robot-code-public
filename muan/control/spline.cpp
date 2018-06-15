@@ -4,16 +4,6 @@
 namespace muan {
 namespace control {
 
-Eigen::Vector2d Projection(Eigen::Vector2d a, Eigen::Vector2d direction) {
-  return a.dot(direction) * direction.dot(direction) * direction;
-}
-
-Position FromMagDirection(double magnitude, double direction) {
-  return magnitude *
-         (Position() << ::std::cos(direction), ::std::sin(direction))
-             .finished();
-}
-
 HermiteSpline::HermiteSpline(Pose initial, Pose final, double initial_velocity,
                              double final_velocity, bool backwards,
                              double extra_distance_initial,
@@ -122,18 +112,16 @@ std::array<PoseWithCurvature, kNumSamples> HermiteSpline::Populate(
   Eigen::Matrix<double, 6, 1> s_polynomial_bases;
   double step = (s_max - s_min) / (kNumSamples - 1);
   std::array<PoseWithCurvature, kNumSamples> pose_arr;
+
+  Eigen::Vector4d combined;
+
   for (int i = 0; i < kNumSamples; i++) {
     double s = s_min + i * step;
-
-    Eigen::Vector4d prev;
-    if (i > 0) {
-      prev = coefficients_ * s_polynomial_bases;
-    }
 
     s_polynomial_bases << 1.0, s, s * s, s * s * s, s * s * s * s,
         s * s * s * s * s;
 
-    Eigen::Vector4d combined = coefficients_ * s_polynomial_bases;
+    combined = coefficients_ * s_polynomial_bases;
 
     double heading;
     double curvature;
@@ -154,12 +142,19 @@ std::array<PoseWithCurvature, kNumSamples> HermiteSpline::Populate(
       }
 
       if (i > 0) {
-        Eigen::Vector2d dT =
-            combined.block<2, 1>(2, 0) - prev.block<2, 1>(2, 0);
-        double ds =
-            (combined.block<2, 1>(0, 0) - prev.block<2, 1>(0, 0)).norm();
+        Eigen::Vector2d tangent = FromMagDirection(1., heading);
+        Eigen::Vector2d prev_tangent =
+            FromMagDirection(1., pose_arr.at(i - 1).heading());
 
-        curvature = (dT / ds).norm();
+        Eigen::Vector2d dT = tangent - prev_tangent;
+        double ds =
+            (combined.block<2, 1>(0, 0) - pose_arr.at(i - 1).translational())
+                .norm();
+        curvature =
+            (dT / ds).norm() * (backwards_ ? -1. : 1.) *
+            std::copysign(
+                1., heading -
+                        pose_arr.at(i - 1).heading());  // signed curvature (k)
       } else {
         curvature = 0.;
       }
