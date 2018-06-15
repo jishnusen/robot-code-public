@@ -82,12 +82,14 @@ class TestFixture : public ::testing::Test {
                  std::sin(current_pose.heading() + velocity(1) * 0.01);
       delta(2) = velocity(1) * 0.01;
 
+      delta *= 1.05;  // Simulate some suckiness;
+
       current_pose = Pose(current_pose.Get() + delta);
 
       EXPECT_LT(std::abs(delta(0)), constraints_.max_velocity + 1e-9);
     }
 
-    EXPECT_LT(error.translational().norm(), 3e-2);
+    EXPECT_LT(error.translational().norm(), 3e-2);  //~3cm within the goal
   }
 
  private:
