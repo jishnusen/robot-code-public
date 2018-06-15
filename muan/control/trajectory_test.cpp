@@ -57,10 +57,20 @@ class TrajectoryTest : public ::testing::Test {
     EXPECT_NEAR(sample.pose.pose().Get()(2), initial.Get()(2), 1e-9);
 
     while (!trajectory.done()) {
+      auto prev_sample = sample;
       sample = trajectory.Advance(0.01);
 
       EXPECT_LT(std::abs(sample.v), constraints_.max_velocity + 1e-9);
       EXPECT_LT(std::abs(sample.a), constraints_.max_acceleration + 1e-9);
+
+      EXPECT_NEAR(FromMagDirection(prev_sample.v * (sample.t - prev_sample.t),
+                                   prev_sample.pose.heading())(0) +
+                      prev_sample.pose.translational()(0),
+                  sample.pose.translational()(0), 1e-2);
+      EXPECT_NEAR(FromMagDirection(prev_sample.v * (sample.t - prev_sample.t),
+                                   prev_sample.pose.heading())(1) +
+                      prev_sample.pose.translational()(1),
+                  sample.pose.translational()(1), 1e-2);
 
       if (backwards) {
         EXPECT_LT(sample.v, 1e-9);
@@ -157,5 +167,3 @@ TEST_F(TrajectoryTest, ExtraTest) {
 
 }  // namespace control
 }  // namespace muan
-
-// TODO(jishnu) Add tests
