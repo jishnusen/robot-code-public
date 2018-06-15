@@ -6,6 +6,9 @@
 namespace muan {
 namespace control {
 
+Eigen::Vector2d Projection(Eigen::Vector2d a, Eigen::Vector2d direction);
+Eigen::Vector2d FromMagDirection(double magnitude, double direction);
+
 class Pose {
  public:
   Pose() = default;
