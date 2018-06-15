@@ -1,5 +1,4 @@
 #include "muan/control/trajectory.h"
-#include <iostream>
 
 namespace muan {
 namespace control {
