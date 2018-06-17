@@ -24,10 +24,6 @@ class DriveTransmission {
     // Gear ratio (output rate/input rate), higher is faster
     double gear_ratio;
 
-    // The effective inertia of the gears in the transmission itself, on the
-    // output shaft
-    double gear_inertia = 0;
-
     // The efficiency. 1 is perfectly efficient.
     double efficiency = 1;
   };
@@ -73,6 +69,9 @@ class DrivetrainModel {
     // drivetrain, N.
     double force_stiction = 0;
 
+    // Abs constant kinetic friction (positive)
+    double force_friction = 0;
+
     // The radius of the wheel in meters.
     double wheel_radius;
   };
@@ -110,6 +109,7 @@ class DrivetrainModel {
   double mass_;
   double moment_inertia_;
   double force_stiction_;
+  double force_friction_;
   double wheel_radius_;
 
   DriveTransmission transmission_low_, transmission_high_;

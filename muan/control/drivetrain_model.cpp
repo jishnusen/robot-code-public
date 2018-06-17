@@ -13,7 +13,6 @@ DriveTransmission::DriveTransmission(Properties properties) {
   dynamics_b_ = properties.num_motors * properties.efficiency *
                 properties.motor_kt /
                 (properties.motor_resistance * properties.gear_ratio);
-  gear_inertia_ = properties.gear_inertia;
 }
 
 double DriveTransmission::CalculateTorque(double velocity,
@@ -37,6 +36,7 @@ DrivetrainModel::DrivetrainModel(DrivetrainModel::Properties properties,
       mass_(properties.mass),
       moment_inertia_(properties.moment_inertia),
       force_stiction_(properties.force_stiction),
+      force_friction_(properties.force_friction),
       wheel_radius_(properties.wheel_radius),
       transmission_low_(low),
       transmission_high_(high) {}
@@ -84,34 +84,36 @@ Eigen::Vector2d DrivetrainModel::ForwardDynamics(Eigen::Vector2d velocity,
   // of the drivetrain, clipped to within an interval given by the maximum
   // static_friction.
   Eigen::Vector2d robot_force_stiction = Eigen::Vector2d::Zero();
-  if (left_right_velocity(0) < 1e-3) {
+  Eigen::Vector2d robot_force_friction = Eigen::Vector2d::Zero();
+  if (std::abs(left_right_velocity(0)) < 1e-3) {
     robot_force_stiction(0) =
         muan::utils::Cap(-robot_force_applied(0) - robot_force_angular_drag(0),
                          -force_stiction_, force_stiction_);
+  } else {
+    robot_force_friction(0) =
+        std::copysign(force_friction_, left_right_velocity(0));
   }
-  if (left_right_velocity(1) < 1e-3) {
+  if (std::abs(left_right_velocity(1)) < 1e-3) {
     robot_force_stiction(1) =
         muan::utils::Cap(-robot_force_applied(1) - robot_force_angular_drag(1),
                          -force_stiction_, force_stiction_);
+  } else {
+    robot_force_friction(1) =
+        std::copysign(force_friction_, left_right_velocity(1));
   }
 
   // Net force on each side of the drivetrain
   const Eigen::Vector2d robot_force_net =
-      robot_force_applied + robot_force_angular_drag + robot_force_stiction;
+      robot_force_applied + robot_force_angular_drag + robot_force_stiction +
+      robot_force_friction;
 
   // The gearing is down a ratio, so its mass has a disproportionate impact on
   // acceleration.
-  const double effective_gearing_mass =
-      transmission.gear_inertia() / (wheel_radius_ * wheel_radius_);
-  const double effective_gearing_moment_inertia =
-      effective_gearing_mass * wheelbase_radius_ * wheelbase_radius_;
-
   Eigen::Vector2d acceleration_net;
-  acceleration_net(0) = (robot_force_net(0) + robot_force_net(1)) /
-                        (mass_ + effective_gearing_mass);
+  acceleration_net(0) = (robot_force_net(0) + robot_force_net(1)) / mass_;
   acceleration_net(1) = wheelbase_radius_ *
                         (robot_force_net(1) - robot_force_net(0)) /
-                        (moment_inertia_ + effective_gearing_moment_inertia);
+                        moment_inertia_;
   return acceleration_net;
 }
 
@@ -125,15 +127,8 @@ Eigen::Vector2d DrivetrainModel::InverseDynamics(Eigen::Vector2d velocity,
   const DriveTransmission transmission =
       high_gear ? transmission_high_ : transmission_low_;
 
-  const double effective_gearing_mass =
-      transmission.gear_inertia() / (wheel_radius_ * wheel_radius_);
-  const double effective_gearing_moment_inertia =
-      effective_gearing_mass * wheelbase_radius_ * wheelbase_radius_;
-
-  const double robot_force_forwards =
-      acceleration(0) * (mass_ + effective_gearing_mass);
-  const double robot_torque =
-      acceleration(1) * (moment_inertia_ + effective_gearing_moment_inertia);
+  const double robot_force_forwards = acceleration(0) * mass_;
+  const double robot_torque = acceleration(1) * moment_inertia_;
 
   // Attribute half of the torque and half of the force to each side.
   Eigen::Vector2d robot_force_net =
@@ -153,17 +148,25 @@ Eigen::Vector2d DrivetrainModel::InverseDynamics(Eigen::Vector2d velocity,
   // This is instantaneously suboptimal - it yields more voltage than is
   // necessary at the very moment of initial acceleration, but is still correct.
   Eigen::Vector2d robot_force_stiction = Eigen::Vector2d::Zero();
-  if (left_right_velocity(0) < 1e-3) {
+  Eigen::Vector2d robot_force_friction = Eigen::Vector2d::Zero();
+  if (std::abs(left_right_velocity(0)) < 1e-3) {
     robot_force_stiction(0) =
         -std::copysign(force_stiction_, left_right_acceleration(0));
+  } else {
+    robot_force_friction(0) =
+        -std::copysign(force_friction_, left_right_acceleration(0));
   }
-  if (left_right_velocity(1) < 1e-3) {
+  if (std::abs(left_right_velocity(1)) < 1e-3) {
     robot_force_stiction(1) =
         -std::copysign(force_stiction_, left_right_acceleration(1));
+  } else {
+    robot_force_friction(1) =
+        -std::copysign(force_friction_, left_right_acceleration(1));
   }
 
   const Eigen::Vector2d robot_force_applied =
-      robot_force_net - robot_force_stiction - robot_force_angular_drag;
+      robot_force_net - robot_force_stiction - robot_force_friction -
+      robot_force_angular_drag;
 
   const Eigen::Vector2d wheel_torque_applied =
       robot_force_applied * wheel_radius_;
@@ -209,24 +212,25 @@ Bounds DrivetrainModel::CalculateMinMaxAcceleration(Eigen::Vector2d velocity,
     int master_direction = 1;
     int follower_direction = relationship_lr * master_direction;
 
-    Eigen::Vector2d robot_force_stiction;
-    if (left_right_velocity(master_index) < 1e-3) {
+    Eigen::Vector2d robot_force_stiction = Eigen::Vector2d::Zero();
+    Eigen::Vector2d robot_force_friction = Eigen::Vector2d::Zero();
+    if (std::abs(left_right_velocity(master_index)) < 1e-3) {
       robot_force_stiction(master_index) = -master_direction * force_stiction_;
+    } else {
+      robot_force_friction(master_index) = -master_direction * force_friction_;
     }
-    if (left_right_velocity(!master_index) < 1e-3) {
+    if (std::abs(left_right_velocity(!master_index)) < 1e-3) {
       robot_force_stiction(!master_index) =
           -follower_direction * force_stiction_;
+    } else {
+      robot_force_friction(!master_index) =
+          -follower_direction * force_friction_;
     }
 
     double robot_torque_angular_drag = angular_drag_ * velocity(1);
     Eigen::Vector2d robot_force_angular_drag =
         0.5 * Eigen::Vector2d(-robot_torque_angular_drag / wheelbase_radius_,
                               robot_torque_angular_drag / wheelbase_radius_);
-
-    const double effective_gearing_mass =
-        transmission.gear_inertia() / (wheel_radius_ * wheel_radius_);
-    const double effective_gearing_moment_inertia =
-        effective_gearing_mass * wheelbase_radius_ * wheelbase_radius_;
 
     Eigen::Vector2d robot_force_applied;
     robot_force_applied(master_index) =
@@ -235,27 +239,27 @@ Bounds DrivetrainModel::CalculateMinMaxAcceleration(Eigen::Vector2d velocity,
             master_voltage_negative ? -max_voltage : max_voltage) /
         wheel_radius_;
     robot_force_applied(!master_index) =
-        (wheelbase_radius_ * (mass_ + effective_gearing_mass) +
-         (master_index ? 1 : -1) * curvature *
-             (moment_inertia_ + effective_gearing_moment_inertia)) /
-            (wheelbase_radius_ * (mass_ + effective_gearing_mass) -
-             (master_index ? 1 : -1) * curvature *
-                 (moment_inertia_ + effective_gearing_moment_inertia)) *
+        (wheelbase_radius_ * mass_ +
+         (master_index ? 1 : -1) * curvature * moment_inertia_) /
+            (wheelbase_radius_ * mass_ -
+             (master_index ? 1 : -1) * curvature * moment_inertia_) *
             (robot_force_applied(master_index) +
              robot_force_angular_drag(master_index) +
-             robot_force_stiction(master_index)) -
+             robot_force_stiction(master_index) +
+             robot_force_friction(master_index)) -
         robot_force_angular_drag(!master_index) -
-        robot_force_stiction(!master_index);
+        robot_force_stiction(!master_index) -
+        robot_force_friction(!master_index);
 
     Eigen::Vector2d robot_force_net =
-        robot_force_applied + robot_force_angular_drag + robot_force_stiction;
+        robot_force_applied + robot_force_angular_drag + robot_force_stiction +
+        robot_force_friction;
 
     Eigen::Vector2d acceleration_net;
-    acceleration_net(0) = (robot_force_net(0) + robot_force_net(1)) /
-                          (mass_ + effective_gearing_mass);
+    acceleration_net(0) = (robot_force_net(0) + robot_force_net(1)) / mass_;
     acceleration_net(1) = wheelbase_radius_ *
                           (robot_force_net(1) - robot_force_net(0)) /
-                          (moment_inertia_ + effective_gearing_moment_inertia);
+                          moment_inertia_;
 
     Eigen::Vector2d voltage_applied;
     voltage_applied(0) =
