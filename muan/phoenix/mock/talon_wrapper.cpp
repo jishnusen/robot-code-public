@@ -12,27 +12,20 @@ void TalonWrapper::SetOpenloopGoal(double setpoint) {  // Voltage
 }
 
 void TalonWrapper::SetPositionGoal(double setpoint,
-                                   double setpoint_ff) {  // Position, Voltage
-  (void)setpoint_ff;
+                                   double /* setpoint_ff */) {  // Position, Voltage
   prev_position_ = position_;
   position_ = setpoint;
 }
 
 void TalonWrapper::SetVelocityGoal(double setpoint,
-                                   double setpoint_ff) {  // Velocity, Voltage
-  (void)setpoint_ff;
+                                   double /* setpoint_ff */) {  // Velocity, Voltage
   prev_position_ = position_;
   position_ += setpoint * 10 * ms;
 }
 
-void TalonWrapper::SetGains(Gains gains, int slot) {
-  (void)gains;
-  (void)slot;
-}
+void TalonWrapper::SetGains(Gains /* gains */, int /* slot */) {}
 
-void TalonWrapper::SelectGains(int slot) {
-  (void)slot;
-}
+void TalonWrapper::SelectGains(int /* slot */) {}
 
 }  // namespace phoenix
 }  // namespace muan

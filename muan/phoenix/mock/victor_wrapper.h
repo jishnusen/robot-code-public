@@ -68,14 +68,14 @@ class VictorWrapper {
   void LoadConfig(Config config);
 
   // Set victor output
-  void SetFollower(int id) { (void)id; }
+  void SetFollower(int /* id */) {}
   void SetOpenloopGoal(double setpoint);
-  void SetPositionGoal(double setpoint, double setpoint_ff);
-  void SetVelocityGoal(double setpoint, double setpoint_ff);
+  void SetPositionGoal(double setpoint, double /* setpoint_ff */);
+  void SetVelocityGoal(double setpoint, double /* setpoint_ff */);
 
   // PID gains for a given slot
-  void SetGains(Gains gains, int slot);
-  void SelectGains(int slot);
+  void SetGains(Gains /* gains */, int /* slot */);
+  void SelectGains(int /* slot */);
 
   void ResetSensor(double value = 0) { prev_position_ = position_ = value; }
 
@@ -84,8 +84,8 @@ class VictorWrapper {
   inline Config config() { return config_; }
   inline double position() { return position_; }
   inline double velocity() { return (position_ - prev_position_) / (10 * ms); }
-  inline double voltage() { return 0; }
-  inline double percent() { return 0; }
+  inline double voltage() { return open_loop_voltage_; }
+  inline double percent() { return open_loop_voltage_ / 12.; }
   inline double current() { return 0; }
 
  private:

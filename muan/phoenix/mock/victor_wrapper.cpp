@@ -12,27 +12,20 @@ void VictorWrapper::SetOpenloopGoal(double setpoint) {  // Voltage
 }
 
 void VictorWrapper::SetPositionGoal(double setpoint,
-                                   double setpoint_ff) {  // Position, Voltage
-  (void)setpoint_ff;
+                                    double /* setpoint_ff */) {  // Position, Voltage
   prev_position_ = position_;
   position_ = setpoint;
 }
 
 void VictorWrapper::SetVelocityGoal(double setpoint,
-                                   double setpoint_ff) {  // Velocity, Voltage
-  (void)setpoint_ff;
+                                    double /* setpoint_ff */) {  // Velocity, Voltage
   prev_position_ = position_;
   position_ += setpoint * 10 * ms;
 }
 
-void VictorWrapper::SetGains(Gains gains, int slot) {
-  (void)gains;
-  (void)slot;
-}
+void VictorWrapper::SetGains(Gains /* gains */, int /* slot */) {}
 
-void VictorWrapper::SelectGains(int slot) {
-  (void)slot;
-}
+void VictorWrapper::SelectGains(int /* slot */) {}
 
 }  // namespace phoenix
 }  // namespace muan
