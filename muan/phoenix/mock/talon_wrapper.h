@@ -84,8 +84,8 @@ class TalonWrapper {
   inline Config config() { return config_; }
   inline double position() { return position_; }
   inline double velocity() { return (position_ - prev_position_) / (10 * ms); }
+  inline double voltage() { return open_loop_voltage_; }
   inline double percent() { return open_loop_voltage_ / 12.; }
-  inline double percent() { return 0; }
   inline double current() { return 0; }
 
  private:
