@@ -13,14 +13,14 @@ constexpr int kTalonOutput = 1023. / 12.;  // Per volt
 
 using muan::units::ms;
 
-enum class FeedbackSensor {
-  kMagEncoderRelative,
-  kMagEncoderAbsolute,
-  kNone,
-};
-
 class TalonWrapper {
  public:
+  enum class FeedbackSensor {
+    kMagEncoderRelative,
+    kMagEncoderAbsolute,
+    kNone,
+  };
+
   struct Gains {  // SI Units, mechanism specific
     double p;
     double i;
