@@ -89,7 +89,7 @@ class TestFixture : public ::testing::Test {
       EXPECT_LT(std::abs(delta(0)), constraints_.max_velocity + 1e-9);
     }
 
-    EXPECT_LT(error.translational().norm(), 3e-2);  //~3cm within the goal
+    EXPECT_LT(error.translational().norm(), 3e-2);  // ~3cm within the goal
   }
 
  private:
