@@ -5,12 +5,6 @@
 namespace muan {
 namespace control {
 
-Eigen::Vector2d FromMagDirection(double magnitude, double direction) {
-  return magnitude *
-         (Eigen::Vector2d() << ::std::cos(direction), ::std::sin(direction))
-             .finished();
-}
-
 DrivetrainModel GenerateModel() {
   DrivetrainModel::Properties properties;
   properties.wheelbase_radius = 0.42;
@@ -20,6 +14,7 @@ DrivetrainModel GenerateModel() {
                               properties.wheelbase_radius *
                               properties.wheelbase_radius;
   properties.force_stiction = 20.0;
+  properties.force_friction = 5.0;
   properties.wheel_radius = 3.25 / 2 * 0.0254;
 
   DriveTransmission::Properties trans_properties;
@@ -34,7 +29,6 @@ DrivetrainModel GenerateModel() {
         (12.0 - i_free * trans_properties.motor_resistance) / w_free;
     trans_properties.gear_ratio = 1 / 4.16;
     trans_properties.num_motors = 2;
-    trans_properties.gear_inertia = 0;
   }
 
   return DrivetrainModel(properties, DriveTransmission(trans_properties),
@@ -89,7 +83,7 @@ class TestFixture : public ::testing::Test {
       EXPECT_LT(std::abs(delta(0)), constraints_.max_velocity + 1e-9);
     }
 
-    EXPECT_LT(error.translational().norm(), 3e-2);  //~3cm within the goal
+    EXPECT_LT(error.translational().norm(), 3e-2);  // ~3cm within the goal
   }
 
  private:
