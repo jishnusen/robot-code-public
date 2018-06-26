@@ -20,21 +20,32 @@ cc_library(
 )
 
 cc_library(
+    name = "drivetrain_config",
+    hdrs = [
+        "drivetrain_config.h",
+    ],
+)
+
+cc_library(
     name = "drivetrain",
     srcs = [
+        "closed_loop_drive.cpp",
         "drivetrain.cpp",
         "open_loop_drive.cpp",
     ],
     hdrs = [
+        "closed_loop_drive.h",
         "drivetrain.h",
-        "drivetrain_config.h",
         "open_loop_drive.h",
     ],
     linkopts = ["-lm"],
     deps = [
+        ":drivetrain_config",
         ":drivetrain_queues",
-        "//muan/control:drivetrain_model",
+        "//muan/control:nonlinear_feedback",
+        "//muan/control:trajectory",
         "//muan/queues:queue_manager",
+        "//muan/utils:math_utils",
         "//muan/wpilib:wpilib_queues",
     ],
 )

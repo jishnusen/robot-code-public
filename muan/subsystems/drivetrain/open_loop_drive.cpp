@@ -1,4 +1,5 @@
 #include "muan/subsystems/drivetrain/open_loop_drive.h"
+#include "muan/utils/math_utils.h"
 
 namespace muan {
 namespace subsystems {
@@ -21,8 +22,8 @@ void OpenLoopDrive::Update(OutputProto* output) {
   right_u -= angular_power * 12.;
 
   (*output)->set_output_type(OPEN_LOOP);
-  (*output)->set_left_setpoint(left_u);
-  (*output)->set_right_setpoint(right_u);
+  (*output)->set_left_setpoint(muan::utils::Cap(left_u, -12., 12.));
+  (*output)->set_right_setpoint(muan::utils::Cap(right_u, -12., 12.));
 }
 
 void OpenLoopDrive::SetGoal(const GoalProto& goal) {

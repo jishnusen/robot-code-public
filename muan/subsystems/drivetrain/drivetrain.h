@@ -4,6 +4,7 @@
 #include "Eigen/Core"
 #include "muan/control/drivetrain_model.h"
 #include "muan/queues/queue_manager.h"
+#include "muan/subsystems/drivetrain/closed_loop_drive.h"
 #include "muan/subsystems/drivetrain/drivetrain_config.h"
 #include "muan/subsystems/drivetrain/open_loop_drive.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
@@ -19,7 +20,7 @@ using muan::control::DrivetrainModel;
 
 class Drivetrain {
  public:
-  Drivetrain(DrivetrainConfig dt_config, DrivetrainModel drive_model);
+  Drivetrain(DrivetrainConfig dt_config);
 
   void Update();
 
@@ -46,8 +47,8 @@ class Drivetrain {
 
   DrivetrainConfig dt_config_;
 
-  /* CLDrivetrain closed_loop_; */
   OpenLoopDrive open_loop_;
+  ClosedLoopDrive closed_loop_;
 };
 
 }  // namespace drivetrain

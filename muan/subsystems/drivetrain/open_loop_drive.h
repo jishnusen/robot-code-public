@@ -1,9 +1,8 @@
 #ifndef MUAN_SUBSYSTEMS_DRIVETRAIN_OPEN_LOOP_DRIVE_H_
 #define MUAN_SUBSYSTEMS_DRIVETRAIN_OPEN_LOOP_DRIVE_H_
 
-/* #include "muan/utils/math_utils" */
-#include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/subsystems/drivetrain/drivetrain_config.h"
+#include "muan/subsystems/drivetrain/queue_types.h"
 
 namespace muan {
 namespace subsystems {
@@ -25,8 +24,8 @@ class OpenLoopDrive {
   DrivetrainConfig dt_config_;
 };
 
-}
-}
-}
+}  // namespace drivetrain
+}  // namespace subsystems
+}  // namespace muan
 
 #endif  // MUAN_SUBSYSTEMS_DRIVETRAIN_OPEN_LOOP_DRIVE_H_
