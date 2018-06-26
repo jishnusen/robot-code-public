@@ -4,6 +4,8 @@
 #include "Eigen/Core"
 #include "muan/control/drivetrain_model.h"
 #include "muan/queues/queue_manager.h"
+#include "muan/subsystems/drivetrain/drivetrain_config.h"
+#include "muan/subsystems/drivetrain/open_loop_drive.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/wpilib/queue_types.h"
 
@@ -11,11 +13,13 @@ namespace muan {
 namespace subsystems {
 namespace drivetrain {
 
+constexpr double kMaxVoltage = 12.;
+
 using muan::control::DrivetrainModel;
 
 class Drivetrain {
  public:
-  Drivetrain(DrivetrainModel drive_model);
+  Drivetrain(DrivetrainConfig dt_config, DrivetrainModel drive_model);
 
   void Update();
 
@@ -40,8 +44,10 @@ class Drivetrain {
   OutputQueue* output_queue_;
   StatusQueue* status_queue_;
 
+  DrivetrainConfig dt_config_;
+
   /* CLDrivetrain closed_loop_; */
-  /* OLDrivetrain open_loop_; */
+  OpenLoopDrive open_loop_;
 };
 
 }  // namespace drivetrain

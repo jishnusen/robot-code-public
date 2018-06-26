@@ -7,14 +7,16 @@ namespace drivetrain {
 using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 
-Drivetrain::Drivetrain(DrivetrainModel drive_model)
+Drivetrain::Drivetrain(DrivetrainConfig dt_config, DrivetrainModel drive_model)
     : drive_model_{drive_model},
       input_reader_{QueueManager<InputProto>::Fetch()->MakeReader()},
       goal_reader_{QueueManager<GoalProto>::Fetch()->MakeReader()},
       ds_status_reader_{
           QueueManager<DriverStationProto>::Fetch()->MakeReader()},
       output_queue_{QueueManager<OutputProto>::Fetch()},
-      status_queue_{QueueManager<StatusProto>::Fetch()} {}
+      status_queue_{QueueManager<StatusProto>::Fetch()},
+      dt_config_{dt_config},
+      open_loop_{dt_config} {}
 
 void Drivetrain::Update() {
   InputProto input;
@@ -57,7 +59,8 @@ void Drivetrain::Update() {
   if (in_closed_loop) {
     /* closed_loop_.Update(input, goal, &status, &output); */
   } else {
-    /* open_loop_.Update(goal, &status, &output); */
+    open_loop_.SetGoal(goal);
+    open_loop_.Update(&output);
   }
 }
 

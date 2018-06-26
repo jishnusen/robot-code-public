@@ -23,8 +23,13 @@ cc_library(
     name = "drivetrain",
     srcs = [
         "drivetrain.cpp",
+        "open_loop_drive.cpp",
     ],
-    hdrs = ["drivetrain.h"],
+    hdrs = [
+        "drivetrain.h",
+        "drivetrain_config.h",
+        "open_loop_drive.h",
+    ],
     linkopts = ["-lm"],
     deps = [
         ":drivetrain_queues",
