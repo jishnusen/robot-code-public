@@ -6,7 +6,6 @@ cc_library(
         "talon_wrapper.cpp",
     ],
     hdrs = ["talon_wrapper.h"],
-    includes = ["."],
     restricted_to = ["//tools:roborio"],
     deps = [
         "//muan/units",
@@ -20,7 +19,6 @@ cc_library(
         "victor_wrapper.cpp",
     ],
     hdrs = ["victor_wrapper.h"],
-    includes = ["."],
     restricted_to = ["//tools:roborio"],
     deps = [
         "//muan/units",
