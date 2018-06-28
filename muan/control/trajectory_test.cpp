@@ -13,6 +13,7 @@ DrivetrainModel GenerateModel() {
                               properties.wheelbase_radius *
                               properties.wheelbase_radius;
   properties.force_stiction = 20.0;
+  properties.force_friction = 5.0;
   properties.wheel_radius = 3.25 / 2 * 0.0254;
 
   DriveTransmission::Properties trans_properties;
@@ -27,7 +28,6 @@ DrivetrainModel GenerateModel() {
         (12.0 - i_free * trans_properties.motor_resistance) / w_free;
     trans_properties.gear_ratio = 1 / 4.16;
     trans_properties.num_motors = 2;
-    trans_properties.gear_inertia = 0;
   }
 
   return DrivetrainModel(properties, DriveTransmission(trans_properties),

@@ -36,6 +36,7 @@ class Trajectory {
     double a;
   };
 
+  Trajectory() = default;
   Trajectory(const HermiteSpline& spline, Constraints constraints,
              bool high_gear, const DrivetrainModel& model);
 
