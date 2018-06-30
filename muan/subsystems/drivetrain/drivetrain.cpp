@@ -72,6 +72,17 @@ void Drivetrain::Update() {
     open_loop_.SetGoal(goal);
     open_loop_.Update(&output);
   }
+
+  status->set_estimated_x_position(cartesian_position_(0));
+  status->set_estimated_y_position(cartesian_position_(1));
+  status->set_estimated_heading(integrated_heading_);
+  status->set_linear_velocity(linear_angular_velocity_(0));
+  status->set_angular_velocity(linear_angular_velocity_(1));
+
+  output->set_high_gear(goal->high_gear());
+
+  status_queue_->WriteMessage(status);
+  output_queue_->WriteMessage(output);
 }
 
 }  // namespace drivetrain

@@ -11,10 +11,13 @@ void SubsystemRunner::operator()() {
 
   running_ = true;
 
-  pigeon_.SetFusedHeading(0., 10);
-
   while (running_) {
-    score_subsystem_.Update(outputs_enabled);
+    interface_runner_.ReadSensors();
+
+    score_subsystem_.Update();
+    drivetrain_.Update();
+
+    interface_runner_.WriteActuators();
 
     phased_loop.SleepUntilNext();
   }

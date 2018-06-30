@@ -5,6 +5,8 @@
 #include "muan/phoenix/victor_wrapper.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
+#include "muan/wpilib/can_wrapper.h"
+#include "muan/wpilib/pcm_wrapper.h"
 
 namespace c2018 {
 namespace interfaces {
@@ -28,9 +30,9 @@ constexpr uint32_t kRightSlaveB = 9;
 
 class DrivetrainInterface {
  public:
-  DrivetrainInterface(TalonWrapper* pigeon_talon);
+  DrivetrainInterface(TalonWrapper* pigeon_talon, muan::wpilib::CanWrapper* can_wrapper);
 
-  void ReadInputs();
+  void ReadSensors();
   void WriteActuators();
 
  private:
@@ -47,6 +49,8 @@ class DrivetrainInterface {
   VictorWrapper right_slave_b_{kRightSlaveB, VictorWrapper::Config()};
 
   PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy
+
+  muan::wpilib::PcmWrapper* pcm_;
 };
 
 }  // namespace interfaces

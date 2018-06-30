@@ -33,6 +33,8 @@ message DrivetrainOutput {
   
   optional double left_setpoint_ff = 5;
   optional double right_setpoint_ff = 6;
+
+  required bool high_gear = 7;
 }
 
 message DrivetrainStatus {

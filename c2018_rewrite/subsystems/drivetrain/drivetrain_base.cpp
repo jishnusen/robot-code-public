@@ -23,6 +23,34 @@ constexpr double kHighGearEfficiency = 0.75;
 constexpr double kLowGearEfficiency = 0.8;
 
 muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
+  muan::control::DriveTransmission::Properties high_gear{
+      .num_motors = 3,
+      .motor_kt = kStallTorque / kStallCurrent,
+      .motor_kv = (12 - kFreeCurrent * (12 / kStallCurrent)) / kFreeSpeed,
+      .motor_resistance = 12 / kStallCurrent,
+      .gear_ratio = kHighGearRatio,
+      .efficiency = kHighGearEfficiency,
+  };
+
+  muan::control::DriveTransmission::Properties low_gear{
+      .num_motors = 3,
+      .motor_kt = kStallTorque / kStallCurrent,
+      .motor_kv = (12 - kFreeCurrent * (12 / kStallCurrent)) / kFreeSpeed,
+      .motor_resistance = 12 / kStallCurrent,
+      .gear_ratio = kLowGearRatio,
+      .efficiency = kLowGearEfficiency,
+  };
+
+  muan::control::DrivetrainModel::Properties model{
+      .wheelbase_radius = kRobotRadius,
+      .angular_drag = 0,  // TUNE ME
+      .mass = kMass,
+      .moment_inertia = kMoment,
+      .force_stiction = 0,  // TUNE ME
+      .force_friction = 0,  // TUNE ME
+      .wheel_radius = kWheelRadius,
+  };
+
   return {
       .wheel_non_linearity = 0.4,
       .sensitivity = 0.6,
@@ -30,36 +58,9 @@ muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
       .zeta = 1.,
       .dt = 0.01,
 
-      .high_gear_properties =
-          {
-              .motor_kt = kStallTorque / kStallCurrent,
-              .motor_resistance = 12 / kStallCurrent,
-              .motor_kv =
-                  (12 - kFreeCurrent * (12 / kStallCurrent)) / kFreeSpeed,
-              .gear_ratio = kHighGearRatio,
-              .efficiency = kHighGearEfficiency,
-          },
-
-      .low_gear_properties =
-          {
-              .motor_kt = kStallTorque / kStallCurrent,
-              .motor_resistance = 12 / kStallCurrent,
-              .motor_kv =
-                  (12 - kFreeCurrent * (12 / kStallCurrent)) / kFreeSpeed,
-              .gear_ratio = kLowGearRatio,
-              .efficiency = kLowGearEfficiency,
-          },
-
-      .drive_properties =
-          {
-              .wheelbase_radius = kRobotRadius,
-              .angular_drag = 0,  // TUNE ME
-              .mass = kMass,
-              .moment_inertia = kMoment,
-              .force_stiction = 0,  // TUNE ME
-              .force_friction = 0,  // TUNE ME
-              .wheel_radius = kWheelRadius,
-          },
+      .high_gear_properties = high_gear,
+      .low_gear_properties = low_gear,
+      .drive_properties = model,
   };
 }
 

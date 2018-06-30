@@ -24,6 +24,7 @@ cc_library(
     hdrs = [
         "drivetrain_config.h",
     ],
+    deps = ["//muan/control:drivetrain_model"],
 )
 
 cc_library(
