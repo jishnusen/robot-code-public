@@ -3,6 +3,8 @@
 namespace c2018 {
 namespace interfaces {
 
+using c2018::subsystems::score_subsystem::TalonOutput;
+
 constexpr double kElevatorRadius = (1. + (1. / 16.)) * 0.0254;
 constexpr double kElevatorSensorRatio = 2.14;
 constexpr double kElevatorFactor =
@@ -86,14 +88,61 @@ ScoreSubsystemInterface::ScoreSubsystemInterface(
 
   elevator_slave_.SetFollower(kElevatorMaster);
 
+  low_roller_.SetFollower(kHighIntake);
+
   pcm_->CreateSolenoid(kIntakeSolenoidOpen);
   pcm_->CreateSolenoid(kIntakeSolenoidClose);
   pcm_->CreateSolenoid(kWhiskerSolenoid);
 }
 
-void ScoreSubsystemInterface::ReadSensors() {}
+void ScoreSubsystemInterface::ReadSensors() {
+  ScoreSubsystemInputProto sensors;
 
-void ScoreSubsystemInterface::WriteActuators() {}
+  sensors->set_elevator_encoder(elevator_talon_.position());
+  sensors->set_elevator_velocity(elevator_talon_.velocity());
+  sensors->set_elevator_voltage(elevator_talon_.voltage());
+  sensors->set_elevator_hall(
+      !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P));
+
+  sensors->set_wrist_encoder(wrist_talon_.position());
+  sensors->set_wrist_velocity(wrist_talon_.velocity());
+  sensors->set_wrist_voltage(wrist_talon_.voltage());
+  sensors->set_wrist_hall(
+      !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+
+  sensors->set_intake_proxy(false);
+
+  input_queue_->WriteMessage(sensors);
+}
+
+void ScoreSubsystemInterface::WriteActuators() {
+  ScoreSubsystemOutputProto outputs;
+
+  if (!output_reader_.ReadLastMessage(&outputs)) {
+    elevator_talon_.SetOpenloopGoal(0);
+    wrist_talon_.SetOpenloopGoal(0);
+    high_roller_.SetOpenloopGoal(0);
+    return;
+  }
+
+  switch (outputs->elevator_output_type()) {
+    case TalonOutput::OPEN_LOOP:
+      elevator_talon_.SetOpenloopGoal(outputs->elevator_setpoint());
+    case TalonOutput::POSITION:
+      elevator_talon_.SetPositionGoal(outputs->elevator_setpoint(),
+                                      outputs->elevator_setpoint_ff());
+  }
+
+  switch (outputs->wrist_output_type()) {
+    case TalonOutput::OPEN_LOOP:
+      wrist_talon_.SetOpenloopGoal(outputs->wrist_setpoint());
+    case TalonOutput::POSITION:
+      wrist_talon_.SetPositionGoal(outputs->wrist_setpoint(),
+                                   outputs->wrist_setpoint_ff());
+  }
+
+  high_roller_.SetOpenloopGoal(outputs->intake_voltage());
+}
 
 }  // namespace interfaces
 }  // namespace c2018

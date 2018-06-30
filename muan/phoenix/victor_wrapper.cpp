@@ -113,13 +113,13 @@ void VictorWrapper::SetOpenloopGoal(double setpoint) {  // Voltage
 void VictorWrapper::SetPositionGoal(double setpoint,
                                    double setpoint_ff) {  // Position, Voltage
   victor_.Set(ControlMode::Position, setpoint * conversion_factor_,
-             DemandType_ArbitraryFeedForward, setpoint_ff * kVictorOutput);
+             DemandType::DemandType_ArbitraryFeedForward, setpoint_ff / 12.);
 }
 
 void VictorWrapper::SetVelocityGoal(double setpoint,
                                    double setpoint_ff) {  // Velocity, Voltage
   victor_.Set(ControlMode::Velocity, setpoint * conversion_factor_ * 100 * ms,
-             DemandType_ArbitraryFeedForward, setpoint_ff * kVictorOutput);
+             DemandType::DemandType_ArbitraryFeedForward, setpoint_ff / 12.);
 }
 
 void VictorWrapper::SetGains(Gains gains, int slot) {

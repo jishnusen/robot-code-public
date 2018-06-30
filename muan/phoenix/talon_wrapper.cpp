@@ -113,13 +113,13 @@ void TalonWrapper::SetOpenloopGoal(double setpoint) {  // Voltage
 void TalonWrapper::SetPositionGoal(double setpoint,
                                    double setpoint_ff) {  // Position, Voltage
   talon_.Set(ControlMode::Position, setpoint * conversion_factor_,
-             DemandType_ArbitraryFeedForward, setpoint_ff * kTalonOutput);
+             DemandType::DemandType_ArbitraryFeedForward, setpoint_ff / 12.);
 }
 
 void TalonWrapper::SetVelocityGoal(double setpoint,
                                    double setpoint_ff) {  // Velocity, Voltage
   talon_.Set(ControlMode::Velocity, setpoint * conversion_factor_ * 100 * ms,
-             DemandType_ArbitraryFeedForward, setpoint_ff * kTalonOutput);
+             DemandType::DemandType_ArbitraryFeedForward, setpoint_ff  / 12.);
 }
 
 void TalonWrapper::SetGains(Gains gains, int slot) {

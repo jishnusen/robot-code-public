@@ -79,8 +79,6 @@ void DrivetrainInterface::WriteActuators() {
   if (!output_reader_.ReadLastMessage(&outputs)) {
     left_master_.SetOpenloopGoal(0);
     right_master_.SetOpenloopGoal(0);
-    pcm_->WriteSolenoid(kShifter, false);
-
     return;
   }
 
