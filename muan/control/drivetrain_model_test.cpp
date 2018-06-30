@@ -115,7 +115,6 @@ TEST(DrivetrainModelDynamics, AccelFromStandstillNoStiction) {
         (12.0 - i_free * trans_properties.motor_resistance) / w_free;
     trans_properties.gear_ratio = 1 / 4.5;
     trans_properties.num_motors = 2;
-    trans_properties.gear_inertia = 0;
   }
 
   DrivetrainModel model(properties, DriveTransmission(trans_properties),
@@ -161,7 +160,6 @@ TEST(DrivetrainModelDynamics, SteadyStateForwards) {
         (12.0 - i_free * trans_properties.motor_resistance) / w_free;
     trans_properties.gear_ratio = 1 / 4.16;
     trans_properties.num_motors = 2;
-    trans_properties.gear_inertia = 0;
   }
 
   DrivetrainModel model(properties, DriveTransmission(trans_properties),
@@ -211,7 +209,6 @@ TEST(DrivetrainModelDynamics, AccelerationBounds) {
         (12.0 - i_free * trans_properties.motor_resistance) / w_free;
     trans_properties.gear_ratio = 1 / 4.16;
     trans_properties.num_motors = 2;
-    trans_properties.gear_inertia = 0;
   }
 
   DrivetrainModel model(properties, DriveTransmission(trans_properties),
