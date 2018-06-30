@@ -20,7 +20,7 @@ using muan::control::DrivetrainModel;
 
 class Drivetrain {
  public:
-  Drivetrain(DrivetrainConfig dt_config);
+  explicit Drivetrain(DrivetrainConfig dt_config);
 
   void Update();
 

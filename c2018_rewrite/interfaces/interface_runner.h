@@ -17,14 +17,15 @@ class InterfaceRunner {
   void WriteActuators();
 
  private:
-  muan::wpilib::CanWrapper can_{QueueManager<muan::wpilib::PdpMessage>::Fetch()};
+  muan::wpilib::CanWrapper can_{
+      QueueManager<muan::wpilib::PdpMessage>::Fetch()};
 
   DrivetrainInterface drive_{new TalonWrapper(kClimber, TalonWrapper::Config()),
-                        &can_};
+                             &can_};
   ScoreSubsystemInterface score_{&can_};
 };
 
-}
-}
+}  // namespace interfaces
+}  // namespace c2018
 
 #endif  // C2018_REWRITE_INTERFACES_INTERFACE_RUNNER_H_

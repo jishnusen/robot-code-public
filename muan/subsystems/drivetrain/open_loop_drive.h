@@ -10,7 +10,7 @@ namespace drivetrain {
 
 class OpenLoopDrive {
  public:
-  OpenLoopDrive(DrivetrainConfig dt_config) : dt_config_(dt_config) {}
+  explicit OpenLoopDrive(DrivetrainConfig dt_config) : dt_config_(dt_config) {}
   void Update(OutputProto* output);
   void SetGoal(const GoalProto& goal);
 

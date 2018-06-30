@@ -1,5 +1,5 @@
-#ifndef C2018_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
-#define C2018_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
+#ifndef C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
+#define C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
 
 #include "c2018_rewrite/subsystems/score_subsystem/score_subsystem.pb.h"
 #include "muan/proto/stack_proto.h"
@@ -33,4 +33,4 @@ using ScoreSubsystemGoalQueue =
 }  // namespace subsystems
 }  // namespace c2018
 
-#endif  // C2018_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
+#endif  // C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_

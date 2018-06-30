@@ -1,3 +1,6 @@
+#ifndef C2018_REWRITE_INTERFACES_SCORE_INTERFACE_H_
+#define C2018_REWRITE_INTERFACES_SCORE_INTERFACE_H_
+
 #include "WPILib.h"
 #include "c2018_rewrite/subsystems/score_subsystem/queue_types.h"
 #include "muan/phoenix/talon_wrapper.h"
@@ -41,3 +44,5 @@ class ScoreSubsystemInterface {
 
 }  // namespace interfaces
 }  // namespace c2018
+
+#endif  //  C2018_REWRITE_INTERFACES_SCORE_INTERFACE_H_

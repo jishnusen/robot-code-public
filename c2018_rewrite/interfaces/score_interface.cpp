@@ -78,7 +78,6 @@ ScoreSubsystemInterface::ScoreSubsystemInterface(
       low_roller_{kLowIntake, {}},
       canifier_{kCanifierId},
       pcm_{can_wrapper->pcm()} {
-
   wrist_talon_.SetGains(wrist_gains, 0);
   wrist_talon_.SelectGains(0);
 
@@ -91,6 +90,10 @@ ScoreSubsystemInterface::ScoreSubsystemInterface(
   pcm_->CreateSolenoid(kIntakeSolenoidClose);
   pcm_->CreateSolenoid(kWhiskerSolenoid);
 }
+
+void ScoreSubsystemInterface::ReadSensors() {}
+
+void ScoreSubsystemInterface::WriteActuators() {}
 
 }  // namespace interfaces
 }  // namespace c2018

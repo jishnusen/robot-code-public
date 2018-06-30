@@ -1,3 +1,6 @@
+#ifndef MUAN_SUBSYSTEMS_DRIVETRAIN_QUEUE_TYPES_H_
+#define MUAN_SUBSYSTEMS_DRIVETRAIN_QUEUE_TYPES_H_
+
 #include "muan/proto/stack_proto.h"
 #include "muan/queues/message_queue.h"
 #include "muan/subsystems/drivetrain/drivetrain.pb.h"
@@ -19,3 +22,5 @@ using StatusQueue = muan::queues::MessageQueue<StatusProto>;
 }  // namespace drivetrain
 }  // namespace subsystems
 }  // namespace muan
+
+#endif  //  MUAN_SUBSYSTEMS_DRIVETRAIN_QUEUE_TYPES_H_
