@@ -10,15 +10,15 @@ constexpr double kElevatorSensorRatio = 2.14;
 constexpr double kElevatorFactor =
     (4096 * kElevatorSensorRatio) / (2 * M_PI * kElevatorRadius);
 
-constexpr uint32_t kElevatorMaster = 20;
-constexpr uint32_t kElevatorSlave = 21;
+constexpr uint32_t kElevatorMaster = 4;
+constexpr uint32_t kElevatorSlave = 3;
 
 constexpr double kWristSensorRatio = 17.14;
 constexpr double kWristFactor = (4096 * kWristSensorRatio) / (2 * M_PI);
-constexpr uint32_t kWristMaster = 22;
+constexpr uint32_t kWristMaster = 21;
 
-constexpr uint32_t kHighIntake = 23;
-constexpr uint32_t kLowIntake = 24;
+constexpr uint32_t kHighIntake = 11;
+constexpr uint32_t kLowIntake = 12;
 
 constexpr uint32_t kCanifierId = 19;
 

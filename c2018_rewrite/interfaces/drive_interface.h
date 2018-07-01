@@ -19,14 +19,14 @@ using muan::subsystems::drivetrain::OutputQueue;
 using muan::phoenix::TalonWrapper;
 using muan::phoenix::VictorWrapper;
 
-constexpr uint32_t kLeftMaster = 4;
-constexpr uint32_t kRightMaster = 5;
+constexpr uint32_t kLeftMaster = 1;
+constexpr uint32_t kRightMaster = 2;
 
-constexpr uint32_t kLeftSlaveA = 6;
+constexpr uint32_t kLeftSlaveA = 13;
 constexpr uint32_t kLeftSlaveB = 7;
 
-constexpr uint32_t kRightSlaveA = 8;
-constexpr uint32_t kRightSlaveB = 9;
+constexpr uint32_t kRightSlaveA = 10;
+constexpr uint32_t kRightSlaveB = 8;
 
 class DrivetrainInterface {
  public:

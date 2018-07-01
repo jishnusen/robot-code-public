@@ -67,7 +67,7 @@ void Drivetrain::Update() {
   bool in_closed_loop = goal->has_path_goal();
   if (in_closed_loop) {
     closed_loop_.SetGoal(goal);
-    closed_loop_.Update(&output);
+    closed_loop_.Update(&output, driver_station->is_sys_active());
   } else {
     open_loop_.SetGoal(goal);
     open_loop_.Update(&output);

@@ -24,7 +24,7 @@ class ClosedLoopDrive {
                   Eigen::Vector2d* linear_angular_velocity);
 
   void SetGoal(const GoalProto& goal);
-  void Update(OutputProto* output);
+  void Update(OutputProto* output, bool outputs_enabled);
 
  private:
   DrivetrainModel model_;

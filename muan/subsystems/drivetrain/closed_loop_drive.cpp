@@ -72,9 +72,9 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
   high_gear_ = goal->high_gear();
 }
 
-void ClosedLoopDrive::Update(OutputProto* output) {
+void ClosedLoopDrive::Update(OutputProto* output, bool outputs_enabled) {
   const Pose current{*cartesian_position_, *integrated_heading_};
-  const Trajectory::TimedPose goal = trajectory_.Advance(dt_config_.dt);
+  const Trajectory::TimedPose goal = outputs_enabled ? trajectory_.Advance(dt_config_.dt) : trajectory_.Advance(0);
   const Pose error = goal.pose.pose() - current;
 
   Eigen::Vector2d goal_velocity;
