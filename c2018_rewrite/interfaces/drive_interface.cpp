@@ -1,4 +1,5 @@
 #include "c2018_rewrite/interfaces/drive_interface.h"
+#include <iostream>
 
 namespace c2018 {
 namespace interfaces {
@@ -24,7 +25,6 @@ constexpr TalonWrapper::Gains kDriveGains{
 TalonWrapper::Config CreateMasterConfig(bool left) {
   TalonWrapper::Config config;
   {
-    config.motor_inverted = !left;
     config.sensor_inverted = !left;
     config.velocity_measurement_period = VelocityMeasPeriod::Period_50Ms;
     config.velocity_measurement_window = 1;
@@ -37,18 +37,18 @@ TalonWrapper::Config CreateMasterConfig(bool left) {
 }
 
 DrivetrainInterface::DrivetrainInterface(TalonWrapper* pigeon_talon,
-                                         muan::wpilib::CanWrapper* can_wrapper)
+                                         muan::wpilib::PcmWrapper* pcm)
     : input_queue_{QueueManager<InputProto>::Fetch()},
       output_reader_{QueueManager<OutputProto>::Fetch()->MakeReader()},
       left_master_{kLeftMaster, CreateMasterConfig(true)},
       right_master_{kRightMaster, CreateMasterConfig(false)},
       pigeon_{pigeon_talon->talon()},
-      pcm_{can_wrapper->pcm()} {
-  left_master_.SetGains(kDriveGains, 0);
-  right_master_.SetGains(kDriveGains, 0);
+      pcm_{pcm} {
+  /* left_master_.SetGains(kDriveGains, 0); */
+  /* right_master_.SetGains(kDriveGains, 0); */
 
-  left_master_.SelectGains(0);
-  right_master_.SelectGains(0);
+  /* left_master_.SelectGains(0); */
+  /* right_master_.SelectGains(0); */
 
   left_slave_a_.SetFollower(kLeftMaster);
   left_slave_b_.SetFollower(kLeftMaster);
@@ -56,9 +56,9 @@ DrivetrainInterface::DrivetrainInterface(TalonWrapper* pigeon_talon,
   right_slave_a_.SetFollower(kRightMaster);
   right_slave_b_.SetFollower(kRightMaster);
 
-  left_master_.ResetSensor(0);
-  right_master_.ResetSensor(0);
-  pigeon_.SetFusedHeading(0, 100);
+  /* left_master_.ResetSensor(0); */
+  /* right_master_.ResetSensor(0); */
+  /* pigeon_.SetFusedHeading(0, 100); */
 
   pcm_->CreateSolenoid(kShifter);
 }
@@ -68,7 +68,7 @@ void DrivetrainInterface::ReadSensors() {
 
   sensors->set_left_encoder(left_master_.position());
   sensors->set_right_encoder(right_master_.position());
-  sensors->set_gyro(pigeon_.GetFusedHeading());
+  /* sensors->set_gyro(pigeon_.GetFusedHeading()); */
 
   input_queue_->WriteMessage(sensors);
 }
@@ -81,20 +81,23 @@ void DrivetrainInterface::WriteActuators() {
     right_master_.SetOpenloopGoal(0);
     return;
   }
+  /* switch (outputs->output_type()) { */
+  /*   case TalonOutput::OPEN_LOOP: */
+  /*     left_master_.SetOpenloopGoal(outputs->left_setpoint()); */
+  /*     right_master_.SetOpenloopGoal(outputs->right_setpoint()); */
+  /*     break; */
+  /*   case TalonOutput::POSITION: */
+  /*   case TalonOutput::VELOCITY: */
+  /*     left_master_.SetPositionGoal(outputs->left_setpoint(), */
+  /*                                  outputs->left_setpoint_ff()); */
+  /*     right_master_.SetPositionGoal(outputs->right_setpoint(), */
+  /*                                   outputs->right_setpoint_ff()); */
+  /*     break; */
+  /* } */
 
-  switch (outputs->output_type()) {
-    case TalonOutput::OPEN_LOOP:
-      left_master_.SetOpenloopGoal(outputs->left_setpoint());
-      right_master_.SetOpenloopGoal(outputs->right_setpoint());
-      break;
-    case TalonOutput::POSITION:
-    case TalonOutput::VELOCITY:
-      left_master_.SetPositionGoal(outputs->left_setpoint(),
-                                   outputs->left_setpoint_ff());
-      right_master_.SetPositionGoal(outputs->right_setpoint(),
-                                    outputs->right_setpoint_ff());
-      break;
-  }
+  left_master_.talon()->Set(ControlMode::PercentOutput, 1.);
+
+  std::cout << left_slave_a_.voltage() << "\t" << left_slave_b_.voltage() << std::endl;
 
   pcm_->WriteSolenoid(kShifter, !outputs->high_gear());
 }

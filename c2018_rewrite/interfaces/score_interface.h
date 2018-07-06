@@ -20,7 +20,7 @@ using subsystems::score_subsystem::ScoreSubsystemOutputQueue;
 
 class ScoreSubsystemInterface {
  public:
-  explicit ScoreSubsystemInterface(muan::wpilib::CanWrapper* can_wrapper);
+  explicit ScoreSubsystemInterface(muan::wpilib::PcmWrapper* pcm);
   void WriteActuators();
   void ReadSensors();
 

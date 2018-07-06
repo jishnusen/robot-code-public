@@ -8,6 +8,26 @@ namespace muan {
 namespace subsystems {
 namespace drivetrain {
 
+constexpr double kThrottleDeadband = 0.02;
+constexpr double kWheelDeadband = 0.02;
+
+constexpr double kHighWheelNonLinearity = 0.65;
+constexpr double kLowWheelNonLinearity = 0.5;
+
+constexpr double kHighNegInertiaScalar = 4.;
+
+constexpr double kLowNegInertiaThreshold = 0.65;
+constexpr double kLowNegInertiaTurnScalar = 3.5;
+constexpr double kLowNegInertiaCloseScalar = 4.0;
+constexpr double kLowNegInertiaFarScalar = 5.0;
+
+constexpr double kHighSensitivity = 0.65;
+constexpr double kLowSensitivity = 0.65;
+
+constexpr double kQuickStopDeadband = 0.5;
+constexpr double kQuickStopWeight = 0.1;
+constexpr double kQuickStopScalar = 5.0;
+
 class OpenLoopDrive {
  public:
   explicit OpenLoopDrive(DrivetrainConfig dt_config) : dt_config_(dt_config) {}
@@ -16,10 +36,13 @@ class OpenLoopDrive {
 
  private:
   double throttle_;
-  double steering_;
-
+  double wheel_;
   bool quickturn_;
   bool high_gear_;
+
+  double old_wheel_ = 0.;
+  double quick_stop_accum_ = 0.;
+  double neg_inertia_accum_ = 0.;
 
   DrivetrainConfig dt_config_;
 };

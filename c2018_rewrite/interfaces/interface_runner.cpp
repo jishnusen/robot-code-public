@@ -3,18 +3,15 @@
 namespace c2018 {
 namespace interfaces {
 
-InterfaceRunner::InterfaceRunner() {
-  std::thread can_thread(std::ref(can_));
-  can_thread.detach();
-}
+using muan::wpilib::PdpMessage;
 
 void InterfaceRunner::ReadSensors() {
-  score_.ReadSensors();
+  /* score_.ReadSensors(); */
   drive_.ReadSensors();
 }
 
 void InterfaceRunner::WriteActuators() {
-  score_.WriteActuators();
+  /* score_.WriteActuators(); */
   drive_.WriteActuators();
 }
 

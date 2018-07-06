@@ -7,22 +7,19 @@
 namespace c2018 {
 namespace interfaces {
 
-constexpr uint32_t kClimber = 10;
+constexpr uint32_t kClimber = 6;
 
 class InterfaceRunner {
  public:
-  InterfaceRunner();
-
   void ReadSensors();
   void WriteActuators();
 
  private:
-  muan::wpilib::CanWrapper can_{
-      QueueManager<muan::wpilib::PdpMessage>::Fetch()};
+  muan::wpilib::PcmWrapper pcm_{0};
 
   DrivetrainInterface drive_{new TalonWrapper(kClimber, TalonWrapper::Config()),
-                             &can_};
-  ScoreSubsystemInterface score_{&can_};
+                             &pcm_};
+  /* ScoreSubsystemInterface score_{&pcm_}; */
 };
 
 }  // namespace interfaces

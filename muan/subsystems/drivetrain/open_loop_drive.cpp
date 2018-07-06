@@ -5,49 +5,122 @@ namespace muan {
 namespace subsystems {
 namespace drivetrain {
 
-constexpr double kThrottleDeadband = 0.05;
+double HandleDeadband(double val, double deadband) {
+  if (std::abs(val) < deadband) {
+    val = 0;
+  }
+  return val;
+}
 
 void OpenLoopDrive::Update(OutputProto* output) {
-  double angular_power;
-  double left_u, right_u;
+  wheel_ = HandleDeadband(wheel_, kWheelDeadband);
+  throttle_ = HandleDeadband(throttle_, kThrottleDeadband);
 
-  if (quickturn_) {
-    angular_power = steering_;
+  double neg_inertia = wheel_ - old_wheel_;
+  old_wheel_ = wheel_;
+
+  double wheel_non_linearity;
+  if (high_gear_) {
+    wheel_non_linearity = kHighWheelNonLinearity;
+    const double denominator = std::sin(M_PI / 2. * wheel_non_linearity);
+    wheel_ = std::sin(M_PI / 2. * wheel_non_linearity * wheel_) / denominator;
+    wheel_ = std::sin(M_PI / 2. * wheel_non_linearity * wheel_) / denominator;
   } else {
-    angular_power = std::abs(throttle_) * steering_ * dt_config_.sensitivity;
+    wheel_non_linearity = kLowWheelNonLinearity;
+    const double denominator = std::sin(M_PI / 2. * wheel_non_linearity);
+    wheel_ = std::sin(M_PI / 2. * wheel_non_linearity * wheel_) / denominator;
+    wheel_ = std::sin(M_PI / 2. * wheel_non_linearity * wheel_) / denominator;
+    wheel_ = std::sin(M_PI / 2. * wheel_non_linearity * wheel_) / denominator;
   }
 
-  left_u = right_u = throttle_;
-  left_u += angular_power * 12.;
-  right_u -= angular_power * 12.;
+  double left, right, over_power;
+  double sensitivity;
+
+  double angular_power;
+  double linear_power;
+
+  double neg_inertia_scalar;
+  if (high_gear_) {
+    neg_inertia_scalar = kHighNegInertiaScalar;
+    sensitivity = kHighSensitivity;
+  } else {
+    if (wheel_ * neg_inertia > 0) {
+      neg_inertia_scalar = kLowNegInertiaTurnScalar;
+    } else {
+      if (std::abs(wheel_) > kLowNegInertiaThreshold) {
+        neg_inertia_scalar = kLowNegInertiaFarScalar;
+      } else {
+        neg_inertia_scalar = kLowNegInertiaCloseScalar;
+      }
+    }
+    sensitivity = kLowSensitivity;
+  }
+
+  double neg_inertia_power = neg_inertia * neg_inertia_scalar;
+  neg_inertia_accum_ += neg_inertia_power;
+
+  wheel_ = wheel_ + neg_inertia_accum_;
+  if (neg_inertia_accum_ > 1) {
+    neg_inertia_accum_ -= 1;
+  } else if (neg_inertia_accum_ < -1) {
+    neg_inertia_accum_ += 1;
+  } else {
+    neg_inertia_accum_ = 0;
+  }
+
+  linear_power = throttle_;
+
+  if (quickturn_) {
+    if (std::abs(linear_power) < kQuickStopDeadband) {
+      double alpha = kQuickStopWeight;
+      quick_stop_accum_ =
+          (1 - alpha) * quick_stop_accum_ +
+          alpha * muan::utils::Cap(wheel_, -1., 1.) * kQuickStopScalar;
+    }
+    over_power = 1.;
+    angular_power = wheel_;
+  } else {
+    over_power = 0.;
+    angular_power =
+        std::abs(throttle_) * wheel_ * sensitivity - quick_stop_accum_;
+    if (quick_stop_accum_ > 1) {
+      quick_stop_accum_ -= 1;
+    } else if (quick_stop_accum_ < -1) {
+      quick_stop_accum_ += 1;
+    } else {
+      quick_stop_accum_ = 0;
+    }
+  }
+
+  right = left = linear_power;
+  left += angular_power;
+  right -= angular_power;
+
+  if (left > 1.) {
+    right -= over_power * (left - 1.);
+    left = 1.;
+  } else if (right > 1.) {
+    left -= over_power * (right - 1.);
+    right = 1.;
+  } else if (left < -1.) {
+    right += over_power * (-left - 1.);
+    left = -1.;
+  } else if (right < -1.) {
+    left += over_power * (-right - 1.);
+    right = -1.;
+  }
 
   (*output)->set_output_type(OPEN_LOOP);
-  (*output)->set_left_setpoint(muan::utils::Cap(left_u, -12., 12.));
-  (*output)->set_right_setpoint(muan::utils::Cap(right_u, -12., 12.));
+  (*output)->set_left_setpoint(muan::utils::Cap(left * 12., -12., 12.));
+  (*output)->set_right_setpoint(muan::utils::Cap(right * 12., -12., 12.));
 }
 
 void OpenLoopDrive::SetGoal(const GoalProto& goal) {
   auto teleop_goal = goal->teleop_goal();  // Auto because protos are a mess
 
-  const double wheel = teleop_goal.steering();
-  const double throttle = teleop_goal.throttle();
-  const bool quickturn = teleop_goal.quick_turn();
-
-  const double angular_range = M_PI_2 * dt_config_.wheel_non_linearity;
-
-  // Sine function to make it feel better
-  steering_ = sin(angular_range * wheel) / sin(angular_range);
-  steering_ = sin(angular_range * steering_) / sin(angular_range);
-  steering_ = 2. * wheel - steering_;
-  quickturn_ = quickturn;
-
-  if (std::abs(throttle) < kThrottleDeadband) {
-    throttle_ = 0;
-  } else {
-    throttle_ = copysign(
-        (std::abs(throttle) - kThrottleDeadband) / (1. - kThrottleDeadband),
-        throttle);
-  }
+  throttle_ = teleop_goal.throttle();
+  wheel_ = teleop_goal.steering();
+  quickturn_ = teleop_goal.quick_turn();
 
   high_gear_ = goal->high_gear();
 }

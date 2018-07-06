@@ -67,7 +67,7 @@ muan::phoenix::TalonWrapper::Config MakeWristMasterConfig() {
 }
 
 ScoreSubsystemInterface::ScoreSubsystemInterface(
-    muan::wpilib::CanWrapper* can_wrapper)
+    muan::wpilib::PcmWrapper* pcm)
     : input_queue_(QueueManager<ScoreSubsystemInputProto>::Fetch()),
       output_reader_(
           QueueManager<ScoreSubsystemOutputProto>::Fetch()->MakeReader()),
@@ -79,7 +79,7 @@ ScoreSubsystemInterface::ScoreSubsystemInterface(
       high_roller_{kHighIntake, {}},
       low_roller_{kLowIntake, {}},
       canifier_{kCanifierId},
-      pcm_{can_wrapper->pcm()} {
+      pcm_{pcm} {
   wrist_talon_.SetGains(wrist_gains, 0);
   wrist_talon_.SelectGains(0);
 
@@ -111,6 +111,8 @@ void ScoreSubsystemInterface::ReadSensors() {
       !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
 
   sensors->set_intake_proxy(false);
+
+  std::cout << sensors->elevator_hall() << std::endl;
 
   input_queue_->WriteMessage(sensors);
 }

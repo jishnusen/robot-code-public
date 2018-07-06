@@ -119,24 +119,24 @@ void TalonWrapper::SetPositionGoal(double setpoint,
 void TalonWrapper::SetVelocityGoal(double setpoint,
                                    double setpoint_ff) {  // Velocity, Voltage
   talon_.Set(ControlMode::Velocity, setpoint * conversion_factor_ * 100 * ms,
-             DemandType::DemandType_ArbitraryFeedForward, setpoint_ff  / 12.);
+             DemandType::DemandType_ArbitraryFeedForward, setpoint_ff / 12.);
 }
 
 void TalonWrapper::SetGains(Gains gains, int slot) {
-  talon_.Config_kP(slot, gains.p * kTalonOutput * conversion_factor_,
+  talon_.Config_kP(slot, gains.p,  // * kTalonOutput * conversion_factor_,
                    kTalonSetupTimeout);
 
-  talon_.Config_kI(slot, gains.i * kTalonOutput * conversion_factor_ / ms,
+  talon_.Config_kI(slot, gains.i,  // * kTalonOutput * conversion_factor_ / ms,
                    kTalonSetupTimeout);
 
-  talon_.Config_kD(slot, gains.d * kTalonOutput * conversion_factor_ * ms,
+  talon_.Config_kD(slot, gains.d,  // * kTalonOutput * conversion_factor_ * ms,
                    kTalonSetupTimeout);
 
-  talon_.Config_kF(slot, gains.f * kTalonOutput * conversion_factor_,
+  talon_.Config_kF(slot, gains.f,  // * kTalonOutput * conversion_factor_,
                    kTalonSetupTimeout);
 
-  talon_.ConfigMaxIntegralAccumulator(slot, gains.max_integral,
-                                      kTalonSetupTimeout);
+  /* talon_.ConfigMaxIntegralAccumulator(slot, gains.max_integral, */
+  /*                                     kTalonSetupTimeout); */
   talon_.Config_IntegralZone(slot, gains.i_zone, kTalonSetupTimeout);
 
   talon_.ConfigAllowableClosedloopError(slot, gains.deadband,

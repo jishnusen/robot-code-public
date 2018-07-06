@@ -7,7 +7,7 @@
 namespace muan {
 namespace wpilib {
 
-CanWrapper::CanWrapper(PdpWrapper::Queue* pdp_queue) {
+CanWrapper::CanWrapper(PdpWrapper::Queue* pdp_queue) : pcm_{0} {
   pdp_.SetQueue(pdp_queue);
 }
 

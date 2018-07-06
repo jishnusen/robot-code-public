@@ -26,7 +26,7 @@ class WpilibRobot : public IterativeRobot {
 int main(int argc, char **argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   muan::queues::Start();
-  printf("whee");
+  printf("whee\n");
   if (!HAL_Initialize(500, 0)) {
     std::printf("FATAL ERROR: HAL could not be initialized\n");
     return -1;
@@ -39,4 +39,5 @@ int main(int argc, char **argv) {
 
   std::printf("Robot program starting\n");
   robot.StartCompetition();
+  std::printf("started\n");
 }

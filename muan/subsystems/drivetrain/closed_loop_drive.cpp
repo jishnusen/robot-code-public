@@ -9,9 +9,10 @@ using muan::control::HermiteSpline;
 
 #define NO_LIMIT std::numeric_limits<double>::infinity();
 
-ClosedLoopDrive::ClosedLoopDrive(
-    DrivetrainConfig dt_config, Eigen::Vector2d* cartesian_position,
-    double* integrated_heading, Eigen::Vector2d* linear_angular_velocity)
+ClosedLoopDrive::ClosedLoopDrive(DrivetrainConfig dt_config,
+                                 Eigen::Vector2d* cartesian_position,
+                                 double* integrated_heading,
+                                 Eigen::Vector2d* linear_angular_velocity)
     : model_{dt_config.drive_properties,
              DriveTransmission(dt_config.low_gear_properties),
              DriveTransmission(dt_config.high_gear_properties)},
@@ -62,10 +63,12 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
   const double final_velocity = path_goal.final_velocity();
 
   const Trajectory::Constraints constraints{
-      max_velocity,     max_voltage,
-      max_acceleration, max_centripetal_acceleration,
-
-      initial_velocity, final_velocity,
+      max_velocity,                  //  NOLINT
+      max_voltage,                   //  NOLINT
+      max_acceleration,              //  NOLINT
+      max_centripetal_acceleration,  //  NOLINT
+      initial_velocity,              //  NOLINT
+      final_velocity,                //  NOLINT
   };
 
   trajectory_ = Trajectory(path, constraints, goal->high_gear(), model_);
@@ -74,7 +77,9 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
 
 void ClosedLoopDrive::Update(OutputProto* output, bool outputs_enabled) {
   const Pose current{*cartesian_position_, *integrated_heading_};
-  const Trajectory::TimedPose goal = outputs_enabled ? trajectory_.Advance(dt_config_.dt) : trajectory_.Advance(0);
+  const Trajectory::TimedPose goal = outputs_enabled
+                                         ? trajectory_.Advance(dt_config_.dt)
+                                         : trajectory_.Advance(0);
   const Pose error = goal.pose.pose() - current;
 
   Eigen::Vector2d goal_velocity;
