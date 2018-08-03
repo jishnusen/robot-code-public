@@ -66,7 +66,7 @@ void Claw::Update(const ScoreSubsystemInputProto& input,
   // Start of intake
   bool intake_solenoid_close = false;
   bool intake_solenoid_open = false;
-  double intake_voltage;
+  double intake_voltage = 0.0;
 
   if (outputs_enabled) {
     switch (intake_goal_) {

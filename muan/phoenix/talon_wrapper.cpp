@@ -6,7 +6,7 @@ namespace phoenix {
 
 TalonWrapper::TalonWrapper(int id, Config config)
     : talon_(id), conversion_factor_(config.conversion_factor) {
-  LoadConfig(config);
+  /* LoadConfig(config); */
 }
 
 void TalonWrapper::LoadConfig(Config config) {

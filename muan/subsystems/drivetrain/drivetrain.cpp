@@ -1,4 +1,5 @@
 #include "muan/subsystems/drivetrain/drivetrain.h"
+#include <iostream>
 
 namespace muan {
 namespace subsystems {
@@ -29,10 +30,11 @@ void Drivetrain::Update() {
   OutputProto output;
   StatusProto status;
   GoalProto goal;
-
   DriverStationProto driver_station;
 
   if (!input_reader_.ReadLastMessage(&input)) {
+    // We _really_ need these
+    // TODO(jishnu) find an elegant way to handle this
     return;
   }
 
@@ -52,8 +54,8 @@ void Drivetrain::Update() {
   double delta_linear = drive_model_.ForwardKinematics(
       Eigen::Vector2d(delta_left, delta_right))(0);
 
-  linear_angular_velocity_(0) = delta_linear / dt_config_.dt;
-  linear_angular_velocity_(1) = delta_heading / dt_config_.dt;
+  linear_angular_velocity_ = drive_model_.ForwardKinematics(
+      Eigen::Vector2d(input->left_velocity(), input->right_velocity()));
 
   integrated_heading_ += delta_heading;
   cartesian_position_(0) += std::cos(integrated_heading_) * delta_linear;
@@ -64,10 +66,18 @@ void Drivetrain::Update() {
     return;
   }
 
+/*   goal->mutable_path_goal()->set_x(1.0); */
+/*   goal->mutable_path_goal()->set_y(1.0); */
+/*   goal->mutable_path_goal()->set_heading(0.0); */
+/*   goal->mutable_path_goal()->set_max_voltage(12.0); */
+
+  /* std::cout << cartesian_position_(0) << "\t" << cartesian_position_(1) << std::endl; */
+
   bool in_closed_loop = goal->has_path_goal();
-  if (in_closed_loop) {
+  std::cout << driver_station->is_sys_active() << std::endl;
+  if (in_closed_loop && driver_station->is_sys_active()) {
     closed_loop_.SetGoal(goal);
-    closed_loop_.Update(&output, driver_station->is_sys_active());
+    closed_loop_.Update(&output, &status);
   } else {
     open_loop_.SetGoal(goal);
     open_loop_.Update(&output);
@@ -78,6 +88,13 @@ void Drivetrain::Update() {
   status->set_estimated_heading(integrated_heading_);
   status->set_linear_velocity(linear_angular_velocity_(0));
   status->set_angular_velocity(linear_angular_velocity_(1));
+  Eigen::Vector2d predicted_v = drive_model_.ForwardDynamics(
+      linear_angular_velocity_,
+      Eigen::Vector2d(output->left_setpoint() * 12,
+                      output->right_setpoint() * 12),
+      true);
+  status->set_pred_lv(predicted_v(0));
+  status->set_pred_rv(predicted_v(0));
 
   output->set_high_gear(goal->high_gear());
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 from collections import OrderedDict
 from Tkinter import Tk, BOTH, N, S, E, W, Toplevel, StringVar, IntVar, Frame, HORIZONTAL, VERTICAL
 from ttk import Button, Style, Treeview, Scrollbar, Radiobutton, Checkbutton

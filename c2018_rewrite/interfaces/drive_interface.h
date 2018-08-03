@@ -36,17 +36,20 @@ class DrivetrainInterface {
   void WriteActuators();
 
  private:
+  void LoadGains();
+  void SetBrakeMode(bool mode);
+
   InputQueue* input_queue_;
   OutputQueue::QueueReader output_reader_;
 
-  TalonWrapper left_master_;
-  TalonWrapper right_master_;
+  TalonSRX left_master_{1};
+  TalonSRX right_master_{2};
 
-  VictorWrapper left_slave_a_{kLeftSlaveA, VictorWrapper::Config()};
-  VictorWrapper left_slave_b_{kLeftSlaveB, VictorWrapper::Config()};
+  VictorSPX left_slave_a_{13};
+  VictorSPX left_slave_b_{7};
 
-  VictorWrapper right_slave_a_{kRightSlaveA, VictorWrapper::Config()};
-  VictorWrapper right_slave_b_{kRightSlaveB, VictorWrapper::Config()};
+  VictorSPX right_slave_a_{10};
+  VictorSPX right_slave_b_{8};
 
   PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy
 

@@ -6,7 +6,7 @@ namespace phoenix {
 
 VictorWrapper::VictorWrapper(int id, Config config)
     : victor_(id), conversion_factor_(config.conversion_factor) {
-  LoadConfig(config);
+  /* LoadConfig(config); */
 }
 
 void VictorWrapper::LoadConfig(Config config) {

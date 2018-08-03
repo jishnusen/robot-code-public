@@ -1,5 +1,6 @@
 #include "muan/subsystems/drivetrain/closed_loop_drive.h"
 #include <limits>
+#include <iostream>
 
 namespace muan {
 namespace subsystems {
@@ -7,7 +8,7 @@ namespace drivetrain {
 
 using muan::control::HermiteSpline;
 
-#define NO_LIMIT std::numeric_limits<double>::infinity();
+/* #define NO_LIMIT std::numeric_limits<double>::infinity(); */
 
 ClosedLoopDrive::ClosedLoopDrive(DrivetrainConfig dt_config,
                                  Eigen::Vector2d* cartesian_position,
@@ -48,16 +49,16 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
   const double max_velocity =
       path_goal.has_linear_constraints()
           ? path_goal.linear_constraints().max_velocity()
-          : NO_LIMIT;
+          : 3;
   const double max_voltage = path_goal.max_voltage();
   const double max_acceleration =
       path_goal.has_linear_constraints()
           ? path_goal.linear_constraints().max_acceleration()
-          : NO_LIMIT;
+          : 1;
   const double max_centripetal_acceleration =
       path_goal.has_angular_constraints()
           ? path_goal.angular_constraints().max_acceleration()
-          : NO_LIMIT;
+          : 1.5;
 
   const double initial_velocity = (*linear_angular_velocity_)(0);
   const double final_velocity = path_goal.final_velocity();
@@ -75,18 +76,27 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
   high_gear_ = goal->high_gear();
 }
 
-void ClosedLoopDrive::Update(OutputProto* output, bool outputs_enabled) {
+void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
   const Pose current{*cartesian_position_, *integrated_heading_};
-  const Trajectory::TimedPose goal = outputs_enabled
-                                         ? trajectory_.Advance(dt_config_.dt)
-                                         : trajectory_.Advance(0);
+  const Trajectory::TimedPose goal = trajectory_.Advance(dt_config_.dt);
   const Pose error = goal.pose.pose() - current;
-
+  
   Eigen::Vector2d goal_velocity;
   goal_velocity(0) = goal.v;
   goal_velocity(1) = goal.pose.curvature() * goal.v;
 
   auto setpoint = controller_.Update(goal_velocity, current, error, high_gear_);
+
+  (*status)->set_x_error(error.Get()(0));
+  (*status)->set_y_error(error.Get()(1));
+  (*status)->set_heading_error(error.Get()(2));
+
+  (*status)->set_profiled_x_goal(goal.pose.Get()(0));
+  (*status)->set_profiled_y_goal(goal.pose.Get()(1));
+  (*status)->set_profiled_heading_goal(goal.pose.Get()(2));
+  (*status)->set_profiled_velocity_goal(goal.v);
+  (*status)->set_adjusted_velocity_goal(
+      model_.ForwardKinematics(setpoint.velocity)(0));
 
   (*output)->set_output_type(VELOCITY);
   (*output)->set_left_setpoint(setpoint.velocity(0));

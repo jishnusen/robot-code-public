@@ -111,8 +111,8 @@ void OpenLoopDrive::Update(OutputProto* output) {
   }
 
   (*output)->set_output_type(OPEN_LOOP);
-  (*output)->set_left_setpoint(muan::utils::Cap(left * 12., -12., 12.));
-  (*output)->set_right_setpoint(muan::utils::Cap(right * 12., -12., 12.));
+  (*output)->set_left_setpoint(left);
+  (*output)->set_right_setpoint(right);
 }
 
 void OpenLoopDrive::SetGoal(const GoalProto& goal) {

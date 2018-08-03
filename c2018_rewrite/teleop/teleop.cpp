@@ -119,10 +119,10 @@ void TeleopBase::SendDrivetrainMessage() {
     high_gear_ = false;
   }
 
-  drivetrain_goal->set_high_gear(high_gear_);
+  drivetrain_goal->set_high_gear(true);
 
   // Drive controls
-  drivetrain_goal->mutable_teleop_goal()->set_steering(wheel);
+  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
   drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
   drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
 

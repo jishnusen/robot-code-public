@@ -76,7 +76,7 @@ class TestFixture : public ::testing::Test {
                  std::sin(current_pose.heading() + velocity(1) * 0.01);
       delta(2) = velocity(1) * 0.01;
 
-      delta *= 1.05;  // Simulate some suckiness;
+      delta(2) *= 1.05;
 
       current_pose = Pose(current_pose.Get() + delta);
 
@@ -88,8 +88,8 @@ class TestFixture : public ::testing::Test {
 
  private:
   DrivetrainModel model_ = GenerateModel();
-  NonLinearFeedbackController controller_{GenerateModel(), 1.,
-                                          1.};  // These gains suck
+  NonLinearFeedbackController controller_{GenerateModel(), 2.0,
+                                          0.7};  // These gains suck
   Trajectory::Constraints constraints_{
       .max_velocity = 3.,
       .max_voltage = 12.,
