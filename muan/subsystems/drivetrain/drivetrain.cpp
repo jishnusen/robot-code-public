@@ -1,5 +1,4 @@
 #include "muan/subsystems/drivetrain/drivetrain.h"
-#include <iostream>
 
 namespace muan {
 namespace subsystems {
@@ -66,16 +65,8 @@ void Drivetrain::Update() {
     return;
   }
 
-/*   goal->mutable_path_goal()->set_x(1.0); */
-/*   goal->mutable_path_goal()->set_y(1.0); */
-/*   goal->mutable_path_goal()->set_heading(0.0); */
-/*   goal->mutable_path_goal()->set_max_voltage(12.0); */
-
-  /* std::cout << cartesian_position_(0) << "\t" << cartesian_position_(1) << std::endl; */
-
-  bool in_closed_loop = goal->has_path_goal();
-  std::cout << driver_station->is_sys_active() << std::endl;
-  if (in_closed_loop && driver_station->is_sys_active()) {
+  bool in_closed_loop = goal->has_path_goal() && driver_station->is_sys_active();
+  if (in_closed_loop) {
     closed_loop_.SetGoal(goal);
     closed_loop_.Update(&output, &status);
   } else {

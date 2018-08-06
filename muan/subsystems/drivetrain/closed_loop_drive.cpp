@@ -1,14 +1,11 @@
 #include "muan/subsystems/drivetrain/closed_loop_drive.h"
 #include <limits>
-#include <iostream>
 
 namespace muan {
 namespace subsystems {
 namespace drivetrain {
 
 using muan::control::HermiteSpline;
-
-/* #define NO_LIMIT std::numeric_limits<double>::infinity(); */
 
 ClosedLoopDrive::ClosedLoopDrive(DrivetrainConfig dt_config,
                                  Eigen::Vector2d* cartesian_position,
@@ -49,16 +46,16 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
   const double max_velocity =
       path_goal.has_linear_constraints()
           ? path_goal.linear_constraints().max_velocity()
-          : 3;
+          : dt_config_.max_velocity;
   const double max_voltage = path_goal.max_voltage();
   const double max_acceleration =
       path_goal.has_linear_constraints()
           ? path_goal.linear_constraints().max_acceleration()
-          : 1;
+          : dt_config_.max_acceleration;
   const double max_centripetal_acceleration =
       path_goal.has_angular_constraints()
           ? path_goal.angular_constraints().max_acceleration()
-          : 1.5;
+          : dt_config_.max_centripetal_acceleration;
 
   const double initial_velocity = (*linear_angular_velocity_)(0);
   const double final_velocity = path_goal.final_velocity();
@@ -80,7 +77,7 @@ void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
   const Pose current{*cartesian_position_, *integrated_heading_};
   const Trajectory::TimedPose goal = trajectory_.Advance(dt_config_.dt);
   const Pose error = goal.pose.pose() - current;
-  
+
   Eigen::Vector2d goal_velocity;
   goal_velocity(0) = goal.v;
   goal_velocity(1) = goal.pose.curvature() * goal.v;

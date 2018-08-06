@@ -1,5 +1,4 @@
 #include "muan/control/nonlinear_feedback_controller.h"
-/* #include <iostream> */
 
 namespace muan {
 namespace control {
@@ -31,11 +30,6 @@ NonLinearFeedbackController::Output NonLinearFeedbackController::Update(
                              (std::cos(current.heading()) * error.Get()(1) -
                               std::sin(current.heading()) * error.Get()(0)) +
                          k1 * error.heading();
-
-  /* std::cout << k1* ((std::cos(current.heading()) * error.Get()(0)) + */
-  /*                              (std::sin(current.heading()) * error.Get()(1))) << std::endl; */
-
-  /* std::cout << velocity(0) << std::endl; */
 
   Eigen::Vector2d left_right_velocity =
       model_.InverseKinematics(adjusted_velocity);

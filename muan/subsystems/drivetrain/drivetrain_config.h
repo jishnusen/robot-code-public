@@ -16,6 +16,10 @@ struct DrivetrainConfig {
 
   double dt = 0.01;
 
+  double max_velocity = 3.5;
+  double max_acceleration = 5;
+  double max_centripetal_acceleration = M_PI / 2;
+
   muan::control::DriveTransmission::Properties high_gear_properties;
   muan::control::DriveTransmission::Properties low_gear_properties;
   muan::control::DrivetrainModel::Properties drive_properties;
