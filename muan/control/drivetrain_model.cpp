@@ -151,17 +151,17 @@ Eigen::Vector2d DrivetrainModel::InverseDynamics(Eigen::Vector2d velocity,
   Eigen::Vector2d robot_force_friction = Eigen::Vector2d::Zero();
   if (std::abs(left_right_velocity(0)) < 1e-3) {
     robot_force_stiction(0) =
-        -std::copysign(force_stiction_, -left_right_acceleration(0));
+        -std::copysign(force_stiction_, left_right_acceleration(0));
   } else {
     robot_force_friction(0) =
-        -std::copysign(force_friction_, -left_right_acceleration(0));
+        -std::copysign(force_friction_, left_right_acceleration(0));
   }
   if (std::abs(left_right_velocity(1)) < 1e-3) {
     robot_force_stiction(1) =
-        -std::copysign(force_stiction_, -left_right_acceleration(1));
+        -std::copysign(force_stiction_, left_right_acceleration(1));
   } else {
     robot_force_friction(1) =
-        -std::copysign(force_friction_, -left_right_acceleration(1));
+        -std::copysign(force_friction_, left_right_acceleration(1));
   }
 
   const Eigen::Vector2d robot_force_applied =
