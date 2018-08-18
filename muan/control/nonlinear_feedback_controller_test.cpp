@@ -67,7 +67,7 @@ class TestFixture : public ::testing::Test {
           controller_.Update((Eigen::Vector2d() << sample.v, omega).finished(),
                              current_pose, error, high_gear);
 
-      Eigen::Vector2d velocity = model_.ForwardKinematics(goal.velocity);
+      Eigen::Vector2d velocity = model_.ForwardKinematics(goal.velocity) * 0.9;
 
       Eigen::Vector3d delta;
       delta(0) = velocity(0) * 0.01 *
@@ -76,20 +76,19 @@ class TestFixture : public ::testing::Test {
                  std::sin(current_pose.heading() + velocity(1) * 0.01);
       delta(2) = velocity(1) * 0.01;
 
-      delta(2) *= 1.05;
-
       current_pose = Pose(current_pose.Get() + delta);
 
       EXPECT_LT(std::abs(delta(0)), constraints_.max_velocity + 1e-9);
     }
 
     EXPECT_LT(error.translational().norm(), 3e-2);  // ~3cm within the goal
+    EXPECT_LT(error.heading(), 3e-2);
   }
 
  private:
   DrivetrainModel model_ = GenerateModel();
-  NonLinearFeedbackController controller_{GenerateModel(), 2.0,
-                                          0.7};  // These gains suck
+  NonLinearFeedbackController controller_{GenerateModel(), 3.0,
+                                          1.5};
   Trajectory::Constraints constraints_{
       .max_velocity = 3.,
       .max_voltage = 12.,
