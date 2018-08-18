@@ -1,9 +1,9 @@
 #include <WPILib.h>
-#include "o2018/subsystems/subsystem_runner.h"
-#include "o2018/autonomous/autonomous_runner.h"
-#include "o2018/teleop/teleop.h"
 #include "gflags/gflags.h"
 #include "muan/queues/queue_manager.h"
+#include "o2018/autonomous/autonomous_runner.h"
+#include "o2018/subsystems/subsystem_runner.h"
+#include "o2018/teleop/teleop.h"
 
 class WpilibRobot : public IterativeRobot {
  public:
@@ -18,7 +18,7 @@ class WpilibRobot : public IterativeRobot {
 
     std::thread teleop_thread(std::ref(teleop_base_));
     teleop_thread.detach();
-    
+
     std::thread autonomous_thread(std::ref(auto_));
     autonomous_thread.detach();
   }
