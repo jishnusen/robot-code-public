@@ -31,15 +31,15 @@ void ScaleOnly::RightScale() {
   MoveTo(c2018::score_subsystem::ScoreGoal::SCALE_SHOOT);
   WaitUntilDriveComplete();
 
-  StartDrivePath(kScaleX + 0.5, scale_y, 220 * deg, -1);
+  StartDrivePath(kScaleX + 0.6, scale_y + 0.2, 220 * deg, -1);
   WaitUntilDriveComplete();
   Score(true);
-  Wait(50);
+  Wait(150);
   // Drive to next cube
   IntakeGround();
   IntakeOpen();
   Wait(75);
-  StartDrivePath(kCubeX + 0.2, -2.05, 175 * deg, 1, kLowGear);
+  StartDrivePath(kCubeX + 0.2, -1.90, 175 * deg, 1, kLowGear);
   WaitUntilDrivetrainNear(kCubeX + 0.2, -2.05, 0.15);
 
   // Intake cube
@@ -60,8 +60,8 @@ void ScaleOnly::RightScale() {
   IntakeGround();
 
   // Drive to 2nd cube
-  StartDrivePath(kCubeX + 0.3, -1.1, 135 * deg, 1, kLowGear, 0.0, 0.3);
-  WaitUntilDrivetrainNear(kCubeX + 0.3, -1.1, 0.2);
+  StartDrivePath(kCubeX + 0.1, -0.40, 155 * deg, 1, kLowGear, 0.0, 0.3);
+  WaitUntilDrivetrainNear(kCubeX + 0.1, -0.40, 0.2);
   if (!WaitForCubeOrTimeout(300)) {
     LOG(WARNING, "Stuck on a cube! Backing up anyway!");
   }
@@ -69,8 +69,8 @@ void ScaleOnly::RightScale() {
   WaitUntilDriveComplete();
   MoveTo(c2018::score_subsystem::ScoreGoal::SCALE_SHOOT);
   // Drive back to scale
-  StartDrivePath(kScaleX + 0.1, scale_y + 0.1, 220 * deg, -1, kLowGear);
-  WaitUntilDrivetrainNear(kScaleX + 0.1, scale_y + 0.1, 0.1);
+  StartDrivePath(kScaleX + 0.25, scale_y - 0.1, 220 * deg, -1, kLowGear);
+  WaitUntilDrivetrainNear(kScaleX + 0.25, scale_y - 0.1, 0.1);
   Score(true);
   Wait(50);
   IntakeGround();
@@ -98,7 +98,7 @@ void ScaleOnly::LeftScale() {
   // Intake next cube
   IntakeGround();
   IntakeOpen();
-  StartDrivePath(kCubeX, 1.85, 195 * deg, 1, kHighGear);
+  StartDrivePath(kCubeX, 1.85, 180 * deg, 1, kHighGear);
   WaitUntilDrivetrainNear(kCubeX + 0.1, 1.85, 0.2);
   IntakeClose();
   WaitUntilDriveComplete();
@@ -115,7 +115,7 @@ void ScaleOnly::LeftScale() {
 
   // Intake 2nd cube
   IntakeGround();
-  StartDrivePath(kCubeX - 0.1, 1.25, 220 * deg, 1, kLowGear, 0.0, 0.4);
+  StartDrivePath(kCubeX - 0.1, 1.25, 200 * deg, 1, kLowGear, 0.0, 0.4);
   if (!WaitForCubeOrTimeout(500)) {
     LOG(WARNING, "Stuck on a cube! Backing up anyway!");
   }
@@ -133,7 +133,7 @@ void ScaleOnly::LeftScale() {
   Wait(50);
 
   IntakeGround();
-  StartDrivePath(kCubeX, 0.3, 225 * deg, 1, kHighGear, 0.6);
+  StartDrivePath(kCubeX, 0.3, 200 * deg, 1, kHighGear, 0.6);
   if (!WaitForCubeOrTimeout(300)) {
     LOG(WARNING, "Stuck on a cube! Backing up anyway!");
   }
