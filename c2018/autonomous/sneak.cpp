@@ -25,7 +25,7 @@ void Sneak::SneakLeft() {
 
   // Drive back to pyramid
   MoveTo(c2018::score_subsystem::ScoreGoal::STOW);
-  StartDrivePath(1.8, 0.5, 315 * deg, 1, kHighGear, 0.0, 1.0);
+  StartDrivePath(1.8, 0.3, 315 * deg, 1, kHighGear, 0.0, 1.0);
   max_forward_acceleration_ = 3.0;
   Wait(300);
   IntakeGround();
@@ -64,7 +64,7 @@ void Sneak::SneakRight() {
   StartDrivePath(4.0, -3.6, 180 * deg, -1, kHighGear, 0, 0.5);
   WaitUntilDrivetrainNear(4.0, -3.6, 1.0);
 
-  StartDrivePath(8.0, -3.5, 190 * deg, -1, kHighGear, 0, -0.5);
+  StartDrivePath(8.0, -2.8, 190 * deg, -1, kHighGear, 0, -0.5);
   WaitUntilDriveComplete();
 
   StartDriveAtAngle(0.0, -90 * deg, 0, kLowGear);
@@ -75,7 +75,7 @@ void Sneak::SneakRight() {
   MoveTo(c2018::score_subsystem::ScoreGoal::SCALE_HIGH_FORWARD);
   Wait(300);
 
-  StartDriveAtAngle(0.7, -90 * deg, 0, kLowGear);
+  StartDriveAtAngle(0.9, -90 * deg, 0, kLowGear);
   WaitUntilDriveComplete();
 
   DropScore();
