@@ -4,9 +4,18 @@ cc_binary(
     deps = [
         ":sender",
         ":vision",
-        "//third_party/gflags:gflags"
+        "//third_party/gflags:gflags",
+        "@opencv//:opencv",
     ],
-    linkopts = ["-lpthread"]
+    linkopts = [
+        "-lpthread",
+        "-lopencv_imgproc",
+        "-lopencv_core",
+        "-lopencv_video",
+        "-lopencv_videoio",
+        "-lopencv_highgui",
+    ],
+    restricted_to = ["//tools:k8", "//tools:armhf-debian"],
 )
 
 cc_library(
@@ -35,6 +44,7 @@ cc_library(
     hdrs = ["vision.h"],
     deps = [
         ":sender",
+        "@opencv//:opencv",
         "//muan/vision:vision"
     ],
     data = [
@@ -46,4 +56,5 @@ cc_library(
         "-lopencv_highgui",
     ],
     visibility = ["//visibility:public"],
+    restricted_to = ["//tools:k8", "//tools:armhf-debian"],
 )

@@ -1,8 +1,9 @@
 #include "muan/control/calibration/pot_calibration.h"
 #include <cmath>
+#include "muan/logging/logger.h"
+
 
 namespace muan {
-
 namespace control {
 
 PotCalibration::PotCalibration(double units_per_index) {
@@ -18,7 +19,8 @@ PotCalibration::PotCalibration(double units_per_index) {
 
 PotCalibration::~PotCalibration() {}
 
-double PotCalibration::Update(double enc_value, double pot_value, bool index_click) {
+double PotCalibration::Update(double enc_value, double pot_value,
+                              bool index_click) {
   // Makes an average of the offset from the encoder and the potentiometer,
   // hopefully taking care of the poteniometer noise
   offset_sum_ += (pot_value - enc_value);
@@ -55,6 +57,7 @@ double PotCalibration::Update(double enc_value, double pot_value, bool index_cli
       // Error checking, changes a boolean if there is a change in offset
     } else if (offset_ != -last_index_pulse_ + section * units_per_index_) {
       index_error_ = true;
+      LOG(WARNING, "Got an index pulse that was different than expected!");
     }
     has_index_pulse_ = false;
   }

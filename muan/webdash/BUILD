@@ -7,8 +7,12 @@ cc_binary(
     deps = [
         ":server",
         "//muan/teleop:joystick_queues",
+        "//muan/wpilib:wpilib_queues",
+        "//c2017/subsystems/superstructure/shooter:shooter_queues",
     ],
+    data = [":webdash_html"],
 )
+
 
 filegroup(
     name = "webdash_html",
@@ -25,9 +29,9 @@ cc_library(
         "//muan/utils:proto_utils",
         "//third_party/optional:optional",
         "//third_party/aos/common:die",
+        "//third_party/google/protobuf:protobuf",
         ":webdash_queues",
     ],
-    linkopts = ["-lpthread"],
     data = [":webdash_html"],
 )
 

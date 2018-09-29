@@ -4,13 +4,12 @@
 #include "muan/utils/history.h"
 
 namespace muan {
-
 namespace wpilib {
 
 class MotorSafety {
  public:
-  MotorSafety(double current_threshold = 120., double stall_time = 2., double reset_time = 2.,
-              double dt = 0.005);
+  MotorSafety(double current_threshold = 120., double stall_time = 2.,
+              double reset_time = 2., double dt = 0.005);
 
   // Returns voltage
   double Update(double voltage, double current);
@@ -27,7 +26,6 @@ class MotorSafety {
 };
 
 }  // namespace wpilib
-
 }  // namespace muan
 
 #endif  // MUAN_WPILIB_MOTOR_SAFETY_H_

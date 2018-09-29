@@ -1,4 +1,4 @@
-licenses(['permissive'])
+licenses(['notice'])
 
 # This is a placeholder for python headers. Projects needing to use
 # fast cpp protos in protobuf's python interface should build with

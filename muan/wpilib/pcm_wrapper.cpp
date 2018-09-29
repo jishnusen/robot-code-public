@@ -2,7 +2,6 @@
 #include "third_party/aos/common/die.h"
 
 namespace muan {
-
 namespace wpilib {
 
 PcmWrapper::PcmWrapper(int32_t module) : module_(module) {}
@@ -28,7 +27,8 @@ bool PcmWrapper::CreateSolenoid(uint8_t port) {
   }
 
   int status = 0;
-  HAL_SolenoidHandle handle = HAL_InitializeSolenoidPort(HAL_GetPortWithModule(module_, port), &status);
+  HAL_SolenoidHandle handle =
+      HAL_InitializeSolenoidPort(HAL_GetPortWithModule(module_, port), &status);
   if (status != 0) {
     return false;
   }
@@ -38,18 +38,22 @@ bool PcmWrapper::CreateSolenoid(uint8_t port) {
   return true;
 }
 
-void PcmWrapper::CreateDoubleSolenoid(uint8_t channel_forward, uint8_t channel_reverse) {
+void PcmWrapper::CreateDoubleSolenoid(uint8_t channel_forward,
+                                      uint8_t channel_reverse) {
   CreateSolenoid(channel_forward);
   CreateSolenoid(channel_reverse);
 }
 
-void PcmWrapper::WriteDoubleSolenoid(uint8_t channel_forward, uint8_t channel_reverse,
+void PcmWrapper::WriteDoubleSolenoid(uint8_t channel_forward,
+                                     uint8_t channel_reverse,
                                      DoubleSolenoid::Value value) {
   SetChannel(channel_forward, value == DoubleSolenoid::Value::kForward);
   SetChannel(channel_reverse, value == DoubleSolenoid::Value::kReverse);
 }
 
-void PcmWrapper::WriteSolenoid(uint8_t channel, bool on) { SetChannel(channel, on); }
+void PcmWrapper::WriteSolenoid(uint8_t channel, bool on) {
+  SetChannel(channel, on);
+}
 
 void PcmWrapper::Flush() {
   // Write the cached values to CAN
@@ -78,5 +82,4 @@ void PcmWrapper::SetChannel(uint8_t channel, bool on) {
 }
 
 }  // namespace wpilib
-
 }  // namespace muan

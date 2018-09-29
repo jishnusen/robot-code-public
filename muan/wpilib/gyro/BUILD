@@ -20,6 +20,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":gyro_queues",
+        "//muan/logging:logger",
         "//muan/proto:stack_proto",
         "//muan/queues",
         "//muan/units",
@@ -30,6 +31,7 @@ cc_library(
         "//third_party/aos/linux_code:init",
         "//third_party/wpilibsuite:wpilib",
     ],
+    restricted_to = ["//tools:roborio"],
 )
 
 cc_proto_library(

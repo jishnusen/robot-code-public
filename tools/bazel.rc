@@ -3,10 +3,12 @@ build --crosstool_top=//tools/cpp:toolchain
 # Don't switch HOST compilers.
 build --host_crosstool_top=//tools/cpp:toolchain
 
+build --auto_cpu_environment_group=//tools:cpus
+
 build --copt -Werror
 # Turn off warnings from third_party
-build --per_file_copt=//third_party.*@-w
-build --output_filter='^//(?!third_party).*'
+build --per_file_copt='third_party(?!/frc971).*@-w'
+build --output_filter='^//((?!third_party)|third_party/frc971).*'
 
 # Always include debug information in the non-.stripped binaries.
 build --strip=never
@@ -53,4 +55,6 @@ build:msan --test_env MSAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer-3.6
 # Show paths to a few more than just 1 target.
 build --show_result 5
 # Dump the output of the failing test to stdout.
-test --test_output=errors --copt="-DFRC1678_NO_QUEUE_LOGGING"
+test --test_output=errors
+
+build --define=use_fast_cpp_protos=true

@@ -21,12 +21,19 @@ cc_library(
 )
 
 cc_library(
+  name = 'gear',
+  hdrs = ['gear.h'],
+  deps = [':drivetrain_queues'],
+)
+
+cc_library(
   name = 'drivetrain_config',
   hdrs = [
     'drivetrain_config.h',
   ],
   deps = [
     '//third_party/frc971/control_loops:state_feedback_loop',
+    '//third_party/frc971:shifter_hall_effect',
   ],
 )
 
@@ -46,6 +53,7 @@ cc_library(
     '//third_party/aos/common:math',
     '//third_party/frc971/control_loops:coerce_goal',
     '//third_party/frc971/control_loops:state_feedback_loop',
+    '//third_party/frc971/control_loops/paths:trajectory',
   ],
 )
 
@@ -60,10 +68,12 @@ cc_library(
   deps = [
     ':drivetrain_queues',
     ':drivetrain_config',
+    ':gear',
     '//third_party/aos/common/controls:polytope',
     '//third_party/aos/common:math',
     '//third_party/frc971/control_loops:state_feedback_loop',
     '//third_party/frc971/control_loops:coerce_goal',
+    '//third_party/frc971:shifter_hall_effect',
   ],
 )
 
@@ -84,18 +94,40 @@ cc_library(
   ],
 )
 
+cc_library(
+  name = 'drivetrain_simulation',
+  srcs = [
+    'drivetrain_simulation.cc'
+  ],
+  hdrs = [
+    'drivetrain_simulation.h',
+  ],
+  deps = [
+    '//third_party/google/googletest:googletest',
+    ':drivetrain_queues',
+    ':drivetrain_lib',
+    ':drivetrain_config',
+    '//third_party/frc971/control_loops:state_feedback_loop',
+    '//muan/wpilib/gyro:gyro_queues',
+    '//muan/logging:logger',
+    '//muan/queues:queue_manager',
+  ],
+)
+
 cc_test(
   name = 'drivetrain_lib_test',
   srcs = [
     'drivetrain_lib_test.cc',
   ],
   deps = [
-    '//third_party/aos/testing:googletest',
+    '//third_party/google/googletest:googletest',
+    ':drivetrain_simulation',
     ':drivetrain_queues',
     ':drivetrain_lib',
     ':drivetrain_config',
     '//third_party/frc971/control_loops:state_feedback_loop',
     '//muan/wpilib/gyro:gyro_queues',
     '//third_party/frc971/control_loops/drivetrain/y2016:polydrivetrain_plants',
+    '//third_party/frc971/control_loops/drivetrain/y2016:drivetrain_base',
   ],
 )

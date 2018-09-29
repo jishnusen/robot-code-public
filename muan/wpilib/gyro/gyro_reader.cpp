@@ -1,4 +1,5 @@
 #include "muan/wpilib/gyro/gyro_reader.h"
+#include "muan/logging/logger.h"
 #include "muan/utils/history.h"
 #include "muan/utils/threading_utils.h"
 #include "third_party/aos/common/util/phased_loop.h"
@@ -8,12 +9,11 @@
 // http://www.analog.com/media/en/technical-documentation/data-sheets/ADXRS453.pdf
 
 namespace muan {
-
 namespace wpilib {
-
 namespace gyro {
 
-GyroReader::GyroReader(GyroQueue* queue, DriverStationQueue* ds_queue, int calib_time, bool invert)
+GyroReader::GyroReader(GyroQueue* queue, DriverStationQueue* ds_queue,
+                       int calib_time, bool invert)
     : gyro_queue_{queue},
       ds_queue_{ds_queue},
       calib_time_{std::chrono::seconds(calib_time)},
@@ -24,6 +24,7 @@ void GyroReader::operator()() {
   muan::utils::SetCurrentThreadName("Gyro");
 
   if (gyro_queue_ == nullptr) {
+    LOG(FATAL, "No queue provided to gyro reader");
     aos::Die(
         "Please supply a queue to the gyro reader - otherwise there's no "
         "reason to run it!");
@@ -45,12 +46,15 @@ double GyroReader::AngleReading() {
 void GyroReader::Init() {
   // Try to initialize repeatedly every 100ms until it works.
   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(100));
-  while (calibration_state_ == GyroState::kUninitialized && !gyro_.InitializeGyro()) {
+  while (calibration_state_ == GyroState::kUninitialized &&
+         !gyro_.InitializeGyro()) {
+    LOG(ERROR, "Init failed");
     phased_loop.SleepUntilNext();
     if (gyro_queue_ != nullptr) {
       GyroMessageProto gyro_message;
       gyro_message->set_state(GyroState::kUninitialized);
       gyro_queue_->WriteMessage(gyro_message);
+      LOG(ERROR, "Uninitialized");
     }
   }
   calibration_state_ = GyroState::kInitialized;
@@ -91,14 +95,16 @@ void GyroReader::RunCalibration() {
       velocity_history.Update(raw_velocity);
     } else {
       velocity_history.reset();
+      LOG(WARNING, "Velocity limit exceeded, Calibration Reset");
     }
 
     // Send out a GyroMessage if the queue exists
     if (gyro_queue_ != nullptr) {
       GyroMessageProto gyro_message;
       gyro_message->set_state(GyroState::kCalibrating);
-      gyro_message->set_calibration_time_left((calib_cycles - velocity_history.num_samples()) *
-                                              std::chrono::duration<double>(loop_time).count());
+      gyro_message->set_calibration_time_left(
+          (calib_cycles - velocity_history.num_samples()) *
+          std::chrono::duration<double>(loop_time).count());
       gyro_message->set_raw_angular_velocity(raw_velocity);
       gyro_queue_->WriteMessage(gyro_message);
     }
@@ -120,6 +126,8 @@ void GyroReader::RunCalibration() {
       auto ds_message = ds_queue_->ReadLastMessage();
       if (ds_message) {
         robot_disabled = ds_message.value()->mode() == RobotMode::DISABLED;
+      } else {
+        LOG(WARNING, "The driverstation queue is null");
       }
     }
   }
@@ -141,6 +149,7 @@ void GyroReader::RunReader() {
     // Reset if the should_reset_ flag is set, then clear it.
     if (should_reset_.exchange(false)) {
       angle_ = 0.0;
+      LOG(WARNING, "reset_ flag sent, Resetting");
     }
 
     // Send out a GyroMessage if the queue exists
@@ -158,13 +167,9 @@ void GyroReader::RunReader() {
 }
 
 void GyroReader::Reset() { should_reset_ = true; }
-
 void GyroReader::Quit() { calibration_state_ = GyroState::kKilled; }
-
 void GyroReader::Recalibrate() { calibration_state_ = GyroState::kInitialized; }
 
 }  // namespace gyro
-
 }  // namespace wpilib
-
 }  // namespace muan

@@ -8,13 +8,13 @@
 #include <utility>
 #include <vector>
 
-#include "muan/logging/filewriter.h"
 #include "gtest/gtest_prod.h"
+#include "muan/logging/filewriter.h"
+#include "muan/logging/textlogger.h"
 #include "muan/queues/message_queue.h"
 #include "muan/units/units.h"
 #include "muan/utils/proto_utils.h"
 #include "muan/utils/threading_utils.h"
-#include "muan/logging/textlogger.h"
 #include "third_party/aos/common/time.h"
 #include "third_party/aos/common/util/phased_loop.h"
 #include "third_party/aos/linux_code/init.h"
@@ -31,7 +31,7 @@ namespace logging {
  *
  * Logger logger;
  *
- * MessageQueue<protobuf_class, 100> mq;
+ * MessageQueue<protobuf_class> mq(100);
  * logger.AddQueue("some_queue", mq.MakeReader());
  *
  * auto textlog = logger.GetTextLogger("log_name");
@@ -46,17 +46,14 @@ namespace logging {
  *  - Adding a Queue to be logged
  *  - Creating a textlog
  * However, these operations should only happen in the beginning of the robot
- * code, when the subsystems are being initialized, this should not be a problem.
+ * code, when the subsystems are being initialized, this should not be a
+ * problem.
  *
  * Right now, textlog uses std::string, which is non-realtime if it needs to be
  * expanded, so it is up to callers to ensure that the construction of the
  * logging string is realtime.
  */
 class Logger {
-  FRIEND_TEST(Logger, LogsOneMessage);
-  FRIEND_TEST(Logger, LogsManyMessages);
-  FRIEND_TEST(Logger, LogsMultipleQueues);
-  FRIEND_TEST(Logger, LogsManyMessagesPerTick);
   FRIEND_TEST(Logger, TextLogger);
 
  public:
@@ -80,34 +77,33 @@ class Logger {
   // This stops the logger from running. It can be resumed calling Start().
   void Stop();
 
-  // Log without format strings, such as
-  // LogStream(__FILE__, __LINE__, "x=", x, " y=", y);
-  template<typename... Ts>
-  static void LogStream(const char* filename, int line, Ts... args);
-  #define LOG_S(msg0, ...) muan::logging::Logger::LogStream(__FILE__, __LINE__, msg0, ##__VA_ARGS__)
-
   // Log with format strings, such as
-  // LogPrintf(__FILE__, __LINE__, "x=%d y=%f", x, y);
-  template<typename... Ts>
-  static void LogPrintf(const char* filename, int line, Ts... args);
-  #define LOG_P(fmt, ...) muan::logging::Logger::LogPrintf(__FILE__, __LINE__, fmt, ##__VA_ARGS__)
+  // LOG(level, "x=%d y=%f", x, y);
+  template <typename... Ts>
+  static void LogText(int level, const char* filename, int line, Ts... args);
+#define LOG(level, fmt, ...) \
+  muan::logging::Logger::LogText(level, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+
+  // Very much not realtime. Public only because a bunch of tests use it.
+  void Update();
 
  private:
   std::unique_ptr<FileWriter> writer_;
   std::atomic<bool> running_{false};
 
-  void Update();
-
   class GenericReader {
    public:
-    virtual std::experimental::optional<std::string> GetMessageAsCSV(bool header) = 0;
+    virtual ~GenericReader() = default;
+    virtual std::experimental::optional<std::string> GetMessageAsCSV(
+        bool header) = 0;
   };
 
   template <class R>
   class Reader : public GenericReader {
    public:
     explicit Reader(R reader);
-    std::experimental::optional<std::string> GetMessageAsCSV(bool header) override;
+    std::experimental::optional<std::string> GetMessageAsCSV(
+        bool header) override;
 
    private:
     R reader_;
@@ -122,10 +118,8 @@ class Logger {
 
   std::vector<std::unique_ptr<QueueLog>> queue_logs_;
   TextLogger::LogQueue::QueueReader textlog_reader_;
-
   static TextLogger text_logger;
 };  // class Logger
-
 }  // namespace logging
 }  // namespace muan
 

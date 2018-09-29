@@ -4,10 +4,9 @@
 #include "WPILib.h"
 #include "muan/proto/stack_proto.h"
 #include "muan/queues/message_queue.h"
-#include "muan/wpilib/state.pb.h"
+#include "muan/wpilib/queue_types.h"
 
 namespace muan {
-
 namespace wpilib {
 
 class PdpWrapper {
@@ -15,9 +14,7 @@ class PdpWrapper {
   explicit PdpWrapper(int module = 0);
   ~PdpWrapper() = default;
 
-  using PdpMessage = muan::proto::StackProto<PdpStatus, 512>;
-
-  using Queue = muan::queues::MessageQueue<PdpMessage, 100>;
+  using Queue = muan::queues::MessageQueue<PdpMessage>;
   void SetQueue(Queue* pdp_queue);
 
  private:
@@ -37,7 +34,6 @@ class PdpWrapper {
 };
 
 }  // namespace wpilib
-
 }  // namespace muan
 
 #endif  // MUAN_WPILIB_PDP_WRAPPER_H_

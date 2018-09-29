@@ -4,15 +4,25 @@ namespace c2017 {
 
 namespace lights {
 void Lights::Update() {
-  auto intake_group_goal_queue = QueueManager::GetInstance()->intake_group_goal_queue()->ReadLastMessage();
-  auto climber_status_queue = QueueManager::GetInstance()->climber_status_queue()->ReadLastMessage();
-  auto drivetrain_status_queue = QueueManager::GetInstance()->drivetrain_status_queue()->ReadLastMessage();
-  auto gyro_status_queue = QueueManager::GetInstance()->gyro_queue()->ReadLastMessage();
-  auto vision_status = QueueManager::GetInstance()->vision_status_queue()->ReadLastMessage();
-  auto ds_status = QueueManager::GetInstance()->driver_station_queue()->ReadLastMessage();
-  auto ground_gear_status = QueueManager::GetInstance()->ground_gear_status_queue()->ReadLastMessage();
-  auto auto_selection_queue =
-      c2017::webdash::WebDashQueueWrapper::GetInstance().auto_selection_queue().ReadLastMessage();
+  auto_list = c2017::QueueManager::GetInstance()->auto_list_;
+  auto intake_group_goal_queue =
+      QueueManager::GetInstance()->intake_group_goal_queue()->ReadLastMessage();
+  auto climber_status_queue =
+      QueueManager::GetInstance()->climber_status_queue()->ReadLastMessage();
+  auto drivetrain_status_queue =
+      QueueManager::GetInstance()->drivetrain_status_queue()->ReadLastMessage();
+  auto gyro_status_queue =
+      QueueManager::GetInstance()->gyro_queue()->ReadLastMessage();
+  auto vision_status =
+      QueueManager::GetInstance()->vision_status_queue()->ReadLastMessage();
+  auto ds_status =
+      QueueManager::GetInstance()->driver_station_queue()->ReadLastMessage();
+  auto ground_gear_status = QueueManager::GetInstance()
+                                ->ground_gear_status_queue()
+                                ->ReadLastMessage();
+  auto auto_selection_queue = muan::webdash::WebDashQueueWrapper::GetInstance()
+                                  .auto_selection_queue()
+                                  .ReadLastMessage();
 
   if (!calibrated_ && gyro_status_queue) {
     light_color_ = LightColor::RED;
@@ -20,52 +30,36 @@ void Lights::Update() {
     light_color_ = LightColor::BLUE;
   } else if (calibrated_ && auto_running_) {
     if (auto_selection_queue) {
-      switch (auto_selection_queue.value()->auto_mode()) {
-        case c2017::webdash::AutoSelection::NONE:
-          light_color_ = LightColor::PINK;
-          break;
-        case c2017::webdash::AutoSelection::BLUE_HELLA_KPA:
-          light_color_ = FlashLights(LightColor::BLUE, LightColor::PINK, false);
-          break;
-        case c2017::webdash::AutoSelection::BLUE_HELLA_KPA_NEW:
-          light_color_ = FlashLights(LightColor::TEAL, LightColor::WHITE, false);
-          break;
-        case c2017::webdash::AutoSelection::BLUE_HELLA_KPA_PLUS_GEAR:
-          light_color_ = FlashLights(LightColor::BLUE, LightColor::TEAL, false);
-          break;
-        case c2017::webdash::AutoSelection::BLUE_CENTER_PLUS_KPA:
-          light_color_ = FlashLights(LightColor::BLUE, LightColor::GREEN, false);
-          break;
-        case c2017::webdash::AutoSelection::BLUE_CENTER_PLUS_KPA_DRIVE:
-          light_color_ = FlashLights(LightColor::BLUE, LightColor::YELLOW, false);
-          break;
-        case c2017::webdash::AutoSelection::BLUE_FAR_PEG_PLUS_KPA_DRIVE:
-          light_color_ = FlashLights(LightColor::BLUE, LightColor::WHITE, false);
-          break;
-        case c2017::webdash::AutoSelection::RED_HELLA_KPA:
-          light_color_ = FlashLights(LightColor::RED, LightColor::PINK, false);
-          break;
-        case c2017::webdash::AutoSelection::RED_HELLA_KPA_NEW:
-          light_color_ = FlashLights(LightColor::PINK, LightColor::WHITE, false);
-          break;
-        case c2017::webdash::AutoSelection::RED_HELLA_KPA_PLUS_GEAR:
-          light_color_ = FlashLights(LightColor::RED, LightColor::TEAL, false);
-          break;
-        case c2017::webdash::AutoSelection::RED_CENTER_PLUS_KPA:
-          light_color_ = FlashLights(LightColor::RED, LightColor::GREEN, false);
-          break;
-        case c2017::webdash::AutoSelection::RED_CENTER_PLUS_KPA_DRIVE:
-          light_color_ = FlashLights(LightColor::RED, LightColor::YELLOW, false);
-          break;
-        case c2017::webdash::AutoSelection::RED_FAR_PEG_PLUS_KPA_DRIVE:
-          light_color_ = FlashLights(LightColor::RED, LightColor::WHITE, false);
-          break;
-        case c2017::webdash::AutoSelection::TWO_GEAR:
-          light_color_ = LightColor::WHITE;
-          break;
-        default:
-          light_color_ = FlashLights(LightColor::OFF, LightColor::PINK, false);
-          break;
+      if (auto_selection_queue.value()->auto_modes() == auto_list[0]) {
+        light_color_ = LightColor::PINK;
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[1]) {
+        light_color_ = FlashLights(LightColor::BLUE, LightColor::PINK, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[2]) {
+        light_color_ = FlashLights(LightColor::TEAL, LightColor::WHITE, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[3]) {
+        light_color_ = FlashLights(LightColor::BLUE, LightColor::TEAL, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[4]) {
+        light_color_ = FlashLights(LightColor::BLUE, LightColor::GREEN, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[5]) {
+        light_color_ = FlashLights(LightColor::BLUE, LightColor::YELLOW, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[6]) {
+        light_color_ = FlashLights(LightColor::BLUE, LightColor::WHITE, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[7]) {
+        light_color_ = FlashLights(LightColor::RED, LightColor::PINK, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[8]) {
+        light_color_ = FlashLights(LightColor::PINK, LightColor::WHITE, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[9]) {
+        light_color_ = FlashLights(LightColor::RED, LightColor::TEAL, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[10]) {
+        light_color_ = FlashLights(LightColor::RED, LightColor::GREEN, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[11]) {
+        light_color_ = FlashLights(LightColor::RED, LightColor::YELLOW, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[12]) {
+        light_color_ = FlashLights(LightColor::RED, LightColor::WHITE, false);
+      } else if (auto_selection_queue.value()->auto_modes() == auto_list[13]) {
+        light_color_ = LightColor::WHITE;
+      } else {
+        light_color_ = FlashLights(LightColor::OFF, LightColor::PINK, false);
       }
     } else {
       light_color_ = FlashLights(LightColor::OFF, LightColor::PINK, false);
@@ -88,15 +82,18 @@ void Lights::Update() {
 
       // Climbing lights
       if (climber_status_queue) {
-        if (climber_status_queue.value()->climber_state() == c2017::climber::State::CLIMBING) {
+        if (climber_status_queue.value()->climber_state() ==
+            c2017::climber::State::CLIMBING) {
           light_color_ = LightColor::PINK;
-        } else if (climber_status_queue.value()->climber_state() == c2017::climber::State::AT_TOP) {
+        } else if (climber_status_queue.value()->climber_state() ==
+                   c2017::climber::State::AT_TOP) {
           light_color_ = LightColor::GREEN;
         }
       }
 
       if (ground_gear_status) {
-        if (ground_gear_status.value()->current_state() == c2017::ground_gear_intake::State::INTAKING) {
+        if (ground_gear_status.value()->current_state() ==
+            c2017::ground_gear_intake::State::INTAKING) {
           light_color_ = LightColor::PINK;
         } else if (ground_gear_status.value()->current_state() ==
                        c2017::ground_gear_intake::State::CARRYING ||
@@ -114,9 +111,9 @@ void Lights::Update() {
     light_color_ = LightColor::BLUE;
   }
 
-
   if (vision_status) {
-    light_color_ = FlashLights(light_color_, light_color_, !vision_status.value()->has_connection());
+    light_color_ = FlashLights(light_color_, light_color_,
+                               !vision_status.value()->has_connection());
   } else {
     light_color_ = FlashLights(light_color_, light_color_, true);
   }
@@ -131,7 +128,8 @@ void Lights::Update() {
 }
 
 LightColor Lights::VisionAlignment() {
-  auto vision_status = QueueManager::GetInstance()->vision_status_queue()->ReadLastMessage();
+  auto vision_status =
+      QueueManager::GetInstance()->vision_status_queue()->ReadLastMessage();
   if (vision_status) {
     if (!vision_status.value()->target_found()) {
       return LightColor::RED;
@@ -144,27 +142,32 @@ LightColor Lights::VisionAlignment() {
   return FlashLights(LightColor::OFF, LightColor::TEAL, false);
 }
 
-LightColor Lights::FlashLights(LightColor color_one, LightColor color_two, bool off_between) {
-  double now =
-      std::chrono::duration<double>(aos::monotonic_clock::now() - aos::monotonic_clock::epoch()).count();
+LightColor Lights::FlashLights(LightColor color_one, LightColor color_two,
+                               bool off_between) {
+  double now = std::chrono::duration<double>(aos::monotonic_clock::now() -
+                                             aos::monotonic_clock::epoch())
+                   .count();
   auto color = (static_cast<int>(now) % 2) ? color_one : color_two;
   if (off_between && fmod(now, 0.5) < 0.25) color = LightColor::OFF;
   return color;
 }
 
 bool Lights::is_green() const {
-  return (light_color_ == LightColor::GREEN || light_color_ == LightColor::TEAL ||
-          light_color_ == LightColor::YELLOW || light_color_ == LightColor::WHITE);
+  return (
+      light_color_ == LightColor::GREEN || light_color_ == LightColor::TEAL ||
+      light_color_ == LightColor::YELLOW || light_color_ == LightColor::WHITE);
 }
 
 bool Lights::is_blue() const {
-  return (light_color_ == LightColor::BLUE || light_color_ == LightColor::TEAL ||
-          light_color_ == LightColor::PINK || light_color_ == LightColor::WHITE);
+  return (
+      light_color_ == LightColor::BLUE || light_color_ == LightColor::TEAL ||
+      light_color_ == LightColor::PINK || light_color_ == LightColor::WHITE);
 }
 
 bool Lights::is_red() const {
-  return (light_color_ == LightColor::RED || light_color_ == LightColor::YELLOW ||
-          light_color_ == LightColor::WHITE || light_color_ == LightColor::PINK);
+  return (
+      light_color_ == LightColor::RED || light_color_ == LightColor::YELLOW ||
+      light_color_ == LightColor::WHITE || light_color_ == LightColor::PINK);
 }
 
 }  // namespace lights

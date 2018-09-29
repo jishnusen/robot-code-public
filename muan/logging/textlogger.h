@@ -3,44 +3,45 @@
 
 #include <ostream>
 #include <string>
+
 #include "muan/queues/message_queue.h"
 #include "muan/utils/threading_utils.h"
+
+constexpr int DEBUG = -1;
+constexpr int ERROR = -2;
+constexpr int WARNING = -3;
+constexpr int FATAL = -4;
+constexpr int INFO = -5;
 
 namespace muan {
 namespace logging {
 
 class TextLogger {
  public:
-  // Log without format strings, such as
-  // LogStream(__FILE__, __LINE__, "x=", x, " y=", y);
-  template<typename... Ts>
-  void LogStream(const char* filename, int line, Ts... args);
-
   // Log with format strings, such as
-  // LogPrintf(__FILE__, __LINE__, "x=%d y=%f", x, y);
-  template<typename... Ts>
-  void LogPrintf(const char* filename, int line, Ts... args);
+  // Log(level, __FILE__, __LINE__, "x=%d y=%f", x, y);
+  int level;
+  template <typename... Ts>
+  void Log(int level, const char* filename, int line, Ts... args);
+
+  constexpr static size_t kBufferSize =
+      1024;  // More than enough for any reasonable message
 
   struct LogCall {
-    muan::utils::DeferCall<void, 1024, std::ostream&> message;
+    muan::utils::DeferCall<void, kBufferSize + 120, std::ostream&> message;
     const std::string* thread_name;
   };
 
-  using LogQueue = muan::queues::MessageQueue<LogCall, 500>;
+  using LogQueue = muan::queues::MessageQueue<LogCall>;
 
   LogQueue::QueueReader MakeReader();
 
  private:
   // Write a stamp that traces where and when the log is from
-  void Stamp(std::ostream& out, uint64_t time, const char* filename, int line);
-  LogQueue log_calls_;
+  void Stamp(std::ostream& out, uint64_t time, int level, const char* filename,
+             int line);
+  LogQueue log_calls_{500};
 };
-
-// Helper function to write a parameter pack to an ostream
-template<typename T, typename... Ts>
-void VariadicStreamWrite(std::ostream& out, T&& head, Ts&&... tail);
-template<typename T>
-void VariadicStreamWrite(std::ostream& out, T&& head);
 
 }  // namespace logging
 }  // namespace muan

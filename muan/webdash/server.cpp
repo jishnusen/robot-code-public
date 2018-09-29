@@ -6,42 +6,35 @@
 namespace muan {
 namespace webdash {
 
-void WebDashRunner::AddAutos(const std::vector<std::string>* auto_list) { auto_list_ = auto_list; }
+void WebDashRunner::AddVideoStream(std::string video_stream) {
+  video_stream_list_.push_back(video_stream);
+}
 
 WebDashQueueWrapper& WebDashQueueWrapper::GetInstance() {
   static WebDashQueueWrapper instance;
   return instance;
 }
 
-AutoSelectionQueue& WebDashQueueWrapper::auto_selection_queue() { return auto_selection_queue_; }
+AutoSelectionQueue& WebDashQueueWrapper::auto_selection_queue() {
+  return auto_selection_queue_;
+}
 
-// Dumb hack that will start to get really unwieldy as soon as we try to do
-// anything useful.
-// TODO(Wesley) Switch to json or ProtoBuf.js
 struct AutoChangeHandler : seasocks::WebSocket::Handler {
   void onConnect(seasocks::WebSocket* /*socket*/) override {}
 
   void onData(seasocks::WebSocket* /*socket*/, const char* data) override {
     AutoSelectionProto output_proto;
 
-    output_proto->set_auto_mode(data);
+    output_proto->set_auto_modes(data);
 
-    WebDashQueueWrapper::GetInstance().auto_selection_queue().WriteMessage(output_proto);
+    WebDashQueueWrapper::GetInstance().auto_selection_queue().WriteMessage(
+        output_proto);
   }
-
   void onDisconnect(seasocks::WebSocket* /*socket*/) override {}
 };
 
-struct LogNameHandler : seasocks::WebSocket::Handler {
-  void onConnect(seasocks::WebSocket* /* socket */) override {}
-  void onDisconnect(seasocks::WebSocket* /* socket */) override {}
-
-  void onData(seasocks::WebSocket* /*socket*/, const char* data) override {
-    muan::logging::FileWriter::CreateReadableName(data);
-  }
-};
-
-void WebDashRunner::DataRequestHandler::onData(seasocks::WebSocket* con, const char* /*data*/) {
+void WebDashRunner::DataRequestHandler::onData(seasocks::WebSocket* con,
+                                               const char* /*data*/) {
   std::stringstream output_json;
   output_json << "{";
   for (size_t i = 0; i < queue_logs_->size(); ++i) {
@@ -50,37 +43,52 @@ void WebDashRunner::DataRequestHandler::onData(seasocks::WebSocket* con, const c
       output_json << ',';
     }
     output_json << "\"" << queue_logs[i]->name
-                << "\":" + queue_logs[i]->reader->GetMessageAsJSON().value_or("{}");
+                << "\":" +
+                       queue_logs[i]->reader->GetMessageAsJSON().value_or("{}");
   }
   output_json << '}';
   con->send(output_json.str().c_str());
 }
 
-// Creates a vector in correct syntax from list of autos to be interpreted by json
-void WebDashRunner::AutoListRequestHandler::onData(seasocks::WebSocket* con, const char* /*data*/) {
-  std::string json_auto_list = "[\"";
-  bool first_auto = true;
-  for (auto auto_name : *auto_list_) {
-    if (!first_auto) {
-      json_auto_list += ", \"";
+void WebDashRunner::VideoListRequestHandler::onData(seasocks::WebSocket* con,
+                                                    const char* /*data*/) {
+  std::string json_video_list = "[\"";
+  bool first_video = true;
+  for (auto video_name : video_list_) {
+    if (!first_video) {
+      json_video_list += ", \"";
     } else {
-      first_auto = false;
+      first_video = false;
     }
-    json_auto_list += auto_name + "\"";
+    json_video_list += video_name + "\"";
   }
-  json_auto_list += "]";
-  con->send(json_auto_list.c_str());
+  json_video_list += "]";
+  con->send(json_video_list.c_str());
+}
+
+void WebDashRunner::DisplayRequestHandler::onData(seasocks::WebSocket* con,
+                                                  const char* /*data*/) {
+  std::string json_display = "";
+  json_display = *display_object_;
+  con->send(json_display.c_str());
+}
+
+void WebDashRunner::DisplayObjectMaker(const std::string display_object) {
+  display_object_ = display_object;
 }
 
 void WebDashRunner::operator()() {
   auto logger = std::make_shared<seasocks::PrintfLogger>();
   seasocks::Server server{logger};
   server.addWebSocketHandler("/auto", std::make_shared<AutoChangeHandler>());
-  server.addWebSocketHandler("/autolist", std::make_shared<AutoListRequestHandler>(auto_list_));
-  server.addWebSocketHandler("/logname", std::make_shared<LogNameHandler>());
-  server.addWebSocketHandler("/data", std::make_shared<DataRequestHandler>(queue_logs_));
+  server.addWebSocketHandler(
+      "/videolist",
+      std::make_shared<VideoListRequestHandler>(video_stream_list_));
+  server.addWebSocketHandler("/data",
+                             std::make_shared<DataRequestHandler>(queue_logs_));
+  server.addWebSocketHandler(
+      "/display", std::make_shared<DisplayRequestHandler>(&display_object_));
   server.serve("muan/webdash/www/", 5801);
 }
-
 }  // namespace webdash
 }  // namespace muan

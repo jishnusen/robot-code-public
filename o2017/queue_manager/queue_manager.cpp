@@ -3,7 +3,6 @@
 namespace o2017 {
 
 void QueueManager::StartLogging() {
-#ifndef FRC1678_NO_QUEUE_LOGGING
   // Logging
   logger_.AddQueue("pdp_status", &pdp_status_queue_);
   logger_.AddQueue("driver_station", &driver_station_queue_);
@@ -34,7 +33,9 @@ void QueueManager::StartLogging() {
 
   std::thread webdash_thread{std::ref(webdash_)};
   webdash_thread.detach();
-#endif  // FRC1678_NO_QUEUE_LOGGING
+
+  std::thread logger_thread{std::ref(logger_)};
+  logger_thread.detach();
 }
 
 QueueManager* QueueManager::GetInstance() {
@@ -42,27 +43,36 @@ QueueManager* QueueManager::GetInstance() {
   return &instance;
 }
 
-MessageQueue<muan::proto::StackProto<PdpStatus, 512>>& QueueManager::pdp_status_queue() {
+MessageQueue<muan::proto::StackProto<PdpStatus, 512>>&
+QueueManager::pdp_status_queue() {
   return pdp_status_queue_;
 }
 
-muan::wpilib::DriverStationQueue& QueueManager::driver_station_queue() { return driver_station_queue_; }
+muan::wpilib::DriverStationQueue& QueueManager::driver_station_queue() {
+  return driver_station_queue_;
+}
 
-muan::wpilib::gyro::GyroQueue* QueueManager::gyro_queue() { return &gyro_queue_; }
+muan::wpilib::gyro::GyroQueue* QueueManager::gyro_queue() {
+  return &gyro_queue_;
+}
 
-frc971::control_loops::drivetrain::InputQueue* QueueManager::drivetrain_input_queue() {
+frc971::control_loops::drivetrain::InputQueue*
+QueueManager::drivetrain_input_queue() {
   return &drivetrain_input_queue_;
 }
 
-frc971::control_loops::drivetrain::GoalQueue* QueueManager::drivetrain_goal_queue() {
+frc971::control_loops::drivetrain::GoalQueue*
+QueueManager::drivetrain_goal_queue() {
   return &drivetrain_goal_queue_;
 }
 
-frc971::control_loops::drivetrain::StatusQueue* QueueManager::drivetrain_status_queue() {
+frc971::control_loops::drivetrain::StatusQueue*
+QueueManager::drivetrain_status_queue() {
   return &drivetrain_status_queue_;
 }
 
-frc971::control_loops::drivetrain::OutputQueue* QueueManager::drivetrain_output_queue() {
+frc971::control_loops::drivetrain::OutputQueue*
+QueueManager::drivetrain_output_queue() {
   return &drivetrain_output_queue_;
 }
 
@@ -70,11 +80,13 @@ o2017::superstructure::InputQueue* QueueManager::superstructure_input_queue() {
   return &superstructure_input_queue_;
 }
 
-o2017::superstructure::OutputQueue* QueueManager::superstructure_output_queue() {
+o2017::superstructure::OutputQueue*
+QueueManager::superstructure_output_queue() {
   return &superstructure_output_queue_;
 }
 
-o2017::superstructure::StatusQueue* QueueManager::superstructure_status_queue() {
+o2017::superstructure::StatusQueue*
+QueueManager::superstructure_status_queue() {
   return &superstructure_status_queue_;
 }
 

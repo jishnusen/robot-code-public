@@ -1,0 +1,45 @@
+syntax = "proto2";
+
+option cc_enable_arenas = true;
+
+package c2018.climber;
+
+enum Goal {
+  NONE = 0;
+  APPROACHING = 1;
+  BATTERING = 2;
+  CLIMBING = 3;
+}
+
+enum State {
+  IDLE = 0;
+  APPROACH = 1;
+  BATTER = 2;
+  CLIMB = 3;
+  DONE = 4;
+}
+
+message ClimberInput {
+  required uint64 timestamp = 1;
+  required double position = 2; // winch encoder position in meters, > 0 is up
+  required double current = 3;
+}
+
+message ClimberOutput {
+  required uint64 timestamp = 1;
+  required double voltage = 2; // climbing up is positive
+  required bool hook_solenoid = 3; // true means the solenoid is down
+  required bool batter_solenoid = 4;
+}
+
+message ClimberStatus {
+  required uint64 timestamp = 1;
+  required State climber_state = 2;
+  required double observed_velocity = 3;
+  required double observed_height = 4;
+}
+
+message ClimberGoal {
+  required uint64 timestamp = 1;
+  required Goal climber_goal = 2;
+}

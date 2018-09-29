@@ -29,13 +29,19 @@ class Joystick {
  public:
   explicit Joystick(int32_t port);
   Joystick(int32_t port, JoystickStatusQueue* queue);
-  Joystick(int32_t port, JoystickStatusQueue* queue, XBoxRumbleQueue* rumble_queue);
+  Joystick(int32_t port, JoystickStatusQueue* queue,
+           XBoxRumbleQueue* rumble_queue);
 
   void Update();
 
   muan::teleop::Button* MakeButton(uint32_t button);
   muan::teleop::Button* MakePov(uint32_t pov, Pov position);
+  muan::teleop::Button* MakePovRange(uint32_t pov, double minimum,
+                                     double maximum);
   muan::teleop::Button* MakeAxis(uint32_t button, double threshold);
+  muan::teleop::Button* MakeAxisRange(double minimum, double maximum,
+                                      double x_axis, double y_axis,
+                                      double threshold);
 
   ::Joystick* wpilib_joystick();
 

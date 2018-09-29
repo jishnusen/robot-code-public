@@ -9,8 +9,8 @@
 #include "muan/wpilib/gyro/queue_types.h"
 #include "muan/wpilib/queue_types.h"
 
-#include "third_party/frc971/control_loops/drivetrain/queue_types.h"
 #include "o2017/subsystems/superstructure/queue_types.h"
+#include "third_party/frc971/control_loops/drivetrain/queue_types.h"
 
 using muan::queues::MessageQueue;
 
@@ -68,10 +68,7 @@ class QueueManager {
   muan::wpilib::DriverStationQueue driver_station_queue_;
 
   muan::wpilib::gyro::GyroQueue gyro_queue_;
-#ifndef FRC1678_NO_QUEUE_LOGGING
   muan::logging::Logger logger_;
-  std::thread logger_thread_{std::ref(logger_)};
-#endif  // FRC1678_NO_QUEUE_LOGGING
 
   muan::webdash::WebDashRunner webdash_;
 };

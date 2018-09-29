@@ -56,7 +56,10 @@ cc_library(
     name = "monitor",
     srcs = ["monitor.cpp"],
     hdrs = ["monitor.h"],
-    deps = [":history"]
+    deps = [
+        ":history",
+        "//muan/logging:logger",    
+      ],
 )
 
 cc_library(
@@ -124,5 +127,27 @@ cc_test(
     deps = [
         ":threading_utils",
         "//third_party/google/googletest:googletest"
+    ],
+)
+
+cc_library(
+    name = "hash",
+    srcs = ["hash.cpp"],
+    hdrs = ["hash.h"],
+)
+
+cc_library(
+    name = "string_utils",
+    srcs = ["string_utils.cpp"],
+    hdrs = ["string_utils.h"],
+    linkstatic = 1,
+)
+
+cc_test(
+    name = "string_utils_test",
+    srcs = ["string_utils_test.cpp"],
+    deps = [
+        ":string_utils",
+        "//third_party/google/googletest:googletest",
     ],
 )

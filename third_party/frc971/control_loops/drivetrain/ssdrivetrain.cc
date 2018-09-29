@@ -39,9 +39,9 @@ void DrivetrainMotorsSS::PolyCapU(Eigen::Matrix<double, 2, 1> *U) {
   // LOG_MATRIX(DEBUG, "U_uncapped", *U);
 
   Eigen::Matrix<double, 2, 2> position_K;
-  position_K << kf_->K(0, 0), kf_->K(0, 2), kf_->K(1, 0), kf_->K(1, 2);
+  position_K << kf_->controller().K(0, 0), kf_->controller().K(0, 2), kf_->controller().K(1, 0), kf_->controller().K(1, 2);
   Eigen::Matrix<double, 2, 2> velocity_K;
-  velocity_K << kf_->K(0, 1), kf_->K(0, 3), kf_->K(1, 1), kf_->K(1, 3);
+  velocity_K << kf_->controller().K(0, 1), kf_->controller().K(0, 3), kf_->controller().K(1, 1), kf_->controller().K(1, 3);
 
   Eigen::Matrix<double, 2, 1> position_error;
   position_error << error(0, 0), error(2, 0);
@@ -119,7 +119,8 @@ void DrivetrainMotorsSS::PolyCapU(Eigen::Matrix<double, 2, 1> *U) {
 
 DrivetrainMotorsSS::DrivetrainMotorsSS(const DrivetrainConfig &dt_config,
                                        StateFeedbackLoop<7, 2, 3> *kf,
-                                       double *integrated_kf_heading)
+                                       double *integrated_kf_heading,
+                                       Eigen::Matrix<double, 2, 1>* cartesian_position)
     : dt_config_(dt_config),
       kf_(kf),
       U_poly_((Eigen::Matrix<double, 4, 2>() << /*[[*/ 1, 0 /*]*/,
@@ -134,7 +135,8 @@ DrivetrainMotorsSS::DrivetrainMotorsSS(const DrivetrainConfig &dt_config,
                /*[*/ -12, 12, 12, -12 /*]*/).finished()),
       linear_profile_(kLoopFrequency),
       angular_profile_(kLoopFrequency),
-      integrated_kf_heading_(integrated_kf_heading) {
+      integrated_kf_heading_(integrated_kf_heading),
+      cartesian_position_(cartesian_position) {
   ::aos::controls::HPolytope<0>::Init();
   T_ << 1, 1, 1, -1;
   T_inverse_ = T_.inverse();
@@ -143,31 +145,101 @@ DrivetrainMotorsSS::DrivetrainMotorsSS(const DrivetrainConfig &dt_config,
 
 void DrivetrainMotorsSS::SetGoal(
     const ::frc971::control_loops::drivetrain::GoalProto &goal) {
+  is_high_gear_ = goal->gear() == Gear::kHighGear
+               || goal->gear() == Gear::kShiftingUp;
   // This is only valid if we're actually using a distance goal
-  if (!goal->has_distance_command()) {
-    return;
-  }
-  auto distance_goal = goal->distance_command();
-  unprofiled_goal_ << distance_goal.left_goal(),
-      distance_goal.left_velocity_goal(), distance_goal.right_goal(),
-      distance_goal.right_velocity_goal(), 0.0, 0.0, 0.0;
+  if (goal->has_distance_command()) {
+    auto distance_goal = goal->distance_command();
+    unprofiled_goal_ << distance_goal.left_goal(),
+        distance_goal.left_velocity_goal(), distance_goal.right_goal(),
+        distance_goal.right_velocity_goal(), 0.0, 0.0, 0.0;
 
-  use_profile_ =
-      !kf_->Kff().isZero(0) &&
-      (goal->has_linear_constraints() && goal->has_angular_constraints() &&
-       goal->linear_constraints().max_velocity() != 0.0 &&
-       goal->linear_constraints().max_acceleration() != 0.0 &&
-       goal->angular_constraints().max_velocity() != 0.0 &&
-       goal->angular_constraints().max_acceleration() != 0.0);
-  if (use_profile_) {
-    linear_profile_.set_maximum_velocity(
-        goal->linear_constraints().max_velocity());
-    linear_profile_.set_maximum_acceleration(
-        goal->linear_constraints().max_acceleration());
-    angular_profile_.set_maximum_velocity(
-        goal->angular_constraints().max_velocity());
-    angular_profile_.set_maximum_acceleration(
-        goal->angular_constraints().max_acceleration());
+    use_profile_ =
+        !kf_->controller().Kff().isZero(0) &&
+        (goal->has_linear_constraints() && goal->has_angular_constraints() &&
+         goal->linear_constraints().max_velocity() !=0.0 &&
+         goal->linear_constraints().max_acceleration() != 0.0 &&
+         goal->angular_constraints().max_velocity() != 0.0 &&
+         goal->angular_constraints().max_acceleration() != 0.0);
+    if (use_profile_) {
+      linear_profile_.set_maximum_velocity(
+          goal->linear_constraints().max_velocity());
+      linear_profile_.set_maximum_acceleration(
+          goal->linear_constraints().max_acceleration());
+      angular_profile_.set_maximum_velocity(
+          goal->angular_constraints().max_velocity());
+      angular_profile_.set_maximum_acceleration(
+          goal->angular_constraints().max_acceleration());
+    }
+  } else if (goal->has_path_command()) {
+    use_path_ = true;
+    use_profile_ = false;
+    auto path_goal = goal->path_command();
+    CHECK_GT(goal->linear_constraints().max_acceleration(), 0.0);
+    trajectory_.set_maximum_acceleration(goal->linear_constraints().max_acceleration());
+    trajectory_.set_maximum_voltage(path_goal.max_voltage());
+
+    Eigen::Matrix<double, 4, 4> A_c = Eigen::Matrix<double, 4, 4>::Zero();
+    A_c(0, 1) = 1.0;
+    A_c(2, 3) = 1.0;
+
+    Eigen::Matrix<double, 4, 2> B_c = Eigen::Matrix<double, 4, 2>::Zero();
+
+    if (is_high_gear_) {
+      A_c(1, 1) = dt_config_.alpha_high;
+      A_c(1, 3) = dt_config_.gamma_high;
+      A_c(3, 3) = dt_config_.alpha_high;
+      A_c(3, 1) = dt_config_.gamma_high;
+      B_c(1, 0) = dt_config_.beta_high;
+      B_c(1, 1) = dt_config_.delta_high;
+      B_c(3, 1) = dt_config_.beta_high;
+      B_c(3, 0) = dt_config_.delta_high;
+    } else {
+      A_c(1, 1) = dt_config_.alpha_low;
+      A_c(1, 3) = dt_config_.gamma_low;
+      A_c(3, 3) = dt_config_.alpha_low;
+      A_c(3, 1) = dt_config_.gamma_low;
+      B_c(1, 0) = dt_config_.beta_low;
+      B_c(1, 1) = dt_config_.delta_low;
+      B_c(3, 1) = dt_config_.beta_low;
+      B_c(3, 0) = dt_config_.delta_low;
+    }
+    trajectory_.set_system(A_c, B_c, dt_config_.robot_radius);
+
+    paths::Pose initial_pose(*cartesian_position_, *integrated_kf_heading_);
+    paths::Pose final_pose((Eigen::Vector3d() << path_goal.x_goal(), path_goal.y_goal(), path_goal.theta_goal()).finished());
+    if (last_goal_pose_.Get() != final_pose.Get()) {
+      bool backwards;
+      ::frc971::control_loops::drivetrain::StatusProto status_proto;
+      PopulateStatus(&status_proto);
+      auto state = (Eigen::Matrix<double, 4, 1>() <<
+        status_proto->profiled_left_position_goal(),
+        status_proto->profiled_left_velocity_goal(),
+        status_proto->profiled_right_position_goal(),
+        status_proto->profiled_right_velocity_goal()).finished();
+      if (path_goal.has_backwards()) {
+        backwards = path_goal.backwards();
+      } else {
+        auto delta = final_pose - initial_pose;
+        backwards = ::std::abs(::std::atan2(delta.translational()(1), delta.translational()(0)) -
+                               initial_pose.heading()) > M_PI / 2;
+      }
+      double initial_angular_velocity = (kf_->X_hat(3, 0) - kf_->X_hat(1, 0)) /
+                                        (dt_config_.robot_radius * 2.0);
+      paths::HermitePath path(initial_pose, final_pose,
+                              0.5 * (state(1) + state(3)),
+                              path_goal.final_velocity(),
+                              backwards,
+                              path_goal.extra_distance_initial(),
+                              path_goal.extra_distance_final(),
+                              initial_angular_velocity,
+                              path_goal.final_angular_velocity());
+
+      trajectory_.SetPath(path, state, path_goal.final_velocity(),
+                          path_goal.final_angular_velocity());
+
+      last_goal_pose_ = final_pose;
+    }
   }
 }
 
@@ -222,6 +294,13 @@ void DrivetrainMotorsSS::Update(bool enable_control_loop) {
                                            unprofiled_linear(1, 0));
       next_angular = angular_profile_.Update(unprofiled_angular(0, 0),
                                              unprofiled_angular(1, 0));
+    } else if (use_path_) {
+      // TODO(Lyra): Consider pose correction
+      sample_ = trajectory_.Update();
+      Eigen::Matrix<double, 7, 1> goal_state;
+      goal_state.block<4, 1>(0, 0) = sample_.drivetrain_state;
+      next_linear = LeftRightToLinear(goal_state);
+      next_angular = LeftRightToAngular(goal_state);
     } else {
       next_angular = unprofiled_angular;
       next_linear = unprofiled_linear;
@@ -243,7 +322,7 @@ void DrivetrainMotorsSS::Update(bool enable_control_loop) {
     kf_->mutable_next_R(0, 0) -= wheel_compensation_offset;
     kf_->mutable_next_R(2, 0) += wheel_compensation_offset;
 
-    if (!use_profile_) {
+    if (!(use_profile_ || use_path_)) {
       kf_->mutable_R() = kf_->next_R();
     } else {
       kf_->mutable_R(0, 0) -= scaled_angle_delta;
@@ -288,6 +367,19 @@ void DrivetrainMotorsSS::Update(bool enable_control_loop) {
 
     kf_->mutable_next_R().block<4, 1>(0, 0) = kf_->X_hat().block<4, 1>(0, 0);
     kf_->mutable_R().block<4, 1>(0, 0) = kf_->X_hat().block<4, 1>(0, 0);
+
+    // Update profiles so if the robot is browned out, it doesn't expect
+    // to be further behind than it is when it gets re-enabled
+    if (use_profile_) {
+      Eigen::Matrix<double, 2, 1> unprofiled_linear =
+          LeftRightToLinear(unprofiled_goal_);
+      Eigen::Matrix<double, 2, 1> unprofiled_angular =
+          LeftRightToAngular(unprofiled_goal_);
+      linear_profile_.Update(unprofiled_linear(0, 0), unprofiled_linear(1, 0));
+      angular_profile_.Update(unprofiled_angular(0, 0), unprofiled_angular(1, 0));
+    } else if (use_path_) {
+      trajectory_.Update();
+    }
   }
   last_gyro_to_wheel_offset_ = gyro_to_wheel_offset;
 }
@@ -297,7 +389,7 @@ void DrivetrainMotorsSS::SetOutput(
   if (output) {
     (*output)->set_left_voltage(kf_->U(0, 0));
     (*output)->set_right_voltage(kf_->U(1, 0));
-    (*output)->set_high_gear(true);
+    (*output)->set_high_gear(is_high_gear_);
   }
 }
 
@@ -317,6 +409,15 @@ void DrivetrainMotorsSS::PopulateStatus(
   (*status)->set_profiled_left_velocity_goal(profiled_gyro_left_right(1, 0));
   (*status)->set_profiled_right_position_goal(profiled_gyro_left_right(2, 0));
   (*status)->set_profiled_right_velocity_goal(profiled_gyro_left_right(3, 0));
+  if (use_path_) {
+    auto path_status = (*status)->mutable_path_status();
+    path_status->set_profiled_x_goal(sample_.pose.Get()(0, 0));
+    path_status->set_profiled_y_goal(sample_.pose.Get()(1, 0));
+    path_status->set_profiled_heading_goal(sample_.pose.Get()(2, 0));
+    path_status->set_distance_remaining(sample_.distance_remaining);
+    path_status->set_time_remaining(sample_.time_remaining);
+    path_status->set_profile_complete(sample_.profile_complete);
+  }
 }
 
 }  // namespace drivetrain

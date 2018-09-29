@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <vector>
+
 #include "muan/webdash/queue_types.h"
 #include "third_party/aos/common/die.h"
 #include "third_party/optional/optional.hpp"
@@ -19,26 +20,28 @@ namespace webdash {
 class WebDashQueueWrapper {
  public:
   static WebDashQueueWrapper &GetInstance();
-  muan::webdash::AutoSelectionQueue &auto_selection_queue();
+  AutoSelectionQueue &auto_selection_queue();
 
  private:
-  muan::webdash::AutoSelectionQueue auto_selection_queue_;
+  AutoSelectionQueue auto_selection_queue_{100};
 };
+
+enum WebDashMode { ROBORIO, JETSON };
 
 class WebDashRunner {
  public:
-  WebDashRunner() = default;
   ~WebDashRunner() = default;
 
   template <class T>
   void AddQueue(const std::string &name, T *queue);
 
-  void AddAutos(const std::vector<std::string> *auto_list);
+  void AddVideoStream(std::string video_stream);
 
-  const std::vector<std::string> *auto_list_;
+  void DisplayObjectMaker(const std::string display_object);
 
   class GenericReader {
    public:
+    virtual ~GenericReader() = default;
     virtual std::experimental::optional<std::string> GetMessageAsJSON() = 0;
   };
 
@@ -67,14 +70,16 @@ class WebDashRunner {
     void onData(seasocks::WebSocket *con, const char * /*data*/) override;
 
     explicit DataRequestHandler(
-        const std::vector<std::unique_ptr<webdash::WebDashRunner::QueueLog>> &queue_logs)
+        const std::vector<std::unique_ptr<webdash::WebDashRunner::QueueLog>>
+            &queue_logs)
         : queue_logs_(&queue_logs) {}
 
    private:
-    const std::vector<std::unique_ptr<webdash::WebDashRunner::QueueLog>> *queue_logs_;
+    const std::vector<std::unique_ptr<webdash::WebDashRunner::QueueLog>>
+        *queue_logs_;
   };
 
-  struct AutoListRequestHandler : seasocks::WebSocket::Handler {
+  struct VideoListRequestHandler : seasocks::WebSocket::Handler {
    public:
     std::set<seasocks::WebSocket *> cons_;
 
@@ -82,13 +87,30 @@ class WebDashRunner {
     void onDisconnect(seasocks::WebSocket * /*con*/) override{};
     void onData(seasocks::WebSocket *con, const char * /*data*/) override;
 
-    explicit AutoListRequestHandler(const std::vector<std::string> *auto_list) : auto_list_(auto_list) {}
+    explicit VideoListRequestHandler(const std::vector<std::string> video_list)
+        : video_list_(video_list) {}
 
    private:
-    const std::vector<std::string> *auto_list_;
+    const std::vector<std::string> video_list_;
   };
 
+  struct DisplayRequestHandler : seasocks::WebSocket::Handler {
+   public:
+    void onConnect(seasocks::WebSocket * /*con*/) override{};
+    void onDisconnect(seasocks::WebSocket * /*con*/) override{};
+    void onData(seasocks::WebSocket *con, const char * /*data*/) override;
+
+    explicit DisplayRequestHandler(const std::string *display_object)
+        : display_object_(display_object) {}
+
+   private:
+    const std::string *display_object_;
+  };
+
+  std::string display_object_;
   std::vector<std::unique_ptr<QueueLog>> queue_logs_;
+  std::vector<std::string> auto_list_;
+  std::vector<std::string> video_stream_list_;
 };
 
 }  // namespace webdash

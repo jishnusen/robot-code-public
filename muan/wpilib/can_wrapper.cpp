@@ -5,10 +5,11 @@
 #include "third_party/aos/linux_code/init.h"
 
 namespace muan {
-
 namespace wpilib {
 
-CanWrapper::CanWrapper(PdpWrapper::Queue* pdp_queue) { pdp_.SetQueue(pdp_queue); }
+CanWrapper::CanWrapper(PdpWrapper::Queue* pdp_queue) {
+  pdp_.SetQueue(pdp_queue);
+}
 
 void CanWrapper::operator()() {
   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20));
@@ -29,9 +30,7 @@ void CanWrapper::operator()() {
 void CanWrapper::Stop() { running_ = false; }
 
 PdpWrapper* CanWrapper::pdp() { return &pdp_; }
-
 PcmWrapper* CanWrapper::pcm() { return &pcm_; }
 
 }  // namespace wpilib
-
 }  // namespace muan

@@ -14,6 +14,7 @@ cc_library(
         "//third_party/aos/common/util:phased_loop",
         "//third_party/aos/linux_code:init",
     ],
+    restricted_to = ["//tools:roborio"],
 )
 
 cc_library(
@@ -21,12 +22,14 @@ cc_library(
     srcs = ["pdp_wrapper.cpp"],
     hdrs = ["pdp_wrapper.h"],
     deps = [
-        ":state_protos",
+        ":wpilib_queues",
         "//muan/proto:stack_proto",
         "//muan/queues",
         "//third_party/aos/common:die",
         "//third_party/wpilibsuite:wpilib",
+        "//muan/logging:logger",
     ],
+    restricted_to = ["//tools:roborio"],
 )
 
 cc_library(
@@ -37,6 +40,7 @@ cc_library(
         "//third_party/aos/common:die",
         "//third_party/wpilibsuite:wpilib",
     ],
+    restricted_to = ["//tools:roborio"],
 )
 
 cc_binary(
@@ -46,6 +50,7 @@ cc_binary(
         ":can_wrapper",
         "//third_party/wpilibsuite:wpilib",
     ],
+    restricted_to = ["//tools:roborio"],
 )
 
 cc_binary(
@@ -55,6 +60,7 @@ cc_binary(
         ":can_wrapper",
         "//third_party/wpilibsuite:wpilib",
     ],
+    restricted_to = ["//tools:roborio"],
 )
 
 cc_library(
@@ -82,4 +88,5 @@ cc_library(
         ":wpilib_queues",
         "//third_party/wpilibsuite:wpilib",
     ],
+    restricted_to = ["//tools:roborio"],
 )

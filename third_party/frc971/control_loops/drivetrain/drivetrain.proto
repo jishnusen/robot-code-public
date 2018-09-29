@@ -7,6 +7,8 @@ option cc_enable_arenas = true;
 enum Gear {
   kHighGear = 0;
   kLowGear = 1;
+  kShiftingUp = 2;
+  kShiftingDown = 3;
 }
 
 message MotionProfileConstraints {
@@ -41,16 +43,49 @@ message DrivetrainGoal {
     required double right_velocity_goal = 4;
   }
 
+  message PathCommand {
+    required double x_goal = 1;
+    required double y_goal = 2;
+    required double theta_goal = 3;
+
+    // How much voltage to allow trajectory to use
+    // Needlessly low => slower
+    // Too high => weak corrections, causing drift or shaking
+    required double max_voltage = 4;
+
+    // Set this to override the default directionality selection
+    optional bool backwards = 5;
+
+    // Set this to fudge the shape of the path to avoid obstacles.
+    // Adds to the starting tangent of the path so the beginning or ending
+    // mostly straight section is longer by approximately the specified amount.
+    // If there is forward velocity and not angular velocity, negative
+    // extra distance may prevent the robot from deccelerating fast enough.
+
+    // Also note that the acceleration component of a pentic hermite is
+    // very small, so if the angular velocity at either end is significant,
+    // extra distance at that end may need to be added (in the event that the
+    // angular velocity is opposite the turn it would have otherwise) or
+    // subtracted (in the event that it is in the same direction) if you get
+    // warnings about velocity being too high on one side.
+    optional double extra_distance_initial = 6;
+    optional double extra_distance_final = 7;
+
+    optional double final_velocity = 8;
+    optional double final_angular_velocity = 9;
+  }
+
   required Gear gear = 2;
 
   oneof command {
     TeleopCommand teleop_command = 3;
     VelocityCommand velocity_command = 4;
     DistanceCommand distance_command = 5;
+    PathCommand path_command = 6;
   }
 
-  optional MotionProfileConstraints linear_constraints = 6;
-  optional MotionProfileConstraints angular_constraints = 7;
+  optional MotionProfileConstraints linear_constraints = 7;
+  optional MotionProfileConstraints angular_constraints = 8;
 }
 
 message DrivetrainInput {
@@ -58,6 +93,17 @@ message DrivetrainInput {
   // In meters, positive is forwards
   required double left_encoder = 2;
   required double right_encoder = 3;
+
+  // Position of each drivetrain shifter, scaled from 0.0 to 1.0 where smaller
+  // is towards low gear.
+  required double left_shifter_position = 4;
+  required double right_shifter_position = 5;
+
+  // Raw analog voltages of each shifter hall effect for logging purposes.
+  required double low_left_hall = 6;
+  required double high_left_hall = 7;
+  required double low_right_hall = 8;
+  required double high_right_hall = 9;
 }
 
 message DrivetrainOutput {
@@ -107,6 +153,20 @@ message DrivetrainStatus {
   // The KF estimated heading.
   required double estimated_heading = 18;
 
+  required double estimated_x_position = 19;
+  required double estimated_y_position = 20;
+
   // True if the output voltage was capped last cycle.
-  required bool output_was_capped = 19;
+  required bool output_was_capped = 21;
+
+  message PathStatus {
+    required double profiled_x_goal = 1;
+    required double profiled_y_goal = 2;
+    required double profiled_heading_goal = 3;
+    required double distance_remaining = 4;
+    required double time_remaining = 5;
+    required bool profile_complete = 6;
+  }
+
+  optional PathStatus path_status = 22;
 }

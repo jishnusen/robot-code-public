@@ -6,7 +6,7 @@
 class BuildTestRobot : public RobotBase {
  public:
   void StartCompetition() override {
-    muan::wpilib::PdpWrapper::Queue pdp_queue;
+    muan::wpilib::PdpWrapper::Queue pdp_queue(200);
     muan::wpilib::CanWrapper can{&pdp_queue};
     std::thread can_thread{std::ref(can)};
 
@@ -15,7 +15,8 @@ class BuildTestRobot : public RobotBase {
     can.pcm()->CreateSolenoid(6);
 
     HAL_ObserveUserProgramStarting();
-
+    // Don't write to solenoid if disabled.
+    // If in autonmous, write to solenoid
     while (true) {
       if (IsDisabled()) {
         can.pcm()->WriteSolenoid(6, false);

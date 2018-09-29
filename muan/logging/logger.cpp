@@ -6,10 +6,8 @@ namespace logging {
 Logger::Logger()
     : writer_{std::make_unique<FileWriter>()},
       textlog_reader_{text_logger.MakeReader()} {}
-
 Logger::Logger(std::unique_ptr<FileWriter>&& writer)
-    : writer_{std::move(writer)},
-      textlog_reader_{text_logger.MakeReader()} {}
+    : writer_{std::move(writer)}, textlog_reader_{text_logger.MakeReader()} {}
 
 void Logger::operator()() {
   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20));
@@ -18,6 +16,7 @@ void Logger::operator()() {
 
   while (running_) {
     Update();
+
     phased_loop.SleepUntilNext();
   }
 }
