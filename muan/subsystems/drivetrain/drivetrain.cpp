@@ -65,7 +65,16 @@ void Drivetrain::Update() {
     return;
   }
 
-  bool in_closed_loop = goal->has_path_goal() && driver_station->is_sys_active();
+  /* std::cout << goal->path_goal().x() << std::endl; */
+  /* goal->mutable_path_goal()->set_x(5); */
+  /* goal->mutable_path_goal()->set_y(-1.3); */
+  /* goal->mutable_path_goal()->set_backwards(false); */
+  /* goal->mutable_path_goal()->set_heading(0); */
+  /* goal->mutable_path_goal()->set_max_voltage(11.); */
+
+  bool in_closed_loop =
+      goal->has_path_goal() && driver_station->is_sys_active();
+  /* std::cout << in_closed_loop << std::endl; */
   if (in_closed_loop) {
     closed_loop_.SetGoal(goal);
     closed_loop_.Update(&output, &status);

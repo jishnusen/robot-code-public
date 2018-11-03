@@ -1,11 +1,12 @@
-#ifndef O2018_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
-#define O2018_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
+#ifndef C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
+#define C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
 
-#include "o2018/subsystems/score_subsystem/score_subsystem.pb.h"
+#include "c2018_rewrite/subsystems/score_subsystem/score_subsystem.pb.h"
 #include "muan/proto/stack_proto.h"
 #include "muan/queues/message_queue.h"
 
-namespace o2018 {
+namespace c2018 {
+namespace subsystems {
 namespace score_subsystem {
 
 using ScoreSubsystemInputProto =
@@ -29,6 +30,7 @@ using ScoreSubsystemGoalQueue =
     muan::queues::MessageQueue<ScoreSubsystemGoalProto>;
 
 }  // namespace score_subsystem
-}  // namespace o2018
+}  // namespace subsystems
+}  // namespace c2018
 
-#endif  // O2018_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_
+#endif  // C2018_REWRITE_SUBSYSTEMS_SCORE_SUBSYSTEM_QUEUE_TYPES_H_

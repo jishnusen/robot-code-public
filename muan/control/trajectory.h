@@ -13,8 +13,10 @@ class Trajectory {
  public:
   struct Constraints {
     double max_velocity;
+    double max_angular_velocity;
     double max_voltage;
     double max_acceleration;
+    double max_angular_acceleration;
     double max_centripetal_acceleration;
 
     double initial_velocity;

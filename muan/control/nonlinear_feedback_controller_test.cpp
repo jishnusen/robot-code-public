@@ -63,9 +63,11 @@ class TestFixture : public ::testing::Test {
 
       double omega = sample.v * sample.pose.curvature();
 
-      goal =
-          controller_.Update((Eigen::Vector2d() << sample.v, omega).finished(),
-                             current_pose, error, high_gear);
+      goal = controller_.Update(
+          (Eigen::Vector2d() << sample.v, omega).finished(),
+          (Eigen::Vector2d() << sample.a, sample.a * sample.pose.curvature())
+              .finished(),
+          current_pose, error, high_gear);
 
       Eigen::Vector2d velocity = model_.ForwardKinematics(goal.velocity) * 0.9;
 
@@ -87,12 +89,13 @@ class TestFixture : public ::testing::Test {
 
  private:
   DrivetrainModel model_ = GenerateModel();
-  NonLinearFeedbackController controller_{GenerateModel(), 3.0,
-                                          1.5};
+  NonLinearFeedbackController controller_{GenerateModel(), 3.0, 1.5};
   Trajectory::Constraints constraints_{
       .max_velocity = 3.,
+      .max_angular_velocity = 6.12,
       .max_voltage = 12.,
       .max_acceleration = 3.,
+      .max_angular_acceleration = 1.35,
       .max_centripetal_acceleration = M_PI / 2,
 
       .initial_velocity = 0.,

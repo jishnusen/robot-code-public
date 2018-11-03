@@ -51,6 +51,14 @@ void Trajectory::TimeReparametrize(const HermiteSpline& spline,
                  std::sqrt(std::abs(constraints.max_centripetal_acceleration /
                                     constrained_pose.pose.curvature())));
 
+    /* if (std::abs(constrained_pose.max_velocity * */
+    /*              constrained_pose.pose.curvature()) > */
+    /*     constraints.max_angular_velocity) { */
+    /*   constrained_pose.max_velocity = std::copysign( */
+    /*       constraints.max_angular_velocity / constrained_pose.pose.curvature(), */
+    /*       constrained_pose.max_velocity); */
+    /* } */
+
     Eigen::Vector2d linear_angular_velocity;
     linear_angular_velocity(0) =
         constrained_pose.max_velocity * (backwards ? -1. : 1.);
@@ -65,6 +73,24 @@ void Trajectory::TimeReparametrize(const HermiteSpline& spline,
     constrained_pose.min_acceleration =
         std::max(constrained_pose.min_acceleration,
                  backwards ? -min_max_accel.max : min_max_accel.min);
+
+    /* if (std::abs(constrained_pose.min_acceleration * */
+    /*              constrained_pose.pose.curvature()) > */
+    /*     constraints.max_angular_acceleration) { */
+    /*   constrained_pose.min_acceleration = */
+    /*       std::copysign(constraints.max_angular_acceleration / */
+    /*                         constrained_pose.pose.curvature(), */
+    /*                     constrained_pose.min_acceleration); */
+    /* } */
+
+    /* if (std::abs(constrained_pose.max_acceleration * */
+    /*              constrained_pose.pose.curvature()) > */
+    /*     constraints.max_angular_acceleration) { */
+    /*   constrained_pose.max_acceleration = */
+    /*       std::copysign(constraints.max_angular_acceleration / */
+    /*                         constrained_pose.pose.curvature(), */
+    /*                     constrained_pose.max_acceleration); */
+    /* } */
 
     constrained_pose.max_acceleration =
         std::min(constrained_pose.max_acceleration,
