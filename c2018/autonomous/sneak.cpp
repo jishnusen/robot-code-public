@@ -20,20 +20,23 @@ void Sneak::SneakLeft() {
   max_forward_acceleration_ = 9.0;
   StartDrivePath(kScaleX + 0.25, scale_y, 150 * deg, -1, kHighGear, 0, 0, 11);
   WaitUntilDrivetrainNear(kScaleX + 0.25, scale_y, 0.2);
-  Score(true);
+  Score(false);
   WaitUntilDriveComplete();
 
   // Drive back to pyramid
   MoveTo(c2018::score_subsystem::ScoreGoal::STOW);
-  StartDrivePath(1.8, 0.5, 315 * deg, 1, kHighGear, 0.0, 1.0);
+  StartDrivePath(1.8, 0.1, 315 * deg, 1, kHighGear, 0.0, 1.0);
   max_forward_acceleration_ = 3.0;
   Wait(300);
   IntakeGround();
   WaitForCube();
+  if (!WaitForCubeOrTimeout(800)) {
+    return;
+  }
   WaitUntilDriveComplete();
 
   MoveTo(c2018::score_subsystem::ScoreGoal::STOW);
-  StartDrivePath(8.0, 3.3, 180 * deg, -1, kHighGear);
+  StartDrivePath(8.0, 2.9, 180 * deg, -1, kHighGear);
   WaitUntilDriveComplete();
 
   MoveTo(c2018::score_subsystem::ScoreGoal::SCALE_HIGH_FORWARD);
@@ -56,6 +59,7 @@ void Sneak::SneakRight() {
 
   // XR - Scale is right
   LOG(INFO, "Running RIGHT SNEAK ONLY auto");
+  /* Wait(800); */
 
   StartDrivePath(0.8, -3.0, 90 * deg, -1);
   MoveTo(c2018::score_subsystem::ScoreGoal::STOW);
@@ -75,12 +79,12 @@ void Sneak::SneakRight() {
   MoveTo(c2018::score_subsystem::ScoreGoal::SCALE_HIGH_FORWARD);
   Wait(300);
 
-  StartDriveAtAngle(0.7, -90 * deg, 0, kLowGear);
+  StartDriveAtAngle(0.8, -90 * deg, 0, kLowGear);
   WaitUntilDriveComplete();
 
   DropScore();
-  Wait(100);
-  StartDriveAtAngle(-0.5, -150 * deg, 0, kLowGear);
+  Wait(150);
+  StartDriveAtAngle(-0.6, -150 * deg, 0, kLowGear);
   Wait(100);
   MoveTo(c2018::score_subsystem::ScoreGoal::INTAKE_0);
 }
