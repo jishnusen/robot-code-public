@@ -19,7 +19,7 @@ class InterfaceRunner {
 
   DrivetrainInterface drive_{new TalonWrapper(kClimber, TalonWrapper::Config()),
                              &pcm_};
-  ArmInterface arm_{&pcm_};
+  /* ArmInterface arm_{&pcm_}; */
 };
 
 }  // namespace interfaces
