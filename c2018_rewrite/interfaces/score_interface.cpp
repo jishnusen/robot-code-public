@@ -26,7 +26,7 @@ constexpr uint32_t kIntakeSolenoidOpen = 1;
 constexpr uint32_t kIntakeSolenoidClose = 2;
 constexpr uint32_t kWhiskerSolenoid = 6;
 
-constexpr double kWristP = 3.;
+constexpr double kWristP = 5.;
 constexpr double kWristI = 0.0;
 constexpr double kWristD = 50.0;
 constexpr double kWristF = 1.05;
@@ -81,17 +81,22 @@ ScoreSubsystemInterface::ScoreSubsystemInterface(muan::wpilib::PcmWrapper* pcm)
 
   elevator_slave_.Follow(elevator_talon_);
 
-  elevator_talon_.ConfigMotionCruiseVelocity(
-      (2.5 * kElevatorFactor) * (60. / 4096.), 100);
-  elevator_talon_.ConfigMotionAcceleration(
-      (4.8 * kElevatorFactor) * (60. / 4096.), 100);
+  elevator_talon_.ConfigMotionCruiseVelocity(12500, 100);
+  //(2.5 * kElevatorFactor) * (60. / 4096.), 100);
+  elevator_talon_.ConfigMotionAcceleration(27000, 100);
 
-  wrist_talon_.ConfigMotionCruiseVelocity((8.0 * kWristFactor) * (60. / 4096.),
-                                          100);
-  wrist_talon_.ConfigMotionAcceleration((8.0 * kWristFactor) * (60. / 4096.),
-                                        100);
+  wrist_talon_.ConfigMotionCruiseVelocity(2500 * 5, 100);
+  //(2.5 * kElevatorFactor) * (60. / 4096.), 100);
+  wrist_talon_.ConfigMotionAcceleration(2500 * 5, 100);
+
+  wrist_talon_.SetInverted(true);
+  elevator_talon_.SetInverted(true);
+  elevator_slave_.SetInverted(true);
+  elevator_talon_.SetSensorPhase(true);
 
   low_roller_.Follow(high_roller_);
+  high_roller_.SetInverted(true);
+  low_roller_.SetInverted(true);
 
   pcm_->CreateSolenoid(kIntakeSolenoidOpen);
   pcm_->CreateSolenoid(kIntakeSolenoidClose);
@@ -108,25 +113,29 @@ void ScoreSubsystemInterface::ReadSensors() {
   sensors->set_elevator_hall(
       !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P));
 
-  sensors->set_wrist_encoder(wrist_talon_.GetSelectedSensorPosition(0));
-  sensors->set_wrist_velocity(wrist_talon_.GetSelectedSensorVelocity(0));
+  sensors->set_wrist_encoder(wrist_talon_.GetSelectedSensorPosition(0) /
+                             kWristFactor);
+  sensors->set_wrist_velocity(wrist_talon_.GetSelectedSensorVelocity(0) /
+                              kWristFactor / 0.1);
   sensors->set_wrist_hall(
       !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
 
-  sensors->set_intake_proxy(false);
+  sensors->set_intake_proxy(
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SDA));
 
   input_queue_->WriteMessage(sensors);
 }
 
 void ScoreSubsystemInterface::WriteActuators() {
-  elevator_talon_.Set(ControlMode::MotionMagic, 0.5 * kElevatorFactor);
-  return;
+  /* elevator_talon_.Set(ControlMode::MotionMagic, 0.5 * kElevatorFactor); */
+  /* elevator_talon_.Set(ControlMode::PercentOutput, 0.4); */
+  /* return; */
   ScoreSubsystemOutputProto outputs;
 
   if (!output_reader_.ReadLastMessage(&outputs)) {
     elevator_talon_.Set(ControlMode::PercentOutput, 0);
-    wrist_talon_.Set(ControlMode::PercentOutput, 0);
-    high_roller_.Set(ControlMode::PercentOutput, 0);
+    wrist_talon_.Set(ControlMode::PercentOutput, 0.2);
+    high_roller_.Set(ControlMode::PercentOutput, 0.5);
     return;
   }
 
@@ -136,7 +145,10 @@ void ScoreSubsystemInterface::WriteActuators() {
                           outputs->elevator_setpoint() / 12.);
       break;
     case TalonOutput::POSITION:
-      elevator_talon_.Set(ControlMode::MotionMagic, 0.5 * kElevatorFactor);
+      elevator_talon_.Set(ControlMode::MotionMagic,
+                          outputs->elevator_setpoint() * kElevatorFactor,
+                          DemandType_ArbitraryFeedForward,
+                          outputs->elevator_setpoint_ff() / 12.);
       break;
   }
 
@@ -146,10 +158,13 @@ void ScoreSubsystemInterface::WriteActuators() {
                        outputs->wrist_setpoint() / 12.);
       break;
     case TalonOutput::POSITION:
-      wrist_talon_.Set(ControlMode::MotionMagic, 0.5 * kWristFactor);
+      wrist_talon_.Set(ControlMode::MotionMagic,
+                       outputs->wrist_setpoint() * kWristFactor);
       break;
   }
 
+  intake_open_.Set(outputs->intake_open());
+  intake_close_.Set(!outputs->intake_close());
   high_roller_.Set(ControlMode::PercentOutput, outputs->intake_voltage() / 12.);
 }
 

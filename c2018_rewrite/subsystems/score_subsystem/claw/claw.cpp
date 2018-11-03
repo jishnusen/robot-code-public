@@ -50,6 +50,10 @@ void Claw::Update(const ScoreSubsystemInputProto& input,
       (*output)->set_wrist_output_type(POSITION);
       (*output)->set_wrist_setpoint(unprofiled_goal_.position -
                                     hall_calibration_.offset());
+      if (calibrated_encoder <= unprofiled_goal_.position + 1e-2 && unprofiled_goal_.position < 1e-2) {
+        (*output)->set_wrist_output_type(OPEN_LOOP);
+        (*output)->set_wrist_setpoint(0);
+      }
       /* (*output)->set_wrist_setpoint_ff(CalculateFeedForwards( */
       /*     input->intake_proxy(), calibrated_encoder > 1.)); */
     } else {

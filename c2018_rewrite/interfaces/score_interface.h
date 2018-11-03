@@ -41,6 +41,9 @@ class ScoreSubsystemInterface {
 
   CANifier canifier_;
 
+  Solenoid intake_open_{1};
+  Solenoid intake_close_{2};
+
   muan::wpilib::PcmWrapper* pcm_;
 };
 

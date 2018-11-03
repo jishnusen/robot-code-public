@@ -52,6 +52,10 @@ void Elevator::Update(const ScoreSubsystemInputProto& input,
                                        hall_calibration_.offset());
       (*output)->set_elevator_setpoint_ff(CalculateFeedForwards(
           input->intake_proxy(), calibrated_encoder > 1.));
+      if (calibrated_encoder - unprofiled_goal_.position < 1e-2 && unprofiled_goal_.position < 1e-2) {
+        (*output)->set_elevator_output_type(OPEN_LOOP);
+        (*output)->set_elevator_setpoint(0);
+      }
     } else {
       (*output)->set_elevator_output_type(OPEN_LOOP);
       (*output)->set_elevator_setpoint(kCalibVoltage);
