@@ -16,7 +16,7 @@ class InterfaceRunner {
   muan::wpilib::PcmWrapper pcm_{0};
 
   DrivetrainInterface drive_{&pcm_};
-  /* ArmInterface arm_{&pcm_}; */
+  ArmInterface arm_{&pcm_};
 };
 
 }  // namespace interfaces

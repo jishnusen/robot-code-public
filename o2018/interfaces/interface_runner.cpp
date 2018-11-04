@@ -4,12 +4,12 @@ namespace o2018 {
 namespace interfaces {
 
 void InterfaceRunner::ReadSensors() {
-  /* arm_.ReadSensors(); */
+  arm_.ReadSensors();
   drive_.ReadSensors();
 }
 
 void InterfaceRunner::WriteActuators() {
-  /* arm_.WriteActuators(); */
+  arm_.WriteActuators();
   drive_.WriteActuators();
 }
 

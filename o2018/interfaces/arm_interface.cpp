@@ -45,6 +45,8 @@ void ArmInterface::ReadSensors() {
   sensors->set_arm_hall(
       arm_talon_.GetSensorCollection().IsFwdLimitSwitchClosed());
 
+  sensors->set_intake_proxy(intake_proxy_.Get());
+
   input_queue_->WriteMessage(sensors);
 }
 

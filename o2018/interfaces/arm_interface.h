@@ -44,6 +44,8 @@ class ArmInterface {
   VictorSPX intake_left_{kIntakeLeft};
   TalonSRX intake_right_{kIntakeRight};
 
+  DigitalInput intake_proxy_{0};
+
   Solenoid intake_open_{2};
   Solenoid intake_close_{3};
 
