@@ -42,7 +42,7 @@ class ArmInterface {
 
   TalonSRX arm_talon_{kArmId};
   VictorSPX intake_left_{kIntakeLeft};
-  VictorSPX intake_right_{kIntakeRight};
+  TalonSRX intake_right_{kIntakeRight};
 
   Solenoid intake_open_{2};
   Solenoid intake_close_{3};

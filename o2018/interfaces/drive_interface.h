@@ -50,10 +50,10 @@ class DrivetrainInterface {
   VictorSPX left_slave_a_{kLeftSlaveA};
   VictorSPX left_slave_b_{kLeftSlaveB};
 
-  VictorSPX right_slave_a_{kRightSlaveA};
-  VictorSPX right_slave_b_{kRightSlaveB};
+  TalonSRX right_slave_a_{kRightSlaveA};
+  TalonSRX right_slave_b_{kRightSlaveB};
 
-  PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy
+  /* PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy */
 
   Solenoid shifter_{0};
 

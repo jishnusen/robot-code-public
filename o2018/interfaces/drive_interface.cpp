@@ -58,11 +58,11 @@ DrivetrainInterface::DrivetrainInterface(TalonWrapper* pigeon_talon,
                                          muan::wpilib::PcmWrapper* pcm)
     : input_queue_{QueueManager<InputProto>::Fetch()},
       output_reader_{QueueManager<OutputProto>::Fetch()->MakeReader()},
-      pigeon_{pigeon_talon->talon()},
+      /* pigeon_{pigeon_talon->talon()}, */
       pcm_{pcm},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
-  pigeon_.SetFusedHeading(0, kSetupTimeout);
+  /* pigeon_.SetFusedHeading(0, kSetupTimeout); */
 
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kHighGearSlot, kSetupTimeout);
@@ -87,6 +87,10 @@ DrivetrainInterface::DrivetrainInterface(TalonWrapper* pigeon_talon,
   right_slave_a_.Follow(right_master_);
   right_slave_b_.Follow(right_master_);
 
+  right_master_.SetInverted(true);
+  right_slave_a_.SetInverted(true);
+  right_slave_b_.SetInverted(true);
+
   LoadGains();
   SetBrakeMode(false);
 
@@ -105,13 +109,15 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_right_velocity(right_master_.GetSelectedSensorVelocity(0) /
                               kDriveConversionFactor / 0.1);
 
-  sensors->set_gyro(-pigeon_.GetFusedHeading() * M_PI / 180.);
+  /* sensors->set_gyro(-pigeon_.GetFusedHeading() * M_PI / 180.); */
+  sensors->set_gyro(0);
 
   input_queue_->WriteMessage(sensors);
 }
 
 void DrivetrainInterface::WriteActuators() {
   OutputProto outputs;
+  /* right_slave_a_.Set(ControlMode::PercentOutput, 1); */
   muan::wpilib::DriverStationProto ds;
 
   if (!output_reader_.ReadLastMessage(&outputs)) {

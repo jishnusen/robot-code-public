@@ -71,6 +71,9 @@ void ArmInterface::WriteActuators() {
                      outputs->arm_setpoint_ff() / 12.);
       break;
   }
+
+  intake_right_.Set(ControlMode::PercentOutput, outputs->intake_voltage() / 12.);
+  intake_left_.Set(ControlMode::PercentOutput, outputs->intake_voltage() / 12.);
 }
 
 }  // namespace interfaces

@@ -7,7 +7,7 @@
 namespace o2018 {
 namespace interfaces {
 
-constexpr uint32_t kClimber = 6;
+constexpr uint32_t kPigeon = 5;
 
 class InterfaceRunner {
  public:
@@ -17,7 +17,7 @@ class InterfaceRunner {
  private:
   muan::wpilib::PcmWrapper pcm_{0};
 
-  DrivetrainInterface drive_{new TalonWrapper(kClimber, TalonWrapper::Config()),
+  DrivetrainInterface drive_{new TalonWrapper(kPigeon, TalonWrapper::Config()),
                              &pcm_};
   /* ArmInterface arm_{&pcm_}; */
 };
