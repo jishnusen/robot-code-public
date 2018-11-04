@@ -31,7 +31,7 @@ ArmInterface::ArmInterface(muan::wpilib::PcmWrapper* pcm) : pcm_(pcm) {
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
   arm_talon_.SetSelectedSensorPosition(0, 0, 100);
 
-  arm_talon_.ConfigReverseLimitSwitchSource(
+  intake_right_.ConfigReverseLimitSwitchSource(
       LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
 }
 
@@ -43,7 +43,7 @@ void ArmInterface::ReadSensors() {
   sensors->set_arm_velocity(arm_talon_.GetSelectedSensorVelocity(0) /
                             kArmConversionFactor / 0.1);
   sensors->set_arm_hall(
-      arm_talon_.GetSensorCollection().IsFwdLimitSwitchClosed());
+      intake_right_.GetSensorCollection().IsFwdLimitSwitchClosed());
 
   sensors->set_intake_proxy(intake_proxy_.Get());
 
