@@ -38,7 +38,9 @@ void TeleopBase::operator()() {
 
   running_ = true;
   while (running_) {
-    // USB Controller Updates go here
+    throttle_.Update();
+    wheel_.Update();
+    gamepad_.Update();
     Update();
     phased_loop.SleepUntilNext();
   }
@@ -48,7 +50,8 @@ void TeleopBase::Stop() { running_ = false; }
 
 void TeleopBase::Update() {
   if (DriverStation::GetInstance().IsOperatorControl()) {
-    // Send Subsystem Messages here
+    SendDrivetrainMessage();
+    SendArmMessage();
   }
 
   ds_sender_.Send();
@@ -112,6 +115,8 @@ void TeleopBase::SendArmMessage() {
     arm_goal->set_intake_mode(IntakeMode::OUTTAKE_SLOW);
   } else if (settle_->is_pressed()) {
     arm_goal->set_intake_mode(IntakeMode::SETTLE);
+  } else {
+    arm_goal->set_intake_mode(IntakeMode::INTAKE_NONE);
   }
 
   QueueManager<ArmGoal>::Fetch()->WriteMessage(arm_goal);

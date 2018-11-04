@@ -44,20 +44,18 @@ class DrivetrainInterface {
   InputQueue* input_queue_;
   OutputQueue::QueueReader output_reader_;
 
-  TalonSRX left_master_{1};
-  TalonSRX right_master_{2};
+  TalonSRX left_master_{kLeftMaster};
+  TalonSRX right_master_{kRightMaster};
 
-  VictorSPX left_slave_a_{13};
-  VictorSPX left_slave_b_{7};
+  VictorSPX left_slave_a_{kLeftSlaveA};
+  VictorSPX left_slave_b_{kLeftSlaveB};
 
-  VictorSPX right_slave_a_{10};
-  VictorSPX right_slave_b_{8};
+  VictorSPX right_slave_a_{kRightSlaveA};
+  VictorSPX right_slave_b_{kRightSlaveB};
 
   PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy
 
   Solenoid shifter_{0};
-
-  CANifier canifier_{20};
 
   muan::wpilib::PcmWrapper* pcm_;
   muan::wpilib::DriverStationQueue::QueueReader ds_status_reader_;

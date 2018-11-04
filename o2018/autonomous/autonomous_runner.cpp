@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "o2018/autonomous/autonomous_runner.h"
+#include "o2018/autonomous/test_auto.h"
 
 namespace o2018 {
 namespace autonomous {
@@ -44,14 +45,8 @@ void AutonomousRunner::operator()() {
     loop_.SleepUntilNext();
   }
 
-  // Check AutoMode() and set auto mode booleans here
-
-  // Start of autonomous. Grab the game specific string.
-  auto left_right_codes = game_specific_string->code();
-  LOG(INFO, "Starting autonomous with layout %s", left_right_codes.c_str());
-
-  // Run auto mode based on code
-  LOG(INFO, "Finished with auto!");
+  TestAuto test_auto;
+  test_auto.Run();
 }
 
 std::string AutonomousRunner::AutoMode() {
