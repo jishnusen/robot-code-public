@@ -67,7 +67,7 @@ void ArmInterface::WriteActuators() {
       arm_talon_.Set(ControlMode::PercentOutput, outputs->arm_setpoint() / 12.);
       break;
     case TalonOutput::POSITION:
-      arm_talon_.Set(ControlMode::MotionMagic,
+      arm_talon_.Set(ControlMode::Position,
                      outputs->arm_setpoint() * kArmConversionFactor,
                      DemandType_ArbitraryFeedForward,
                      outputs->arm_setpoint_ff() / 12.);
