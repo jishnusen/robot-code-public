@@ -7,8 +7,6 @@
 namespace o2018 {
 namespace interfaces {
 
-constexpr uint32_t kPigeon = 5;
-
 class InterfaceRunner {
  public:
   void ReadSensors();
@@ -17,8 +15,7 @@ class InterfaceRunner {
  private:
   muan::wpilib::PcmWrapper pcm_{0};
 
-  DrivetrainInterface drive_{new TalonWrapper(kPigeon, TalonWrapper::Config()),
-                             &pcm_};
+  DrivetrainInterface drive_{&pcm_};
   /* ArmInterface arm_{&pcm_}; */
 };
 

@@ -54,8 +54,7 @@ void DrivetrainInterface::SetBrakeMode(bool mode) {
   right_slave_b_.SetNeutralMode(neutral_mode);
 }
 
-DrivetrainInterface::DrivetrainInterface(TalonWrapper* pigeon_talon,
-                                         muan::wpilib::PcmWrapper* pcm)
+DrivetrainInterface::DrivetrainInterface(muan::wpilib::PcmWrapper* pcm)
     : input_queue_{QueueManager<InputProto>::Fetch()},
       output_reader_{QueueManager<OutputProto>::Fetch()->MakeReader()},
       /* pigeon_{pigeon_talon->talon()}, */
@@ -158,7 +157,7 @@ void DrivetrainInterface::WriteActuators() {
       break;
   }
 
-  shifter_.Set(!outputs->high_gear());
+  shifter_.Set(outputs->high_gear());
 }
 
 }  // namespace interfaces

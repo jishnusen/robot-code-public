@@ -31,8 +31,7 @@ constexpr uint32_t kRightSlaveB = 8;
 
 class DrivetrainInterface {
  public:
-  DrivetrainInterface(TalonWrapper* pigeon_talon,
-                      muan::wpilib::PcmWrapper* pcm);
+  DrivetrainInterface(muan::wpilib::PcmWrapper* pcm);
 
   void ReadSensors();
   void WriteActuators();
