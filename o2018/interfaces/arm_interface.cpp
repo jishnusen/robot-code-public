@@ -68,9 +68,9 @@ void ArmInterface::WriteActuators() {
       break;
     case TalonOutput::POSITION:
       arm_talon_.Set(ControlMode::Position,
-                     outputs->arm_setpoint() * kArmConversionFactor,
-                     /*DemandType_ArbitraryFeedForward,*/
-                     outputs->arm_setpoint_ff() / 12.);
+                     outputs->arm_setpoint() * kArmConversionFactor/*,
+                     DemandType_ArbitraryFeedForward,
+                     outputs->arm_setpoint_ff() / 12.*/);
       break;
   }
 
