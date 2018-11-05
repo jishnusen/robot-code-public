@@ -22,7 +22,7 @@ constexpr uint32_t kIntakeLeft = 15;
 constexpr uint32_t kIntakeRight = 16;
 
 constexpr uint32_t kIntakeOpen = 2;
-constexpr uint32_t kIntakeClose = 3;
+constexpr uint32_t kIntakeClose = 1;
 
 class ArmInterface {
  public:
@@ -46,8 +46,8 @@ class ArmInterface {
 
   DigitalInput intake_proxy_{0};
 
-  Solenoid intake_open_{2};
-  Solenoid intake_close_{3};
+  Solenoid intake_open_{kIntakeOpen};
+  Solenoid intake_close_{kIntakeClose};
 
   muan::wpilib::DriverStationQueue::QueueReader ds_reader_{
       muan::queues::QueueManager<muan::wpilib::DriverStationProto>::Fetch()
