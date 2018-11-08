@@ -5,9 +5,9 @@ namespace o2018 {
 namespace teleop {
 
 using muan::queues::QueueManager;
+using muan::teleop::JoystickStatusProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
-using muan::teleop::JoystickStatusProto;
 using o2018::subsystems::arm::IntakeMode;
 using ArmGoal = o2018::subsystems::arm::ArmGoalProto;
 using ArmStatus = o2018::subsystems::arm::ArmStatusProto;
@@ -96,6 +96,15 @@ void TeleopBase::SendDrivetrainMessage() {
 void TeleopBase::SendArmMessage() {
   ArmGoal arm_goal;
 
+  double godmode_wrist = -gamepad_.wpilib_joystick()->GetRawAxis(5);
+  double arm_godmode = 0;
+
+  if (std::abs(godmode_wrist) > kGodmodeButtonThreshold) {
+    arm_godmode =
+        (std::pow((std::abs(godmode_wrist) - kGodmodeButtonThreshold), 2) *
+         kGodmodeWristMultiplier * (godmode_wrist > 0 ? 1 : -1));
+  }
+
   arm_goal->set_arm_god_mode_goal(0);
 
   if (pos_0_->is_pressed()) {
@@ -112,6 +121,13 @@ void TeleopBase::SendArmMessage() {
     arm_angle_ = 60 * (M_PI / 180);
   }
 
+  arm_angle_ += arm_godmode * (M_PI / 180.);
+  if (arm_angle_ < 0) {
+    arm_angle_ = 0;
+  }
+  if (arm_angle_ > M_PI / 2.) {
+    arm_angle_ = M_PI / 2.;
+  }
   arm_goal->set_arm_angle(arm_angle_);
 
   if (intake_->is_pressed()) {

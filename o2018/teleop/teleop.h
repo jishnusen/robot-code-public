@@ -44,8 +44,12 @@ class TeleopBase {
                            o2018::subsystems::arm::ArmStatusProto>::Fetch()
                            ->MakeReader();
 
-  double arm_angle_ =0;
+  double arm_angle_ = 0;
   bool high_gear_;
+
+  // Godmode constants
+  double kGodmodeWristMultiplier = 3;
+  double kGodmodeButtonThreshold = .25;
 };
 
 }  // namespace teleop
