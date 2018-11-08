@@ -45,8 +45,14 @@ void AutonomousRunner::operator()() {
     loop_.SleepUntilNext();
   }
 
+  auto left_right_codes = game_specific_string->code();
+
   TestAuto test_auto;
-  test_auto.Run();
+  if (left_right_codes[0] == 'L') {
+    test_auto.LeftSwitch();
+  } else if (left_right_codes[0] == 'R') {
+    test_auto.RightSwitch();
+  }
 }
 
 std::string AutonomousRunner::AutoMode() {

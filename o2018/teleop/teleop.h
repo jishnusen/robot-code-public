@@ -44,6 +44,7 @@ class TeleopBase {
                            o2018::subsystems::arm::ArmStatusProto>::Fetch()
                            ->MakeReader();
 
+  double arm_angle_ =0;
   bool high_gear_;
 };
 

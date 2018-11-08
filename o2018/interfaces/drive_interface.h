@@ -52,7 +52,7 @@ class DrivetrainInterface {
   TalonSRX right_slave_a_{kRightSlaveA};
   TalonSRX right_slave_b_{kRightSlaveB};
 
-  /* PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy */
+  PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy
 
   Solenoid shifter_{0};
 

@@ -71,6 +71,7 @@ void Arm::Update() {
 
   bool has_cube = /* pinch_state_ == IDLE_WITH_CUBE && */ input->intake_proxy();
 
+  output->set_arm_setpoint_ff(CalculateFeedForwards(has_cube, calibrated_encoder));
   if (outputs_enabled && !encoder_fault_detected_) {
     if (is_calibrated()) {
       UpdateProfiledGoal(outputs_enabled);
@@ -78,6 +79,10 @@ void Arm::Update() {
       output->set_arm_output_type(POSITION);
       output->set_arm_setpoint(profiled_goal_ - hall_calibration_.offset());
       output->set_arm_setpoint_ff(CalculateFeedForwards(has_cube, calibrated_encoder));
+      if (calibrated_encoder <= unprofiled_goal_ + 1e-2 && unprofiled_goal_ < 1e-2) {
+        output->set_arm_output_type(OPEN_LOOP);
+        output->set_arm_setpoint(0);
+      }
     } else {
       output->set_arm_output_type(OPEN_LOOP);
       output->set_arm_setpoint(kCalibVoltage);

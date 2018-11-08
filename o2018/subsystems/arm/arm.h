@@ -21,8 +21,8 @@ constexpr double kHoldingVoltage = 1.5;
 constexpr double kSlowOuttakeVoltage = -6;
 constexpr double kFastOuttakeVoltage = -9;
 
-constexpr double kHallEffectAngle = 0.92;
-constexpr double kCalibVoltage = 6;
+constexpr double kHallEffectAngle = 0.51;
+constexpr double kCalibVoltage = 0;
 
 constexpr double kEncoderFaultMinVoltage = 6;
 constexpr double kEncoderFaultTicksAllowed = 100;

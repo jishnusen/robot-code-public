@@ -26,7 +26,7 @@ constexpr uint32_t kIntakeSolenoidOpen = 1;
 constexpr uint32_t kIntakeSolenoidClose = 2;
 constexpr uint32_t kWhiskerSolenoid = 6;
 
-constexpr double kWristP = 5.;
+constexpr double kWristP = 3.;
 constexpr double kWristI = 0.0;
 constexpr double kWristD = 50.0;
 constexpr double kWristF = 1.05;
@@ -85,9 +85,9 @@ ScoreSubsystemInterface::ScoreSubsystemInterface(muan::wpilib::PcmWrapper* pcm)
   //(2.5 * kElevatorFactor) * (60. / 4096.), 100);
   elevator_talon_.ConfigMotionAcceleration(27000, 100);
 
-  wrist_talon_.ConfigMotionCruiseVelocity(2500 * 5, 100);
+  wrist_talon_.ConfigMotionCruiseVelocity(2500 * 4, 100);
   //(2.5 * kElevatorFactor) * (60. / 4096.), 100);
-  wrist_talon_.ConfigMotionAcceleration(2500 * 5, 100);
+  wrist_talon_.ConfigMotionAcceleration(2500 * 4, 100);
 
   wrist_talon_.SetInverted(true);
   elevator_talon_.SetInverted(true);

@@ -10,7 +10,8 @@ namespace autonomous {
 
 class TestAuto : public o2018::autonomous::AutonomousBase {
  public:
-  void Run();
+  void LeftSwitch();
+  void RightSwitch();
 };
 
 }  // namespace autonomous

@@ -22,6 +22,7 @@ cc_library(
         "//muan/logging:logger",
         "//muan/queues:queue_manager",
         "//muan/subsystems/drivetrain:drivetrain_queues",
+        "//c2018_rewrite/subsystems/score_subsystem:score_subsystem_queues",
         "//muan/wpilib:wpilib_queues",
     ],
 )

@@ -19,7 +19,9 @@ AutonomousBase::AutonomousBase()
           QueueManager<GameSpecificStringProto>::Fetch()->MakeReader()),
       drivetrain_goal_queue_(QueueManager<DrivetrainGoal>::Fetch()),
       drivetrain_status_reader_(
-          QueueManager<DrivetrainStatus>::Fetch()->MakeReader()) {}
+          QueueManager<DrivetrainStatus>::Fetch()->MakeReader()), 
+      arm_goal_queue_(
+          QueueManager<ArmGoalProto>::Fetch()) {}
 
 bool AutonomousBase::IsAutonomous() {
   DriverStationProto driver_station;
@@ -29,6 +31,14 @@ bool AutonomousBase::IsAutonomous() {
     LOG(WARNING, "No driver station status found.");
     return false;
   }
+}
+
+void AutonomousBase::SetArm(double angle, IntakeMode intake_mode) {
+  ArmGoalProto arm_goal;
+  arm_goal->set_arm_angle(angle);
+  arm_goal->set_intake_mode(intake_mode);
+
+  arm_goal_queue_->WriteMessage(arm_goal);
 }
 
 void AutonomousBase::StartDrivePath(double x, double y, double heading,

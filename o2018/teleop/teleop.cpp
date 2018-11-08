@@ -27,6 +27,17 @@ TeleopBase::TeleopBase()
   pos_1_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::B_BUTTON));
   pos_2_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::X_BUTTON));
   pos_3_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::Y_BUTTON));
+  // Various intake type buttons
+  intake_ = gamepad_.MakeAxis(3, 0.3);
+  settle_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
+  intake_open_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_BUMPER));
+  intake_close_ =
+      gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_BUMPER));
+
+  // Outtake buttons
+  outtake_slow_ = gamepad_.MakeAxis(2, 0.7);
+  outtake_fast_ =
+      gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
 }
 
 void TeleopBase::operator()() {
@@ -88,14 +99,20 @@ void TeleopBase::SendArmMessage() {
   arm_goal->set_arm_god_mode_goal(0);
 
   if (pos_0_->is_pressed()) {
-    arm_goal->set_arm_angle(0);
+    /* arm_goal->set_arm_angle(0); */
+    arm_angle_ = 0;
   } else if (pos_1_->is_pressed()) {
-    arm_goal->set_arm_angle(30 * M_PI / 180);
+    /* arm_goal->set_arm_angle(30 * M_PI / 180); */
+    arm_angle_ = 20 * (M_PI / 180);
   } else if (pos_2_->is_pressed()) {
-    arm_goal->set_arm_angle(45 * M_PI / 180);
+    /* arm_goal->set_arm_angle(45 * M_PI / 180); */
+    arm_angle_ = 45 * (M_PI / 180);
   } else if (pos_3_->is_pressed()) {
-    arm_goal->set_arm_angle(60 * M_PI / 180);
+    /* arm_goal->set_arm_angle(60 * M_PI / 180); */
+    arm_angle_ = 60 * (M_PI / 180);
   }
+
+  arm_goal->set_arm_angle(arm_angle_);
 
   if (intake_->is_pressed()) {
     arm_goal->set_intake_mode(IntakeMode::INTAKE);

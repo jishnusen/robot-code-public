@@ -38,6 +38,18 @@
             "should-title": false
         },
         {
+            "name": "Arm Calibrated",
+            "type": "boolean",
+            "source": ["arm_status", "armCalibrated"],
+            "condition": "source",
+            "coordinates": [3, 0],
+            "should-title": true,
+            "colors": {
+                "if_true": "#00ff00",
+                "if_false": "#ff0000"
+            }
+        },
+        {
             "name": "Game Layout",
             "type": "gss",
             "source": ["game_specific_string", "code"],

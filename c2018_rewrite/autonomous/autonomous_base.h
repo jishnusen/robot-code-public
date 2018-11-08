@@ -9,6 +9,7 @@
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "third_party/aos/common/util/phased_loop.h"
 #include "Eigen/Dense"
+#include "c2018_rewrite/subsystems/score_subsystem/queue_types.h"
 
 namespace c2018 {
 namespace autonomous {
@@ -39,6 +40,27 @@ class AutonomousBase {
 
   void WaitUntilDriveComplete();
   void WaitUntilDrivetrainNear(double x, double y, double distance);
+  void WaitUntilElevatorAtPosition();
+
+  void ForceIntake();
+  void IntakeGround();
+  void IntakeOpen();
+  void IntakeClose();
+  void StopIntakeGround();
+  void GoToIntake();
+
+  void MoveToSwitch();
+  void MoveToScale(bool front);
+  void MoveTo(c2018::subsystems::score_subsystem::ScoreGoal goal);
+  void Score(bool fast = true);
+  void DropScore();
+  void StopScore();
+  bool IsAtScoreHeight();
+  bool HasCube();
+  void WaitForCube();
+
+  // Wait until we have a cube or `ticks` has elapsed, return if we have a cube
+  bool WaitForCubeOrTimeout(int ticks);
 
   void SetFieldPosition(double x, double y, double theta);
 
@@ -51,6 +73,10 @@ class AutonomousBase {
   muan::subsystems::drivetrain::GoalQueue* drivetrain_goal_queue_;
   muan::subsystems::drivetrain::StatusQueue::QueueReader
       drivetrain_status_reader_;
+
+  c2018::subsystems::score_subsystem::ScoreSubsystemGoalQueue* score_goal_queue_;
+  c2018::subsystems::score_subsystem::ScoreSubsystemStatusQueue::QueueReader
+      score_status_reader_;
 
   Eigen::Transform<double, 2, Eigen::AffineCompact> transform_f0_;
   double theta_offset_ = 0.0;

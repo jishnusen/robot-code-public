@@ -8,6 +8,7 @@
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/webdash/queue_types.h"
 #include "muan/wpilib/queue_types.h"
+#include "o2018/subsystems/arm/queue_types.h"
 #include "third_party/aos/common/util/phased_loop.h"
 
 namespace o2018 {
@@ -15,6 +16,8 @@ namespace autonomous {
 
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
+using ArmGoalProto = o2018::subsystems::arm::ArmGoalProto;
+using IntakeMode = o2018::subsystems::arm::IntakeMode;
 
 class AutonomousBase {
  public:
@@ -40,6 +43,7 @@ class AutonomousBase {
   void WaitUntilDrivetrainNear(double x, double y, double distance);
 
   void SetFieldPosition(double x, double y, double theta);
+  void SetArm(double angle, IntakeMode intake_mode);
 
   // Set the robot-space (robot poweron position) transformation. The parameters
   // are the position of the robot (right now) in field coordinates (F).
@@ -50,6 +54,8 @@ class AutonomousBase {
   muan::subsystems::drivetrain::GoalQueue* drivetrain_goal_queue_;
   muan::subsystems::drivetrain::StatusQueue::QueueReader
       drivetrain_status_reader_;
+
+  o2018::subsystems::arm::ArmGoalQueue* arm_goal_queue_;
 
   Eigen::Transform<double, 2, Eigen::AffineCompact> transform_f0_;
   double theta_offset_ = 0.0;

@@ -57,11 +57,11 @@ void DrivetrainInterface::SetBrakeMode(bool mode) {
 DrivetrainInterface::DrivetrainInterface(muan::wpilib::PcmWrapper* pcm)
     : input_queue_{QueueManager<InputProto>::Fetch()},
       output_reader_{QueueManager<OutputProto>::Fetch()->MakeReader()},
-      /* pigeon_{pigeon_talon->talon()}, */
+      pigeon_{&right_slave_a_},
       pcm_{pcm},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
-  /* pigeon_.SetFusedHeading(0, kSetupTimeout); */
+  pigeon_.SetFusedHeading(0, kSetupTimeout);
 
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kHighGearSlot, kSetupTimeout);
@@ -108,8 +108,8 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_right_velocity(right_master_.GetSelectedSensorVelocity(0) /
                               kDriveConversionFactor / 0.1);
 
-  /* sensors->set_gyro(-pigeon_.GetFusedHeading() * M_PI / 180.); */
-  sensors->set_gyro(0);
+  sensors->set_gyro(-pigeon_.GetFusedHeading() * M_PI / 180.);
+  /* sensors->set_gyro(0); */
 
   input_queue_->WriteMessage(sensors);
 }
@@ -157,7 +157,7 @@ void DrivetrainInterface::WriteActuators() {
       break;
   }
 
-  shifter_.Set(outputs->high_gear());
+  shifter_.Set(!outputs->high_gear());
 }
 
 }  // namespace interfaces

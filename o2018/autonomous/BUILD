@@ -2,27 +2,28 @@ cc_library(
     name = "autonomous_runner",
     srcs = ["autonomous_runner.cpp"],
     hdrs = ["autonomous_runner.h"],
+    restricted_to = ["//tools:roborio"],
+    visibility = ["//visibility:public"],
     deps = [
         ":autonomous_base",
         ":test_auto",
-        "//muan/queues:queue_manager",
         "//muan/logging:logger",
+        "//muan/queues:queue_manager",
     ],
-    visibility = ["//visibility:public"],
-    restricted_to = ["//tools:roborio"],
 )
 
 cc_library(
     name = "autonomous_base",
     srcs = ["autonomous_base.cpp"],
     hdrs = ["autonomous_base.h"],
-    deps = [
-        "//muan/queues:queue_manager",
-        "//muan/logging:logger",
-        "//muan/wpilib:wpilib_queues",
-        "//muan/subsystems/drivetrain:drivetrain_queues",
-    ],
     visibility = ["//visibility:public"],
+    deps = [
+        "//muan/logging:logger",
+        "//muan/queues:queue_manager",
+        "//muan/subsystems/drivetrain:drivetrain_queues",
+        "//muan/wpilib:wpilib_queues",
+        "//o2018/subsystems/arm:arm_queues",
+    ],
 )
 
 cc_test(
@@ -30,7 +31,7 @@ cc_test(
     srcs = ["autonomous_base_test.cpp"],
     deps = [
         ":autonomous_base",
-        "//third_party/google/googletest:googletest",
+        "//third_party/google/googletest",
     ],
 )
 
