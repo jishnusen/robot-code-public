@@ -8,18 +8,22 @@
             "autos": {
                 "LL": [
                     "TEST_AUTO",
+                    "DRIVE_STRAIGHT",
                     "NONE"
                 ],
                 "LR": [
                     "TEST_AUTO",
+                    "DRIVE_STRAIGHT",
                     "NONE"
                 ],
                 "RR": [
                     "TEST_AUTO",
+                    "DRIVE_STRAIGHT",
                     "NONE"
                 ],
                 "RL": [
                     "TEST_AUTO",
+                    "DRIVE_STRAIGHT",
                     "NONE"
                 ]
             }

@@ -6,6 +6,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":autonomous_base",
+        ":drive_straight",
         ":none",
         ":test_auto",
         "//muan/logging:logger",
@@ -40,6 +41,17 @@ cc_library(
     name = "none",
     srcs = ["none.cpp"],
     hdrs = ["none.h"],
+    restricted_to = ["//tools:roborio"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":autonomous_base",
+    ],
+)
+
+cc_library(
+    name = "drive_straight",
+    srcs = ["drive_straight.cpp"],
+    hdrs = ["drive_straight.h"],
     restricted_to = ["//tools:roborio"],
     visibility = ["//visibility:public"],
     deps = [

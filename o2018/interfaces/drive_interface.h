@@ -53,6 +53,7 @@ class DrivetrainInterface {
   TalonSRX right_slave_b_{kRightSlaveB};
 
   PigeonIMU pigeon_;  // PIDGEYYYY <3 this guy
+  double pigeon_offset_ = 0;
 
   Solenoid shifter_{0};
 

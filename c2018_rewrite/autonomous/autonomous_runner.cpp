@@ -30,8 +30,6 @@ void AutonomousRunner::operator()() {
   muan::wpilib::DriverStationProto driver_station;
   muan::wpilib::GameSpecificStringProto game_specific_string;
 
-  std::cout << AutoMode() << std::endl;
-
   while (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station message!");
     loop_.SleepUntilNext();
@@ -48,12 +46,20 @@ void AutonomousRunner::operator()() {
   }
 
   auto left_right_codes = game_specific_string->code();
-
-  TestAuto test_auto;
-  if (left_right_codes[0] == 'L') {
-    test_auto.LeftSwitch();
-  } else if (left_right_codes[0] == 'R') {
-    test_auto.RightSwitch();
+  
+  if (AutoMode() == "TEST_AUTO") {
+    TestAuto test_auto;
+    if (left_right_codes[0] == 'L') {
+      test_auto.LeftSwitch();
+    } else if (left_right_codes[0] == 'R') {
+      test_auto.RightSwitch();
+    }
+  } else if (AutoMode() == "DRIVE_STRAIGHT") {
+    DriveStraight drive_auto;
+    drive_auto.Drive();
+  } else {
+    None none_auto;
+    none_auto.NoneAuto();
   }
 }
 

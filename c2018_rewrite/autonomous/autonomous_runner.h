@@ -9,6 +9,7 @@
 #include "third_party/aos/common/util/phased_loop.h"
 #include "c2018_rewrite/autonomous/test_auto.h"
 #include "c2018_rewrite/autonomous/none.h"
+#include "c2018_rewrite/autonomous/drive_straight.h"
 
 namespace c2018 {
 namespace autonomous {

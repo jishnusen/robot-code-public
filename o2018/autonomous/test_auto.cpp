@@ -5,6 +5,7 @@ namespace autonomous {
 
 void TestAuto::LeftSwitch() {
   SetFieldPosition(0.0, -0.3, 0.0);
+  FreeArm();
   LOG(INFO, "Running TEST auto");
 
   SetArm(0.0, IntakeMode::INTAKE_NONE);
@@ -18,6 +19,7 @@ void TestAuto::LeftSwitch() {
 
 void TestAuto::RightSwitch() {
   SetFieldPosition(0.0, -0.3, 0.0);
+  FreeArm();
   LOG(INFO, "Running TEST auto");
 
   SetArm(0.0, IntakeMode::INTAKE_NONE);

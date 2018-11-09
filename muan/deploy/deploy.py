@@ -73,7 +73,7 @@ def main():
     ssh_command = get_ssh_command(options.port)
 
     # mjpg_streamer command
-    mjpg_streamer = "LD_LIBRARY_PATH=/home/lvuser/mjpg-streamer-182 ./mjpg_streamer -i './input_uvc.so -n -y -f 15 -q 30 -r 160x120 -d /dev/video0' -o './output_http.so -w ./www/ -p 5802'"
+    mjpg_streamer = "./mjpg_streamer -i './input_uvc.so -n -y -f 15 -q 30 -r 160x120 -d /dev/video0' -o './output_http.so -w ./www/ -p 5802'"
 
 
     # rsync all of the runfiles over. This will also copy this script over, which isn't the cleanest way to
@@ -82,11 +82,10 @@ def main():
 
     # This will look like (cd /home/lvuser/robot_code && ./c20XX/frc1678).
     robot_command_contents = '''cd {};./muan/autostart/autostart /tmp/autostart.pid {}'''.format(options.deploy_path, options.main_binary)
-    try:
-        sp.check_call(['ssh', ssh_target, 'test', '-d', '/home/lvuser/mjpg-streamer-182'])
-        robot_command_contents += ''' & cd /home/lvuser/mjpg-streamer-182; {}'''.format(mjpg_streamer)
-    except:
+    if sp.call(['ssh', ssh_target, 'test', '-d', '/home/lvuser/mjpg-streamer-182']):
         print("No mjpg-streamer detected")
+    else:
+        robot_command_contents += ''' & cd /home/lvuser/mjpg-streamer-182; {}'''.format(mjpg_streamer)
 
     # The ssh command that we're going to run to create robotCommand
     ssh = ssh_command + [

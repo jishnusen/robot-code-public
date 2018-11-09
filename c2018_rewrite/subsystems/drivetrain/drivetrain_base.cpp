@@ -56,8 +56,10 @@ muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
   };
 
   return {
-      .wheel_non_linearity = 0.65,
-      .sensitivity = 0.65,
+      .high_gear_wheel_non_linearity = 0.65,
+      .low_gear_wheel_non_linearity = 0.5,
+      .high_gear_sensitivity = 0.95,
+      .low_gear_sensitivity = 0.65,
       .beta = 2.0,
       .zeta = 0.7,
       .dt = 0.01,

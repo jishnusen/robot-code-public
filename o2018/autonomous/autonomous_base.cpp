@@ -19,9 +19,8 @@ AutonomousBase::AutonomousBase()
           QueueManager<GameSpecificStringProto>::Fetch()->MakeReader()),
       drivetrain_goal_queue_(QueueManager<DrivetrainGoal>::Fetch()),
       drivetrain_status_reader_(
-          QueueManager<DrivetrainStatus>::Fetch()->MakeReader()), 
-      arm_goal_queue_(
-          QueueManager<ArmGoalProto>::Fetch()) {}
+          QueueManager<DrivetrainStatus>::Fetch()->MakeReader()),
+      arm_goal_queue_(QueueManager<ArmGoalProto>::Fetch()) {}
 
 bool AutonomousBase::IsAutonomous() {
   DriverStationProto driver_station;
@@ -37,6 +36,21 @@ void AutonomousBase::SetArm(double angle, IntakeMode intake_mode) {
   ArmGoalProto arm_goal;
   arm_goal->set_arm_angle(angle);
   arm_goal->set_intake_mode(intake_mode);
+
+  arm_goal_queue_->WriteMessage(arm_goal);
+}
+
+void AutonomousBase::FreeArm() {
+  ArmGoalProto arm_goal;
+  arm_goal->set_arm_angle(1.3);
+  arm_goal->set_intake_mode(IntakeMode::INTAKE_NONE);
+
+  arm_goal_queue_->WriteMessage(arm_goal);
+
+  Wait(50);
+
+  arm_goal->set_arm_angle(0);
+  arm_goal->set_intake_mode(IntakeMode::INTAKE_NONE);
 
   arm_goal_queue_->WriteMessage(arm_goal);
 }
@@ -58,9 +72,11 @@ void AutonomousBase::StartDrivePath(double x, double y, double heading,
   goal->mutable_path_goal()->set_extra_distance_initial(extra_distance_initial);
   goal->mutable_path_goal()->set_extra_distance_final(extra_distance_final);
 
-  /* goal->mutable_path_goal()->mutable_linear_constraints()->set_max_acceleration( */
+  /* goal->mutable_path_goal()->mutable_linear_constraints()->set_max_acceleration(
+   */
   /*     max_path_acceleration_); */
-  /* goal->mutable_path_goal()->mutable_linear_constraints()->set_max_velocity( */
+  /* goal->mutable_path_goal()->mutable_linear_constraints()->set_max_velocity(
+   */
   /*     max_path_velocity_); */
   goal->set_high_gear(gear);
 

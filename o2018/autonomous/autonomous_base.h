@@ -29,6 +29,7 @@ class AutonomousBase {
   bool IsAutonomous();
 
   void Wait(uint32_t num_cycles);
+  void FreeArm();
 
   void StartDrivePath(double x, double y, double heading,
                       int force_direction = 0, bool gear = true,

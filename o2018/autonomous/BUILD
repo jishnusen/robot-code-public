@@ -7,6 +7,8 @@ cc_library(
     deps = [
         ":autonomous_base",
         ":test_auto",
+        ":none",
+        ":drive_straight",
         "//muan/logging:logger",
         "//muan/queues:queue_manager",
     ],
@@ -39,6 +41,28 @@ cc_library(
     name = "test_auto",
     srcs = ["test_auto.cpp"],
     hdrs = ["test_auto.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":autonomous_base",
+    ],
+)
+
+cc_library(
+    name = "none",
+    srcs = ["none.cpp"],
+    hdrs = ["none.h"],
+    restricted_to = ["//tools:roborio"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":autonomous_base",
+    ],
+)
+
+cc_library(
+    name = "drive_straight",
+    srcs = ["drive_straight.cpp"],
+    hdrs = ["drive_straight.h"],
+    restricted_to = ["//tools:roborio"],
     visibility = ["//visibility:public"],
     deps = [
         ":autonomous_base",

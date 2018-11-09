@@ -35,6 +35,8 @@ ArmInterface::ArmInterface(muan::wpilib::PcmWrapper* pcm) : pcm_(pcm) {
 
   intake_right_.SetInverted(true);
   intake_right_.ConfigReverseLimitSwitchSource(
+      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyClosed, 100);
+  intake_right_.ConfigForwardLimitSwitchSource(
       LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
   arm_talon_.ConfigMotionCruiseVelocity(1000, 100);
   //(2.5 * kElevatorFactor) * (60. / 4096.), 100);

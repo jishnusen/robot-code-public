@@ -61,8 +61,6 @@ DrivetrainInterface::DrivetrainInterface(muan::wpilib::PcmWrapper* pcm)
       pcm_{pcm},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
-  pigeon_.SetFusedHeading(0, kSetupTimeout);
-
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kHighGearSlot, kSetupTimeout);
   right_master_.ConfigSelectedFeedbackSensor(
@@ -87,12 +85,14 @@ DrivetrainInterface::DrivetrainInterface(muan::wpilib::PcmWrapper* pcm)
   right_slave_b_.Follow(right_master_);
 
   right_master_.SetInverted(true);
+  right_master_.SetSensorPhase(true);
   right_slave_a_.SetInverted(true);
   right_slave_b_.SetInverted(true);
 
   LoadGains();
   SetBrakeMode(false);
 
+  pigeon_offset_ = pigeon_.GetFusedHeading();
   /* pcm_->CreateSolenoid(kShifter); */
 }
 
@@ -108,7 +108,7 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_right_velocity(right_master_.GetSelectedSensorVelocity(0) /
                               kDriveConversionFactor / 0.1);
 
-  sensors->set_gyro(-pigeon_.GetFusedHeading() * M_PI / 180.);
+  sensors->set_gyro(-(pigeon_.GetFusedHeading() - pigeon_offset_) * M_PI / 180.);
   /* sensors->set_gyro(0); */
 
   input_queue_->WriteMessage(sensors);
