@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+option cc_enable_arenas = true;
+
+package muan.lime;
+
+message LimeStatus {
+  required uint64 timestamp = 1;
+  required double dist = 2;
+  required double theta = 3;
+  required double relative_x = 4;
+  required double relative_y = 5;
+  required bool has_target = 6;
+}
+
+enum LightState {
+  ON = 0;
+  OFF = 1;
+  BLINK = 2;
+}
+
+message LimeGoal {
+  required LightState light_state = 1;
+}
