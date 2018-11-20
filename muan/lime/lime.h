@@ -13,10 +13,6 @@
 namespace muan {
 namespace lime {
 
-constexpr double kLimeHeight = .92;
-constexpr double kLimeAngle = 30.;
-constexpr double kCubeHeight = 0.28;
-
 class Lime {
  public:
   Lime(double lime_height, double lime_angle, double object_height);
