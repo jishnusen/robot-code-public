@@ -23,8 +23,6 @@ class NonLinearFeedbackController {
   DrivetrainModel model_;
   double beta_;
   double zeta_;
-
-  Eigen::Vector2d prev_velocity_;
 };
 
 }  // namespace control

@@ -34,9 +34,6 @@ NonLinearFeedbackController::Output NonLinearFeedbackController::Update(
   Eigen::Vector2d left_right_velocity =
       model_.InverseKinematics(adjusted_velocity);
 
-  /* Eigen::Vector2d accel = (adjusted_velocity - prev_velocity_) / 0.01; */
-  /* prev_velocity_ = adjusted_velocity; */
-
   Eigen::Vector2d left_right_ff =
       model_.InverseDynamics(velocity, acceleration, high_gear);
 
