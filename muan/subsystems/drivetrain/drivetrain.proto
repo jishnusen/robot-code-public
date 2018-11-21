@@ -57,19 +57,19 @@ message DrivetrainStatus {
 
   optional double x_goal = 10;
   optional double y_goal = 11;
-  optional double heading_goal = 13;
+  optional double heading_goal = 12;
 
-  optional double profiled_x_goal = 14;
-  optional double profiled_y_goal = 15;
-  optional double profiled_heading_goal = 16;
+  optional double profiled_x_goal = 13;
+  optional double profiled_y_goal = 14;
+  optional double profiled_heading_goal = 15;
 
-  optional double profiled_velocity_goal = 17;
-  optional double adjusted_velocity_goal = 18;
+  optional double profiled_velocity_goal = 16;
+  optional double adjusted_velocity_goal = 17;
 
-  optional double pred_lv = 19;
-  optional double pred_rv = 20;
+  optional double pred_lv = 18;
+  optional double pred_rv = 19;
 
-  optional bool profile_complete = 21;
+  optional bool profile_complete = 20;
 }
 
 message DrivetrainGoal {
