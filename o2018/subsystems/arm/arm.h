@@ -2,11 +2,11 @@
 #define O2018_SUBSYSTEMS_ARM_ARM_H_
 
 #include "muan/logging/logger.h"
+#include "muan/queues/queue_manager.h"
 #include "muan/units/units.h"
 #include "muan/utils/math_utils.h"
-#include "o2018/subsystems/arm/queue_types.h"
 #include "muan/wpilib/queue_types.h"
-#include "muan/queues/queue_manager.h"
+#include "o2018/subsystems/arm/queue_types.h"
 
 namespace o2018 {
 namespace subsystems {
@@ -27,8 +27,8 @@ constexpr double kEncoderFaultTicksAllowed = 100;
 
 constexpr int kNumHasCubeTicks = 150;
 
-constexpr double kArmFF = 3.48; // V
-constexpr double kArmCubeFF = 3.9; // V
+constexpr double kArmFF = 3.48;     // V
+constexpr double kArmCubeFF = 3.9;  // V
 
 class Arm {
  public:
@@ -36,9 +36,7 @@ class Arm {
   void SetGoal(double angle, IntakeMode intake_goal);
   void Update();
 
-  inline bool is_calibrated() const {
-    return calibrated_;
-  }
+  inline bool is_calibrated() const { return calibrated_; }
 
  private:
   double CalculateFeedForwards(bool has_cube, double theta);
