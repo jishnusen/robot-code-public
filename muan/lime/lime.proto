@@ -6,10 +6,10 @@ package muan.lime;
 
 message LimeStatus {
   required uint64 timestamp = 1;
-  required double dist = 2;
-  required double theta = 3;
-  required double relative_x = 4;
-  required double relative_y = 5;
+  optional double dist = 2;
+  optional double theta = 3;
+  optional double relative_x = 4;
+  optional double relative_y = 5;
   required bool has_target = 6;
 }
 
