@@ -47,7 +47,6 @@ void Lime::Update() {
     table->PutNumber("ledMode", static_cast<int>(goal->light_state()));
   }
 
-  GetTable();
   status->set_has_target(target_present_);
   if (target_present_) {
     status->set_dist((ObjectDistance(target_vertical_angle_) * dist_factor_) -

@@ -26,6 +26,7 @@ class Lime {
   LimeStatusQueue* status_queue_;
   LimeGoalQueue::QueueReader goal_reader_{
       muan::queues::QueueManager<LimeGoalProto>::Fetch()->MakeReader()};
+  FRIEND_TEST(LimeTest, HasNoTarget);
   double lime_height_;
   double lime_angle_;
   double object_height_;
