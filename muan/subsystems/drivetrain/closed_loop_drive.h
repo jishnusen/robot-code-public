@@ -39,6 +39,9 @@ class ClosedLoopDrive {
   Pose last_goal_pose_;
 
   bool high_gear_;
+
+  double point_turn_goal_;
+  ControlMode control_mode_;
 };
 
 }  // namespace drivetrain

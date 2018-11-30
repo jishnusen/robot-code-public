@@ -95,7 +95,7 @@ class TestFixture : public ::testing::Test {
       .max_velocity = 3.,
       .max_voltage = 12.,
       .max_acceleration = 3.,
-      .max_centripetal_acceleration = M_PI / 2,
+      .max_centripetal_acceleration = M_PI,
 
       .initial_velocity = 0.,
       .final_velocity = 0.,

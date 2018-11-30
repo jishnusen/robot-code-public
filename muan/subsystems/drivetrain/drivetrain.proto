@@ -41,6 +41,11 @@ message DrivetrainOutput {
   required bool high_gear = 7;
 }
 
+enum ControlMode {
+    PATH_FOLLOWING = 0;
+    POINT_TURN = 1;
+}
+
 message DrivetrainStatus {
   required uint64 timestamp = 1;
 
@@ -70,6 +75,8 @@ message DrivetrainStatus {
   optional double pred_rv = 19;
 
   optional bool profile_complete = 20;
+
+  optional ControlMode closed_loop_control_mode = 21;
 }
 
 message DrivetrainGoal {
@@ -103,5 +110,6 @@ message DrivetrainGoal {
   oneof goal {
     TeleopGoal teleop_goal = 3;
     PathGoal path_goal = 4;
+    double point_turn_goal = 5;
   }
 }

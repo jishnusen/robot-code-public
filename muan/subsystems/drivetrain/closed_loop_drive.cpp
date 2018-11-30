@@ -21,6 +21,12 @@ ClosedLoopDrive::ClosedLoopDrive(DrivetrainConfig dt_config,
       linear_angular_velocity_{linear_angular_velocity} {}
 
 void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
+  if (goal->has_point_turn_goal()) {
+    point_turn_goal_ = goal->point_turn_goal();
+    control_mode_ = ControlMode::POINT_TURN;
+    return;
+  }
+  control_mode_ = ControlMode::PATH_FOLLOWING;
   const auto path_goal = goal->path_goal();
   const Pose goal_pose{
       Eigen::Vector3d(path_goal.x(), path_goal.y(), path_goal.heading())};
@@ -74,6 +80,19 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
 }
 
 void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
+  if (control_mode_ == ControlMode::POINT_TURN) {
+    Eigen::Vector2d delta = model_.InverseKinematics(
+        Eigen::Vector2d(0, point_turn_goal_ - *integrated_heading_));
+    Eigen::Vector2d left_right_position = model_.InverseKinematics(
+        Eigen::Vector2d((*cartesian_position_).norm(), *integrated_heading_));
+
+    (*status)->set_heading_error(point_turn_goal_ - *integrated_heading_);
+
+    (*output)->set_output_type(POSITION);
+    (*output)->set_left_setpoint(delta(0) + left_right_position(0));
+    (*output)->set_right_setpoint(delta(1) + left_right_position(1));
+    return;
+  }
   const Pose current{*cartesian_position_, *integrated_heading_};
   const Trajectory::TimedPose goal = trajectory_.Advance(dt_config_.dt);
   const Pose error = goal.pose.pose() - current;
@@ -86,7 +105,8 @@ void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
   goal_accel(0) = goal.a;
   goal_accel(1) = goal.pose.curvature() * goal.a;
 
-  auto setpoint = controller_.Update(goal_velocity, goal_accel, current, error, high_gear_);
+  auto setpoint =
+      controller_.Update(goal_velocity, goal_accel, current, error, high_gear_);
 
   (*status)->set_x_error(error.Get()(0));
   (*status)->set_y_error(error.Get()(1));
@@ -107,8 +127,10 @@ void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
   (*output)->set_output_type(VELOCITY);
   (*output)->set_left_setpoint(setpoint.velocity(0));
   (*output)->set_right_setpoint(setpoint.velocity(1));
-  (*output)->set_left_setpoint_ff(trajectory_.done() ? 0 : setpoint.feedforwards(0));
-  (*output)->set_right_setpoint_ff(trajectory_.done() ? 0 : setpoint.feedforwards(1));
+  (*output)->set_left_setpoint_ff(
+      trajectory_.done() ? 0 : setpoint.feedforwards(0));
+  (*output)->set_right_setpoint_ff(
+      trajectory_.done() ? 0 : setpoint.feedforwards(1));
 }
 
 }  // namespace drivetrain

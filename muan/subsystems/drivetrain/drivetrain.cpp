@@ -65,7 +65,11 @@ void Drivetrain::Update() {
     return;
   }
 
-  bool in_closed_loop = goal->has_path_goal() && driver_station->is_sys_active();
+  goal->set_point_turn_goal(M_PI / 2.);
+
+  bool in_closed_loop =
+      (goal->has_path_goal() || goal->has_point_turn_goal()) &&
+      driver_station->is_sys_active();
   if (in_closed_loop) {
     closed_loop_.SetGoal(goal);
     closed_loop_.Update(&output, &status);
