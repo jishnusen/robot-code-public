@@ -46,7 +46,8 @@ void Drivetrain::Update() {
   const double delta_right = input->right_encoder() - prev_right_;
   const double delta_heading = input->gyro() - prev_heading_;
 
-  left_right_position_ = Eigen::Vector2d(input->left_encoder(), input->right_encoder());
+  left_right_position_ =
+      Eigen::Vector2d(input->left_encoder(), input->right_encoder());
 
   prev_left_ = input->left_encoder();
   prev_right_ = input->right_encoder();
@@ -68,7 +69,8 @@ void Drivetrain::Update() {
   }
 
   bool in_closed_loop =
-      (goal->has_path_goal() || goal->has_point_turn_goal() || goal->has_distance_goal() || goal->has_left_right_goal()) &&
+      (goal->has_path_goal() || goal->has_point_turn_goal() ||
+       goal->has_distance_goal() || goal->has_left_right_goal()) &&
       driver_station->is_sys_active();
   if (in_closed_loop) {
     closed_loop_.SetGoal(goal);
