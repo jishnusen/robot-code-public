@@ -4,11 +4,6 @@ option cc_enable_arenas = true;
 
 package muan.subsystems.drivetrain;
 
-message Constraints {
-  required double max_velocity = 1;
-  required double max_acceleration = 2;
-}
-
 message DrivetrainInput {
   required uint64 timestamp = 1;
   
@@ -109,8 +104,9 @@ message DrivetrainGoal {
     optional double final_velocity = 8;
     optional double final_angular_velocity = 9;
 
-    optional Constraints linear_constraints = 10;
-    optional Constraints angular_constraints = 11;
+    optional double max_linear_velocity = 10;
+    optional double max_linear_accel = 11;
+    optional double max_centripetal_accel = 12;
   }
 
   message LeftRightGoal {

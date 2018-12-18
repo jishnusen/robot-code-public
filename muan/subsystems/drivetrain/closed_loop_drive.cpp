@@ -78,17 +78,17 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
                            path_goal.final_angular_velocity()};
 
   const double max_velocity =
-      path_goal.has_linear_constraints()
-          ? path_goal.linear_constraints().max_velocity()
+      path_goal.has_max_linear_velocity()
+          ? path_goal.max_linear_velocity()
           : dt_config_.max_velocity;
   const double max_voltage = path_goal.max_voltage();
   const double max_acceleration =
-      path_goal.has_linear_constraints()
-          ? path_goal.linear_constraints().max_acceleration()
+      path_goal.has_max_linear_accel()
+          ? path_goal.max_linear_accel()
           : dt_config_.max_acceleration;
   const double max_centripetal_acceleration =
-      path_goal.has_angular_constraints()
-          ? path_goal.angular_constraints().max_acceleration()
+      path_goal.has_max_centripetal_accel()
+          ? path_goal.max_centripetal_accel()
           : dt_config_.max_centripetal_acceleration;
 
   const double initial_velocity = (*linear_angular_velocity_)(0);
