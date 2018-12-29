@@ -15,9 +15,9 @@ WpilibInterface::WpilibInterface()
     : can_{QueueManager<PdpMessage>::Fetch()},
       gyro_{QueueManager<GyroMessageProto>::Fetch(),
             QueueManager<DriverStationProto>::Fetch(), FLAGS_gyro_time, false},
-      drivetrain_{&can_},
-      score_{&can_},
-      climb_{&can_} {
+      drivetrain_{&can_} {
+      /* score_{&can_}, */
+      /* climb_{&can_} { */
   std::thread can_thread(std::ref(can_));
   can_thread.detach();
 
@@ -27,15 +27,15 @@ WpilibInterface::WpilibInterface()
 
 void WpilibInterface::WriteActuators() {
   drivetrain_.WriteActuators();
-  score_.WriteActuators();
-  climb_.WriteActuators();
-  lights_.WriteActuators();
+  /* score_.WriteActuators(); */
+  /* climb_.WriteActuators(); */
+  /* lights_.WriteActuators(); */
 }
 
 void WpilibInterface::ReadSensors() {
   drivetrain_.ReadSensors();
-  score_.ReadSensors();
-  climb_.ReadSensors();
+  /* score_.ReadSensors(); */
+  /* climb_.ReadSensors(); */
 }
 
 }  // namespace wpilib

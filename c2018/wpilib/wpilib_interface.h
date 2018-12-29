@@ -27,9 +27,9 @@ class WpilibInterface {
   muan::wpilib::CanWrapper can_;
   muan::wpilib::gyro::GyroReader gyro_;
   DrivetrainInterface drivetrain_;
-  ScoreSubsystemInterface score_;
-  ClimberInterface climb_;
-  LightsInterface lights_;
+  /* ScoreSubsystemInterface score_; */
+  /* ClimberInterface climb_; */
+  /* LightsInterface lights_; */
 };
 
 }  // namespace wpilib
