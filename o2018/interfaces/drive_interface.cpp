@@ -152,15 +152,15 @@ void DrivetrainInterface::WriteActuators() {
       right_master_.Set(ControlMode::PercentOutput, outputs->right_setpoint());
       break;
     case TalonOutput::POSITION:
-      left_master_.SelectProfileSlot(kPositionSlot, kPositionSlot);
-      right_master_.SelectProfileSlot(kPositionSlot, kPositionSlot);
+      left_master_.SelectProfileSlot(kPositionSlot, 0);
+      right_master_.SelectProfileSlot(kPositionSlot, 0);
       left_master_.Set(ControlMode::Position, outputs->left_setpoint() * kDriveConversionFactor);
       right_master_.Set(ControlMode::Position, outputs->right_setpoint() * kDriveConversionFactor);
       break;
     case TalonOutput::VELOCITY:
       SetBrakeMode(true);
-      left_master_.SelectProfileSlot(kVelocitySlot, kVelocitySlot);
-      right_master_.SelectProfileSlot(kVelocitySlot, kVelocitySlot);
+      left_master_.SelectProfileSlot(kVelocitySlot, 0);
+      right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1,
                        DemandType_ArbitraryFeedForward,
