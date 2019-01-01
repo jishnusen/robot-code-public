@@ -9,7 +9,8 @@ void Drive::DriveBackwards() {
   SetFieldPosition(0.0, 0.0, 0.0);
   LOG(INFO, "Running DRIVE BACKWARDS auto");
 
-  StartDriveAtAngle(-4.0, 0);  // Drive backwards
+  //bStartDriveAtAngle(4.0, 0);  // Drive backwards
+  StartDrivePath(1.0, 1.0, 0, 1, Gear::kHighGear, 0.0, 0.0);
   WaitUntilDriveComplete();
 }
 
