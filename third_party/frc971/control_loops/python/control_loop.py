@@ -521,13 +521,13 @@ class MiniCIM(object):
 class NEO(object):
   def __init__(self):
     # Stall Torque in N m
-    self.stall_torque = 2.51
+    self.stall_torque = (2.51 * 2 + 1.42) / 3.
     # Stall Current in Amps
-    self.stall_current = 100.0
+    self.stall_current = (100.0 * 2 + 89.0) / 3.
     # Free Speed in rad/s
     self.free_speed = 5760.0 / 60.0 * 2.0 * numpy.pi
     # Free Current in Amps
-    self.free_current = 2.0
+    self.free_current = (2.0 * 2 + 5.8) / 3.
     # Resistance of the motor
     self.resistance = 12.0 / self.stall_current
     # Motor velocity constant
