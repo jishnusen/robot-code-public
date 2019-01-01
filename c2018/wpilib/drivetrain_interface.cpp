@@ -5,8 +5,10 @@ namespace c2018 {
 namespace wpilib {
 namespace constants {
 
-constexpr uint32_t kMotorLeft = 1;
-constexpr uint32_t kMotorRight = 0;
+constexpr uint32_t kTalonLeft = 0;
+constexpr uint32_t kTalonRight = 1;
+constexpr uint32_t kSparkRight = 2;
+constexpr uint32_t kSparkLeft = 3;
 
 constexpr uint32_t kEncoderLeftA = 12, kEncoderLeftB = 13;
 constexpr uint32_t kEncoderRightA = 10, kEncoderRightB = 11;
@@ -20,8 +22,10 @@ constexpr double kMaxVoltage = 12;
 DrivetrainInterface::DrivetrainInterface(muan::wpilib::CanWrapper* can_wrapper)
     : input_queue_(QueueManager<DrivetrainInputProto>::Fetch()),
       output_queue_(QueueManager<DrivetrainOutputProto>::Fetch()->MakeReader()),
-      motor_left_{constants::kMotorLeft},
-      motor_right_{constants::kMotorRight},
+      talon_left_{constants::kTalonLeft},
+      spark_left_{constants::kSparkLeft},
+      talon_right_{constants::kTalonRight},
+      spark_right_{constants::kSparkRight},
       encoder_left_{constants::kEncoderLeftA, constants::kEncoderLeftB},
       encoder_right_{constants::kEncoderRightA, constants::kEncoderRightB},
       pcm_{can_wrapper->pcm()} {
@@ -41,15 +45,21 @@ void DrivetrainInterface::ReadSensors() {
 void DrivetrainInterface::WriteActuators() {
   auto outputs = output_queue_.ReadLastMessage();
   if (outputs) {
-    motor_left_.Set(muan::utils::Cap((*outputs)->left_voltage(),
+    talon_left_.Set(muan::utils::Cap((*outputs)->left_voltage(),
                     -constants::kMaxVoltage, constants::kMaxVoltage) / 12.0);
-    motor_right_.Set(-muan::utils::Cap((*outputs)->right_voltage(),
+    talon_right_.Set(-muan::utils::Cap((*outputs)->right_voltage(),
+                     -constants::kMaxVoltage, constants::kMaxVoltage) / 12.0);
+    spark_left_.Set(muan::utils::Cap((*outputs)->left_voltage(),
+                    -constants::kMaxVoltage, constants::kMaxVoltage) / 12.0);
+    spark_right_.Set(-muan::utils::Cap((*outputs)->right_voltage(),
                      -constants::kMaxVoltage, constants::kMaxVoltage) / 12.0);
 
     pcm_->WriteSolenoid(constants::kShifter, !(*outputs)->high_gear());
   } else {
-    motor_left_.Set(0);
-    motor_right_.Set(0);
+    talon_left_.Set(0);
+    talon_right_.Set(0);
+    spark_left_.Set(0);
+    spark_right_.Set(0);
     LOG(ERROR, "No output queue given");
   }
 }

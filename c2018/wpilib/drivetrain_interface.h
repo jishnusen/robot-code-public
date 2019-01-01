@@ -26,8 +26,10 @@ class DrivetrainInterface {
   frc971::control_loops::drivetrain::InputQueue* input_queue_;
   frc971::control_loops::drivetrain::OutputQueue::QueueReader output_queue_;
 
-  Spark motor_left_;
-  Spark motor_right_;
+  PWMTalonSRX talon_left_;
+  Spark spark_left_;
+  PWMTalonSRX talon_right_;
+  Spark spark_right_;
 
   Encoder encoder_left_, encoder_right_;
 
