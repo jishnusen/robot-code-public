@@ -487,13 +487,13 @@ class HybridControlLoop(ControlLoop):
 class CIM(object):
   def __init__(self):
     # Stall Torque in N m
-    self.stall_torque = 2.42
+    self.stall_torque = 2.07
     # Stall Current in Amps
-    self.stall_current = 133.0
+    self.stall_current = 117.3
     # Free Speed in rad/s
     self.free_speed = 5500.0 / 60.0 * 2.0 * numpy.pi
     # Free Current in Amps
-    self.free_current = 4.7
+    self.free_current = 3.6
     # Resistance of the motor
     self.resistance = 12.0 / self.stall_current
     # Motor velocity constant
