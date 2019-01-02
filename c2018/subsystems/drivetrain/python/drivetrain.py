@@ -10,8 +10,8 @@ import glog
 FLAGS = gflags.FLAGS 
 gflags.DEFINE_bool('plot', False, 'If true, plot the loop response.')
 
-mass = 64.0
-distribution_radius = 0.38
+mass = 69.7
+distribution_radius = 0.47
 
 kDrivetrain = drivetrain.DrivetrainParams(J = mass * distribution_radius ** 2.0,
                                           mass = mass,
@@ -19,8 +19,8 @@ kDrivetrain = drivetrain.DrivetrainParams(J = mass * distribution_radius ** 2.0,
                                           wheel_radius = 6.0 * 0.0254 / 2.0,
                                           G_high = (12.0 / 50.0) * (18.0 / 46.0) * (50.0 / 34.0),
                                           G_low = (12.0 / 50.0) * (18.0 / 46.0) * (34.0 / 50.0),
-                                          motor_type = control_loop.NEO(),
-                                          num_motors = 3,
+                                          motor_type = control_loop.Fusion(),
+                                          num_motors = 1,
                                           q_pos_low = 0.12,
                                           q_pos_high = 0.14,
                                           q_vel_low = 1.0,
