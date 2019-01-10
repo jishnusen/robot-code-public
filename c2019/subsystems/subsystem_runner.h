@@ -5,6 +5,7 @@
 
 #include "c2019/interfaces/interface_runner.h"
 #include "c2019/subsystems/drivetrain/drivetrain_base.h"
+#include "c2019/subsystems/limelight/limelight.h"
 #include "muan/subsystems/drivetrain/drivetrain.h"
 #include "third_party/aos/common/time.h"
 #include "third_party/aos/common/util/phased_loop.h"
@@ -24,7 +25,7 @@ class SubsystemRunner {
   muan::subsystems::drivetrain::Drivetrain drivetrain_{
       c2019::subsystems::drivetrain::GetDrivetrainConfig()};
   interfaces::InterfaceRunner interface_runner_;
-  c2019::limelight::Limelight limelight_;
+  c2019::limelight::Limelight limelight_{1.32, 30, 0.28, 0.914 / 0.24, 0.61};
   std::atomic<bool> running_;
 };
 
