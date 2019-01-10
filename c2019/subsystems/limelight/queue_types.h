@@ -11,7 +11,7 @@ namespace limelight {
 using LimelightStatusProto = muan::proto::StackProto<LimelightStatus, 1024>;
 using LimelightStatusQueue = muan::queues::MessageQueue<LimelightStatusProto>;
 
-using LimelightGoalProto = muan::proto::StackProto<LimeGoal, 1024>;
+using LimelightGoalProto = muan::proto::StackProto<LimelightGoal, 1024>;
 using LimelightGoalQueue = muan::queues::MessageQueue<LimelightGoalProto>;
 
 }  // namespace limelight

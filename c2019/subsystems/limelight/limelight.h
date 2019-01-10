@@ -10,14 +10,14 @@
 #include "networktables/NetworkTableEntry.h"
 #include "networktables/NetworkTableInstance.h"
 
-namespace muan {
+namespace c2019 {
 namespace limelight {
 
 class Limelight {
  public:
   Limelight(double limelight_height, double limelight_angle,
             double object_height, double dist_factor, double dist_offset);
-  void Getable();
+  void GetTable();
   void Update();
   double ObjectDistance(double vertical_angle);
 

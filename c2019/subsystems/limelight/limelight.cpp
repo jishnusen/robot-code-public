@@ -33,7 +33,7 @@ double Limelight::ObjectDistance(double vertical_angle) {
 }
 
 void Limelight::Update() {
-  LimeLightStatusProto status;
+  LimelightStatusProto status;
   LimelightGoalProto goal;
 
   if (goal_reader_.ReadLastMessage(&goal)) {
@@ -81,8 +81,8 @@ void BackLimelight::GetBackTable() {
 
 double BackLimelight::BackObjectDistance(double back_vertical_angle) {
   back_distance_ =
-      (back_lime_height_ - back_object_height_) *
-      tan((M_PI / 180.) * (back_lime_angle_ + back_vertical_angle));
+      (back_limelight_height_ - back_object_height_) *
+      tan((M_PI / 180.) * (back_limelight_angle_ + back_vertical_angle));
   return back_distance_;
 }
 
@@ -93,7 +93,7 @@ void BackLimelight::UpdateBack() {
   if (goal_reader_.ReadLastMessage(&goal)) {
     auto inst = nt::NetworkTableInstance::GetDefault();
     std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-back");
-    table->PutNumber("ledMode", static_cast<int>(goal->limelight_state()));
+    table->PutNumber("ledMode", static_cast<int>(goal->back_limelight_state()));
   }
 
   status->set_back_has_target(back_target_present_);
