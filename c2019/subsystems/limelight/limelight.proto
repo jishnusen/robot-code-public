@@ -1,0 +1,33 @@
+syntax = "proto2";
+
+option cc_enable_arenas = true;
+
+package muan.lime;
+
+message LimelightStatus {
+  required uint64 timestamp = 1;
+  optional double dist = 2;
+  optional double back_dist = 3;
+  optional double theta = 4;
+  optional double back_theta = 5;
+  optional double relative_x = 6;
+  optional double back_relative_x = 7;
+  optional double relative_y = 8;
+  optional double back_relative_y = 9;
+  required bool has_target = 10;
+  required bool back_has_target = 11;
+}
+
+enum LimelightState {
+  ON = 0;
+  ON = 1;
+  BACK_ON = 2;
+  BACK_OFF = 3;
+  BLINK = 4;
+  BACK_BLINK = 5;
+}
+
+message LimeGoal {
+  required LimelightState light_state = 1;
+  required LightlightState back_light_state = 2;
+}
