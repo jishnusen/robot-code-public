@@ -8,6 +8,7 @@ cc_library(
         "//muan/subsystems/drivetrain",
         "//c2019/interfaces:interface_runner",
         "//c2019/subsystems/drivetrain:drivetrain_base",
+        "//c2019/subsystems/limelight:limelight",
         "//muan/utils:threading_utils",
         "//third_party/aos/common:time",
         "//third_party/aos/common/util:phased_loop",
