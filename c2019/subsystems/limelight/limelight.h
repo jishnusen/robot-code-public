@@ -67,6 +67,6 @@ class BackLimelight {
 };
 
 }  // namespace limelight
-}  // namespace C2019
+}  // namespace c2019
 
 #endif  // C2019_SUBSYSTEMS_LIMELIGHT_LIMELIGHT_H_
