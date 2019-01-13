@@ -14,6 +14,7 @@ enum State {
   HANDOFF = 6;
   IDLE = 7;
   CLIMBING = 8;
+  BUDDY_CLIMBING = 9;
 }
 
 enum CargoScoreState {
