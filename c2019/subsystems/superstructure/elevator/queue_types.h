@@ -18,6 +18,7 @@ using ElevatorGoalProto =
     muan::proto::StackProto<ElevatorGoal, 256>;
 
 }  // namespace elevator
+
 }  // namespace c2019
 
 #endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_ELEVATOR_QUEUE_TYPES_H_

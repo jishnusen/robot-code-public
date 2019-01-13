@@ -18,6 +18,7 @@ using WristGoalProto =
     muan::proto::StackProto<WristGoal, 256>;
 
 }  // namespace wrist
+
 }  // namespace c2019
 
 #endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_WRIST_QUEUE_TYPES_H_

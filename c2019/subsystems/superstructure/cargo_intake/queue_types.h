@@ -18,6 +18,7 @@ using CargoIntakeGoalProto =
     muan::proto::StackProto<CargoIntakeGoal, 256>;
 
 }  // namespace cargo_intake
+
 }  // namespace c2019
 
 #endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_CARGO_INTAKE_QUEUE_TYPES_H_

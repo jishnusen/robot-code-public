@@ -18,6 +18,7 @@ using HatchIntakeGoalProto =
     muan::proto::StackProto<HatchIntakeGoal, 256>;
 
 }  // namespace hatch_intake
+
 }  // namespace c2019
 
 #endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_HATCH_INTAKE_QUEUE_TYPES_H_

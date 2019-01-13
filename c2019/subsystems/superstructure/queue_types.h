@@ -27,6 +27,7 @@ using SuperstructureOutputQueue =
     muan::queues::MessageQueue<SuperstructureOutputProto>;
 
 }  // namespace superstructure
+
 }  // namespace c2019
 
 #endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_WINCH_QUEUE_TYPES_H_
