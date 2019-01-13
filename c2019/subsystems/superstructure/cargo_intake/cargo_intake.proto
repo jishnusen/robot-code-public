@@ -17,6 +17,6 @@ message CargoIntakeStatus {
 }
 
 message CargoIntakeOutput {
-	required uint64 timestamp = 1;
-	required double roller_voltage = 2;
+  required uint64 timestamp = 1;
+  required double roller_voltage = 2;
 }
