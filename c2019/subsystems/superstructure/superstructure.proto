@@ -5,34 +5,34 @@ package c2019.superstructure;
 option cc_enable_arenas = true;
 
 enum State {
-  HUMAN_PLAYER_HATCH = 0;
-  HUMAN_PLAYER_CARGO = 1;
-  GROUND_HATCH = 2;
-  GROUND_CARGO = 3;
-  SCORE_HATCH = 4;
-  SCORE_CARGO = 5;
-  HANDOFF = 6;
-  IDLE = 7;
+  IDLE = 0;
+  HUMAN_PLAYER_HATCH = 1;
+  HUMAN_PLAYER_CARGO = 2;
+  GROUND_HATCH = 3;
+  GROUND_CARGO = 4;
+  SCORE_HATCH = 5;
+  SCORE_CARGO = 6;
+  HANDOFF = 7;
   CLIMBING = 8;
   BUDDY_CLIMBING = 9;
 }
 
 enum CargoScoreState {
-  ROCKET_FIRST = 0;
-  ROCKET_FIRST_BACKWARDS = 1;
-  ROCKET_SECOND = 2;
-  ROCKET_THIRD = 3;
-  CARGOSHIP = 4;
-  NONE = 5;
+  NONE = 0;
+  ROCKET_FIRST = 1;
+  ROCKET_FIRST_BACKWARDS = 2;
+  ROCKET_SECOND = 3;
+  ROCKET_THIRD = 4;
+  CARGOSHIP = 5;
 }
 
 enum HatchScoreState {
-  ROCKET_FIRST = 0;
-  ROCKET_FIRST_BACKWARDS = 1;
-  ROCKET_SECOND = 2;
-  ROCKET_THIRD = 3;
-  CARGOSHIP = 4;
-  NONE = 5;
+  NONE = 0;
+  ROCKET_FIRST = 1;
+  ROCKET_FIRST_BACKWARDS = 2;
+  ROCKET_SECOND = 3;
+  ROCKET_THIRD = 4;
+  CARGOSHIP = 5;
 }
 
 message SuperstructureStatus {
