@@ -8,7 +8,7 @@ enum State {
   IDLE = 0;
   INTAKING = 1;
   CARRYING = 2;
-	OUTTAKING = 3;
+  OUTTAKING = 3;
 }
 
 message CargoIntakeStatus {

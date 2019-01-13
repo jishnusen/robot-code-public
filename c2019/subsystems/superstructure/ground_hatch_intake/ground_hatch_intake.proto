@@ -8,7 +8,7 @@ enum State {
   IDLE = 0;
   INTAKING = 1;
   CARRYING = 2;
-	OUTTAKING = 3;
+  OUTTAKING = 3;
 }
 
 message GroundHatchIntakeStatus {
@@ -17,7 +17,7 @@ message GroundHatchIntakeStatus {
 }
 
 message GroundHatchIntakeOutput {
-	required uint64 timestamp = 1;
-	required double roller_voltage = 2;
-	required bool snap_down = 3;
+  required uint64 timestamp = 1;
+  required double roller_voltage = 2;
+  required bool snap_down = 3;
 }
