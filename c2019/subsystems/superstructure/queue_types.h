@@ -6,7 +6,7 @@
 
 namespace c2019 {
 
-namespace superstruture {
+namespace superstructure {
 
 using SuperstructureOutputProto =
     muan::proto::StackProto<SuperstructureOutput, 256>;
@@ -26,7 +26,7 @@ using SuperstructureGoalQueue =
 using SuperstructureOutputQueue =
     muan::queues::MessageQueue<SuperstructureOutputProto>;
 
-}  // namespace superstruture
+}  // namespace superstructure
 }  // namespace c2019
 
 #endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_WINCH_QUEUE_TYPES_H_
