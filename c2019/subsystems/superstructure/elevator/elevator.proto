@@ -10,7 +10,8 @@ enum State {
   AT_GOAL = 2;
   MOVING = 3;
   CLIMBING = 4;
-  BRAKE = 5;
+  BUDDY_CLIMBING = 5;
+  BRAKE = 6;
 }
 
 message ElevatorStatus {
