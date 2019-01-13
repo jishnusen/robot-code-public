@@ -1,0 +1,81 @@
+syntax = "proto2";
+
+package c2019.superstructure;
+
+option cc_enable_arenas = true;
+
+enum State {
+  HUMAN_PLAYER_HATCH = 0;
+  HUMAN_PLAYER_CARGO = 1;
+  GROUND_HATCH = 2;
+  GROUND_CARGO = 3;
+  SCORE_HATCH = 4;
+  SCORE_CARGO = 5;
+  HANDOFF = 6;
+  IDLE = 7;
+  CLIMBING = 8;
+}
+
+enum CargoScoreState {
+  ROCKET_FIRST = 0;
+  ROCKET_FIRST_BACKWARDS = 1;
+  ROCKET_SECOND = 2;
+  ROCKET_THIRD = 3;
+  CARGOSHIP = 4;
+  NONE = 5;
+}
+
+enum HatchScoreState {
+  ROCKET_FIRST = 0;
+  ROCKET_FIRST_BACKWARDS = 1;
+  ROCKET_SECOND = 2;
+  ROCKET_THIRD = 3;
+  CARGOSHIP = 4;
+  NONE = 5;
+}
+
+message SuperstructureStatus {
+  required uint64 timestamp = 1;
+  required State superstructure_state = 2;
+  required CargoScoreState cargo_score_state = 3;
+  required HatchScoreState hatch_score_state = 4;
+}
+
+message SuperstructureInput {
+  required bool hatch_intake_proxy = 1;
+  required bool hatch_holding_proxy = 2;
+  required bool cargo_proxy = 3;
+  required double hatch_ground_current = 4;
+  required double elevator_encoder = 5;
+  required double wrist_encoder = 6;
+  required bool elevator_hall = 7
+  required bool wrist_hall = 8;
+}
+
+message SuperstructureGoal {
+  required uint64 timestamp = 1;
+  required State superstructure_goal = 2;
+  required CargoScoreState cargo_score_goal = 3;
+  required HatchScoreState hatch_score_goal = 4;
+}
+
+enum TalonOutput {
+  OPEN_LOOP = 0;
+  POSITION = 1;
+}
+
+message SuperstructureOutput {
+  required bool arrow_solenoid = 1;
+  required bool arrow_pinch_solenoid = 2;
+  required double ground_hatch_voltage = 3;
+  required bool ground_snap_down = 4;
+  required TalonOutput elevator_setpoint_type = 5;
+  required TalonOutput wrist_setpoint_type = 6;
+  required double wrist_setpoint = 7;
+  required double elevator_setpoint = 8;
+  required double elevator_setpoint_ff = 9;
+  required double wrist_setpoint_ff = 10;
+  required bool roller_solenoid = 11;
+  required double roller_voltage = 12;
+  required double winch_voltage = 13;
+}

@@ -18,6 +18,6 @@ using GroundHatchIntakeGoalProto =
     muan::proto::StackProto<GroundHatchIntakeGoal, 256>;
 
 }  // namespace ground_hatch_intake
-}  // namespace c2017
+}  // namespace c2019
 
-#endif  // C2017_SUBSYSTEMS_SUPERSTRUCTURE_GROUND_HATCH_INTAKE_QUEUE_TYPES_H_
+#endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_GROUND_HATCH_INTAKE_QUEUE_TYPES_H_
