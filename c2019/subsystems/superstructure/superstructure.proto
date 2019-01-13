@@ -49,7 +49,7 @@ message SuperstructureInput {
   required double hatch_ground_current = 4;
   required double elevator_encoder = 5;
   required double wrist_encoder = 6;
-  required bool elevator_hall = 7
+  required bool elevator_hall = 7;
   required bool wrist_hall = 8;
 }
 
