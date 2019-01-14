@@ -16,7 +16,7 @@ namespace limelight {
 class Limelight {
  public:
   Limelight(double limelight_height, double limelight_angle,
-            double object_height, double dist_factor, double dist_offset);
+            double object_height);
   void GetTable();
   void Update();
   double ObjectDistance(double vertical_angle);

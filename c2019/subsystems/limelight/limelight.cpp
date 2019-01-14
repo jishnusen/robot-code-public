@@ -7,14 +7,11 @@ namespace c2019 {
 namespace limelight {
 
 Limelight::Limelight(double limelight_height, double limelight_angle,
-                     double object_height, double dist_factor,
-                     double dist_offset)
+                     double object_height)
     : status_queue_{QueueManager<LimelightStatusProto>::Fetch()},
       limelight_height_(limelight_height),
       limelight_angle_(limelight_angle),
-      object_height_(object_height),
-      dist_factor_(dist_factor),
-      dist_offset_(dist_offset) {}
+      object_height_(object_height) {}
 
 void Limelight::GetTable() {
   auto inst = nt::NetworkTableInstance::GetDefault();
@@ -28,7 +25,8 @@ void Limelight::GetTable() {
 
 double Limelight::ObjectDistance(double vertical_angle) {
   const double distance =
-      (12 * 0.0254) * std::tan((M_PI / 180.) * (60 + vertical_angle));
+      (limelight_height_ - object_height_ * 0.0254) *
+      std::tan((M_PI / 180.) * (limelight_angle_ + vertical_angle));
   distance_ = 2.577 * distance - 0.7952;
   distance_ = distance;
   return distance_;
