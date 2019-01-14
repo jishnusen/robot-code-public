@@ -15,10 +15,11 @@ void SubsystemRunner::operator()() {
 
   while (running_) {
     // Subsystems go here
-    interface_runner_.ReadSensors();
+    // interface_runner_.ReadSensors();
     drivetrain_.Update();
+    limelight_.GetTable();
     limelight_.Update();
-    interface_runner_.WriteActuators();
+    // interface_runner_.WriteActuators();
     phased_loop.SleepUntilNext();
   }
 }

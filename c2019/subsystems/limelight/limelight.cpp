@@ -18,7 +18,7 @@ Limelight::Limelight(double limelight_height, double limelight_angle,
 
 void Limelight::GetTable() {
   auto inst = nt::NetworkTableInstance::GetDefault();
-  std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-");
+  std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight");
   target_horizontal_angle_ = table->GetEntry("tx").GetDouble(0);
   target_vertical_angle_ = table->GetEntry("ty").GetDouble(0);
   target_area_ = table->GetEntry("ta").GetDouble(0);
@@ -27,8 +27,10 @@ void Limelight::GetTable() {
 }
 
 double Limelight::ObjectDistance(double vertical_angle) {
-  distance_ = (limelight_height_ - object_height_) *
-              tan((M_PI / 180.) * (limelight_angle_ + vertical_angle));
+  const double distance =
+      (12 * 0.0254) * std::tan((M_PI / 180.) * (60 + vertical_angle));
+  distance_ = 2.577 * distance - 0.7952;
+  distance_ = distance;
   return distance_;
 }
 
@@ -41,23 +43,21 @@ void Limelight::Update() {
     std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight");
     table->PutNumber("ledMode", static_cast<int>(goal->limelight_state()));
   }
-
   status->set_has_target(target_present_);
   if (target_present_) {
-    status->set_dist((ObjectDistance(target_vertical_angle_) * dist_factor_) -
-                     dist_offset_);
+    status->set_dist(ObjectDistance(target_vertical_angle_));
     status->set_theta(target_horizontal_angle_);
     status->set_relative_x(std::cos(status->theta() * (M_PI / 180.)) *
                            status->dist());
     status->set_relative_y(std::sin(status->theta() * (M_PI / 180.)) *
                            status->dist());
+    status->set_target_skew(target_skew_);
   }
   status_queue_->WriteMessage(status);
 }
 
 //////////////////////////////////////////////////////////////////// Front is Up
 /// and Back is Down ////////////////////////
-
 BackLimelight::BackLimelight(double back_limelight_height,
                              double back_limelight_angle,
                              double back_object_height, double back_dist_factor,

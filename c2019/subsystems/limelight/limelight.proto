@@ -14,8 +14,10 @@ message LimelightStatus {
   optional double back_relative_x = 7;
   optional double relative_y = 8;
   optional double back_relative_y = 9;
-  required bool has_target = 10;
-  required bool back_has_target = 11;
+  optional double target_skew = 10;
+  optional bool has_target = 11;
+  optional bool back_has_target = 12;
+
 }
 
 enum LimelightState {
@@ -29,5 +31,5 @@ enum LimelightState {
 
 message LimelightGoal {
   required LimelightState limelight_state = 1;
-  required LimelightState back_limelight_state = 2;
+  optional LimelightState back_limelight_state = 2;
 }
