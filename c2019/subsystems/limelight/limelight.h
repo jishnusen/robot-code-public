@@ -29,8 +29,6 @@ class Limelight {
   double limelight_height_;
   double limelight_angle_;
   double object_height_;
-  double dist_factor_ = 1;
-  double dist_offset_ = 0;
   double distance_;
   double target_vertical_angle_;
   double target_horizontal_angle_;
