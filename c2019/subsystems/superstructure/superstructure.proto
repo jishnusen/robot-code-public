@@ -4,7 +4,7 @@ package c2019.superstructure;
 
 option cc_enable_arenas = true;
 
-enum State {
+enum SuperstructureState {
   IDLE = 0;
   HUMAN_PLAYER_HATCH = 1;
   HUMAN_PLAYER_CARGO = 2;
@@ -17,22 +17,19 @@ enum State {
   BUDDY_CLIMBING = 9;
 }
 
-enum CargoScoreState {
+enum SuperstructureGoal {
   CARGO_NONE = 0;
   CARGO_ROCKET_FIRST = 1;
   CARGO_ROCKET_FIRST_BACKWARDS = 2;
   CARGO_ROCKET_SECOND = 3;
   CARGO_ROCKET_THIRD = 4;
   CARGO_SHIP = 5;
-}
-
-enum HatchScoreState {
-  HATCH_NONE = 0;
-  HATCH_ROCKET_FIRST = 1;
-  HATCH_ROCKET_FIRST_BACKWARDS = 2;
-  HATCH_ROCKET_SECOND = 3;
-  HATCH_ROCKET_THIRD = 4;
-  HATCH_SHIP = 5;
+  HATCH_NONE = 6;
+  HATCH_ROCKET_FIRST = 7;
+  HATCH_ROCKET_FIRST_BACKWARDS = 8;
+  HATCH_ROCKET_SECOND = 9;
+  HATCH_ROCKET_THIRD = 10;
+  HATCH_SHIP = 11;
 }
 
 message SuperstructureStatus {

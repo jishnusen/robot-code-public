@@ -84,8 +84,11 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case IDLE:
       break;
     case HUMAN_PLAYER_HATCH:
+      Elevator::elevator_height_ = kHatchLoadingStationHeight;
+      Wrist::wrist_angle_ = kHatchLoadingStationAngle;
       break;
   }
+}
 
 }  // namespace superstructure
-}  // namespace superstructure
+}  // namespace c2019

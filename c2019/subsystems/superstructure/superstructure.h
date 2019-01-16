@@ -29,10 +29,13 @@ constexpr double kHatchRocketFirstHeight = 0;
 constexpr double kHatchRocketSecondHeight = 0;
 constexpr double kHatchRocketThirdHeight = 0;
 constexpr double kHatchLoadingStationHeight = 0;
+constexpr double kHatchGroundHeight = 0;
 constexpr double kCargoShipHeight = 0;
 constexpr double kCargoRocketFirstHeight = 0;
 constexpr double kCargoRocketSecondHeight = 0;
 constexpr double kCargoRocketThirdHeight = 0;
+constexpr double kCargoGroundHeight = 0;
+constexpr double kHandoffHeight = 0;
 constexpr double kElevatorSafeHeight = 0;
 
 // wrist constants
@@ -41,10 +44,12 @@ constexpr double kHatchRocketBackwardsAngle = 0;
 constexpr double kHatchShipForwardsAngle = 0;
 constexpr double kHatchShipBackwardsAngle = 0;
 constexpr double kHatchLoadingStationAngle = 0;
+constexpr double kHatchGroundAngle = 0;
 constexpr double kCargoRocketForwardsAngle = 0;
 constexpr double kCargoRocketBackwardsAngle = 0;
 constexpr double kCargoShipForwardsAngle = 0;
 constexpr double kCargoShipBackwardsAngle = 0;
+constexpr double kCargoGroundAngle = 0;
 constexpr double kHandoffAngle = 0;
 constexpr double kWristSafeAngle = 0;
 
@@ -84,8 +89,13 @@ class Superstructure {
   SuperstructureStatusQueue* status_queue_;
   SuperstructureOutputQueue* output_queue_;
 
+  double elevator_height_;
+  double wrist_angle_;
+
   State superstructure_state_ = State::IDLE;
 }
 
 }  // namespace superstructure
 }  // namespace c2019
+
+#endif  // C2019_SUBSYSTEMS_SUPERSTRUCTURE_SUPERSTRUCTURE_H_
