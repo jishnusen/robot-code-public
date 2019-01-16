@@ -33,6 +33,7 @@ constexpr double kCargoShipHeight = 0;
 constexpr double kCargoRocketFirstHeight = 0;
 constexpr double kCargoRocketSecondHeight = 0;
 constexpr double kCargoRocketThirdHeight = 0;
+constexpr double kElevatorSafeHeight = 0;
 
 // wrist constants
 constexpr double kHatchRocketForwardsAngle = 0;
@@ -45,6 +46,7 @@ constexpr double kCargoRocketBackwardsAngle = 0;
 constexpr double kCargoShipForwardsAngle = 0;
 constexpr double kCargoShipBackwardsAngle = 0;
 constexpr double kHandoffAngle = 0;
+constexpr double kWristSafeAngle = 0;
 
 class Superstructure {
  public:
@@ -53,6 +55,11 @@ class Superstructure {
   void Update();
 
  private:
+  void SetGoal(const SuperstructureGoalProto& goal);
+  void GoToState(SuperstructureState state = SuperstructureState::IDLE);
+  void RunStateMachine();
+
+  void BoundGoal(double* elevator_goal, double* wrist_goal);
   // TODO(Hanson) uncomment subsystems when they exist
   /* c2019::cargo_intake::CargoIntake cargo_intake_;
   c2019::elevator::Elevator elevator_;
