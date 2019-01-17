@@ -174,7 +174,8 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       }
     case OUTTAKE_HATCH:
     case OUTTAKE_GROUND_HATCH:
-    case OUTTAKE_CARGO:
+    case OUTTAKE_CARGO_SLOW:
+    case OUTTAKE_CARGO_FAST:
     case POP:
       GoToState(SuperstructureState::HANDING_OFF, goal->intake_goal());
       break;
