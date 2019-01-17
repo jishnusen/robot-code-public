@@ -14,6 +14,7 @@ enum State {
 message GroundHatchIntakeStatus {
   required uint64 timestamp = 1;
   required State state = 2;
+  required bool has_hatch = 3;
 }
 
 message GroundHatchIntakeOutput {
