@@ -92,7 +92,8 @@ class Superstructure {
   double elevator_height_;
   double wrist_angle_;
 
-  State superstructure_state_ = State::IDLE;
+  SuperstructureState superstructure_state_ = SuperstructureState::IDLE;
+  IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
 }
 
 }  // namespace superstructure
