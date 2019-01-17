@@ -67,7 +67,7 @@ TEST(C2019AutonomousTest, ThreadKill) {
   QueueManager<AutoGoalProto>::Fetch()->WriteMessage(auto_goal);
   QueueManager<DriverStationProto>::Fetch()->WriteMessage(ds_proto);
   StartAutoInThread();
-  for (int i = 0; i < 50; i++) {
+  for (int i = 0; i < 51; i++) {
     auto_goal->set_run_command(true);
     auto_goal->set_command(TEST_AUTO);
     ds_proto->set_is_sys_active(true);
