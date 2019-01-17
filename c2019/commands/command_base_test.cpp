@@ -50,9 +50,14 @@ TEST(C2019AutonomousTest, PathDriveTransformsNonzeroInit) {
   EXPECT_TRUE(goal->path_goal().backwards());
 }
 
+void StartAutoInThread() {
+  TestAuto command;
+  std::thread command_thread(command);
+  command_thread.detach();
+}
+
 TEST(C2019AutonomousTest, ThreadKill) {
   aos::time::PhasedLoop loop_{std::chrono::milliseconds(10)};
-  TestAuto command;
   AutoStatusProto auto_status;
   AutoGoalProto auto_goal;
   auto_goal->set_run_command(true);
@@ -61,27 +66,28 @@ TEST(C2019AutonomousTest, ThreadKill) {
   ds_proto->set_is_sys_active(true);
   QueueManager<AutoGoalProto>::Fetch()->WriteMessage(auto_goal);
   QueueManager<DriverStationProto>::Fetch()->WriteMessage(ds_proto);
-  std::thread command_thread(command);
-  command_thread.detach();
-  for (int i = 0; i < 51; i++) {
+  StartAutoInThread();
+  for (int i = 0; i < 50; i++) {
     auto_goal->set_run_command(true);
     auto_goal->set_command(TEST_AUTO);
     ds_proto->set_is_sys_active(true);
     QueueManager<AutoGoalProto>::Fetch()->WriteMessage(auto_goal);
     QueueManager<DriverStationProto>::Fetch()->WriteMessage(ds_proto);
     if (i >= 1) {
-      EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(&auto_status));
+      EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(
+          &auto_status));
       EXPECT_TRUE(auto_status->running_command());
     }
     loop_.SleepUntilNext();
   }
-  EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(&auto_status));
+  loop_.SleepUntilNext();
+  EXPECT_TRUE(
+      QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(&auto_status));
   EXPECT_FALSE(auto_status->running_command());
 }
 
 TEST(C2019AutonomousTest, PullOut) {
   aos::time::PhasedLoop loop_{std::chrono::milliseconds(10)};
-  TestAuto command;
   AutoStatusProto auto_status;
   AutoGoalProto auto_goal;
   auto_goal->set_run_command(true);
@@ -90,34 +96,36 @@ TEST(C2019AutonomousTest, PullOut) {
   ds_proto->set_is_sys_active(true);
   QueueManager<AutoGoalProto>::Fetch()->WriteMessage(auto_goal);
   QueueManager<DriverStationProto>::Fetch()->WriteMessage(ds_proto);
-  std::thread command_thread(command);
-  command_thread.detach();
-  for (int i = 0; i < 51; i++) {
+  StartAutoInThread();
+  for (int i = 0; i < 50; i++) {
     if (i < 30) {
       auto_goal->set_run_command(true);
       auto_goal->set_command(TEST_AUTO);
       ds_proto->set_is_sys_active(true);
     } else {
       auto_goal->set_run_command(true);
-      auto_goal->set_command(DRIVE_STRAIGHT); // Started running a different command
+      auto_goal->set_command(
+          DRIVE_STRAIGHT);  // Started running a different command
       ds_proto->set_is_sys_active(true);
     }
 
     QueueManager<AutoGoalProto>::Fetch()->WriteMessage(auto_goal);
     QueueManager<DriverStationProto>::Fetch()->WriteMessage(ds_proto);
     if (i >= 1 && i < 31) {
-      EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(&auto_status));
+      EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(
+          &auto_status));
       EXPECT_TRUE(auto_status->running_command());
     } else {
-      EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(&auto_status));
+      EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(
+          &auto_status));
       EXPECT_FALSE(auto_status->running_command());
     }
     loop_.SleepUntilNext();
   }
-  EXPECT_TRUE(QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(&auto_status));
+  EXPECT_TRUE(
+      QueueManager<AutoStatusProto>::Fetch()->ReadLastMessage(&auto_status));
   EXPECT_FALSE(auto_status->running_command());
 }
-
 
 }  // namespace commands
 }  // namespace c2019
