@@ -2,7 +2,7 @@
 #define C2019_SUBSYSTEMS_SUPERSTRUCTURE_SUPERSTRUCTURE_H_
 
 // TODO(Hanson) uncomment subsystem header files when they exist
-#include "c2019/queue_manager/queue_manager.h"
+#include "muan/queues/queue_manager.h"
 // #include "c2019/subsystems/superstructure/cargo_intake/cargo_intake.h"
 #include "c2019/subsystems/superstructure/cargo_intake/queue_types.h"
 // #include "c2019/subsystems/superstructure/elevator/elevator.h"
@@ -24,14 +24,18 @@ namespace superstructure {
 
 // TODO(hanson) put actual numbers here
 // elevator constants
-constexpr double kHatchShipHeight = 0;
+constexpr double kHatchShipForwardsHeight = 0;
+constexpr double kHatchShipBackwardsHeight = 0;
 constexpr double kHatchRocketFirstHeight = 0;
+constexpr double kHatchRocketBackwardsHeight = 0;
 constexpr double kHatchRocketSecondHeight = 0;
 constexpr double kHatchRocketThirdHeight = 0;
 constexpr double kHatchLoadingStationHeight = 0;
 constexpr double kHatchGroundHeight = 0;
-constexpr double kCargoShipHeight = 0;
+constexpr double kCargoShipForwardsHeight = 0;
+constexpr double kCargoShipBackwardsHeight = 0;
 constexpr double kCargoRocketFirstHeight = 0;
+constexpr double kCargoRocketBackwardsHeight = 0;
 constexpr double kCargoRocketSecondHeight = 0;
 constexpr double kCargoRocketThirdHeight = 0;
 constexpr double kCargoGroundHeight = 0;
@@ -39,13 +43,11 @@ constexpr double kHandoffHeight = 0;
 constexpr double kElevatorSafeHeight = 0;
 
 // wrist constants
-constexpr double kHatchRocketForwardsAngle = 0;
-constexpr double kHatchRocketBackwardsAngle = 0;
-constexpr double kHatchShipForwardsAngle = 0;
-constexpr double kHatchShipBackwardsAngle = 0;
-constexpr double kHatchLoadingStationAngle = 0;
-constexpr double kHatchGroundAngle = 0;
-constexpr double kCargoRocketForwardsAngle = 0;
+constexpr double kHatchForwardsAngle = 0;
+constexpr double kHatchBackwardsAngle = 0;
+constexpr double kCargoRocketFirstAngle = 0;
+constexpr double kCargoRocketSecondAngle = 0;
+constexpr double kCargoRocketThirdAngle = 0;
 constexpr double kCargoRocketBackwardsAngle = 0;
 constexpr double kCargoShipForwardsAngle = 0;
 constexpr double kCargoShipBackwardsAngle = 0;
@@ -73,14 +75,12 @@ class Superstructure {
   c2019::wrist::Wrist wrist_;
   c2019::winch::Winch winch_; */
 
-  muan::wpilib::DriverStationQueue::QueueReader ds_status_reader_;
-
-  CargoIntakeStatusProto cargo_intake_status_;
-  ElevatorStatusProto elevator_status_;
-  GroundHatchIntakeStatusProto ground_hatch_intake_status_;
-  HatchIntakeStatusProto hatch_intake_status_;
-  WristStatusProto wrist_status_;
-  WinchStatusProto winch_status_;
+  cargo_intake::CargoIntakeStatusProto cargo_intake_status_;
+  elevator::ElevatorStatusProto elevator_status_;
+  ground_hatch_intake::GroundHatchIntakeStatusProto ground_hatch_intake_status_;
+  hatch_intake::HatchIntakeStatusProto hatch_intake_status_;
+  wrist::WristStatusProto wrist_status_;
+  winch::WinchStatusProto winch_status_;
 
   SuperstructureStatusProto status_;
 
@@ -89,12 +89,14 @@ class Superstructure {
   SuperstructureStatusQueue* status_queue_;
   SuperstructureOutputQueue* output_queue_;
 
+  muan::wpilib::DriverStationQueue::QueueReader ds_status_reader_;
+
   double elevator_height_;
   double wrist_angle_;
 
-  SuperstructureState superstructure_state_ = SuperstructureState::IDLE;
+  SuperstructureState state_ = SuperstructureState::IDLE;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
-}
+};
 
 }  // namespace superstructure
 }  // namespace c2019

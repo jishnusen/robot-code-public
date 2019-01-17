@@ -9,11 +9,10 @@ enum SuperstructureState {
   INTAKING_GROUND_HATCH = 1;
   INTAKING_HATCH = 2;
   INTAKING_CARGO = 3;
-  SCORING_HATCH = 4;
-  SCORING_CARGO = 5;
-  HANDING_OFF = 6;
-  CLIMBING = 7;
-  BUDDY_CLIMBING = 8;
+  HOLDING = 4;
+  HANDING_OFF = 5;
+  CLIMBING = 6;
+  BUDDY_CLIMBING = 7;
 }
 
 enum IntakeGoal {
@@ -25,28 +24,30 @@ enum IntakeGoal {
   OUTTAKE_GROUND_HATCH = 5;
   OUTTAKE_CARGO_SLOW = 6;
   OUTTAKE_CARGO_FAST = 7;
+  POP = 8;
 }
 
-enum SuperstructureGoal {
+enum ScoreGoal {
   NONE = 0;
   CARGO_ROCKET_FIRST = 1;
-  CARGO_ROCKET_FIRST_BACKWARDS = 2;
+  CARGO_ROCKET_BACKWARDS = 2;
   CARGO_ROCKET_SECOND = 3;
   CARGO_ROCKET_THIRD = 4;
-  CARGO_SHIP = 5;
-  HATCH_ROCKET_FIRST = 6;
-  HATCH_ROCKET_FIRST_BACKWARDS = 7;
-  HATCH_ROCKET_SECOND = 8;
-  HATCH_ROCKET_THIRD = 9;
-  HATCH_SHIP = 10;
-  HANDOFF = 11;
+  CARGO_SHIP_FORWARDS = 5;
+  CARGO_SHIP_BACKWARDS = 6;
+  HATCH_ROCKET_FIRST = 7;
+  HATCH_ROCKET_BACKWARDS = 8;
+  HATCH_ROCKET_SECOND = 9;
+  HATCH_ROCKET_THIRD = 10;
+  HATCH_SHIP_FORWARDS = 12;
+  HATCH_SHIP_BACKWARDS = 13;
+  HANDOFF = 14;
 }
 
 message SuperstructureStatus {
   required uint64 timestamp = 1;
-  required SuperstructureState superstructure_state = 2;
+  required SuperstructureState state = 2;
   // TODO(hanson) add rest of statuses
-  required bool has_ground_hatch = 3;
 }
 
 message SuperstructureInput {
@@ -62,8 +63,10 @@ message SuperstructureInput {
 
 message SuperstructureGoal {
   required uint64 timestamp = 1;
-  required SuperstructureGoal superstructure_goal = 2;
+  required ScoreGoal score_goal = 2;
   required IntakeGoal intake_goal = 3;
+  required double elevator_god_mode_goal = 4;
+  required double wrist_god_mode_goal = 5;
 }
 
 enum TalonOutput {
