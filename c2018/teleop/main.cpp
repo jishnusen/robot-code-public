@@ -73,6 +73,8 @@ TeleopBase::TeleopBase()
 
   // Quickturn - lever behind wheel on the left
   quickturn_ = wheel_.MakeButton(5);
+
+  vision_ = throttle_.MakeButton(1);
 }
 
 void TeleopBase::operator()() {
@@ -126,8 +128,10 @@ void TeleopBase::Update() {
 
 void TeleopBase::SendDrivetrainMessage() {
   using DrivetrainGoal = frc971::control_loops::drivetrain::GoalProto;
+  using DrivetrainInput = frc971::control_loops::drivetrain::InputProto;
 
   DrivetrainGoal drivetrain_goal;
+  DrivetrainInput drivetrain_input;
 
   double throttle = -throttle_.wpilib_joystick()->GetRawAxis(1);
   double wheel = -wheel_.wpilib_joystick()->GetRawAxis(0);
@@ -149,6 +153,13 @@ void TeleopBase::SendDrivetrainMessage() {
   drivetrain_goal->mutable_teleop_command()->set_steering(wheel);
   drivetrain_goal->mutable_teleop_command()->set_throttle(throttle);
   drivetrain_goal->mutable_teleop_command()->set_quick_turn(quickturn);
+
+  if (vision_->is_pressed()) {
+    if (QueueManager<DrivetrainInput>::Fetch()->ReadLastMessage(&drivetrain_input)) {
+      throttle = drivetrain_input->target_dist() * 0.10;
+      drivetrain_goal->mutable_teleop_command()->set_throttle(throttle);
+    }
+  }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }

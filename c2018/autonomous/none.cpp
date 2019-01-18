@@ -6,10 +6,11 @@ namespace autonomous {
 using frc971::control_loops::drivetrain::Gear;
 
 void None::NoneAuto() {
-  SetFieldPosition(1678.1678, 1678.1678, 0.0);
+  SetFieldPosition(0.0, 0.0, 0.0);
   LOG(INFO, "Running NONE auto");
 
-  Wait(1678);  // :)
+  StartDriveVision();
+  WaitUntilDriveComplete();  // :)
 }
 
 }  // namespace autonomous

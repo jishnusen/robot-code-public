@@ -220,6 +220,9 @@ void DrivetrainLoop::RunIteration(
 
     (*status)->set_estimated_x_position(cartesian_position_(0));
     (*status)->set_estimated_y_position(cartesian_position_(1));
+    (*status)->set_horiz_angle((*input)->horiz_angle());
+    (*status)->set_target_dist((*input)->target_dist());
+    (*status)->set_skew((*input)->skew());
 
     dt_openloop_.PopulateStatus(status);
     dt_closedloop_.PopulateStatus(status);

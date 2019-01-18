@@ -33,6 +33,7 @@ class AutonomousBase {
 
   bool IsAutonomous();
 
+  void StartDriveVision();
   void StartDriveAbsolute(
       double left, double right, bool follow_through = false,
       frc971::control_loops::drivetrain::Gear gear =

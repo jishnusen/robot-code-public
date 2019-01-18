@@ -1,5 +1,8 @@
 #include "c2018/wpilib/drivetrain_interface.h"
 #include "muan/logging/logger.h"
+#include "networktables/NetworkTable.h"
+#include "networktables/NetworkTableEntry.h"
+#include "networktables/NetworkTableInstance.h"
 
 namespace c2018 {
 namespace wpilib {
@@ -35,6 +38,32 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_left_encoder(encoder_left_.Get() * kMetersPerClick);
   sensors->set_right_encoder(-encoder_right_.Get() * kMetersPerClick);
 
+  if (measure_) {
+    auto inst = nt::NetworkTableInstance::GetDefault();
+    std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight");
+    double target_vertical_angle = table->GetEntry("ty").GetDouble(0);
+    double target_horizontal_angle = table->GetEntry("tx").GetDouble(0);
+    table->PutNumber("pipeline", 1);
+    target_dist_ =
+        std::tan((target_vertical_angle + 60.) * (M_PI / 180.)) *
+        (51.0 * 0.0254);
+    /* target_dist_ = distance * 2.70247 - 1.0116; */
+
+    horiz_angle_ = (target_horizontal_angle * (M_PI / 180.));
+
+    target_x_ = target_dist_ * std::cos(horiz_angle_);
+    target_y_ = target_dist_ * std::sin(horiz_angle_);
+
+    double target_skew = table->GetEntry("ts").GetDouble(0);
+    target_skew_ = target_skew;
+  }
+  measure_ = !measure_;
+
+  sensors->set_target_dist(target_dist_);
+  sensors->set_skew(target_skew_);
+  sensors->set_horiz_angle(horiz_angle_);
+  sensors->set_target_x(target_x_);
+  sensors->set_target_y(target_y_);
   input_queue_->WriteMessage(sensors);
 }
 
@@ -42,9 +71,13 @@ void DrivetrainInterface::WriteActuators() {
   auto outputs = output_queue_.ReadLastMessage();
   if (outputs) {
     motor_left_.Set(muan::utils::Cap((*outputs)->left_voltage(),
-                    -constants::kMaxVoltage, constants::kMaxVoltage) / 12.0);
+                                     -constants::kMaxVoltage,
+                                     constants::kMaxVoltage) /
+                    12.0);
     motor_right_.Set(-muan::utils::Cap((*outputs)->right_voltage(),
-                     -constants::kMaxVoltage, constants::kMaxVoltage) / 12.0);
+                                       -constants::kMaxVoltage,
+                                       constants::kMaxVoltage) /
+                     12.0);
 
     pcm_->WriteSolenoid(constants::kShifter, !(*outputs)->high_gear());
   } else {

@@ -32,6 +32,13 @@ class DrivetrainInterface {
   Encoder encoder_left_, encoder_right_;
 
   muan::wpilib::PcmWrapper* pcm_;
+
+  bool measure_ = false;
+  double target_dist_ = 0;
+  double target_x_ = 0;
+  double target_y_ = 0;
+  double target_skew_ = 0;
+  double horiz_angle_ = 0;
 };
 
 }  // namespace wpilib

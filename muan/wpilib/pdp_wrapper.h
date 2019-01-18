@@ -21,6 +21,7 @@ class PdpWrapper {
   friend class CanWrapper;
 
   int module_;
+  HAL_PDPHandle handle_;
 
   // Read values from the PDP. This is not realtime and should only be called
   // from the CAN thread. It's private so it can only be called by friend

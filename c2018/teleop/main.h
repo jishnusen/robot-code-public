@@ -37,6 +37,7 @@ class TeleopBase {
 
   // Driving controls
   muan::teleop::Joystick throttle_, wheel_;
+  muan::teleop::Button *vision_;
 
   // Operator controls
   muan::teleop::Joystick gamepad_;

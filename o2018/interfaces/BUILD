@@ -25,6 +25,7 @@ cc_library(
         "//muan/wpilib:can_wrapper",
         "//muan/phoenix:talon_wrapper",
         "//muan/phoenix:victor_wrapper",
+        "//third_party/spark_max",
     ],
 )
 

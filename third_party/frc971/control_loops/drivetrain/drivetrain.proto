@@ -104,6 +104,14 @@ message DrivetrainInput {
   required double high_left_hall = 7;
   required double low_right_hall = 8;
   required double high_right_hall = 9;
+  
+  required double target_dist = 10;
+  required double horiz_angle = 11;
+  required double skew = 12;
+  required int64 pipeline = 13;
+  required double horiz = 14;
+  required double target_x = 15;
+  required double target_y = 16;
 }
 
 message DrivetrainOutput {
@@ -169,4 +177,7 @@ message DrivetrainStatus {
   }
 
   optional PathStatus path_status = 22;
+  required double target_dist = 23;
+  required double horiz_angle = 24;
+  required double skew = 25;
 }

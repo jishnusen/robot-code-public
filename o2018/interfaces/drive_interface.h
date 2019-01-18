@@ -7,6 +7,7 @@
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/wpilib/can_wrapper.h"
 #include "muan/wpilib/queue_types.h"
+#include "rev/CANSparkMax.h"
 
 namespace o2018 {
 namespace interfaces {
@@ -50,6 +51,8 @@ class DrivetrainInterface {
 
   TalonSRX right_slave_a_{kRightSlaveA};
   TalonSRX right_slave_b_{kRightSlaveB};
+
+  rev::CANSparkMax test_{1, rev::CANSparkMaxLowLevel::MotorType::kBrushless}; 
 
   PigeonIMU pigeon_;
   double pigeon_offset_ = 0;

@@ -64,6 +64,15 @@ void AutonomousBase::StartDriveAbsolute(
   drivetrain_goal_queue_->WriteMessage(goal);
 }
 
+void AutonomousBase::StartDriveVision() {
+  DrivetrainStatus status;
+  if (!drivetrain_status_reader_.ReadLastMessage(&status)) {
+    LOG(WARNING, "No drivetrain status message provided.");
+    return;
+  }
+  StartDrivePath(status->target_dist() * std::cos(status->horiz_angle()) - (15 * 0.0254), -status->target_dist() * std::sin(status->horiz_angle()) - 0.082, 0, 1);
+}
+
 void AutonomousBase::StartDriveRelative(
     double forward, double theta, double final_velocity,
     frc971::control_loops::drivetrain::Gear gear) {
