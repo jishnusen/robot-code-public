@@ -65,11 +65,40 @@ void Superstructure::Update() {
 
   // Then we tell the controller to do it
   // TODO(Hanson) uncomment lines below once subsystems exist
-  /*elevator_.SetGoal(constrained_elevator_height);
+  elevator_.SetGoal(constrained_elevator_height);
   elevator_.Update(input, &output, &status_, driver_station->is_sys_active());
 
-  wrist_.SetGoal(constrained_wrist_angle, intake_goal_);
-  wrist_.Update(input, &output, &status_, driver_station->is_sys_active());*/
+  wrist_.SetGoal(constrained_wrist_angle);
+  wrist_.Update(input, &output, &status_, driver_station->is_sys_active());
+
+  ground_hatch_intake_.SetGoal(intake_goal_);
+  ground_hatch_intake_.Update(input, &output, &status_,
+                              driver_station->is_sys_active());
+
+  hatch_intake_.SetGoal(intake_goal_);
+  hatch_intake_.Update(input, &output, &status_,
+                       driver_station->is_sys_active());
+
+  cargo_intake_.SetGoal(intake_goal_);
+  cargo_intake_.Update(input, &output, &status_,
+                       driver_station->is_sys_active());
+
+  WinchGoalProto winch_goal;
+  winch_goal->set_winch(should_climb_);
+  c2019::winch::ClimbType climb_type;
+
+  if (should_climb_) {
+    if (buddy_) {
+      climb_type = BUDDY;
+    } else {
+      climb_type = SOLO;
+    }
+  } else {
+    climb_type = NONE;
+  }
+
+  winch_.SetGoal(winch_goal);
+  winch_.Update(input, &output, &status_, driver_station->is_sys_active());
 
   status_->set_state(state_);
 
@@ -230,8 +259,12 @@ void Superstructure::RunStateMachine() {
       }
       break;
     case CLIMBING:
+      should_climb_ = true;
+      buddy_ = false;
       break;
     case BUDDY_CLIMBING:
+      should_climb_ = true;
+      buddy_ = true;
       break;
   }
 }
