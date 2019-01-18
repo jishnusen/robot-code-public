@@ -5,11 +5,11 @@ package c2019.superstructure;
 option cc_enable_arenas = true;
 
 enum SuperstructureState {
-  IDLE = 0;
-  INTAKING_GROUND_HATCH = 1;
-  INTAKING_HATCH = 2;
-  INTAKING_CARGO = 3;
-  HOLDING = 4;
+  HOLDING = 0;
+  CALIBRATING = 1;
+  INTAKING_GROUND_HATCH = 2;
+  INTAKING_HATCH = 3;
+  INTAKING_CARGO = 4;
   HANDING_OFF = 5;
   CLIMBING = 6;
   BUDDY_CLIMBING = 7;
@@ -42,6 +42,7 @@ enum ScoreGoal {
   HATCH_SHIP_FORWARDS = 12;
   HATCH_SHIP_BACKWARDS = 13;
   HANDOFF = 14;
+  STOW = 15;
 }
 
 message SuperstructureStatus {

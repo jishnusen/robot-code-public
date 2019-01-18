@@ -40,7 +40,9 @@ constexpr double kCargoRocketSecondHeight = 0;
 constexpr double kCargoRocketThirdHeight = 0;
 constexpr double kCargoGroundHeight = 0;
 constexpr double kHandoffHeight = 0;
+constexpr double kStowHeight = 0;
 constexpr double kElevatorSafeHeight = 0;
+constexpr double kElevatorHandoffTolerance = 2e-3;
 
 // wrist constants
 constexpr double kHatchForwardsAngle = 0;
@@ -53,7 +55,9 @@ constexpr double kCargoShipForwardsAngle = 0;
 constexpr double kCargoShipBackwardsAngle = 0;
 constexpr double kCargoGroundAngle = 0;
 constexpr double kHandoffAngle = 0;
+constexpr double kStowAngle = 0;
 constexpr double kWristSafeAngle = 0;
+constexpr double kWristHandoffTolerance = 3 * (M_PI / 180);
 
 class Superstructure {
  public:
@@ -63,7 +67,8 @@ class Superstructure {
 
  private:
   void SetGoal(const SuperstructureGoalProto& goal);
-  void GoToState(SuperstructureState state = SuperstructureState::IDLE);
+  void GoToState(SuperstructureState state = SuperstructureState::HOLDING,
+                 IntakeGoal intake = IntakeGoal::INTAKE_NONE);
   void RunStateMachine();
 
   void BoundGoal(double* elevator_goal, double* wrist_goal);
@@ -94,7 +99,7 @@ class Superstructure {
   double elevator_height_;
   double wrist_angle_;
 
-  SuperstructureState state_ = SuperstructureState::IDLE;
+  SuperstructureState state_ = SuperstructureState::HOLDING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
 };
 

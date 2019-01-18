@@ -135,6 +135,10 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       elevator_height_ = kHandoffHeight;
       wrist_angle_ = kHandoffAngle;
       break;
+    case STOW:
+      elevator_height_ = kStowHeight;
+      wrist_angle_ = kStowAngle;
+      break;
   }
 
   // Godmode
@@ -151,7 +155,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
-      GoToState(SuperstructureState::IDLE, goal->intake_goal());
+      GoToState(SuperstructureState::HOLDING, goal->intake_goal());
       break;
     case INTAKE_HATCH:
       if (!hatch_intake_status_->has_hatch()) {
@@ -173,16 +177,111 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
         GoToState(SuperstructureState::HOLDING, goal->intake_goal());
       }
     case OUTTAKE_HATCH:
+      break;
     case OUTTAKE_GROUND_HATCH:
+      break;
     case OUTTAKE_CARGO_SLOW:
+      break;
     case OUTTAKE_CARGO_FAST:
+      break;
     case POP:
-      GoToState(SuperstructureState::HANDING_OFF, goal->intake_goal());
+      if (ground_hatch_intake_status_->has_hatch() &&
+          std::abs(elevator_status_->elevator_height() - kHandoffHeight) <
+              kElevatorHandoffTolerance &&
+          std::abs(wrist_status_->wrist_angle() - kHandoffAngle) <
+              kWristHandoffTolerance) {
+        GoToState(SuperstructureState::HANDING_OFF, goal->intake_goal());
+      }
       break;
   }
 }
 
 // TODO(Hanson) RunStateMachine() and GoToState()
+
+void Superstructure::RunStateMachine() {
+  switch (state_) {
+    case CALIBRATING:
+      elevator_height_ = elevator_status_->elevator_height();
+      wrist_angle_ = wrist_status_->wrist_angle();
+      if (elevator_status_->is_calibrated() && wrist_status_->is_calibrated()) {
+        GoToState(HOLDING);
+      }
+      break;
+    case INTAKING_GROUND_HATCH:
+      if (ground_hatch_intake_status_->has_hatch()) {
+        GoToState(HOLDING);
+      }
+      break;
+    case INTAKING_HATCH:
+      if (hatch_intake_status_->has_hatch()) {
+        GoToState(HOLDING);
+      }
+      break;
+    case INTAKING_CARGO:
+      if (cargo_intake_status_->has_cargo()) {
+        GoToState(HOLDING);
+      }
+      break;
+    case HOLDING:
+      break;
+    case HANDING_OFF:
+      if ((hatch_intake_status_->has_hatch() ||
+           cargo_intake_status_->has_cargo())) {
+        GoToState(HOLDING);
+      }
+      break;
+    case CLIMBING:
+      break;
+    case BUDDY_CLIMBING:
+      break;
+  }
+}
+
+void Superstructure::GoToState(SuperstructureState desired_state,
+                               IntakeGoal intake) {
+  switch (state_) {
+    case CALIBRATING:
+      if (wrist_.is_calibrated() && elevator_.is_calibrated()) {
+        state_ = desired_state;
+      } else {
+        LOG(ERROR, "Tried to go to invalid state %d while calibrating!",
+            static_cast<int>(desired_state));
+      }
+      break;
+    case INTAKING_GROUND_HATCH:
+      break;
+    case INTAKING_HATCH:
+      break;
+    case INTAKING_CARGO:
+      break;
+    case HOLDING:
+      if (desired_state == INTAKING_GROUND_HATCH ||
+          desired_state == INTAKING_HATCH || desired_state == INTAKING_CARGO) {
+        if (intake == IntakeGoal::INTAKE_GROUND_HATCH ||
+            intake == IntakeGoal::INTAKE_HATCH ||
+            intake == IntakeGoal::INTAKE_CARGO) {
+          intake_goal_ = intake;
+        } else {
+          LOG(ERROR,
+              "Tried to go to invalid state/intake_goal combination %d, %d",
+              static_cast<int>(desired_state), static_cast<int>(intake));
+        }
+      } else {
+        if (intake == IntakeGoal::INTAKE_NONE ||
+            intake == IntakeGoal::OUTTAKE_HATCH ||
+            intake == IntakeGoal::OUTTAKE_GROUND_HATCH ||
+            intake == IntakeGoal::OUTTAKE_CARGO_SLOW ||
+            intake == IntakeGoal::OUTTAKE_CARGO_FAST) {
+          intake_goal_ = intake;
+        } else {
+          LOG(ERROR,
+              "Tried to go to invalid state/intake_goal combination %d, %d",
+              static_cast<int>(desired_state), static_cast<int>(intake));
+        }
+      }
+      state_ = desired_statel break;
+  }
+}
 
 }  // namespace superstructure
 }  // namespace c2019
