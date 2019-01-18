@@ -174,13 +174,12 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   elevator_height_ += goal->elevator_god_mode_goal() * 0.005;
   wrist_angle_ += goal->wrist_god_mode_goal() * 0.005;
 
-  // TODO(Hanson) uncomment these when subsystems exist
-  /*elevator_height_ = muan::utils::Cap(
+  elevator_height_ = muan::utils::Cap(
       elevator_height_, c2019::superstructure::elevator::kElevatorMinHeight,
       c2019::superstructure::elevator::kElevatorMaxHeight);
-  wrist_angle_ = muan::utils::Cap(
-      wrist_angle_, c2019::superstructure::wrist::kWristMinAngle,
-      c2019::superstructure::wrist::kWristMaxAngle);*/
+  wrist_angle_ = muan::utils::Cap(wrist_angle_,
+                                  c2019::superstructure::wrist::kWristMinAngle,
+                                  c2019::superstructure::wrist::kWristMaxAngle);
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:

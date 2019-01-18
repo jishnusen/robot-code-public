@@ -1,22 +1,20 @@
 #ifndef C2019_SUBSYSTEMS_SUPERSTRUCTURE_SUPERSTRUCTURE_H_
 #define C2019_SUBSYSTEMS_SUPERSTRUCTURE_SUPERSTRUCTURE_H_
 
-// TODO(Hanson) uncomment subsystem header files when they exist
-#include "muan/queues/queue_manager.h"
-// #include "c2019/subsystems/superstructure/cargo_intake/cargo_intake.h"
+#include "c2019/subsystems/superstructure/cargo_intake/cargo_intake.h"
 #include "c2019/subsystems/superstructure/cargo_intake/queue_types.h"
-// #include "c2019/subsystems/superstructure/elevator/elevator.h"
+#include "c2019/subsystems/superstructure/elevator/elevator.h"
 #include "c2019/subsystems/superstructure/elevator/queue_types.h"
-// #include
-// "c2019/subsystems/superstructure/ground_hatch_intake/ground_hatch_intake.h"
+#include "c2019/subsystems/superstructure/ground_hatch_intake/ground_hatch_intake.h"
 #include "c2019/subsystems/superstructure/ground_hatch_intake/queue_types.h"
-// #include "c2019/subsystems/superstructure/hatch_intake/hatch_intake.h"
+#include "c2019/subsystems/superstructure/hatch_intake/hatch_intake.h"
 #include "c2019/subsystems/superstructure/hatch_intake/queue_types.h"
 #include "c2019/subsystems/superstructure/queue_types.h"
 #include "c2019/subsystems/superstructure/winch/queue_types.h"
-// #include "c2019/subsystems/superstructure/winch/winch.h"
+#include "c2019/subsystems/superstructure/winch/winch.h"
 #include "c2019/subsystems/superstructure/wrist/queue_types.h"
-// #include "c2019/subsystems/superstructure/wrist/wrist.h"
+#include "c2019/subsystems/superstructure/wrist/wrist.h"
+#include "muan/queues/queue_manager.h"
 #include "muan/wpilib/queue_types.h"
 
 namespace c2019 {
@@ -42,6 +40,8 @@ constexpr double kCargoGroundHeight = 0;
 constexpr double kHandoffHeight = 0;
 constexpr double kStowHeight = 0;
 constexpr double kElevatorSafeHeight = 0;
+constexpr double kElevatorMinHeight = 0;
+constexpr double kElevatorMaxHeight = 0;
 constexpr double kElevatorHandoffTolerance = 2e-3;
 
 // wrist constants
@@ -57,6 +57,8 @@ constexpr double kCargoGroundAngle = 0;
 constexpr double kHandoffAngle = 0;
 constexpr double kStowAngle = 0;
 constexpr double kWristSafeAngle = 0;
+constexpr double kWristMinAngle = 0;
+constexpr double kWristMaxAngle = 0;
 constexpr double kWristHandoffTolerance = 3 * (M_PI / 180);
 
 class Superstructure {
@@ -70,15 +72,14 @@ class Superstructure {
   void GoToState(SuperstructureState state = SuperstructureState::HOLDING,
                  IntakeGoal intake = IntakeGoal::INTAKE_NONE);
   void RunStateMachine();
-
   void BoundGoal(double* elevator_goal, double* wrist_goal);
-  // TODO(Hanson) uncomment subsystems when they exist
-  /* c2019::cargo_intake::CargoIntake cargo_intake_;
+
+  c2019::cargo_intake::CargoIntake cargo_intake_;
   c2019::elevator::Elevator elevator_;
   c2019::ground_hatch_intake::GroundHatchIntake ground_hatch_intake_;
   c2019::hatch_intake::HatchIntake hatch_intake_;
   c2019::wrist::Wrist wrist_;
-  c2019::winch::Winch winch_; */
+  c2019::winch::Winch winch_;
 
   cargo_intake::CargoIntakeStatusProto cargo_intake_status_;
   elevator::ElevatorStatusProto elevator_status_;
