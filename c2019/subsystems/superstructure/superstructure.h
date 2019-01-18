@@ -72,13 +72,6 @@ class Superstructure {
   void RunStateMachine();
 
   void BoundGoal(double* elevator_goal, double* wrist_goal);
-  // TODO(Hanson) uncomment subsystems when they exist
-  /* c2019::cargo_intake::CargoIntake cargo_intake_;
-  c2019::elevator::Elevator elevator_;
-  c2019::ground_hatch_intake::GroundHatchIntake ground_hatch_intake_;
-  c2019::hatch_intake::HatchIntake hatch_intake_;
-  c2019::wrist::Wrist wrist_;
-  c2019::winch::Winch winch_; */
 
   cargo_intake::CargoIntakeStatusProto cargo_intake_status_;
   elevator::ElevatorStatusProto elevator_status_;

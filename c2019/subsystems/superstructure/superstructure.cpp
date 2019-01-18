@@ -155,26 +155,25 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
-      GoToState(SuperstructureState::HOLDING, goal->intake_goal());
+      GoToState(HOLDING, goal->intake_goal());
       break;
     case INTAKE_HATCH:
       if (!hatch_intake_status_->has_hatch()) {
-        GoToState(SuperstructureState::INTAKING_HATCH, goal->intake_goal());
+        GoToState(INTAKING_HATCH, goal->intake_goal());
       } else {
-        GoToState(SuperstructureState::HOLDING, goal->intake_goal());
+        GoToState(HOLDING, goal->intake_goal());
       }
     case INTAKE_GROUND_HATCH:
       if (!ground_hatch_intake_status_->has_hatch()) {
-        GoToState(SuperstructureState::INTAKING_GROUND_HATCH,
-                  goal->intake_goal());
+        GoToState(INTAKING_GROUND_HATCH, goal->intake_goal());
       } else {
-        GoToState(SuperstructureState::HOLDING, goal->intake_goal());
+        GoToState(HOLDING, goal->intake_goal());
       }
     case INTAKE_CARGO:
       if (!cargo_intake_status_->has_cargo()) {
-        GoToState(SuperstructureState::INTAKING_CARGO, goal->intake_goal());
+        GoToState(INTAKING_CARGO, goal->intake_goal());
       } else {
-        GoToState(SuperstructureState::HOLDING, goal->intake_goal());
+        GoToState(HOLDING, goal->intake_goal());
       }
     case OUTTAKE_HATCH:
       break;
@@ -190,7 +189,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
               kElevatorHandoffTolerance &&
           std::abs(wrist_status_->wrist_angle() - kHandoffAngle) <
               kWristHandoffTolerance) {
-        GoToState(SuperstructureState::HANDING_OFF, goal->intake_goal());
+        GoToState(HANDING_OFF, goal->intake_goal());
       }
       break;
   }
@@ -241,7 +240,7 @@ void Superstructure::GoToState(SuperstructureState desired_state,
                                IntakeGoal intake) {
   switch (state_) {
     case CALIBRATING:
-      if (wrist_.is_calibrated() && elevator_.is_calibrated()) {
+      if (wrist_status_->is_calibrated() && elevator_status_->is_calibrated()) {
         state_ = desired_state;
       } else {
         LOG(ERROR, "Tried to go to invalid state %d while calibrating!",
@@ -279,7 +278,24 @@ void Superstructure::GoToState(SuperstructureState desired_state,
               static_cast<int>(desired_state), static_cast<int>(intake));
         }
       }
-      state_ = desired_statel break;
+      state_ = desired_state;
+      break;
+    case HANDING_OFF:
+      if (desired_state == HANDING_OFF) {
+        if (intake == IntakeGoal::POP) {
+          intake_goal_ = intake;
+        } else {
+          LOG(ERROR,
+              "Tried to go to invalid state/intake_goal combination %d, %d",
+              static_cast<int>(desired_state), static_cast<int>(intake));
+        }
+        state_ = desired_state;
+        break;
+      }
+    case CLIMBING:
+      break;
+    case BUDDY_CLIMBING:
+      break;
   }
 }
 
