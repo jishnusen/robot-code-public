@@ -43,7 +43,9 @@ void DrivetrainInterface::ReadSensors() {
     std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight");
     double target_vertical_angle = table->GetEntry("ty").GetDouble(0);
     double target_horizontal_angle = table->GetEntry("tx").GetDouble(0);
-    table->PutNumber("pipeline", 1);
+    double target1_horizontal_angle = table->GetEntry("tx0").GetDouble(0);
+    table->PutNumber("pipeline", 0);
+    double target2_horizontal_angle = table->GetEntry("tx1").GetDouble(0);
     target_dist_ =
         std::tan((target_vertical_angle + 60.) * (M_PI / 180.)) *
         (51.0 * 0.0254);
@@ -54,8 +56,7 @@ void DrivetrainInterface::ReadSensors() {
     target_x_ = target_dist_ * std::cos(horiz_angle_);
     target_y_ = target_dist_ * std::sin(horiz_angle_);
 
-    double target_skew = table->GetEntry("ts").GetDouble(0);
-    target_skew_ = target_skew;
+    target_skew_ = /*Some target factor here */ target1_horizontal_angle/ target2_horizontal_angle;
   }
   measure_ = !measure_;
 

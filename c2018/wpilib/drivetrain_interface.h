@@ -39,6 +39,8 @@ class DrivetrainInterface {
   double target_y_ = 0;
   double target_skew_ = 0;
   double horiz_angle_ = 0;
+  double target1_horizontal_angle = 0;
+  double target2_horizontal_angle = 0;
 };
 
 }  // namespace wpilib
