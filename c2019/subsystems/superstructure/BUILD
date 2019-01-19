@@ -34,3 +34,12 @@ cc_library(
         "//muan/queues",
     ]
 )
+
+cc_test(
+    name = "superstructure_test",
+    srcs = ["superstructure_test.cpp"],
+    deps = [
+        ":superstructure",
+        "//third_party/google/googletest",
+    ],
+)

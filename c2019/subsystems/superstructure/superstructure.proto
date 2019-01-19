@@ -45,10 +45,63 @@ enum ScoreGoal {
   STOW = 15;
 }
 
+enum WristState {
+  IDLE = 0;
+  WRIST_CALIBRATING = 1;
+  MOVING = 2;
+  AT_GOAL = 3;
+}
+
+enum GroundHatchIntakeState {
+  GROUND_HATCH_IDLE = 0;
+  GROUND_HATCH_INTAKING = 1;
+  GROUND_HATCH_HOLDING = 2;
+  GROUND_HATCH_OUTTAKING = 3;
+}
+
+enum HatchIntakeState {
+  HATCH_INTAKING = 0;
+  HATCH_CARRYING = 1;
+  HATCH_OUTTAKING = 2;
+}
+
+enum CargoIntakeState {
+  CARGO_IDLE = 0;
+  CARGO_INTAKING = 1;
+  CARGO_OUTTAKING = 2;
+}
+
+enum ClimbType {
+  CLIMB_NONE = 0;
+  SOLO = 1;
+  BUDDY = 2;
+}
+
 message SuperstructureStatus {
   required uint64 timestamp = 1;
   required SuperstructureState state = 2;
-  // TODO(hanson) add rest of statuses
+  required double elevator_height = 3;
+  required bool elevator_is_calibrated = 4;
+  required double elevator_velocity = 5;
+  required bool elevator_at_top = 6;
+  required double elevator_goal = 7;
+  required bool elevator_encoder_fault_detected = 8;
+  required bool braked = 9;
+  required double wrist_angle = 10;
+  required bool wrist_is_calibrated = 11;
+  required double wrist_voltage = 12;
+  required WristState wrist_state = 13;
+  required bool wrist_encoder_fault = 14;
+  required double wrist_velocity = 15;
+  required GroundHatchIntakeState ground_hatch_intake_state = 16;
+  required bool has_ground_hatch = 17;
+  required HatchIntakeState hatch_intake_state = 18;
+  required bool has_hp_hatch = 19;
+  required CargoIntakeState cargo_intake_state = 20;
+  required bool has_cargo = 21;
+  required ClimbType climb_type = 22;
+  required bool climb = 23;
+  required double winch_current = 24;
 }
 
 message SuperstructureInput {
@@ -58,7 +111,7 @@ message SuperstructureInput {
   required double hatch_ground_current = 4;
   required double elevator_encoder = 5;
   required double wrist_encoder = 6;
-  required bool elevator_hall = 7;
+  required bool elevator_zeroed = 7;
   required bool wrist_hall = 8;
 }
 
@@ -76,17 +129,17 @@ enum TalonOutput {
 }
 
 message SuperstructureOutput {
-  required bool arrow_solenoid = 1;
-  required bool arrow_pinch_solenoid = 2;
-  required double ground_hatch_voltage = 3;
-  required bool ground_snap_down = 4;
-  required TalonOutput elevator_setpoint_type = 5;
-  required TalonOutput wrist_setpoint_type = 6;
-  required double wrist_setpoint = 7;
-  required double elevator_setpoint = 8;
-  required double elevator_setpoint_ff = 9;
-  required double wrist_setpoint_ff = 10;
-  required bool roller_solenoid = 11;
-  required double roller_voltage = 12;
-  required double winch_voltage = 13;
+  required TalonOutput elevator_setpoint_type = 1;
+  required TalonOutput wrist_setpoint_type = 2;
+  required double elevator_setpoint = 3;
+  required double wrist_setpoint = 4;
+  required double elevator_setpoint_ff = 5;
+  required double wrist_setpoint_ff = 6;
+  required bool arrow_solenoid = 7;
+  required bool backplate_solenoid = 8;
+  required double cargo_roller_voltage = 9;
+  required double hatch_roller_voltage = 10;
+  required bool snap_down = 11;
+  required double winch_voltage = 12;
+  required bool drop_forks = 13;
 }
