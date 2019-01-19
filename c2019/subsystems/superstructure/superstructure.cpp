@@ -64,7 +64,6 @@ void Superstructure::Update() {
   BoundGoal(&constrained_elevator_height, &constrained_wrist_angle);
 
   // Then we tell the controller to do it
-  // TODO(Hanson) uncomment lines below once subsystems exist
   elevator_.SetGoal(constrained_elevator_height);
   elevator_.Update(input, &output, &status_, driver_station->is_sys_active());
 
@@ -87,6 +86,7 @@ void Superstructure::Update() {
   winch_goal->set_winch(should_climb_);
   c2019::winch::ClimbType climb_type;
 
+  // Buddy climb logic
   if (should_climb_) {
     if (buddy_) {
       climb_type = BUDDY;
@@ -96,6 +96,7 @@ void Superstructure::Update() {
   } else {
     climb_type = NONE;
   }
+  winch_goal->set_climb_type(climb_type);
 
   winch_.SetGoal(winch_goal);
   winch_.Update(input, &output, &status_, driver_station->is_sys_active());
@@ -222,8 +223,6 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
   }
 }
-
-// TODO(Hanson) RunStateMachine() and GoToState()
 
 void Superstructure::RunStateMachine() {
   switch (state_) {
