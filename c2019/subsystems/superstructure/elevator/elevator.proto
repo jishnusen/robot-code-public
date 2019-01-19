@@ -51,4 +51,3 @@ message ElevatorGoal {
   required bool crawler_down = 5;
   required bool brake = 6;
 }
-
