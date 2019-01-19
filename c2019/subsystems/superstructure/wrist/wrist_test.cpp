@@ -69,7 +69,7 @@ TEST_F(WristFixture, NotCalibrated) {
 }
 
 TEST_F(WristFixture, Offsets) {
-  CalibrateDisabled(M_PI); // Setpoint should always be pi higher than actual
+  CalibrateDisabled(M_PI);  // Setpoint should always be pi higher than actual
   SetGoal(M_PI / 2.);
   Update(true);
   UpdateInputs();
@@ -79,7 +79,6 @@ TEST_F(WristFixture, Offsets) {
   EXPECT_NEAR(status_->wrist_angle(), M_PI / 2., 1e-2);
   EXPECT_EQ(output_->output_type(), POSITION);
 }
-
 
 }  // namespace wrist
 }  // namespace c2019
