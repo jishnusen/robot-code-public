@@ -14,6 +14,10 @@ using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 
 TEST(C2019AutonomousTest, PathDriveTransformsZeroInit) {
+  DriverStationProto ds_proto;
+  ds_proto->set_is_sys_active(true);
+  QueueManager<DriverStationProto>::Fetch()->WriteMessage(ds_proto);
+
   CommandBase auto_base;
   auto_base.SetFieldPosition(0.0, -4.0, -M_PI);
   auto_base.StartDrivePath(1.0, -3.0, -M_PI, -1);
@@ -22,7 +26,6 @@ TEST(C2019AutonomousTest, PathDriveTransformsZeroInit) {
   DrivetrainGoal goal;
   ASSERT_TRUE(QueueManager<DrivetrainGoal>::Fetch()->ReadLastMessage(&goal));
   ASSERT_TRUE(goal->has_path_goal());
-  ASSERT_FALSE(auto_base.IsAutonomous());
   EXPECT_NEAR(goal->path_goal().x(), -1.0, 1e-3);
   EXPECT_NEAR(goal->path_goal().y(), -1.0, 1e-3);
   EXPECT_NEAR(goal->path_goal().heading(), 0.0, 1e-3);
@@ -30,6 +33,10 @@ TEST(C2019AutonomousTest, PathDriveTransformsZeroInit) {
 }
 
 TEST(C2019AutonomousTest, PathDriveTransformsNonzeroInit) {
+  DriverStationProto ds_proto;
+  ds_proto->set_is_sys_active(true);
+  QueueManager<DriverStationProto>::Fetch()->WriteMessage(ds_proto);
+
   CommandBase auto_base;
   {
     DrivetrainStatus status;

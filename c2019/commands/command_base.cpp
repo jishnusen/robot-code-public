@@ -25,14 +25,15 @@ CommandBase::CommandBase()
 
 bool CommandBase::IsAutonomous() {
   DriverStationProto driver_station;
-  if (driver_station_reader_.ReadLastMessage(&driver_station)) {
-    if (driver_station->is_sys_active()) {
-      return true;
-    }
-  } else {
+  if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station status found.");
     return false;
   }
+
+  if (driver_station->is_sys_active()) {
+    return true;
+  }
+
   return false;
 }
 
@@ -54,6 +55,10 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
                                  double extra_distance_initial,
                                  double extra_distance_final,
                                  double path_voltage) {
+  if (!IsAutonomous()) {
+    return;
+  }
+
   DrivetrainGoal goal;
 
   Eigen::Vector2d goal_field = (Eigen::Vector2d() << x, y).finished();

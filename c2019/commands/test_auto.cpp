@@ -8,19 +8,25 @@ using muan::wpilib::DriverStationProto;
 bool TestAuto::IsAutonomous() {
   DriverStationProto driver_station;
   AutoGoalProto auto_goal;
-  if (driver_station_reader_.ReadLastMessage(&driver_station)) {
-    if (driver_station->is_sys_active()) {
-      if (auto_goal_reader_.ReadLastMessage(&auto_goal)) {
-        if (auto_goal->run_command() && auto_goal->command() == TEST_AUTO) {
-          return true;
-        }
-      } else {
-        LOG(WARNING, "No auto goal found.");
-      }
-    }
-  } else {
+  if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station status found.");
+    return false;
   }
+
+  if (!driver_station->is_sys_active()) {
+    LOG(WARNING, "Tried to run command while disabled.");
+    return false;
+  }
+
+  if (!auto_goal_reader_.ReadLastMessage(&auto_goal)) {
+    LOG(WARNING, "No auto goal found.");
+    return false;
+  }
+
+  if (auto_goal->run_command() && auto_goal->command() == TEST_AUTO) {
+    return true;
+  }
+
   return false;
 }
 
