@@ -31,11 +31,3 @@ cc_proto_library(
     visibility = ["//visibility:public"],
 )
 
-cc_test(
-     name = "wrist_test",
-     srcs = ["wrist_test.cpp"],
-     deps = [
-         ":wrist",
-         "//third_party/google/googletest",
-     ],
-)
