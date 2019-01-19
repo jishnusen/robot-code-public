@@ -6,9 +6,8 @@ cc_library(
     hdrs = ["wrist.h"],
     deps = [
         ":wrist_queues",
+        "//muan/utils:math_utils",
         "//muan/control/calibration:hall_calibration",
-        "//muan/utils:monitor",
-        "//muan/wpilib:wpilib_queues",
     ],
 )
 
@@ -19,7 +18,6 @@ cc_library(
     deps = [
         ":wrist_proto",
         "//muan/proto:stack_proto",
-        "//muan/queues:queue_manager",
     ],
 )
 
@@ -31,3 +29,11 @@ cc_proto_library(
     visibility = ["//visibility:public"],
 )
 
+cc_test(
+    name = "wrist_test",
+    srcs = ["wrist_test.cpp"],
+    deps = [
+        ":wrist",
+        "//third_party/google/googletest",
+    ],
+)

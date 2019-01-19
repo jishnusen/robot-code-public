@@ -4,26 +4,25 @@
 #include <cmath>
 
 #include "c2019/subsystems/superstructure/wrist/queue_types.h"
-#include "muan/queues/queue_manager.h"
 #include "muan/control/calibration/hall_calibration.h"
-#include "muan/units/units.h"
-#include "muan/utils/monitor.h"
-#include "muan/wpilib/queue_types.h"
 
 namespace c2019 {
 namespace wrist {
 
 // Angle constants
 static constexpr double kMinAngle = 0;
-static constexpr double kStowAngle = M_PI / 3;  // TODO(Apurva) find value for this
+static constexpr double kStowAngle =
+    M_PI / 3;  // TODO(Apurva) find value for this
 static constexpr double kMaxAngle = M_PI;
 
 // Hall Calibration constants
 static constexpr double kCalibVoltage = 0;
-static constexpr double kHallEffectAngle = M_PI / 6;  // TODO(Apurva) find value for this
+static constexpr double kHallEffectAngle =
+    M_PI / 6;  // TODO(Apurva) find value for this
 
 // Manual voltage control constants
-static constexpr double kHoldingVoltage = 5;  // TODO(Apurva) find value for this
+static constexpr double kHoldingVoltage =
+    5;  // TODO(Apurva) find value for this
 static constexpr double kMaxVoltage = 12;
 
 constexpr double kFF = 2.;  // TODO(alex) double check values
@@ -49,9 +48,12 @@ class Wrist {
     return hall_calibration_.is_calibrated();
   }
 
+  inline double offset() const {
+    return hall_calibration_.offset();
+  }
+
  private:
   double goal_;
-  bool calibrated_;
 
   muan::control::HallCalibration hall_calibration_{kHallEffectAngle};
 };
