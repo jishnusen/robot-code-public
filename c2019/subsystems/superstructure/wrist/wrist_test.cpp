@@ -2,20 +2,15 @@
 #include "gtest/gtest.h"
 
 namespace c2019 {
-namespace subsystems {
 namespace wrist {
 
 class WristTest : public ::testing::Test {
  public:
   void Update() {
-    wrist_input_proto_->set_intake_proxy(has_cube_);
     wrist_input_proto_->set_wrist_voltage(voltage_);
     if (wrist_output_proto_->wrist_output_type() == POSITION) {
       wrist_input_proto_->set_wrist_encoder(wrist_output_proto_->wrist_setpoint() +
                                         offset_);
-      wrist_input_proto_->set_wrist_velocity(
-          (wrist_output_proto_->wrist_setpoint() - prev_position_) / 0.01);
-      prev_position_ = wrist_input_proto_->wrist_encoder();
     }
     wrist_input_proto_->set_wrist_hall(
         std::abs(wrist_status_proto_->wrist_angle()) < 2e-2);
@@ -31,52 +26,7 @@ class WristTest : public ::testing::Test {
 
   void CheckGoal() {
     EXPECT_NEAR(wrist_status_proto_->wrist_angle(),
-                wrist_status_proto_->wrist_profiled_goal(), 1e-9);
-    EXPECT_NEAR(wrist_status_proto_->wrist_angle(),
-                wrist_status_proto_->wrist_unprofiled_goal(), 1e-9);
-    switch (intake_goal_) {
-      case INTAKE_NONE:
-        EXPECT_TRUE(wrist_output_proto_->intake_close());
-        EXPECT_FALSE(wrist_output_proto_->intake_open());
-        if (wrist_status_proto_->has_cube()) {
-          EXPECT_NEAR(wrist_output_proto_->intake_voltage(), kHoldingVoltage,
-                      1e-9);
-        } else {
-          EXPECT_NEAR(wrist_output_proto_->intake_voltage(), 0., 1e-9);
-        }
-        break;
-      case INTAKE:
-        EXPECT_NEAR(wrist_output_proto_->intake_voltage(), kIntakeVoltage, 1e-9);
-        break;
-      case INTAKE_OPEN:
-        EXPECT_TRUE(wrist_output_proto_->intake_open());
-        EXPECT_FALSE(wrist_output_proto_->intake_close());
-        EXPECT_NEAR(wrist_output_proto_->intake_voltage(), kIntakeVoltage, 1e-9);
-        break;
-      case INTAKE_CLOSE:
-      case SETTLE:
-        EXPECT_TRUE(wrist_output_proto_->intake_close());
-        EXPECT_FALSE(wrist_output_proto_->intake_open());
-        EXPECT_NEAR(wrist_output_proto_->intake_voltage(), kIntakeVoltage, 1e-9);
-        break;
-      case OUTTAKE_SLOW:
-        EXPECT_FALSE(wrist_output_proto_->intake_open());
-        EXPECT_TRUE(wrist_output_proto_->intake_close());
-        EXPECT_NEAR(wrist_output_proto_->intake_voltage(), kSlowOuttakeVoltage,
-                    1e-9);
-        break;
-      case OUTTAKE_FAST:
-        EXPECT_FALSE(wrist_output_proto_->intake_open());
-        EXPECT_TRUE(wrist_output_proto_->intake_close());
-        EXPECT_NEAR(wrist_output_proto_->intake_voltage(), kFastOuttakeVoltage,
-                    1e-9);
-        break;
-      case DROP:
-        EXPECT_TRUE(wrist_output_proto_->intake_open());
-        EXPECT_FALSE(wrist_output_proto_->intake_close());
-        EXPECT_NEAR(wrist_output_proto_->intake_voltage(), 0., 1e-9);
-        break;
-    }
+                wrist_status_proto_->wrist_goal(), 1e-9);
   }
 
   void WriteMessages() {
@@ -99,11 +49,6 @@ class WristTest : public ::testing::Test {
     CheckGoal();
   }
 
-  void SetGoal(double goal, IntakeMode intake_goal = INTAKE_NONE) {
-    intake_goal_ = intake_goal;
-    wrist_goal_proto_->set_wrist_angle(goal);
-    wrist_goal_proto_->set_intake_mode(intake_goal);
-  }
 
   void SetInput(double position, bool hall) {
     wrist_input_proto_->set_wrist_encoder(position);
@@ -130,7 +75,8 @@ class WristTest : public ::testing::Test {
   muan::wpilib::DriverStationProto ds_proto_;
 
   bool outputs_enabled_;
-  bool has_cube_ = false;
+  bool has_cargo_ = false;
+  bool has_panel_ = false;
   double voltage_ = kEncoderFaultMinVoltage - 0.1;
 
  protected:
@@ -152,8 +98,9 @@ class WristTest : public ::testing::Test {
   double offset_;
 
   bool calibrate_test_;
-  IntakeMode intake_goal_;
 };
+
+/****************************************************************************/
 
 TEST_F(WristTest, NotEnabled) {
   SetGoal(1);
@@ -209,46 +156,5 @@ TEST_F(WristTest, Cap) {
   CheckGoal();
 }
 
-TEST_F(WristTest, IntakeModes) {
-  wrist_input_proto_->set_wrist_encoder(0);
-  wrist_input_proto_->set_wrist_hall(false);
-  outputs_enabled_ = true;
-  SetGoal(0.0, INTAKE);
-  Update();
-  CheckGoal();
-
-  SetGoal(0.0, INTAKE_OPEN);
-  Update();
-  CheckGoal();
-
-  SetGoal(0.0, INTAKE_CLOSE);
-  Update();
-  CheckGoal();
-
-  SetGoal(0.0, SETTLE);
-  Update();
-  CheckGoal();
-
-  SetGoal(0.0, OUTTAKE_SLOW);
-  Update();
-  CheckGoal();
-
-  SetGoal(0.0, OUTTAKE_FAST);
-  Update();
-  CheckGoal();
-
-  SetGoal(0.0, DROP);
-  Update();
-  CheckGoal();
-
-  SetGoal(0.0, INTAKE_NONE);
-  has_cube_ = true;
-
-  RunFor(600);
-  EXPECT_TRUE(wrist_status_proto_->has_cube());
-  CheckGoal();
-}
-
 }  // namespace wrist
-}  // namespace subsystems
 }  // namespace c2019
