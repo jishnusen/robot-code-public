@@ -1,14 +1,14 @@
 #ifndef C2019_SUBSYSTEMS_SUPERSTRUCTURE_WRIST_WRIST_H_
 #define C2019_SUBSYSTEMS_SUPERSTRUCTURE_WRIST_WRIST_H_
 
+#include <cmath>
+
 #include "c2019/subsystems/superstructure/wrist/queue_types.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/control/calibration/hall_calibration.h"
 #include "muan/units/units.h"
 #include "muan/utils/monitor.h"
 #include "muan/wpilib/queue_types.h"
-
-#include <cmath>
 
 namespace c2019 {
 namespace wrist {
@@ -26,7 +26,7 @@ static constexpr double kHallEffectAngle = M_PI / 6;  // TODO(Apurva) find value
 static constexpr double kHoldingVoltage = 5;  // TODO(Apurva) find value for this
 static constexpr double kMaxVoltage = 12;
 
-constexpr double kFF = 2.; // TODO double check values
+constexpr double kFF = 2.;  // TODO(alex) double check values
 constexpr double kFFHatch = 0.5;
 constexpr double kFFCargo = 0.3;
 
@@ -54,7 +54,6 @@ class Wrist {
   bool calibrated_;
 
   muan::control::HallCalibration hall_calibration_{kHallEffectAngle};
-
 };
 
 }  // namespace wrist

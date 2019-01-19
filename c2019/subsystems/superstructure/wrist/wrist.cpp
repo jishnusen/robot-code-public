@@ -11,10 +11,10 @@ void Wrist::SetGoal(const WristGoalProto& goal) {
 
 double Wrist::CalculateFeedForwards(bool has_cargo, bool has_panel, double angle) {
   double ff = kFF;
-  if (has_cargo) {  // TODO (Eithne) do this correctly
+  if (has_cargo) {  // TODO(Eithne) do this correctly
     ff += kFFCargo;
   }
-  if (has_panel) {  // TODO (Eithne) do this correctly
+  if (has_panel) {  // TODO(Eithne) do this correctly
     ff += kFFHatch;
   }
 
