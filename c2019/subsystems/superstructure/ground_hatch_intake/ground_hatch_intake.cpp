@@ -21,12 +21,13 @@ void GroundHatchIntake::Update(const GroundHatchIntakeInputProto& input,
         snap_down = true;
         if (input->current() > kCurrentThreshold) {
           current_state_ = PICKING_UP;
+          counter_ = 0;
         }
         break;
       case PICKING_UP:
         voltage = kIntakeVoltage;
         snap_down = true;
-        counter_++;
+        counter_ += 1;
         if (counter_ > kPickupTicks) {
           current_state_ = CARRYING;
           counter_ = 0;
@@ -39,9 +40,20 @@ void GroundHatchIntake::Update(const GroundHatchIntakeInputProto& input,
       case OUTTAKING:
         voltage = kOuttakeVoltage;
         snap_down = false;
+        counter_ += 1;
+        if (counter_ > kOuttakeTicks) {
+          current_state_ = IDLE;
+          counter_ = 0;
+        }
         break;
     }
   }
+
+  std::cout << "current state: " << current_state_ << std::endl;
+  std::cout << "counter: " << counter_ << std::endl;
+  std::cout << "ground hatch input: " << input->current() << std::endl;
+  std::cout << "carrying ground hatch: " << (current_state_ == CARRYING)
+            << std::endl;
 
   (*output)->set_roller_voltage(voltage);
   (*output)->set_snap_down(snap_down);
@@ -50,6 +62,7 @@ void GroundHatchIntake::Update(const GroundHatchIntakeInputProto& input,
 }
 
 void GroundHatchIntake::SetGoal(GroundHatchIntakeGoalProto goal) {
+  std::cout << "Goal: " << goal->goal() << std::endl;
   switch (goal->goal()) {
     case NONE:
       break;

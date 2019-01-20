@@ -11,6 +11,7 @@ constexpr double kOuttakeVoltage = -4.0;
 constexpr double kHoldingVoltage = 2.0;
 constexpr double kCurrentThreshold = 10;
 constexpr double kPickupTicks = 30;  // .3 seconds
+constexpr double kOuttakeTicks = 50;
 
 class GroundHatchIntake {
  public:

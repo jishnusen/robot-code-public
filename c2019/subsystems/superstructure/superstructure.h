@@ -38,6 +38,7 @@ constexpr double kCargoRocketSecondHeight = 0;
 constexpr double kCargoRocketThirdHeight = 0;
 constexpr double kCargoGroundHeight = 0;
 constexpr double kHandoffHeight = 0;
+constexpr double kSpitHeight = 0;
 constexpr double kStowHeight = 0;
 constexpr double kClimbHeight = 0;
 constexpr double kElevatorSafeHeight = 0;

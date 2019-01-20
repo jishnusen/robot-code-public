@@ -24,6 +24,7 @@ enum IntakeGoal {
   OUTTAKE_GROUND_HATCH = 5;
   OUTTAKE_CARGO = 6;
   POP = 7;
+  SPIT = 8;
 }
 
 enum ScoreGoal {
@@ -49,18 +50,12 @@ enum ScoreGoal {
   BRAKE = 20;
 }
 
-enum WristState {
-  IDLE = 0;
-  WRIST_CALIBRATING = 1;
-  MOVING = 2;
-  AT_GOAL = 3;
-}
-
 enum GroundHatchIntakeState {
   GROUND_HATCH_IDLE = 0;
   GROUND_HATCH_INTAKING = 1;
-  GROUND_HATCH_HOLDING = 2;
-  GROUND_HATCH_OUTTAKING = 3;
+  GROUND_HATCH_PICKING_UP = 2;
+  GROUND_HATCH_CARRYING = 3;
+  GROUND_HATCH_OUTTAKING = 4;
 }
 
 enum HatchIntakeState {
@@ -94,11 +89,10 @@ message SuperstructureStatus {
   required double wrist_angle = 10;
   required bool wrist_is_calibrated = 11;
   required double wrist_voltage = 12;
-  required WristState wrist_state = 13;
-  required double wrist_goal = 14;
-  required bool wrist_encoder_fault = 15;
-  required double wrist_velocity = 16;
-  required GroundHatchIntakeState ground_hatch_intake_state = 17;
+  required double wrist_goal = 13;
+  required bool wrist_encoder_fault = 14;
+  required double wrist_velocity = 15;
+  required GroundHatchIntakeState ground_hatch_intake_state = 16;
   required bool has_ground_hatch = 18;
   required HatchIntakeState hatch_intake_state = 19;
   required bool has_hp_hatch = 20;
@@ -111,13 +105,12 @@ message SuperstructureStatus {
 
 message SuperstructureInput {
   required bool hatch_intake_proxy = 1;
-  required bool hatch_holding_proxy = 2;
-  required bool cargo_proxy = 3;
-  required double hatch_ground_current = 4;
-  required double elevator_encoder = 5;
-  required double wrist_encoder = 6;
-  required bool elevator_zeroed = 7;
-  required bool wrist_hall = 8;
+  required bool cargo_proxy = 2;
+  required double hatch_ground_current = 3;
+  required double elevator_encoder = 4;
+  required double wrist_encoder = 5;
+  required bool elevator_zeroed = 6;
+  required bool wrist_hall = 7;
 }
 
 message SuperstructureGoal {

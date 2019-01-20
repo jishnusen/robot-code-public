@@ -26,6 +26,10 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
   bool backplate, flutes;
 
   switch (state_) {
+    case IDLE:
+      flutes = false;
+      backplate = false;
+      break;
     case INTAKING:
       flutes = true;
       backplate = false;
@@ -41,6 +45,11 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
     case OUTTAKING:
       flutes = false;
       backplate = true;
+      if (!input->hatch_proxy()) {
+        flutes = false;
+        backplate = false;
+        state_ = (IDLE);
+      }
       break;
   }
   if (outputs_enabled) {
