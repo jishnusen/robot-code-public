@@ -36,7 +36,6 @@ class SuperstructureTest : public ::testing::Test {
   bool outputs_enabled_;
 
   void UpdateInput() {
-    superstructure_input_queue_->WriteMessage(superstructure_input_proto_);
   }
 
   void CalibrateDisabled() {
@@ -45,8 +44,7 @@ class SuperstructureTest : public ::testing::Test {
     superstructure_input_proto_->set_elevator_zeroed(true);
     // TODO(Hanson) make this work
     for (int i = 0; i < 2500; i++) {
-      superstructure_input_proto_->set_wrist_encoder(i * 5e-4);
-      SetInput(0, true, i * 5e-4);
+      SetInput(0, true, i * (M_PI / 2500.));
       Update();
     }
 
@@ -176,9 +174,9 @@ class SuperstructureTest : public ::testing::Test {
 
 TEST_F(SuperstructureTest, CalibrateDisabled) { CalibrateDisabled(); }
 
-/*TEST_F(SuperstructureTest, Disabled) {
+TEST_F(SuperstructureTest, Disabled) {
   SetGoal(ScoreGoal::HATCH_ROCKET_THIRD, IntakeGoal::INTAKE_NONE, false);
-  SetInput(0, false, 0, false);
+  SetInput(0, false, 0);
 
   Update();
 
@@ -190,18 +188,7 @@ TEST_F(SuperstructureTest, CalibrateDisabled) { CalibrateDisabled(); }
   EXPECT_EQ(superstructure_output_proto_->winch_voltage(), 0);
   EXPECT_EQ(superstructure_output_proto_->drop_forks(), false);
 }
-*/
-// TODO(Hanson) is this test even necessary
-/*TEST_F(SuperstructureTest, DisabledCalibrates) {
-  CalibrateDisabled();
-  RunFor(100);
 
-  EXPECT_NEAR(score_subsystem_status_proto_->wrist_angle(), wrist_plant_.x(0),
-              1e-2);
-  EXPECT_NEAR(score_subsystem_status_proto_->elevator_height(),
-              elevator_plant_.x(0), 1e-2);
-}*/
-/*
 TEST_F(SuperstructureTest, ScoreGoals) {
   CalibrateDisabled();
 
@@ -295,9 +282,9 @@ TEST_F(SuperstructureTest, ScoreGoals) {
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
   CheckGoal(kStowHeight, kStowAngle);
-} */
+} 
 
-/*TEST_F(SuperstructureTest, TTF) {
+TEST_F(SuperstructureTest, TTF) {
   SetIntakeInputs(false, false, false);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
   RunFor(1);
@@ -314,63 +301,19 @@ TEST_F(SuperstructureTest, ScoreGoals) {
 
   SetIntakeInputs(true, true, false);
   RunFor(50);
-  CheckIntake(true, true, false, true, true, false);
+  CheckIntake(false, true, false, true, true, false);
 
   SetGoal(ScoreGoal::HANDOFF, IntakeGoal::SPIT, true);
   RunFor(55);
 
+  EXPECT_EQ(superstructure_status_proto_->state(), HANDING_OFF);
   SetIntakeInputs(false, true, false);
 
   CheckIntake(false, true, false, true, true, false);
-}*/
-/*
-TEST_F(SuperstructureTest, spitout) {
-  SetIntakeInputs(false, false, false);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
-  RunFor(1);
-  SetIntakeInputs(true, false, false);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(50);
-  CheckIntake(true, false, false, false, false, false);
-
-  SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_GROUND_HATCH, true);
-  RunFor(1);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(50);
-  CheckIntake(false, false, false, false, false, true);
 }
 
-TEST_F(SuperstructureTest, Handoff) {
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
-  RunFor(1);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  CheckIntake(false, false, false, false, false, true);  // should snap down
-
-  SetIntakeInputs(true, false, false);  // set ground hatch current to 5million
-  RunFor(50);
-  CheckIntake(true, false, false, false, false, false);  // has ground hatch
-
-  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::POP, true);
-  RunFor(1);
-  CheckGoal(kHandoffHeight, kHandoffAngle);
-
-  SetIntakeInputs(true, true, false);  // arrow stabbed the hatch
-
-  CheckIntake(true, true, false, false, false, false);
-  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::SPIT, true);
-  RunFor(1);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(50);
-
-  EXPECT_EQ(superstructure_status_proto_->state(), HANDING_OFF);
-
-  SetIntakeInputs(false, true, false);  // ground intake spits out
-  RunFor(50);
-
-  CheckIntake(false, true, false, true, true, false);
-}*/
-
-/*TEST_F(SuperstructureTest, IntakeGoals) {
+/*
+TEST_F(SuperstructureTest, IntakeGoals) {
   CalibrateDisabled();
 
   // INTAKE_HATCH
@@ -461,7 +404,8 @@ TEST_F(SuperstructureTest, Handoff) {
 
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, true, false, false, false, false);
-}*/
+}
+*/
 
 }  // namespace superstructure
 }  // namespace c2019

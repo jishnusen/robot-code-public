@@ -52,18 +52,13 @@ wrist::WristGoalProto Superstructure::PopulateWristGoal() {
 ground_hatch_intake::GroundHatchIntakeGoalProto
 Superstructure::PopulateGroundHatchIntakeGoal() {
   ground_hatch_intake::GroundHatchIntakeGoalProto goal;
-  std::cout << intake_goal_ << std::endl;
   if (intake_goal_ == INTAKE_GROUND_HATCH) {
-    std::cout << "WHTAT" << std::endl;
     goal->set_goal(ground_hatch_intake::REQUEST_HATCH);
   } else if (intake_goal_ == OUTTAKE_GROUND_HATCH || intake_goal_ == SPIT) {
-    std::cout << "uosduipsa" << std::endl;
     goal->set_goal(ground_hatch_intake::EJECT);
   } else if (intake_goal_ == POP) {
-    std::cout << "YO" << std::endl;
     goal->set_goal(ground_hatch_intake::RISE);
   } else {
-    std::cout << "NONE" << std::endl;
     goal->set_goal(ground_hatch_intake::NONE);
   }
   return goal;
@@ -112,21 +107,21 @@ winch::WinchGoalProto Superstructure::PopulateWinchGoal() {
   return goal;
 }
 
-cargo_intake::CargoIntakeInputProto cargo_intake_input;
-elevator::ElevatorInputProto elevator_input;
-ground_hatch_intake::GroundHatchIntakeInputProto ground_hatch_intake_input;
-hatch_intake::HatchIntakeInputProto hatch_intake_input;
-wrist::WristInputProto wrist_input;
-winch::WinchInputProto winch_input;
-
-cargo_intake::CargoIntakeOutputProto cargo_intake_output;
-elevator::ElevatorOutputProto elevator_output;
-ground_hatch_intake::GroundHatchIntakeOutputProto ground_hatch_intake_output;
-hatch_intake::HatchIntakeOutputProto hatch_intake_output;
-wrist::WristOutputProto wrist_output;
-winch::WinchOutputProto winch_output;
-
 void Superstructure::Update() {
+  cargo_intake::CargoIntakeInputProto cargo_intake_input;
+  elevator::ElevatorInputProto elevator_input;
+  ground_hatch_intake::GroundHatchIntakeInputProto ground_hatch_intake_input;
+  hatch_intake::HatchIntakeInputProto hatch_intake_input;
+  wrist::WristInputProto wrist_input;
+  winch::WinchInputProto winch_input;
+
+  cargo_intake::CargoIntakeOutputProto cargo_intake_output;
+  elevator::ElevatorOutputProto elevator_output;
+  ground_hatch_intake::GroundHatchIntakeOutputProto ground_hatch_intake_output;
+  hatch_intake::HatchIntakeOutputProto hatch_intake_output;
+  wrist::WristOutputProto wrist_output;
+  winch::WinchOutputProto winch_output;
+
   SuperstructureGoalProto goal;
   SuperstructureInputProto input;
   SuperstructureOutputProto output;
@@ -206,6 +201,8 @@ void Superstructure::Update() {
   status_->set_climb_type(static_cast<ClimbType>(winch_status_->climb_type()));
   status_->set_climb(winch_status_->climb());
   status_->set_winch_current(winch_status_->winch_current());
+  status_->set_elevator_is_calibrated(elevator_status_->is_calibrated());
+  status_->set_wrist_is_calibrated(wrist_status_->is_calibrated());
 
   output->set_arrow_solenoid(hatch_intake_output->flute_solenoid());
   output->set_backplate_solenoid(hatch_intake_output->backplate_solenoid());
@@ -335,7 +332,6 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
-      std::cout << "settomg gpt imtake none" << std::endl;
       intake_goal_ = INTAKE_NONE;
       break;
     case INTAKE_HATCH:
@@ -388,14 +384,11 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case SPIT:
       elevator_height_ = kSpitHeight;
       GoToState(HANDING_OFF, goal->intake_goal());
-      std::cout << goal->intake_goal() << std::endl;
       break;
   }
 }
 
 void Superstructure::RunStateMachine() {
-  std::cout << "State: " << state_ << std::endl;
-
   switch (state_) {
     case CALIBRATING:
       elevator_height_ = elevator_status_->elevator_height();
@@ -406,7 +399,6 @@ void Superstructure::RunStateMachine() {
       break;
     case INTAKING_GROUND_HATCH:
       if (ground_hatch_intake_status_->has_hatch()) {
-        std::cout << "case intaking ground hatch" << std::endl;
         GoToState(HOLDING);
       }
       break;
@@ -464,7 +456,6 @@ void Superstructure::GoToState(SuperstructureState desired_state,
             intake == IntakeGoal::OUTTAKE_CARGO || intake == IntakeGoal::POP ||
             intake == IntakeGoal::SPIT) {
           intake_goal_ = intake;
-          std::cout << "Intake Goal: " << intake_goal_ << std::endl;
         } else {
           LOG(ERROR,
               "Tried to go to invalid state/intake_goal combination %d, %d",

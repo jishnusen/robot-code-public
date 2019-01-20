@@ -49,12 +49,6 @@ void GroundHatchIntake::Update(const GroundHatchIntakeInputProto& input,
     }
   }
 
-  std::cout << "current state: " << current_state_ << std::endl;
-  std::cout << "counter: " << counter_ << std::endl;
-  std::cout << "ground hatch input: " << input->current() << std::endl;
-  std::cout << "carrying ground hatch: " << (current_state_ == CARRYING)
-            << std::endl;
-
   (*output)->set_roller_voltage(voltage);
   (*output)->set_snap_down(snap_down);
   (*status)->set_state(current_state_);
@@ -62,7 +56,6 @@ void GroundHatchIntake::Update(const GroundHatchIntakeInputProto& input,
 }
 
 void GroundHatchIntake::SetGoal(GroundHatchIntakeGoalProto goal) {
-  std::cout << "Goal: " << goal->goal() << std::endl;
   switch (goal->goal()) {
     case NONE:
       break;
