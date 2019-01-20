@@ -43,6 +43,8 @@ enum ScoreGoal {
   HATCH_SHIP_BACKWARDS = 13;
   HANDOFF = 14;
   STOW = 15;
+  CLIMB = 16;
+  CRAWL = 17;
 }
 
 enum WristState {
@@ -121,6 +123,7 @@ message SuperstructureGoal {
   required IntakeGoal intake_goal = 3;
   required double elevator_god_mode_goal = 4;
   required double wrist_god_mode_goal = 5;
+  required bool elevator_brake = 6;
 }
 
 enum TalonOutput {

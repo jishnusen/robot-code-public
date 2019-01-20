@@ -39,6 +39,7 @@ constexpr double kCargoRocketThirdHeight = 0;
 constexpr double kCargoGroundHeight = 0;
 constexpr double kHandoffHeight = 0;
 constexpr double kStowHeight = 0;
+constexpr double kClimbHeight = 0;
 constexpr double kElevatorSafeHeight = 0;
 constexpr double kElevatorMinHeight = 0;
 constexpr double kElevatorMaxHeight = 0;
@@ -56,6 +57,7 @@ constexpr double kCargoShipBackwardsAngle = 0;
 constexpr double kCargoGroundAngle = 0;
 constexpr double kHandoffAngle = 0;
 constexpr double kStowAngle = 0;
+constexpr double kClimbAngle = 0;
 constexpr double kWristSafeAngle = 0;
 constexpr double kWristMinAngle = 0;
 constexpr double kWristMaxAngle = 0;
@@ -73,6 +75,13 @@ class Superstructure {
                  IntakeGoal intake = IntakeGoal::INTAKE_NONE);
   void RunStateMachine();
   void BoundGoal(double* elevator_goal, double* wrist_goal);
+
+  ElevatorGoalProto PopulateElevatorGoal();
+  WristGoalProto PopulateWristGoal();
+  GroundHatchIntakeGoalProto PopulateGroundHatchIntakeGoal();
+  HatchIntakeGoalProto PopulateHatchIntakeGoal();
+  CargoIntakeGoalProto PopulateCargoIntakeGoal();
+  WinchGoalProto PopulateWinchGoal();
 
   c2019::cargo_intake::CargoIntake cargo_intake_;
   c2019::elevator::Elevator elevator_;
@@ -98,6 +107,9 @@ class Superstructure {
   muan::wpilib::DriverStationQueue::QueueReader ds_status_reader_;
 
   double elevator_height_;
+  bool crawling_ = false;
+  bool high_gear_ = true;
+  bool crawler_down_ = false;
   double wrist_angle_;
 
   bool should_climb_ = false;

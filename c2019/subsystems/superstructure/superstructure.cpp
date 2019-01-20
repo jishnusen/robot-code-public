@@ -33,6 +33,34 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
   }
 }
 
+ElevatorGoalProto Superstructure::PopulateElevatorGoal() {
+  ElevatorGoalProto goal;
+  goal->set_height(elevator_height_);
+  goal->set_crawling(crawling_) goal->set_high_gear(high_gear_);
+  goal->set_crawler_down(crawler_down_);
+  return goal;
+}
+
+WristGoalProto Superstructure::PopulateWristGoal() {
+  WristGoalProto goal;
+  goal->set_angle(wrist_angle_);
+  return goal;
+}
+
+cargo_intake::CargoIntakeInputProto cargo_intake_input_;
+elevator::ElevatorInputProto elevator_input_;
+ground_hatch_intake::GroundHatchIntakeInputProto ground_hatch_intake_input_;
+hatch_intake::HatchIntakeInputProto hatch_intake_input_;
+wrist::WristInputProto wrist_input_;
+winch::WinchInputProto winch_input_;
+
+cargo_intake::CargoIntakeOutputProto cargo_intake_output_;
+elevator::ElevatorOutputProto elevator_output_;
+ground_hatch_intake::GroundHatchIntakeOutputProto ground_hatch_intake_output_;
+hatch_intake::HatchIntakeOutputProto hatch_intake_output_;
+wrist::WristOutputProto wrist_output_;
+winch::WinchOutputProto winch_output_;
+
 void Superstructure::Update() {
   SuperstructureGoalProto goal;
   SuperstructureInputProto input;
@@ -56,23 +84,27 @@ void Superstructure::Update() {
     RunStateMachine();
   }
 
-  // These are the goals before they get safety-ized
-  double constrained_elevator_height = elevator_height_;
-  double constrained_wrist_angle = wrist_angle_;
-
   // Now we make them safe so stuff doesn't break
-  BoundGoal(&constrained_elevator_height, &constrained_wrist_angle);
+  BoundGoal(&elevator_height, &wrist_angle);
+
+  auto elevator_goal = PopulateElevatorGoal();
+  elevator_goal->set_brake(superstructure_goal->elevator_brake());
+
+  auto wrist_goal = PopulateWristGoal();
 
   // Then we tell the controller to do it
-  elevator_.SetGoal(constrained_elevator_height);
-  elevator_.Update(input, &output, &status_, driver_station->is_sys_active());
+  elevator_.SetGoal(elevator_goal);
+  elevator_.Update(elevator_input, &elevator_output, &elevator_status_,
+                   driver_station->is_sys_active());
 
-  wrist_.SetGoal(constrained_wrist_angle);
-  wrist_.Update(input, &output, &status_, driver_station->is_sys_active());
+  wrist_.SetGoal(wrist_goal);
+  wrist_.Update(wrist_input, &wrist_output, &status_,
+                driver_station->is_sys_active());
 
   ground_hatch_intake_.SetGoal(intake_goal_);
-  ground_hatch_intake_.Update(input, &output, &status_,
-                              driver_station->is_sys_active());
+  ground_hatch_intake_.Update(
+      ground_hatch_intake_input, &ground_hatch_intake_output,
+      &ground_hatch_intake_status_, driver_station->is_sys_active());
 
   hatch_intake_.SetGoal(intake_goal_);
   hatch_intake_.Update(input, &output, &status_,
@@ -110,6 +142,10 @@ void Superstructure::Update() {
 void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   // These set the member variable goals before they are constrained
   // They are set based on the score goal enumerator
+  crawling_ = false;
+  high_gear_ = false;
+  crawler_down_ = false;
+  brake_ = false;
   switch (goal->score_goal()) {
     case NONE:
       break;
@@ -168,6 +204,17 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case STOW:
       elevator_height_ = kStowHeight;
       wrist_angle_ = kStowAngle;
+      break;
+    case CLIMB:
+      elevator_height_ = kClimbHeight;
+      wrist_angle_ = kClimbAngle;
+      high_gear_ = false;
+      crawler_down_ = true;
+      break;
+    case CRAWL:
+      crawling_ = true;
+      high_gear_ = false;
+      crawler_down_ = true;
       break;
   }
 

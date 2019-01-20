@@ -382,5 +382,4 @@ TEST_F(SuperstructureTest, IntakeGoals) {
 }
 
 }  // namespace superstructure
-
 }  // namespace c2019

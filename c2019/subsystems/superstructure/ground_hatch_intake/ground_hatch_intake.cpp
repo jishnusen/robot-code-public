@@ -3,10 +3,10 @@
 namespace c2019 {
 namespace ground_hatch_intake {
 
-void GroundHatchIntake::Update(bool outputs_enabled,
-                               const GroundHatchIntakeInputProto& input,
+void GroundHatchIntake::Update(const GroundHatchIntakeInputProto& input,
                                GroundHatchIntakeOutputProto* output,
-                               GroundHatchIntakeStatusProto* status) {
+                               GroundHatchIntakeStatusProto* status,
+                               bool outputs_enabled) {
   double voltage = 0;
   bool snap_down = false;
 
