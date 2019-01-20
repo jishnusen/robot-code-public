@@ -22,9 +22,8 @@ enum IntakeGoal {
   INTAKE_CARGO = 3;
   OUTTAKE_HATCH = 4;
   OUTTAKE_GROUND_HATCH = 5;
-  OUTTAKE_CARGO_SLOW = 6;
-  OUTTAKE_CARGO_FAST = 7;
-  POP = 8;
+  OUTTAKE_CARGO = 6;
+  POP = 7;
 }
 
 enum ScoreGoal {
@@ -44,7 +43,10 @@ enum ScoreGoal {
   HANDOFF = 14;
   STOW = 15;
   CLIMB = 16;
-  CRAWL = 17;
+  BUDDY_CLIMB = 17;
+  CRAWL = 18;
+  CRAWL_BRAKED = 19;
+  BRAKE = 20;
 }
 
 enum WristState {
@@ -93,17 +95,18 @@ message SuperstructureStatus {
   required bool wrist_is_calibrated = 11;
   required double wrist_voltage = 12;
   required WristState wrist_state = 13;
-  required bool wrist_encoder_fault = 14;
-  required double wrist_velocity = 15;
-  required GroundHatchIntakeState ground_hatch_intake_state = 16;
-  required bool has_ground_hatch = 17;
-  required HatchIntakeState hatch_intake_state = 18;
-  required bool has_hp_hatch = 19;
-  required CargoIntakeState cargo_intake_state = 20;
-  required bool has_cargo = 21;
-  required ClimbType climb_type = 22;
-  required bool climb = 23;
-  required double winch_current = 24;
+  required double wrist_goal = 14;
+  required bool wrist_encoder_fault = 15;
+  required double wrist_velocity = 16;
+  required GroundHatchIntakeState ground_hatch_intake_state = 17;
+  required bool has_ground_hatch = 18;
+  required HatchIntakeState hatch_intake_state = 19;
+  required bool has_hp_hatch = 20;
+  required CargoIntakeState cargo_intake_state = 21;
+  required bool has_cargo = 22;
+  required ClimbType climb_type = 23;
+  required bool climb = 24;
+  required double winch_current = 25;
 }
 
 message SuperstructureInput {

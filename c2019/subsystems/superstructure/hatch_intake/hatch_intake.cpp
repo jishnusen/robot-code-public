@@ -20,9 +20,9 @@ void HatchIntake::SetGoal(const HatchIntakeGoalProto& goal) {
   }
 }
 
-void HatchIntake::Update(bool outputs_enabled, const HatchIntakeInputProto& input,
-                         HatchIntakeStatusProto* status,
-                         HatchIntakeOutputProto* output) {
+void HatchIntake::Update(const HatchIntakeInputProto& input,
+                         HatchIntakeOutputProto* output,
+                         HatchIntakeStatusProto* status, bool outputs_enabled) {
   bool backplate, flutes;
 
   switch (state_) {

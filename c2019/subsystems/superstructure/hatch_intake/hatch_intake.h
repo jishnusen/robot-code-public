@@ -11,8 +11,9 @@ namespace hatch_intake {
 class HatchIntake {
  public:
   void SetGoal(const HatchIntakeGoalProto& goal);
-  void Update(bool outputs_enabled, const HatchIntakeInputProto& input,
-              HatchIntakeStatusProto* status, HatchIntakeOutputProto* output);
+  void Update(const HatchIntakeInputProto& input,
+              HatchIntakeOutputProto* output, HatchIntakeStatusProto* status,
+              bool outputs_enabled);
 
  private:
   State state_;

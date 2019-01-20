@@ -14,9 +14,9 @@ constexpr double kPickupTicks = 30;  // .3 seconds
 
 class GroundHatchIntake {
  public:
-  void Update(bool outputs_enabled, const GroundHatchIntakeInputProto& input,
+  void Update(const GroundHatchIntakeInputProto& input,
               GroundHatchIntakeOutputProto* output,
-              GroundHatchIntakeStatusProto* status);
+              GroundHatchIntakeStatusProto* status, bool outputs_enabled);
   void SetGoal(GroundHatchIntakeGoalProto goal);
 
  private:

@@ -76,12 +76,13 @@ class Superstructure {
   void RunStateMachine();
   void BoundGoal(double* elevator_goal, double* wrist_goal);
 
-  ElevatorGoalProto PopulateElevatorGoal();
-  WristGoalProto PopulateWristGoal();
-  GroundHatchIntakeGoalProto PopulateGroundHatchIntakeGoal();
-  HatchIntakeGoalProto PopulateHatchIntakeGoal();
-  CargoIntakeGoalProto PopulateCargoIntakeGoal();
-  WinchGoalProto PopulateWinchGoal();
+  elevator::ElevatorGoalProto PopulateElevatorGoal();
+  wrist::WristGoalProto PopulateWristGoal();
+  ground_hatch_intake::GroundHatchIntakeGoalProto
+  PopulateGroundHatchIntakeGoal();
+  hatch_intake::HatchIntakeGoalProto PopulateHatchIntakeGoal();
+  cargo_intake::CargoIntakeGoalProto PopulateCargoIntakeGoal();
+  winch::WinchGoalProto PopulateWinchGoal();
 
   c2019::cargo_intake::CargoIntake cargo_intake_;
   c2019::elevator::Elevator elevator_;
@@ -107,13 +108,15 @@ class Superstructure {
   muan::wpilib::DriverStationQueue::QueueReader ds_status_reader_;
 
   double elevator_height_;
+  double wrist_angle_;
+
   bool crawling_ = false;
   bool high_gear_ = true;
   bool crawler_down_ = false;
-  double wrist_angle_;
+  bool brake_ = false;
 
   bool should_climb_ = false;
-  bool buddy_;
+  bool buddy_ = false;
 
   SuperstructureState state_ = SuperstructureState::HOLDING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
