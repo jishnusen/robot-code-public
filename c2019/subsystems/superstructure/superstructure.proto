@@ -60,9 +60,10 @@ enum GroundHatchIntakeState {
 }
 
 enum HatchIntakeState {
-  HATCH_INTAKING = 0;
-  HATCH_CARRYING = 1;
-  HATCH_OUTTAKING = 2;
+  HATCH_IDLE = 0;
+  HATCH_INTAKING = 1;
+  HATCH_CARRYING = 2;
+  HATCH_OUTTAKING = 3;
 }
 
 enum CargoIntakeState {
