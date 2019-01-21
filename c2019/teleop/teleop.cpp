@@ -11,16 +11,31 @@ using muan::wpilib::GameSpecificStringProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using autonomous::AutoStatusProto;
 
-
 TeleopBase::TeleopBase()
     : ds_sender_{QueueManager<DriverStationProto>::Fetch(),
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")},
-      auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()} {
+      auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()}
+      // goal/status queues
+      // TODO(Hanson) add limelight when its merged
+      superstructure_goal_queue{QueueManager<SuperstructureGoalProto>::Fetch()},
+      superstructure_status_queue{
+          QueueManager<SuperstructureStatusProto>::Fetch()},
+      limelight_goal_queue{QueueManager<LimelightGoalProto>::Fetch()},
+      limelight_status_queue{QueueManager<LimelightStatusProto>::Fetch()} {
+  // climbing buttons
+  // scoring positions
+
+  // scoring modes
+  // intake buttons
+  // outtake buttons
+  // gear shifting - throttle buttons
   shifting_low_ = throttle_.MakeButton(4);
   shifting_high_ = throttle_.MakeButton(5);
+
+  // quickturn - ??
   quickturn_ = wheel_.MakeButton(5);
 }
 
@@ -71,8 +86,8 @@ void TeleopBase::SendDrivetrainMessage() {
   drivetrain_goal->set_high_gear(high_gear_);
 
   // Drive controls
-  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);i
-  drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
+  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
+  i drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
   drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -84,11 +99,6 @@ void TeleopBase::SendSuperstructureMessage() {
   // Default elevator, wrist, and intake goals
   elevator_goal->set_height(0);
   wrist_goal->set_angle(0);
-  
-
-
-
-
 
 }  // namespace teleop
-}  // namespace c2019
+}  // namespace teleop

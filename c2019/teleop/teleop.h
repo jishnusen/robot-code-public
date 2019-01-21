@@ -3,12 +3,12 @@
 
 #include <atomic>
 #include "WPILib.h"
+#include "c2019/autonomous/queue_types.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/teleop/joystick.h"
 #include "muan/utils/threading_utils.h"
 #include "muan/wpilib/ds_sender.h"
-#include "c2019/autonomous/queue_types.h"
 
 namespace c2019 {
 namespace teleop {
@@ -37,10 +37,9 @@ class TeleopBase {
 
   bool high_gear_;
 
-  muan::teleop::Button *cargo_outtake_, *cargo_intake_, *ground_hatch_intake_,
-                       *rocket_level_3_, *rocket_level_2_, *rocket_level_1_,
-                       *cargo_ship_, *hatch_outtake_, *hp_hatch_intake_,
-
+  muan::teleop::Button *cargo_intake_, *cargo_outtake_, *ground_hatch_intake_,
+      *rocket_level_1_, *rocket_level_2_, *rocket_level_3_, *ship_,
+      *hatch_outtake_, *hp_hatch_intake_,
 }
 
 }  // namespace teleop
