@@ -25,7 +25,7 @@ class TeleopBase {
 
   void Update();
   void SendDrivetrainMessage();
-  void SendArmMessage();
+  void SendSuperstructureMessage();
 
   muan::wpilib::DriverStationSender ds_sender_;
   muan::teleop::Joystick throttle_, wheel_;
@@ -36,7 +36,12 @@ class TeleopBase {
   muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_;
 
   bool high_gear_;
-};
+
+  muan::teleop::Button *cargo_outtake_, *cargo_intake_, *ground_hatch_intake_,
+                       *rocket_level_3_, *rocket_level_2_, *rocket_level_1_,
+                       *cargo_ship_, *hatch_outtake_, *hp_hatch_intake_,
+
+}
 
 }  // namespace teleop
 }  // namespace c2019
