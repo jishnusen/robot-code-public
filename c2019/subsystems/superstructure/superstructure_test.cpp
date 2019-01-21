@@ -41,7 +41,6 @@ class SuperstructureTest : public ::testing::Test {
     driver_station_proto_->set_is_sys_active(false);
     superstructure_input_proto_->set_elevator_encoder(0);
     superstructure_input_proto_->set_elevator_zeroed(true);
-    // TODO(Hanson) make this work
     for (int i = 0; i < 2500; i++) {
       SetInput(0, true, i * (M_PI / 2500.));
       Update();

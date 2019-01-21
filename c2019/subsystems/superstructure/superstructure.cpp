@@ -21,15 +21,14 @@ Superstructure::Superstructure()
 void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
   // If wrist angle is higher than safe angle, cap elevator to safe height
   if (wrist_status_->wrist_angle() > kWristSafeAngle) {
-    *elevator_goal =
-        muan::utils::Cap(*elevator_goal, 0 /*elevator::kElevatorMinHeight*/,
-                         kElevatorSafeHeight);
+    *elevator_goal = muan::utils::Cap(
+        *elevator_goal, elevator::kElevatorMinHeight, kElevatorSafeHeight);
   }
 
   // If elevator is higher than safe height, cap wrist to safe angle
   if (elevator_status_->elevator_height() > kElevatorSafeHeight) {
-    *wrist_goal = muan::utils::Cap(*wrist_goal, 0 /*wrist::kWristMinAngle*/,
-                                   kWristSafeAngle);
+    *wrist_goal =
+        muan::utils::Cap(*wrist_goal, wrist::kWristMinAngle, kWristSafeAngle);
   }
 }
 
