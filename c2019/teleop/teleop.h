@@ -27,19 +27,31 @@ class TeleopBase {
   void SendDrivetrainMessage();
   void SendSuperstructureMessage();
 
+  // driver controls
   muan::wpilib::DriverStationSender ds_sender_;
   muan::teleop::Joystick throttle_, wheel_;
+  // operator controls
   muan::teleop::Joystick gamepad_;
 
   autonomous::AutoStatusQueue::QueueReader auto_status_reader_;
 
+  // driving
   muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_;
 
   bool high_gear_;
 
+  // climbing buttons
+  // intake/outtake buttons
   muan::teleop::Button *cargo_intake_, *cargo_outtake_, *ground_hatch_intake_,
-      *rocket_level_1_, *rocket_level_2_, *rocket_level_3_, *ship_,
-      *hatch_outtake_, *hp_hatch_intake_,
+      *ground_hatch_outtake_, *hp_hatch_intake_, *hp_hatch_outtake_;
+  // scoring positions
+  muan::teleop::Button *level_1_, *level_2_, *level_3_, *ship_;
+  // vision buttons
+  // muan::teleop::Button *align_;
+  // scoring modes
+  muan::teleop::Button *cargo_, *hatch_;
+  // handoff
+  muan::teleop::Button *handoff_
 }
 
 }  // namespace teleop
