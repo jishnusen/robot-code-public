@@ -22,7 +22,8 @@ class GroundHatchIntake {
 
  private:
   State current_state_ = IDLE;
-  int counter_ = 0;
+  int pickup_counter_ = 0;
+  int outtake_counter_ = 0;
 };
 
 }  // namespace ground_hatch_intake
