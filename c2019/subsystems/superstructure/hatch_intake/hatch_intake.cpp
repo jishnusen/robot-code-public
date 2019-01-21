@@ -15,6 +15,7 @@ void HatchIntake::SetGoal(const HatchIntakeGoalProto& goal) {
       state_ = (CARRYING);
       break;
     case SCORE:
+      counter_ = 0;
       state_ = (OUTTAKING);
       break;
   }
@@ -45,7 +46,9 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
     case OUTTAKING:
       flutes = false;
       backplate = true;
-      if (!input->hatch_proxy()) {
+      counter_++;
+      if (!input->hatch_proxy() && counter_ > kScoreTicks) {
+        counter_ = 0;
         flutes = false;
         backplate = false;
         state_ = (IDLE);

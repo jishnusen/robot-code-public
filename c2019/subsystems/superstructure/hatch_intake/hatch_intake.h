@@ -8,6 +8,8 @@
 namespace c2019 {
 namespace hatch_intake {
 
+constexpr int kScoreTicks = 50;
+
 class HatchIntake {
  public:
   void SetGoal(const HatchIntakeGoalProto& goal);
@@ -18,6 +20,7 @@ class HatchIntake {
  private:
   State state_;
   HatchIntakeGoalProto goal_;
+  int counter_ = 0;
 };
 
 }  // namespace hatch_intake
