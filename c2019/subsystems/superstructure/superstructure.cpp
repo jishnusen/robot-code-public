@@ -337,14 +337,17 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       GoToState(HOLDING, goal->intake_goal());
       break;
     case INTAKE_HATCH:
+      GoToState(INTAKING_HATCH, goal->intake_goal());
       if (hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING, goal->intake_goal());
       }
     case INTAKE_GROUND_HATCH:
+      GoToState(INTAKING_GROUND_HATCH, goal->intake_goal());
       if (ground_hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING, goal->intake_goal());
       }
     case INTAKE_CARGO:
+      GoToState(INTAKING_CARGO, goal->intake_goal());
       if (cargo_intake_status_->has_cargo()) {
         GoToState(HOLDING, goal->intake_goal());
       }
@@ -416,6 +419,9 @@ void Superstructure::RunStateMachine() {
     case HOLDING:
       break;
     case HANDING_OFF:
+      if (hatch_intake_status_->has_hatch()) {
+        GoToState(HOLDING);
+      }
       break;
     case CLIMBING:
       break;
