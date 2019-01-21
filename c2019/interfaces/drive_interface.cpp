@@ -101,10 +101,15 @@ DrivetrainInterface::DrivetrainInterface()
   right_slave_a_.Follow(right_master_);
   right_slave_b_.Follow(right_master_);
 
-  right_master_.SetInverted(true);
+  right_master_.SetInverted(false);
   right_master_.SetSensorPhase(true);
-  right_slave_a_.SetInverted(true);
-  right_slave_b_.SetInverted(true);
+  right_slave_a_.SetInverted(false);
+  right_slave_b_.SetInverted(false);
+
+  left_master_.SetInverted(true);
+  left_master_.SetSensorPhase(true);
+  left_slave_a_.SetInverted(true);
+  left_slave_b_.SetInverted(true);
 
   LoadGains();
   SetBrakeMode(false);
@@ -133,6 +138,8 @@ void DrivetrainInterface::ReadSensors() {
 void DrivetrainInterface::WriteActuators() {
   OutputProto outputs;
   muan::wpilib::DriverStationProto ds;
+
+  QueueManager<muan::wpilib::DriverStationProto>::Fetch()->ReadLastMessage(&ds);
 
   if (!output_reader_.ReadLastMessage(&outputs)) {
     left_master_.Set(ControlMode::PercentOutput, 0);

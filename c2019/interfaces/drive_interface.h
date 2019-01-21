@@ -45,7 +45,7 @@ class DrivetrainInterface {
   VictorSPX left_slave_b_{kLeftSlaveB};
 
   TalonSRX right_slave_a_{kRightSlaveA};
-  TalonSRX right_slave_b_{kRightSlaveB};
+  VictorSPX right_slave_b_{kRightSlaveB};
 
   PigeonIMU pigeon_;
   double pigeon_offset_ = 0;
