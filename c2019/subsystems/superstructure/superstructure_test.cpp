@@ -271,14 +271,15 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   // INTAKE_HATCH
   SetIntakeInputs(false, false, false);
 
-  SetGoal(ScoreGoal::CARGO_SHIP_BACKWARDS, IntakeGoal::INTAKE_HATCH, true);
-  RunFor(1);
+  SetGoal(ScoreGoal::HATCH_SHIP_FORWARDS, IntakeGoal::INTAKE_HATCH, true);
+  RunFor(2);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
   CheckGoal(kHatchLoadingStationHeight, kHatchForwardsAngle);
   EXPECT_EQ(superstructure_status_proto_->state(), INTAKING_HATCH);
 
   SetIntakeInputs(false, true, false);
+  RunFor(2);
 
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, true, false, true, true, false);
@@ -287,7 +288,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, false, false);
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
-  RunFor(1);
+  RunFor(2);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
   CheckGoal(kHatchGroundHeight, kHatchForwardsAngle);
@@ -295,8 +296,19 @@ TEST_F(SuperstructureTest, IntakeGoals) {
 
   SetIntakeInputs(true, false, false);
 
+  SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_HATCH, true);
+  RunFor(2);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(500);
+
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
-  CheckIntake(true, false, false, false, false, true);
+  CheckIntake(true, false, false, false, false, false);
+
+  SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_GROUND_HATCH, true);
+  RunFor(2);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(50);
+  CheckIntake(false, false, false, false, false, false);
 
   // INTAKE_CARGO
   SetIntakeInputs(false, false, false);
@@ -309,6 +321,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   EXPECT_EQ(superstructure_status_proto_->state(), INTAKING_CARGO);
 
   SetIntakeInputs(false, false, true);
+  RunFor(2);
 
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, false, true, false, false, false);
@@ -317,9 +330,11 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, true, false);
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_HATCH, true);
-  RunFor(1000);
+  RunFor(1);
 
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   SetIntakeInputs(false, false, false);
+  RunFor(200);
 
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, false, false, false, false, false);
@@ -328,9 +343,12 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, false, true);
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_GROUND_HATCH, true);
-  RunFor(1000);
+  RunFor(1);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(200);
 
   SetIntakeInputs(false, false, false);
+  RunFor(1);
 
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, false, false, false, false, false);
@@ -339,9 +357,10 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(true, false, false);
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_CARGO, true);
-  RunFor(1000);
+  RunFor(100);
 
   SetIntakeInputs(false, false, false);
+  RunFor(1);
 
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, false, false, false, false, false);
@@ -350,18 +369,20 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(true, false, false);
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::POP, true);
-  RunFor(1000);
+  RunFor(100);
 
   SetIntakeInputs(false, true, false);
+  RunFor(100);
 
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, true, false, false, false, false);
 }
 
 TEST_F(SuperstructureTest, Handoff) {
+  CalibrateDisabled();
   SetIntakeInputs(false, false, false);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
-  RunFor(1);
+  RunFor(2);
   SetIntakeInputs(true, false, false);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(50);
@@ -373,16 +394,20 @@ TEST_F(SuperstructureTest, Handoff) {
   RunFor(50);
   CheckGoal(kHandoffHeight, kHandoffAngle);
 
-  SetIntakeInputs(true, true, false);
+  SetIntakeInputs(true, false, false);
+  SetInput(kHandoffHeight, true, kHandoffAngle);
   RunFor(50);
-  CheckIntake(false, true, false, true, true, false);
 
   SetGoal(ScoreGoal::HANDOFF, IntakeGoal::SPIT, true);
+  SetIntakeInputs(true, false, false);
   RunFor(55);
 
   EXPECT_EQ(superstructure_status_proto_->state(), HANDING_OFF);
-  SetIntakeInputs(false, true, false);
+  CheckIntake(false, false, false, true, false, false);
 
+  SetIntakeInputs(false, true, false);
+  RunFor(55);
+  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, true, false, true, true, false);
 }
 
