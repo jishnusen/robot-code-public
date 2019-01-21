@@ -49,8 +49,7 @@ class SuperstructureTest : public ::testing::Test {
 
     EXPECT_TRUE(superstructure_status_proto_->elevator_is_calibrated());
     EXPECT_TRUE(superstructure_status_proto_->wrist_is_calibrated());
-    EXPECT_EQ(superstructure_status_proto_->state(),
-              SuperstructureState::HOLDING);
+    EXPECT_EQ(superstructure_status_proto_->state(), SuperstructureState::IDLE);
   }
 
   void Update() {
@@ -266,7 +265,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   CalibrateDisabled();
 
   SetIntakeInputs(false, false, false);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::IDLE, true);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_IDLE, true);
 
   // INTAKE_HATCH
   SetIntakeInputs(false, false, false);
@@ -281,7 +280,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, true, false);
   RunFor(2);
 
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(false, true, false, true, true, false);
 
   // INTAKE_GROUND_HATCH
@@ -301,7 +300,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(500);
 
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(true, false, false, false, false, false);
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_GROUND_HATCH, true);
@@ -323,7 +322,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, false, true);
   RunFor(2);
 
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(false, false, true, false, false, false);
 
   // OUTTAKE_HATCH
@@ -336,7 +335,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, false, false);
   RunFor(200);
 
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(false, false, false, false, false, false);
 
   // OUTTAKE_GROUND_HATCH
@@ -350,7 +349,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, false, false);
   RunFor(1);
 
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(false, false, false, false, false, false);
 
   // OUTTAKE_CARGO
@@ -362,7 +361,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, false, false);
   RunFor(1);
 
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(false, false, false, false, false, false);
 
   // POP
@@ -374,7 +373,7 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, true, false);
   RunFor(100);
 
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(false, true, false, false, false, false);
 }
 
@@ -407,7 +406,7 @@ TEST_F(SuperstructureTest, Handoff) {
 
   SetIntakeInputs(false, true, false);
   RunFor(55);
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->state(), IDLE);
   CheckIntake(false, true, false, true, true, false);
 }
 
