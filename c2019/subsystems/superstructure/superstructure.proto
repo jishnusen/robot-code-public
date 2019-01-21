@@ -17,7 +17,7 @@ enum SuperstructureState {
 
 enum IntakeGoal {
   INTAKE_NONE = 0;
-  IDLE = 1;
+  INTAKE_IDLE = 1;
   INTAKE_HATCH = 2;
   INTAKE_GROUND_HATCH = 3;
   INTAKE_CARGO = 4;

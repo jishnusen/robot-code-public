@@ -84,7 +84,7 @@ cargo_intake::CargoIntakeGoalProto Superstructure::PopulateCargoIntakeGoal() {
   } else if (intake_goal_ == OUTTAKE_CARGO) {
     goal->set_goal(cargo_intake::OUTTAKE);
   } else {
-    goal->set_goal(cargo_intake::IDLE);
+    goal->set_goal(cargo_intake::INTAKE_IDLE);
   }
   return goal;
 }
@@ -332,7 +332,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case INTAKE_NONE:
       intake_goal_ = goal->intake_goal();
       break;
-    case IDLE:
+    case INTAKE_IDLE:
       GoToState(HOLDING, goal->intake_goal());
       break;
     case INTAKE_HATCH:
@@ -461,7 +461,8 @@ void Superstructure::GoToState(SuperstructureState desired_state,
               static_cast<int>(desired_state), static_cast<int>(intake));
         }
       } else {
-        if (intake == IntakeGoal::INTAKE_NONE || intake == IntakeGoal::IDLE ||
+        if (intake == IntakeGoal::INTAKE_NONE ||
+            intake == IntakeGoal::INTAKE_IDLE ||
             intake == IntakeGoal::OUTTAKE_HATCH ||
             intake == IntakeGoal::OUTTAKE_GROUND_HATCH ||
             intake == IntakeGoal::OUTTAKE_CARGO || intake == IntakeGoal::POP ||
