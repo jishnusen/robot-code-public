@@ -21,15 +21,14 @@ Superstructure::Superstructure()
 void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
   // If wrist angle is higher than safe angle, cap elevator to safe height
   if (wrist_status_->wrist_angle() > kWristSafeAngle) {
-    *elevator_goal =
-        muan::utils::Cap(*elevator_goal, 0 /*elevator::kElevatorMinHeight*/,
-                         kElevatorSafeHeight);
+    *elevator_goal = muan::utils::Cap(*elevator_goal, kElevatorMinHeight,
+                                      kElevatorSafeHeight);
   }
 
   // If elevator is higher than safe height, cap wrist to safe angle
   if (elevator_status_->elevator_height() > kElevatorSafeHeight) {
-    *wrist_goal = muan::utils::Cap(*wrist_goal, 0 /*wrist::kWristMinAngle*/,
-                                   kWristSafeAngle);
+    *wrist_goal =
+        muan::utils::Cap(*wrist_goal, kWristMinAngle, kWristSafeAngle);
   }
 }
 
@@ -321,49 +320,46 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   elevator_height_ += goal->elevator_god_mode_goal() * 0.005;
   wrist_angle_ += goal->wrist_god_mode_goal() * 0.005;
 
-  elevator_height_ = muan::utils::Cap(
-      elevator_height_, c2019::superstructure::kElevatorMinHeight,
-      c2019::superstructure::kElevatorMaxHeight);
-  wrist_angle_ =
-      muan::utils::Cap(wrist_angle_, c2019::superstructure::kWristMinAngle,
-                       c2019::superstructure::kWristMaxAngle);
+  elevator_height_ = muan::utils::Cap(elevator_height_, kElevatorMinHeight,
+                                      kElevatorMaxHeight);
+  wrist_angle_ = muan::utils::Cap(wrist_angle_, kWristMinAngle, kWristMaxAngle);
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
       intake_goal_ = goal->intake_goal();
       break;
-    case IDLE:
-      GoToState(HOLDING, goal->intake_goal());
+    case INTAKE_IDLE:
+      GoToState(IDLE, goal->intake_goal());
       break;
     case INTAKE_HATCH:
       GoToState(INTAKING_HATCH, goal->intake_goal());
       if (hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING, goal->intake_goal());
+        GoToState(IDLE, goal->intake_goal());
       }
       break;
     case INTAKE_GROUND_HATCH:
       GoToState(INTAKING_GROUND_HATCH, goal->intake_goal());
       if (ground_hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING, goal->intake_goal());
+        GoToState(IDLE, goal->intake_goal());
       }
       break;
     case INTAKE_CARGO:
       GoToState(INTAKING_CARGO, goal->intake_goal());
       if (cargo_intake_status_->has_cargo()) {
-        GoToState(HOLDING, goal->intake_goal());
+        GoToState(IDLE, goal->intake_goal());
       }
       break;
     case OUTTAKE_HATCH:
       if (!hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING, goal->intake_goal());
+        GoToState(IDLE, goal->intake_goal());
       }
       break;
     case OUTTAKE_GROUND_HATCH:
-      GoToState(HOLDING, goal->intake_goal());
+      GoToState(IDLE, goal->intake_goal());
       break;
     case OUTTAKE_CARGO:
       if (!cargo_intake_status_->has_cargo()) {
-        GoToState(HOLDING, goal->intake_goal());
+        GoToState(IDLE, goal->intake_goal());
       }
       break;
     case POP:
@@ -377,14 +373,14 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
           intake_goal_ = SPIT;
         }
       } else {
-        GoToState(HOLDING);
+        GoToState(IDLE);
       }
       break;
     case SPIT:
       elevator_height_ = kSpitHeight;
       GoToState(HANDING_OFF, goal->intake_goal());
       if (hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING);
+        GoToState(IDLE);
       }
       break;
   }
@@ -396,29 +392,29 @@ void Superstructure::RunStateMachine() {
       elevator_height_ = elevator_status_->elevator_height();
       wrist_angle_ = wrist_status_->wrist_angle();
       if (elevator_status_->is_calibrated() && wrist_status_->is_calibrated()) {
-        GoToState(HOLDING);
+        GoToState(IDLE);
       }
       break;
     case INTAKING_GROUND_HATCH:
       if (ground_hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING);
+        GoToState(IDLE);
       }
       break;
     case INTAKING_HATCH:
       if (hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING);
+        GoToState(IDLE);
       }
       break;
     case INTAKING_CARGO:
       if (cargo_intake_status_->has_cargo()) {
-        GoToState(HOLDING);
+        GoToState(IDLE);
       }
       break;
-    case HOLDING:
+    case IDLE:
       break;
     case HANDING_OFF:
       if (hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING);
+        GoToState(IDLE);
       }
       break;
     case CLIMBING:
@@ -448,7 +444,7 @@ void Superstructure::GoToState(SuperstructureState desired_state,
     case INTAKING_CARGO:
       state_ = desired_state;
       break;
-    case HOLDING:
+    case IDLE:
       if (desired_state == INTAKING_GROUND_HATCH ||
           desired_state == INTAKING_HATCH || desired_state == INTAKING_CARGO) {
         if (intake == IntakeGoal::INTAKE_GROUND_HATCH ||
@@ -461,7 +457,8 @@ void Superstructure::GoToState(SuperstructureState desired_state,
               static_cast<int>(desired_state), static_cast<int>(intake));
         }
       } else {
-        if (intake == IntakeGoal::INTAKE_NONE || intake == IntakeGoal::IDLE ||
+        if (intake == IntakeGoal::INTAKE_NONE ||
+            intake == IntakeGoal::INTAKE_IDLE ||
             intake == IntakeGoal::OUTTAKE_HATCH ||
             intake == IntakeGoal::OUTTAKE_GROUND_HATCH ||
             intake == IntakeGoal::OUTTAKE_CARGO || intake == IntakeGoal::POP ||
