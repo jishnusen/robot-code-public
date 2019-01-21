@@ -71,12 +71,24 @@ void TeleopBase::SendDrivetrainMessage() {
   drivetrain_goal->set_high_gear(high_gear_);
 
   // Drive controls
-  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
+  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);i
   drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
   drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }
+
+void TeleopBase::SendSuperstructureMessage() {
+  SuperstructureGoalProto superstructure_goal;
+
+  // Default elevator, wrist, and intake goals
+  elevator_goal->set_height(0);
+  wrist_goal->set_angle(0);
+  
+
+
+
+
 
 }  // namespace teleop
 }  // namespace c2019
