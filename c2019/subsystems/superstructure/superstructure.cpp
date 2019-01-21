@@ -332,24 +332,20 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
-      intake_goal_ = INTAKE_NONE;
+      break;
+    case IDLE:
+      GoToState(HOLDING, goal->intake_goal());
       break;
     case INTAKE_HATCH:
-      if (!hatch_intake_status_->has_hatch()) {
-        GoToState(INTAKING_HATCH, goal->intake_goal());
-      } else {
+      if (hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING, goal->intake_goal());
       }
     case INTAKE_GROUND_HATCH:
-      if (!ground_hatch_intake_status_->has_hatch()) {
-        GoToState(INTAKING_GROUND_HATCH, goal->intake_goal());
-      } else {
+      if (ground_hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING, goal->intake_goal());
       }
     case INTAKE_CARGO:
-      if (!cargo_intake_status_->has_cargo()) {
-        GoToState(INTAKING_CARGO, goal->intake_goal());
-      } else {
+      if (cargo_intake_status_->has_cargo()) {
         GoToState(HOLDING, goal->intake_goal());
       }
     case OUTTAKE_HATCH:
@@ -373,6 +369,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
               kElevatorHandoffTolerance &&
           std::abs(wrist_status_->wrist_angle() - kHandoffAngle) <
               kWristHandoffTolerance) {
+        std::cout << "state pop" << std::endl;
         GoToState(HANDING_OFF, goal->intake_goal());
         if (hatch_intake_status_->has_hatch()) {
           intake_goal_ = SPIT;
@@ -383,7 +380,11 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case SPIT:
       elevator_height_ = kSpitHeight;
+      std::cout << "state spit" << std::endl;
       GoToState(HANDING_OFF, goal->intake_goal());
+      if (hatch_intake_status_->has_hatch()) {
+        GoToState(HOLDING);
+      }
       break;
   }
 }
@@ -435,8 +436,14 @@ void Superstructure::GoToState(SuperstructureState desired_state,
       }
       break;
     case INTAKING_GROUND_HATCH:
+      state_ = desired_state;
+      break;
     case INTAKING_HATCH:
+      state_ = desired_state;
+      break;
     case INTAKING_CARGO:
+      state_ = desired_state;
+      break;
     case HOLDING:
       if (desired_state == INTAKING_GROUND_HATCH ||
           desired_state == INTAKING_HATCH || desired_state == INTAKING_CARGO) {
@@ -450,7 +457,7 @@ void Superstructure::GoToState(SuperstructureState desired_state,
               static_cast<int>(desired_state), static_cast<int>(intake));
         }
       } else {
-        if (intake == IntakeGoal::INTAKE_NONE ||
+        if (intake == IntakeGoal::INTAKE_NONE || intake == IntakeGoal::IDLE ||
             intake == IntakeGoal::OUTTAKE_HATCH ||
             intake == IntakeGoal::OUTTAKE_GROUND_HATCH ||
             intake == IntakeGoal::OUTTAKE_CARGO || intake == IntakeGoal::POP ||
@@ -477,8 +484,10 @@ void Superstructure::GoToState(SuperstructureState desired_state,
         break;
       }
     case CLIMBING:
+      state_ = desired_state;
       break;
     case BUDDY_CLIMBING:
+      state_ = desired_state;
       break;
   }
 }

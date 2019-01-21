@@ -17,14 +17,15 @@ enum SuperstructureState {
 
 enum IntakeGoal {
   INTAKE_NONE = 0;
-  INTAKE_HATCH = 1;
-  INTAKE_GROUND_HATCH = 2;
-  INTAKE_CARGO = 3;
-  OUTTAKE_HATCH = 4;
-  OUTTAKE_GROUND_HATCH = 5;
-  OUTTAKE_CARGO = 6;
-  POP = 7;
-  SPIT = 8;
+  IDLE = 1;
+  INTAKE_HATCH = 2;
+  INTAKE_GROUND_HATCH = 3;
+  INTAKE_CARGO = 4;
+  OUTTAKE_HATCH = 5;
+  OUTTAKE_GROUND_HATCH = 6;
+  OUTTAKE_CARGO = 7;
+  POP = 8;
+  SPIT = 9;
 }
 
 enum ScoreGoal {

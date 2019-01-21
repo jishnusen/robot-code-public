@@ -35,8 +35,7 @@ class SuperstructureTest : public ::testing::Test {
 
   bool outputs_enabled_;
 
-  void UpdateInput() {
-  }
+  void UpdateInput() {}
 
   void CalibrateDisabled() {
     driver_station_proto_->set_is_sys_active(false);
@@ -121,27 +120,6 @@ class SuperstructureTest : public ::testing::Test {
     superstructure_input_proto_->set_hatch_intake_proxy(has_hp_hatch);
     superstructure_input_proto_->set_cargo_proxy(has_cargo);
     WriteMessages();
-    std::cout << "has_ground_hatch input: "
-              << superstructure_input_proto_->hatch_ground_current()
-              << std::endl;
-    std::cout << "has_hp_hatch input: "
-              << superstructure_input_proto_->hatch_intake_proxy() << std::endl;
-    std::cout << "has_cargo input: "
-              << superstructure_input_proto_->cargo_proxy() << std::endl;
-    if (superstructure_status_proto_->has_ground_hatch() != has_ground_hatch ||
-        superstructure_status_proto_->has_hp_hatch() != has_hp_hatch ||
-        superstructure_status_proto_->has_cargo() != has_cargo) {
-      if (superstructure_status_proto_->has_ground_hatch() !=
-          has_ground_hatch) {
-        std::cout << "has_ground_hatch doesn't comply with input" << std::endl;
-      }
-      if (superstructure_status_proto_->has_hp_hatch() != has_hp_hatch) {
-        std::cout << "has_hp_hatch doesn't comply with input" << std::endl;
-      }
-      if (superstructure_status_proto_->has_cargo() != has_cargo) {
-        std::cout << "has_cargo doesn't comply with input" << std::endl;
-      }
-    }
   }
 
  protected:
@@ -282,44 +260,18 @@ TEST_F(SuperstructureTest, ScoreGoals) {
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
   CheckGoal(kStowHeight, kStowAngle);
-} 
-
-TEST_F(SuperstructureTest, TTF) {
-  SetIntakeInputs(false, false, false);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
-  RunFor(1);
-  SetIntakeInputs(true, false, false);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(50);
-  CheckIntake(true, false, false, false, false, false);
-
-  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::POP, true);
-  RunFor(1);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(50);
-  CheckGoal(kHandoffHeight, kHandoffAngle);
-
-  SetIntakeInputs(true, true, false);
-  RunFor(50);
-  CheckIntake(false, true, false, true, true, false);
-
-  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::SPIT, true);
-  RunFor(55);
-
-  EXPECT_EQ(superstructure_status_proto_->state(), HANDING_OFF);
-  SetIntakeInputs(false, true, false);
-
-  CheckIntake(false, true, false, true, true, false);
 }
 
-/*
 TEST_F(SuperstructureTest, IntakeGoals) {
   CalibrateDisabled();
+
+  SetIntakeInputs(false, false, false);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::IDLE, true);
 
   // INTAKE_HATCH
   SetIntakeInputs(false, false, false);
 
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_HATCH, true);
+  SetGoal(ScoreGoal::CARGO_SHIP_BACKWARDS, IntakeGoal::INTAKE_HATCH, true);
   RunFor(1);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
@@ -405,7 +357,34 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   CheckIntake(false, true, false, false, false, false);
 }
-*/
+
+TEST_F(SuperstructureTest, Handoff) {
+  SetIntakeInputs(false, false, false);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
+  RunFor(1);
+  SetIntakeInputs(true, false, false);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(50);
+  CheckIntake(true, false, false, false, false, false);
+
+  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::POP, true);
+  RunFor(1);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(50);
+  CheckGoal(kHandoffHeight, kHandoffAngle);
+
+  SetIntakeInputs(true, true, false);
+  RunFor(50);
+  CheckIntake(false, true, false, true, true, false);
+
+  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::SPIT, true);
+  RunFor(55);
+
+  EXPECT_EQ(superstructure_status_proto_->state(), HANDING_OFF);
+  SetIntakeInputs(false, true, false);
+
+  CheckIntake(false, true, false, true, true, false);
+}
 
 }  // namespace superstructure
 }  // namespace c2019
