@@ -1,11 +1,15 @@
+load("//third_party/google/protobuf:protobuf.bzl", "cc_proto_library")
+
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "teleop",
     srcs = ["teleop.cpp"],
     hdrs = ["teleop.h"],
-    restricted_to = ["//tools:roborio"],
     visibility = ["//visibility:public"],
     deps = [
         "//c2019/autonomous:autonomous_queues",
+        "//c2019/subsystems/superstructure:superstructure",
         "//muan/logging:logger",
         "//muan/queues:queue_manager",
         "//muan/subsystems/drivetrain:drivetrain_queues",
@@ -13,4 +17,5 @@ cc_library(
         "//muan/utils:threading_utils",
         "//muan/wpilib:ds_sender",
     ],
+    restricted_to = ["//tools:roborio"],
 )

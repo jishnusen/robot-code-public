@@ -10,23 +10,27 @@ using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using autonomous::AutoStatusProto;
+using c2019::superstructure::SuperstructureGoalProto;
+//using c2019::limelight::LimelightGoalProto;
+using c2019::superstructure::SuperstructureStatusProto;
 
 TeleopBase::TeleopBase()
-    : ds_sender_{QueueManager<DriverStationProto>::Fetch(),
+    : superstructure_goal_queue_{
+          QueueManager<c2019::superstructure::SuperstructureGoalProto>::Fetch()},
+      superstructure_status_queue_{
+          QueueManager<c2019::superstructure::SuperstructureStatusProto>::Fetch()},
+      ds_sender_{QueueManager<DriverStationProto>::Fetch(),
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
-      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")},
-      auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()}
-      // goal/status queues
-      // TODO(Hanson) add limelight when its merged
-      superstructure_goal_queue{QueueManager<SuperstructureGoalProto>::Fetch()},
-      superstructure_status_queue{
-          QueueManager<SuperstructureStatusProto>::Fetch()},
-      limelight_goal_queue{QueueManager<LimelightGoalProto>::Fetch()},
-      limelight_status_queue{QueueManager<LimelightStatusProto>::Fetch()} {
+      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")}
+      // auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
+      // goal/status queues    
+      // TODO(Apurva) include when limelight is merged
+      /*, limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
+      limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/ {
   // climbing buttons
-  // TODO(Hanson) do climbing buttons
+  // TODO(Apurva or Hanson) do climbing buttons
   // scoring positions
   level_1_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::A_BUTTON));
   level_2_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::B_BUTTON));
@@ -42,8 +46,8 @@ TeleopBase::TeleopBase()
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_BUMPER));
   ground_hatch_intake_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
   // outtake buttons
-  cargo_outtake = gamepad_.MakeAxis(2, 0.7);
-  hp_hatch_outtake_ =
+  cargo_outtake_ = gamepad_.MakeAxis(2, 0.7);
+  hp_hatch_outtake_ = 
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_BUMPER));
   ground_hatch_outtake_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
   // gear shifting - throttle buttons
@@ -75,9 +79,42 @@ void TeleopBase::Stop() { running_ = false; }
 
 void TeleopBase::Update() {
   AutoStatusProto auto_status;
-  auto_status_reader_.ReadLastMessage(&auto_status);
+  // auto_status_reader_.ReadLastMessage(&auto_status);
   if (RobotController::IsSysActive() && !auto_status->in_auto()) {
     SendDrivetrainMessage();
+    SendSuperstructureMessage();
+  }
+
+  SuperstructureStatusProto superstructure_status;
+  superstructure_status_queue_->ReadLastMessage(&superstructure_status);
+  
+  has_cargo_ = superstructure_status_->has_cargo();
+  has_hp_hatch_ = superstructure_status_->has_hp_hatch();
+  has_ground_hatch_ = superstructure_status_->has_ground_hatch();
+  
+  if ((has_cargo_ && !had_cargo_) ||
+      (has_hp_hatch_ && !had_hp_hatch_) ||
+      (has_ground_hatch_ && !had_ground_hatch_)) {
+    rumble_ticks_left_ = kRumbleTicks;
+  }
+  had_cargo_ = has_cargo_;
+  had_hp_hatch_ = has_hp_hatch_;
+  had_ground_hatch_ = has_ground_hatch_;
+
+
+
+  if (rumble_ticks_left_ > 0) {
+    // Set rumble on
+    rumble_ticks_left_--;
+    gamepad_.wpilib_joystick()->SetRumble(
+             GenericHID::kLeftRumble, 1.0);
+    if (!has_cargo_ && !has_hp_hatch_ && !has_ground_hatch_) {
+      rumble_ticks_left_ = 0;
+    }  // TODO(Nathan) rename hatch to panel in places used
+  } else {
+    // Set rumble off
+    gamepad_.wpilib_joystick()->SetRumble(
+             GenericHID::kLeftRumble, 0.0);
   }
 
   ds_sender_.Send();
@@ -102,7 +139,7 @@ void TeleopBase::SendDrivetrainMessage() {
 
   // Drive controls
   drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
-  i drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
+  drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
   drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -111,9 +148,20 @@ void TeleopBase::SendDrivetrainMessage() {
 void TeleopBase::SendSuperstructureMessage() {
   SuperstructureGoalProto superstructure_goal;
 
-  // Default elevator, wrist, and intake goals
-  elevator_goal->set_height(0);
-  wrist_goal->set_angle(0);
+  double godmode_elevator = -gamepad_.wpilib_joystick()->GetRawAxis(5);
+  double godmode_wrist = gamepad_.wpilib_joystick()->GetRawAxis(4);
+
+  if (std::abs(godmode_elevator) > kGodmodeButtonThreshold) {
+    superstructure_goal->set_elevator_god_mode_goal(
+        (std::pow((std::abs(godmode_elevator) - kGodmodeButtonThreshold), 2) *
+         kGodmodeElevatorMultiplier * (godmode_elevator > 0 ? 1 : -1)));
+  }
+  if (std::abs(godmode_wrist) > kGodmodeButtonThreshold) {
+    superstructure_goal->set_wrist_god_mode_goal(
+        (std::pow((std::abs(godmode_wrist) - kGodmodeButtonThreshold), 2) *
+         kGodmodeWristMultiplier * (godmode_wrist > 0 ? 1 : -1)));
+  }
+}
 
 }  // namespace teleop
-}  // namespace teleop
+}  // namespace c2019
