@@ -21,14 +21,14 @@ Superstructure::Superstructure()
 void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
   // If wrist angle is higher than safe angle, cap elevator to safe height
   if (wrist_status_->wrist_angle() > kWristSafeAngle) {
-    *elevator_goal = muan::utils::Cap(
-        *elevator_goal, elevator::kElevatorMinHeight, kElevatorSafeHeight);
+    *elevator_goal = muan::utils::Cap(*elevator_goal, kElevatorMinHeight,
+                                      kElevatorSafeHeight);
   }
 
   // If elevator is higher than safe height, cap wrist to safe angle
   if (elevator_status_->elevator_height() > kElevatorSafeHeight) {
     *wrist_goal =
-        muan::utils::Cap(*wrist_goal, wrist::kWristMinAngle, kWristSafeAngle);
+        muan::utils::Cap(*wrist_goal, kWristMinAngle, kWristSafeAngle);
   }
 }
 
@@ -320,12 +320,9 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   elevator_height_ += goal->elevator_god_mode_goal() * 0.005;
   wrist_angle_ += goal->wrist_god_mode_goal() * 0.005;
 
-  elevator_height_ = muan::utils::Cap(
-      elevator_height_, c2019::superstructure::kElevatorMinHeight,
-      c2019::superstructure::kElevatorMaxHeight);
-  wrist_angle_ =
-      muan::utils::Cap(wrist_angle_, c2019::superstructure::kWristMinAngle,
-                       c2019::superstructure::kWristMaxAngle);
+  elevator_height_ = muan::utils::Cap(elevator_height_, kElevatorMinHeight,
+                                      kElevatorMaxHeight);
+  wrist_angle_ = muan::utils::Cap(wrist_angle_, kWristMinAngle, kWristMaxAngle);
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
