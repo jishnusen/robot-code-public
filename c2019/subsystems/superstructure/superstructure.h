@@ -119,7 +119,7 @@ class Superstructure {
   bool should_climb_ = false;
   bool buddy_ = false;
 
-  SuperstructureState state_ = SuperstructureState::HOLDING;
+  SuperstructureState state_ = SuperstructureState::CALIBRATING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
 };
 

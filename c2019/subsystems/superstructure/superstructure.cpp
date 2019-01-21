@@ -71,8 +71,6 @@ hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
     goal->set_goal(hatch_intake::INTAKE);
   } else if (intake_goal_ == OUTTAKE_HATCH) {
     goal->set_goal(hatch_intake::SCORE);
-  } else if (intake_goal_ == INTAKE_NONE && status_->has_hp_hatch()) {
-    goal->set_goal(hatch_intake::HOLD);
   } else {
     goal->set_goal(hatch_intake::NONE);
   }
@@ -332,6 +330,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
+      intake_goal_ = goal->intake_goal();
       break;
     case IDLE:
       GoToState(HOLDING, goal->intake_goal());
@@ -341,25 +340,26 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       if (hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING, goal->intake_goal());
       }
+      break;
     case INTAKE_GROUND_HATCH:
       GoToState(INTAKING_GROUND_HATCH, goal->intake_goal());
       if (ground_hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING, goal->intake_goal());
       }
+      break;
     case INTAKE_CARGO:
       GoToState(INTAKING_CARGO, goal->intake_goal());
       if (cargo_intake_status_->has_cargo()) {
         GoToState(HOLDING, goal->intake_goal());
       }
+      break;
     case OUTTAKE_HATCH:
       if (!hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING, goal->intake_goal());
       }
       break;
     case OUTTAKE_GROUND_HATCH:
-      if (!ground_hatch_intake_status_->has_hatch()) {
-        GoToState(HOLDING, goal->intake_goal());
-      }
+      GoToState(HOLDING, goal->intake_goal());
       break;
     case OUTTAKE_CARGO:
       if (!cargo_intake_status_->has_cargo()) {
@@ -372,7 +372,6 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
               kElevatorHandoffTolerance &&
           std::abs(wrist_status_->wrist_angle() - kHandoffAngle) <
               kWristHandoffTolerance) {
-        std::cout << "state pop" << std::endl;
         GoToState(HANDING_OFF, goal->intake_goal());
         if (hatch_intake_status_->has_hatch()) {
           intake_goal_ = SPIT;
@@ -383,7 +382,6 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case SPIT:
       elevator_height_ = kSpitHeight;
-      std::cout << "state spit" << std::endl;
       GoToState(HANDING_OFF, goal->intake_goal());
       if (hatch_intake_status_->has_hatch()) {
         GoToState(HOLDING);
