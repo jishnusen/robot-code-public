@@ -104,13 +104,13 @@ void TeleopBase::Update() {
 
 
   if (rumble_ticks_left_ > 0) {
+    if (!has_cargo_ && !has_hp_hatch_ && !has_ground_hatch_) {
+      rumble_ticks_left_ = 0;
+    }  // TODO(Nathan) rename hatch to panel in places used
     // Set rumble on
     rumble_ticks_left_--;
     gamepad_.wpilib_joystick()->SetRumble(
              GenericHID::kLeftRumble, 1.0);
-    if (!has_cargo_ && !has_hp_hatch_ && !has_ground_hatch_) {
-      rumble_ticks_left_ = 0;
-    }  // TODO(Nathan) rename hatch to panel in places used
   } else {
     // Set rumble off
     gamepad_.wpilib_joystick()->SetRumble(
@@ -161,6 +161,29 @@ void TeleopBase::SendSuperstructureMessage() {
         (std::pow((std::abs(godmode_wrist) - kGodmodeButtonThreshold), 2) *
          kGodmodeWristMultiplier * (godmode_wrist > 0 ? 1 : -1)));
   }
+
+  // Intakes & Outtakes
+  if (cargo_intake_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_CARGO);
+  } else if (cargo_outtake_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_CARGO);
+  } else if (ground_hatch_intake_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_GROUND_HATCH);
+  } else if (ground_hatch_outtake_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_GROUND_HATCH);
+  } else if (hp_hatch_intake_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
+  } else if (hp_hatch_outtake_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
+  } else {
+    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_IDLE);
+  }
+
+  // Scoring positions
+  if (level_1_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::
+
+  superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }
 
 }  // namespace teleop
