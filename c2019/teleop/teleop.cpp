@@ -25,7 +25,7 @@ TeleopBase::TeleopBase()
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")}
       // auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
-      // goal/status queues    
+      // goal/status queues
       // TODO(Apurva) include when limelight is merged
       /*, limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
       limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/ {
@@ -47,7 +47,7 @@ TeleopBase::TeleopBase()
   ground_hatch_intake_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
   // outtake buttons
   cargo_outtake_ = gamepad_.MakeAxis(2, 0.7);
-  hp_hatch_outtake_ = 
+  hp_hatch_outtake_ =
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_BUMPER));
   ground_hatch_outtake_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
   // gear shifting - throttle buttons
@@ -87,11 +87,11 @@ void TeleopBase::Update() {
 
   SuperstructureStatusProto superstructure_status;
   superstructure_status_queue_->ReadLastMessage(&superstructure_status);
-  
+
   has_cargo_ = superstructure_status_->has_cargo();
   has_hp_hatch_ = superstructure_status_->has_hp_hatch();
   has_ground_hatch_ = superstructure_status_->has_ground_hatch();
-  
+
   if ((has_cargo_ && !had_cargo_) ||
       (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
@@ -181,7 +181,25 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Scoring positions
   if (level_1_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::
+    if (has_cargo_) {
+      superstructure_goal->set_score_goal(c2019::superstructure::CARGO_ROCKET_FIRST);
+    } else if (has_hp_hatch_ || has_ground_hatch /*not sure this logic is right*/) {
+      superstructure_goal->set_score_goal(c2019::superstructure::HATCH_ROCKET_FIRST);
+    }
+  }
+  if (level_2_->is_pressed()) {
+    if (has_cargo_) {
+       superstructure_goal->set_score_goal(c2019::superstructure::CARGO_ROCKET_SECOND);
+     else if (has_hp_hatch_ || has_ground_hatch) {
+       superstructure_goal->set_score_goal(c2019::superstructure::HATCH_ROCKET_SECOND);
+     }
+  if (level_3_->is_pressed()) {
+    if (has_cargo_) {
+      superstructure_goal->set_score_goal(c2019::superstructure::CARGO_ROCKET_THIRD);
+    else if (has_hp_hatch_ || has_ground_hatch) {
+      superstructure_goal->set_score_goal(c2019::superstructure::HATCH_ROCKET_THIRD);
+    }
+  }
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }
