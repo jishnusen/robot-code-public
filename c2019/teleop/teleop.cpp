@@ -23,13 +23,12 @@ TeleopBase::TeleopBase()
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
-      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")}
-// auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
-// TODO(Apurva) include when limelight is merged
-/*goal/status
-queues/limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
-limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/
-{
+      // auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
+      // TODO(Apurva) include when limelight is merged
+      /*goal/status
+      queues/limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
+      limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/
+      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")} {
   // climbing buttons
   // TODO(Apurva or Hanson) do climbing buttons
   // scoring positions
