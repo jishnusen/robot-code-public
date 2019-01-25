@@ -534,31 +534,6 @@ TEST_F(SuperstructureTest, Crawl) {
   EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
 }
 
-TEST_F(SuperstructureTest, CrawlBraked) {
-  CalibrateDisabled();
-
-  SetGoal(ScoreGoal::CLIMB, IntakeGoal::INTAKE_NONE, true);
-  RunFor(3);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(1000);
-
-  CheckGoal(kClimbHeight, kClimbAngle);
-  EXPECT_EQ(superstructure_status_proto_->state(), CLIMBING);
-  EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
-
-  SetGoal(ScoreGoal::CRAWL_BRAKED, IntakeGoal::INTAKE_NONE, true);
-  RunFor(3);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(1000);
-
-  CheckGoal(kClimbHeight, kClimbAngle);
-  EXPECT_EQ(superstructure_status_proto_->state(), CLIMBING);
-  EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
-  EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
-  EXPECT_EQ(superstructure_output_proto_->crawler_voltage(), 12);
-  EXPECT_TRUE(superstructure_output_proto_->brake());
-}
-
 TEST_F(SuperstructureTest, Brake) {
   CalibrateDisabled();
 

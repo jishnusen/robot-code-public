@@ -48,8 +48,7 @@ enum ScoreGoal {
   CLIMB = 17;
   BUDDY_CLIMB = 18;
   CRAWL = 19;
-  CRAWL_BRAKED = 20;
-  BRAKE = 21;
+  BRAKE = 20;
 }
 
 enum GroundHatchIntakeState {

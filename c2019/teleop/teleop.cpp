@@ -30,7 +30,12 @@ TeleopBase::TeleopBase()
       limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")} {
   // climbing buttons
-  // TODO(Apurva or Hanson) do climbing buttons
+  crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
+  climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
+  brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
+  drop_forks_ =
+      gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
+
   // scoring positions
   stow_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
 
@@ -268,6 +273,20 @@ void TeleopBase::SendSuperstructureMessage() {
             c2019::superstructure::HATCH_SHIP_BACKWARDS);
       }
     }
+  }
+
+  // Climbing buttons
+  if (drop_forks_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::BUDDY_CLIMB);
+  }
+  if (crawl_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
+  }
+  if (climb_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
+  }
+  if (brake_->was_clicked()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
   }
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);

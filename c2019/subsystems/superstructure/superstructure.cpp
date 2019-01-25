@@ -298,32 +298,24 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       elevator_height_ = kCargoGroundHeight;
       wrist_angle_ = kCargoGroundAngle;
     case CLIMB:
-      GoToState(CLIMBING);
+      if (buddy_) {
+        GoToState(BUDDY_CLIMBING);
+      } else {
+        GoToState(CLIMBING);
+      }
       elevator_height_ = kClimbHeight;
       wrist_angle_ = kClimbAngle;
       should_climb_ = true;
-      buddy_ = false;
       high_gear_ = false;
       crawler_down_ = true;
       break;
     case BUDDY_CLIMB:
-      GoToState(BUDDY_CLIMBING);
-      elevator_height_ = kClimbHeight;
-      wrist_angle_ = kClimbAngle;
-      should_climb_ = true;
       buddy_ = true;
-      high_gear_ = false;
       break;
     case CRAWL:
       crawling_ = true;
       high_gear_ = false;
       crawler_down_ = true;
-      break;
-    case CRAWL_BRAKED:
-      crawling_ = true;
-      high_gear_ = false;
-      crawler_down_ = true;
-      brake_ = true;
       break;
     case BRAKE:
       brake_ = true;
