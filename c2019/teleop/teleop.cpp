@@ -148,6 +148,8 @@ void TeleopBase::SendDrivetrainMessage() {
 void TeleopBase::SendSuperstructureMessage() {
   SuperstructureGoalProto superstructure_goal;
 
+  // Ground hatch intake and outtake is true if both intakes/outtakes are
+  // pressed
   bool ground_hatch_intake_ =
       cargo_intake_->is_pressed() && hp_hatch_intake_->is_pressed();
   bool ground_hatch_outtake_ =
@@ -167,11 +169,12 @@ void TeleopBase::SendSuperstructureMessage() {
          kGodmodeWristMultiplier * (godmode_wrist > 0 ? 1 : -1)));
   }
 
-  // Intakes & Outtakes
+  // Intake elevator height
   if (ground_intake_height_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CARGO_GROUND);
   }
 
+  // Intake buttons
   if (cargo_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_CARGO);
     if (has_cargo_) {
@@ -207,7 +210,7 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
 
-  // Scoring positions - auto detects which game piece
+  // Scoring positions - auto detects game piece
   if (stow_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::STOW);
   }
