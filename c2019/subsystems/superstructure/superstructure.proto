@@ -12,7 +12,7 @@ enum SuperstructureState {
   INTAKING_CARGO = 4;
   HANDING_OFF = 5;
   CLIMBING = 6;
-  BUDDY_CLIMBING = 7;
+  DROPPING_FORKS = 7;
 }
 
 enum IntakeGoal {
@@ -46,7 +46,7 @@ enum ScoreGoal {
   STOW = 15;
   CARGO_GROUND = 16;
   CLIMB = 17;
-  BUDDY_CLIMB = 18;
+  DROP_FORKS = 18;
   CRAWL = 19;
   BRAKE = 20;
 }

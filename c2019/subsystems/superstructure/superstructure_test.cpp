@@ -497,17 +497,15 @@ TEST_F(SuperstructureTest, Climb) {
   EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
 }
 
-TEST_F(SuperstructureTest, BuddyClimb) {
+TEST_F(SuperstructureTest, DropForks) {
   CalibrateDisabled();
-  SetGoal(ScoreGoal::BUDDY_CLIMB, IntakeGoal::INTAKE_NONE, true);
-  RunFor(3);
+  SetGoal(ScoreGoal::DROP_FORKS, IntakeGoal::INTAKE_NONE, true);
+  RunFor(10);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
 
-  CheckGoal(kClimbHeight, kClimbAngle);
-  EXPECT_EQ(superstructure_status_proto_->state(), BUDDY_CLIMBING);
-  EXPECT_EQ(superstructure_output_proto_->winch_voltage(), 12);
-  EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
+  EXPECT_EQ(superstructure_status_proto_->state(), DROPPING_FORKS);
+  EXPECT_TRUE(superstructure_output_proto_->drop_forks());
 }
 
 TEST_F(SuperstructureTest, Crawl) {
