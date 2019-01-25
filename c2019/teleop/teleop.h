@@ -47,10 +47,12 @@ class TeleopBase {
 
   // climbing buttons
   // intake/outtake buttons
-  muan::teleop::Button *cargo_intake_, *cargo_outtake_, *ground_hatch_intake_,
-      *ground_hatch_outtake_, *hp_hatch_intake_, *hp_hatch_outtake_;
+  muan::teleop::Button *cargo_intake_, *cargo_outtake_, *hp_hatch_intake_,
+      *hp_hatch_outtake_;
+  muan::teleop::Button *ground_intake_height_;
   // scoring positions
   muan::teleop::Button *level_1_, *level_2_, *level_3_, *ship_;
+  muan::teleop::Button *stow_;
   // scoring modes
   muan::teleop::Button *forwards_, *backwards_;
   // vision buttons
@@ -60,6 +62,8 @@ class TeleopBase {
 
   int kRumbleTicks = 25;
   int rumble_ticks_left_;
+
+  bool ground_hatch_intake_, ground_hatch_outtake_;
 
   bool has_cargo_, has_hp_hatch_, has_ground_hatch_ = false;
   bool had_cargo_, had_hp_hatch_, had_ground_hatch_ = false;

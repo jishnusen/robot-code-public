@@ -25,14 +25,16 @@ TeleopBase::TeleopBase()
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")}
 // auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
-// goal/status queues
 // TODO(Apurva) include when limelight is merged
-/*, limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
+/*goal/status
+queues/limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
 limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/
 {
   // climbing buttons
   // TODO(Apurva or Hanson) do climbing buttons
   // scoring positions
+  stow_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
+
   level_1_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::A_BUTTON));
   level_2_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::B_BUTTON));
   level_3_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::Y_BUTTON));
@@ -42,15 +44,14 @@ limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/
   backwards_ = gamepad_.MakeAxisRange(135, 180, 0, 1, 0.8);
   // vision buttons?
   // intake buttons
+  ground_intake_height_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
   cargo_intake_ = gamepad_.MakeAxis(3, 0.3);
   hp_hatch_intake_ =
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_BUMPER));
-  ground_hatch_intake_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
   // outtake buttons
   cargo_outtake_ = gamepad_.MakeAxis(2, 0.7);
   hp_hatch_outtake_ =
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_BUMPER));
-  ground_hatch_outtake_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
   // gear shifting - throttle buttons
   shifting_low_ = throttle_.MakeButton(4);
   shifting_high_ = throttle_.MakeButton(5);
@@ -82,6 +83,7 @@ void TeleopBase::Stop() { running_ = false; }
 
 void TeleopBase::Update() {
   AutoStatusProto auto_status;
+  // TODO(Hanson) when is auto going to work
   // auto_status_reader_.ReadLastMessage(&auto_status);
   if (RobotController::IsSysActive() && !auto_status->in_auto()) {
     SendDrivetrainMessage();
@@ -146,6 +148,11 @@ void TeleopBase::SendDrivetrainMessage() {
 void TeleopBase::SendSuperstructureMessage() {
   SuperstructureGoalProto superstructure_goal;
 
+  bool ground_hatch_intake_ =
+      cargo_intake_->is_pressed() && hp_hatch_intake_->is_pressed();
+  bool ground_hatch_outtake_ =
+      cargo_outtake_->is_pressed() && hp_hatch_outtake_->is_pressed();
+
   double godmode_elevator = -gamepad_.wpilib_joystick()->GetRawAxis(5);
   double godmode_wrist = gamepad_.wpilib_joystick()->GetRawAxis(4);
 
@@ -161,18 +168,28 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Intakes & Outtakes
+  if (ground_intake_height_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::CARGO_GROUND);
+  }
+
   if (cargo_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_CARGO);
+    if (has_cargo_) {
+      superstructure_goal->set_score_goal(c2019::superstructure::STOW);
+    }
   } else if (cargo_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_CARGO);
-  } else if (ground_hatch_intake_->is_pressed()) {
+  } else if (ground_hatch_intake_) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::INTAKE_GROUND_HATCH);
-  } else if (ground_hatch_outtake_->is_pressed()) {
+  } else if (ground_hatch_outtake_) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::OUTTAKE_GROUND_HATCH);
   } else if (hp_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
+    if (has_hp_hatch_) {
+      superstructure_goal->set_score_goal(c2019::superstructure::STOW);
+    }
   } else if (hp_hatch_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
@@ -191,6 +208,9 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Scoring positions - auto detects which game piece
+  if (stow_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::STOW);
+  }
   if (level_1_->is_pressed()) {
     if (has_cargo_) {
       if (forwards_->is_pressed()) {
