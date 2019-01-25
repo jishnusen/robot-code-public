@@ -4,13 +4,13 @@
 #include <atomic>
 #include "WPILib.h"
 #include "c2019/autonomous/queue_types.h"
+#include "c2019/subsystems/superstructure/queue_types.h"
+#include "c2019/subsystems/superstructure/superstructure.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/teleop/joystick.h"
 #include "muan/utils/threading_utils.h"
 #include "muan/wpilib/ds_sender.h"
-#include "c2019/subsystems/superstructure/queue_types.h"
-#include "c2019/subsystems/superstructure/superstructure.h"
 
 namespace c2019 {
 namespace teleop {
@@ -24,7 +24,8 @@ class TeleopBase {
 
  private:
   c2019::superstructure::SuperstructureGoalQueue *superstructure_goal_queue_;
-  c2019::superstructure::SuperstructureStatusQueue *superstructure_status_queue_;
+  c2019::superstructure::SuperstructureStatusQueue
+      *superstructure_status_queue_;
   std::atomic<bool> running_;
 
   void Update();
@@ -37,7 +38,7 @@ class TeleopBase {
   muan::teleop::Joystick gamepad_;
 
   void SendSuperstructureMessage();
-  //autonomous::AutoStatusQueue::QueueReader auto_status_reader_;
+  // autonomous::AutoStatusQueue::QueueReader auto_status_reader_;
 
   // driving
   muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_;
@@ -50,19 +51,19 @@ class TeleopBase {
       *ground_hatch_outtake_, *hp_hatch_intake_, *hp_hatch_outtake_;
   // scoring positions
   muan::teleop::Button *level_1_, *level_2_, *level_3_, *ship_;
+  // scoring modes
+  muan::teleop::Button *forwards_, *backwards_;
   // vision buttons
   // muan::teleop::Button *align_;
-  // scoring modes
-  muan::teleop::Button *cargo_, *hatch_;
   // handoff
   muan::teleop::Button *handoff_;
-  
+
   int kRumbleTicks = 25;
   int rumble_ticks_left_;
-  
+
   bool has_cargo_, has_hp_hatch_, has_ground_hatch_ = false;
   bool had_cargo_, had_hp_hatch_, had_ground_hatch_ = false;
-  
+
   c2019::superstructure::SuperstructureStatusProto superstructure_status_;
 
   double kGodmodeButtonThreshold = .25;

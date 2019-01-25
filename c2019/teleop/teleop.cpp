@@ -11,24 +11,25 @@ using muan::wpilib::GameSpecificStringProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using autonomous::AutoStatusProto;
 using c2019::superstructure::SuperstructureGoalProto;
-//using c2019::limelight::LimelightGoalProto;
+// using c2019::limelight::LimelightGoalProto;
 using c2019::superstructure::SuperstructureStatusProto;
 
 TeleopBase::TeleopBase()
-    : superstructure_goal_queue_{
-          QueueManager<c2019::superstructure::SuperstructureGoalProto>::Fetch()},
-      superstructure_status_queue_{
-          QueueManager<c2019::superstructure::SuperstructureStatusProto>::Fetch()},
+    : superstructure_goal_queue_{QueueManager<
+          c2019::superstructure::SuperstructureGoalProto>::Fetch()},
+      superstructure_status_queue_{QueueManager<
+          c2019::superstructure::SuperstructureStatusProto>::Fetch()},
       ds_sender_{QueueManager<DriverStationProto>::Fetch(),
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")}
-      // auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
-      // goal/status queues
-      // TODO(Apurva) include when limelight is merged
-      /*, limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
-      limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/ {
+// auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
+// goal/status queues
+// TODO(Apurva) include when limelight is merged
+/*, limelight_goal_queue_{QueueManager<LimelightGoalProto>::Fetch()},
+limelight_status_queue_{QueueManager<LimelightStatusProto>::Fetch()}*/
+{
   // climbing buttons
   // TODO(Apurva or Hanson) do climbing buttons
   // scoring positions
@@ -36,10 +37,10 @@ TeleopBase::TeleopBase()
   level_2_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::B_BUTTON));
   level_3_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::Y_BUTTON));
   ship_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::X_BUTTON));
-  // vision buttons?
   // scoring modes
-  cargo_ = gamepad_.MakeAxisRange(0, 45, 0, 1, 0.8);
-  hatch_ = gamepad_.MakeAxisRange(135, 180, 0, 1, 0.8);
+  forwards_ = gamepad_.MakeAxisRange(0, 45, 0, 1, 0.8);
+  backwards_ = gamepad_.MakeAxisRange(135, 180, 0, 1, 0.8);
+  // vision buttons?
   // intake buttons
   cargo_intake_ = gamepad_.MakeAxis(3, 0.3);
   hp_hatch_intake_ =
@@ -53,6 +54,8 @@ TeleopBase::TeleopBase()
   // gear shifting - throttle buttons
   shifting_low_ = throttle_.MakeButton(4);
   shifting_high_ = throttle_.MakeButton(5);
+  // handoff button
+  handoff_ = gamepad_.MakePov(0, muan::teleop::Pov::kEast);
 
   // quickturn - ??
   quickturn_ = wheel_.MakeButton(5);
@@ -92,8 +95,7 @@ void TeleopBase::Update() {
   has_hp_hatch_ = superstructure_status_->has_hp_hatch();
   has_ground_hatch_ = superstructure_status_->has_ground_hatch();
 
-  if ((has_cargo_ && !had_cargo_) ||
-      (has_hp_hatch_ && !had_hp_hatch_) ||
+  if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
     rumble_ticks_left_ = kRumbleTicks;
   }
@@ -101,20 +103,16 @@ void TeleopBase::Update() {
   had_hp_hatch_ = has_hp_hatch_;
   had_ground_hatch_ = has_ground_hatch_;
 
-
-
   if (rumble_ticks_left_ > 0) {
     if (!has_cargo_ && !has_hp_hatch_ && !has_ground_hatch_) {
       rumble_ticks_left_ = 0;
-    }  // TODO(Nathan) rename hatch to panel in places used
+    }
     // Set rumble on
     rumble_ticks_left_--;
-    gamepad_.wpilib_joystick()->SetRumble(
-             GenericHID::kLeftRumble, 1.0);
+    gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 1.0);
   } else {
     // Set rumble off
-    gamepad_.wpilib_joystick()->SetRumble(
-             GenericHID::kLeftRumble, 0.0);
+    gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
 
   ds_sender_.Send();
@@ -168,9 +166,11 @@ void TeleopBase::SendSuperstructureMessage() {
   } else if (cargo_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_CARGO);
   } else if (ground_hatch_intake_->is_pressed()) {
-    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_GROUND_HATCH);
+    superstructure_goal->set_intake_goal(
+        c2019::superstructure::INTAKE_GROUND_HATCH);
   } else if (ground_hatch_outtake_->is_pressed()) {
-    superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_GROUND_HATCH);
+    superstructure_goal->set_intake_goal(
+        c2019::superstructure::OUTTAKE_GROUND_HATCH);
   } else if (hp_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
   } else if (hp_hatch_outtake_->is_pressed()) {
@@ -179,25 +179,72 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_IDLE);
   }
 
-  // Scoring positions
+  // Handoff
+  if (handoff_->is_pressed()) {
+    if (has_ground_hatch_) {
+      superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
+      superstructure_goal->set_intake_goal(c2019::superstructure::POP);
+      if (has_hp_hatch_) {
+        superstructure_goal->set_intake_goal(c2019::superstructure::SPIT);
+      }
+    }
+  }
+
+  // Scoring positions - auto detects which game piece
   if (level_1_->is_pressed()) {
     if (has_cargo_) {
-      superstructure_goal->set_score_goal(c2019::superstructure::CARGO_ROCKET_FIRST);
-    } else if (has_hp_hatch_ || has_ground_hatch /*not sure this logic is right*/) {
-      superstructure_goal->set_score_goal(c2019::superstructure::HATCH_ROCKET_FIRST);
+      if (forwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_ROCKET_FIRST);
+      } else if (backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_ROCKET_BACKWARDS);
+      }
+    } else if (has_hp_hatch_) {
+      if (forwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_FIRST);
+      } else if (backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_BACKWARDS);
+      }
     }
   }
   if (level_2_->is_pressed()) {
     if (has_cargo_) {
-       superstructure_goal->set_score_goal(c2019::superstructure::CARGO_ROCKET_SECOND);
-     else if (has_hp_hatch_ || has_ground_hatch) {
-       superstructure_goal->set_score_goal(c2019::superstructure::HATCH_ROCKET_SECOND);
-     }
+      superstructure_goal->set_score_goal(
+          c2019::superstructure::CARGO_ROCKET_SECOND);
+    } else if (has_hp_hatch_) {
+      superstructure_goal->set_score_goal(
+          c2019::superstructure::HATCH_ROCKET_SECOND);
+    }
+  }
   if (level_3_->is_pressed()) {
     if (has_cargo_) {
-      superstructure_goal->set_score_goal(c2019::superstructure::CARGO_ROCKET_THIRD);
-    else if (has_hp_hatch_ || has_ground_hatch) {
-      superstructure_goal->set_score_goal(c2019::superstructure::HATCH_ROCKET_THIRD);
+      superstructure_goal->set_score_goal(
+          c2019::superstructure::CARGO_ROCKET_THIRD);
+    } else if (has_hp_hatch_) {
+      superstructure_goal->set_score_goal(
+          c2019::superstructure::HATCH_ROCKET_THIRD);
+    }
+  }
+  if (ship_->is_pressed()) {
+    if (has_cargo_) {
+      if (forwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_SHIP_FORWARDS);
+      } else if (backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_SHIP_BACKWARDS);
+      }
+    } else if (has_hp_hatch_) {
+      if (forwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_SHIP_FORWARDS);
+      } else if (backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_SHIP_BACKWARDS);
+      }
     }
   }
 
