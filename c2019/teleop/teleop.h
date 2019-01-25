@@ -46,7 +46,8 @@ class TeleopBase {
   bool high_gear_;
 
   // climbing buttons
-  muan::teleop::Button *climb_, *crawl_, *drop_forks_, *brake_;
+  muan::teleop::Button *climb_, *crawl_, *drop_forks_, *drop_forks_safety_,
+      *brake_;
 
   // intake/outtake buttons
   muan::teleop::Button *cargo_intake_, *cargo_outtake_, *hp_hatch_intake_,

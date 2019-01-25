@@ -33,7 +33,8 @@ TeleopBase::TeleopBase()
   crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
-  drop_forks_ =
+  drop_forks_ = gamepad_.MakeAxisRange(46, 134, 0, 1, 0.8);
+  drop_forks_safety_ =
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
 
   // scoring positions
@@ -159,6 +160,9 @@ void TeleopBase::SendSuperstructureMessage() {
   bool ground_hatch_outtake_ =
       cargo_outtake_->is_pressed() && hp_hatch_outtake_->is_pressed();
 
+  bool drop_forks =
+      drop_forks_->is_pressed() && drop_forks_safety_->is_pressed();
+
   double godmode_elevator = -gamepad_.wpilib_joystick()->GetRawAxis(5);
   double godmode_wrist = gamepad_.wpilib_joystick()->GetRawAxis(4);
 
@@ -273,7 +277,7 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Climbing buttons
-  if (drop_forks_->is_pressed()) {
+  if (drop_forks) {
     superstructure_goal->set_score_goal(c2019::superstructure::BUDDY_CLIMB);
   }
   if (crawl_->is_pressed()) {
@@ -282,7 +286,7 @@ void TeleopBase::SendSuperstructureMessage() {
   if (climb_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
   }
-  if (brake_->was_clicked()) {
+  if (brake_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
   }
 
