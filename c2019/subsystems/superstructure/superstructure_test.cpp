@@ -505,7 +505,6 @@ TEST_F(SuperstructureTest, DropForks) {
   RunFor(1000);
 
   EXPECT_EQ(superstructure_status_proto_->state(), DROPPING_FORKS);
-  EXPECT_TRUE(superstructure_output_proto_->drop_forks());
 }
 
 TEST_F(SuperstructureTest, Crawl) {
