@@ -44,11 +44,12 @@ enum ScoreGoal {
   HATCH_SHIP_BACKWARDS = 13;
   HANDOFF = 14;
   STOW = 15;
-  CLIMB = 16;
-  BUDDY_CLIMB = 17;
-  CRAWL = 18;
-  CRAWL_BRAKED = 19;
-  BRAKE = 20;
+  CARGO_GROUND = 16;
+  CLIMB = 17;
+  BUDDY_CLIMB = 18;
+  CRAWL = 19;
+  CRAWL_BRAKED = 20;
+  BRAKE = 21;
 }
 
 enum GroundHatchIntakeState {
@@ -143,4 +144,8 @@ message SuperstructureOutput {
   required bool snap_down = 11;
   required double winch_voltage = 12;
   required bool drop_forks = 13;
+  required bool elevator_high_gear = 14;
+  required bool crawler_solenoid = 15;
+  required double crawler_voltage = 16;
+  required bool brake = 17;
 }

@@ -20,49 +20,49 @@
 namespace c2019 {
 namespace superstructure {
 
-// TODO(hanson) put actual numbers here
+// TODO(hanson) test these numbers
 // elevator constants
-constexpr double kHatchShipForwardsHeight = 0;
-constexpr double kHatchShipBackwardsHeight = 0;
-constexpr double kHatchRocketFirstHeight = 0;
-constexpr double kHatchRocketBackwardsHeight = 0;
-constexpr double kHatchRocketSecondHeight = 0;
-constexpr double kHatchRocketThirdHeight = 0;
-constexpr double kHatchLoadingStationHeight = 0;
-constexpr double kHatchGroundHeight = 0;
-constexpr double kCargoShipForwardsHeight = 0;
+constexpr double kHatchShipForwardsHeight = .4;
+constexpr double kHatchShipBackwardsHeight = 0.;
+constexpr double kHatchRocketFirstHeight = .4;
+constexpr double kHatchRocketBackwardsHeight = 0.;
+constexpr double kHatchRocketSecondHeight = 1.2;
+constexpr double kHatchRocketThirdHeight = 2.;
+constexpr double kHatchLoadingStationHeight = .4;
+constexpr double kHatchGroundHeight = 0.;
+constexpr double kCargoShipForwardsHeight = 1.;
 constexpr double kCargoShipBackwardsHeight = 0;
-constexpr double kCargoRocketFirstHeight = 0;
-constexpr double kCargoRocketBackwardsHeight = 0;
-constexpr double kCargoRocketSecondHeight = 0;
-constexpr double kCargoRocketThirdHeight = 0;
-constexpr double kCargoGroundHeight = 0;
-constexpr double kHandoffHeight = 0;
-constexpr double kSpitHeight = 0;
-constexpr double kStowHeight = 0;
-constexpr double kClimbHeight = 0;
-constexpr double kElevatorSafeHeight = 0;
-constexpr double kElevatorMinHeight = 0;
-constexpr double kElevatorMaxHeight = 0;
+constexpr double kCargoRocketFirstHeight = .6;
+constexpr double kCargoRocketBackwardsHeight = 0.;
+constexpr double kCargoRocketSecondHeight = 1.4;
+constexpr double kCargoRocketThirdHeight = 2.;
+constexpr double kCargoGroundHeight = 0.;
+constexpr double kHandoffHeight = 0.;
+constexpr double kSpitHeight = 0.;
+constexpr double kStowHeight = 0.;
+constexpr double kClimbHeight = 0.;
+constexpr double kElevatorSafeHeight = 0.05;
+constexpr double kElevatorMinHeight = 0.;
+constexpr double kElevatorMaxHeight = 2.;
 constexpr double kElevatorHandoffTolerance = 2e-3;
 
 // wrist constants
-constexpr double kHatchForwardsAngle = 0;
-constexpr double kHatchBackwardsAngle = 0;
-constexpr double kCargoRocketFirstAngle = 0;
-constexpr double kCargoRocketSecondAngle = 0;
-constexpr double kCargoRocketThirdAngle = 0;
-constexpr double kCargoRocketBackwardsAngle = 0;
-constexpr double kCargoShipForwardsAngle = 0;
-constexpr double kCargoShipBackwardsAngle = 0;
-constexpr double kCargoGroundAngle = 0;
-constexpr double kHandoffAngle = 0;
-constexpr double kStowAngle = 0;
-constexpr double kClimbAngle = 0;
-constexpr double kWristSafeAngle = 0;
-constexpr double kWristMinAngle = 0;
-constexpr double kWristMaxAngle = 0;
-constexpr double kWristHandoffTolerance = 3 * (M_PI / 180);
+constexpr double kHatchForwardsAngle = 0.;
+constexpr double kHatchBackwardsAngle = 3.1;
+constexpr double kCargoRocketFirstAngle = 0.;
+constexpr double kCargoRocketSecondAngle = 0.;
+constexpr double kCargoRocketThirdAngle = M_PI / 12.;
+constexpr double kCargoRocketBackwardsAngle = M_PI * (5. / 6.);
+constexpr double kCargoShipForwardsAngle = 0.;
+constexpr double kCargoShipBackwardsAngle = M_PI * (5. / 6.);
+constexpr double kCargoGroundAngle = 0.;
+constexpr double kHandoffAngle = 3.1;
+constexpr double kStowAngle = M_PI / 2.;
+constexpr double kClimbAngle = 0.;
+constexpr double kWristSafeAngle = 1.4;
+constexpr double kWristMinAngle = 0.;
+constexpr double kWristMaxAngle = M_PI;
+constexpr double kWristHandoffTolerance = 3. * (M_PI / 180.);
 
 class Superstructure {
  public:
