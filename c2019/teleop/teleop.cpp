@@ -194,9 +194,6 @@ void TeleopBase::SendSuperstructureMessage() {
         c2019::superstructure::OUTTAKE_GROUND_HATCH);
   } else if (hp_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
-    if (has_hp_hatch_) {
-      superstructure_goal->set_score_goal(c2019::superstructure::STOW);
-    }
   } else if (hp_hatch_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
