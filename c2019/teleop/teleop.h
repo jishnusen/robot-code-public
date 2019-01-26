@@ -73,9 +73,9 @@ class TeleopBase {
 
   c2019::superstructure::SuperstructureStatusProto superstructure_status_;
 
-  double kGodmodeButtonThreshold = .25;
-  double kGodmodeElevatorMultiplier = 6;
-  double kGodmodeWristMultiplier = 10;
+  constexpr double kGodmodeButtonThreshold = .25;
+  constexpr double kGodmodeElevatorMultiplier = 6;
+  constexpr double kGodmodeWristMultiplier = 10;
 };
 
 }  // namespace teleop
