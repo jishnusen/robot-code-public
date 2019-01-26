@@ -273,7 +273,7 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   if (drop_forks) {
-    superstructure_goal->set_score_goal(c2019::superstructure::BUDDY_CLIMB);
+    superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
   if (crawl_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
