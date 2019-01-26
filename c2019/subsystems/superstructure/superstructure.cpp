@@ -405,13 +405,12 @@ void Superstructure::GoToState(SuperstructureState desired_state,
                                IntakeGoal intake) {
   switch (state_) {
     case CALIBRATING:
-      /* if (wrist_status_->is_calibrated() &&
-       * elevator_status_->is_calibrated()) { */
-      state_ = desired_state;
-      /* } else { */
-      /*   LOG(ERROR, "Tried to go to invalid state %d while calibrating!", */
-      /*       static_cast<int>(desired_state)); */
-      /* } */
+      if (wrist_status_->is_calibrated() && elevator_status_->is_calibrated()) {
+        state_ = desired_state;
+      } else {
+        LOG(ERROR, "Tried to go to invalid state %d while calibrating!",
+            static_cast<int>(desired_state));
+      }
       break;
     case INTAKING_WRIST:
     case INTAKING_GROUND:
