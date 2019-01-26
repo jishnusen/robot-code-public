@@ -421,13 +421,37 @@ TEST_F(SuperstructureTest, Climb) {
 
 TEST_F(SuperstructureTest, BuddyClimb) {
   CalibrateDisabled();
-  SetGoal(ScoreGoal::BUDDY_CLIMB, IntakeGoal::INTAKE_NONE, true);
+  SetGoal(ScoreGoal::DROP_FORKS, IntakeGoal::INTAKE_NONE, true);
+  RunFor(3);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
+  EXPECT_TRUE(superstructure_output_proto_->drop_forks());
+
+  SetGoal(ScoreGoal::DROP_CRAWLERS, IntakeGoal::INTAKE_NONE, true);
+  RunFor(3);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
+  EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
+
+  SetGoal(ScoreGoal::WINCH, IntakeGoal::INTAKE_NONE, true);
+  RunFor(3);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
+  EXPECT_EQ(superstructure_output_proto_->winch_voltage(), 12);
+
+  SetGoal(ScoreGoal::CLIMB, IntakeGoal::INTAKE_NONE, true);
+  RunFor(3);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
+
+  SetGoal(ScoreGoal::CRAWL, IntakeGoal::INTAKE_NONE, true);
   RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
 
   CheckGoal(kClimbHeight, kClimbAngle);
-  EXPECT_EQ(superstructure_output_proto_->winch_voltage(), 12);
+  EXPECT_EQ(superstructure_output_proto_->crawler_voltage(), 12);
+  EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
   EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
 }
 

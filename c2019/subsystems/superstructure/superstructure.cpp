@@ -90,14 +90,14 @@ winch::WinchGoalProto Superstructure::PopulateWinchGoal() {
   winch::WinchGoalProto goal;
   goal->set_winch(should_climb_);
   // Buddy climb logic
-  if (should_climb_) {
-    if (buddy_) {
-      goal->set_climb_goal(winch::BUDDY);
-    } else {
-      goal->set_climb_goal(winch::SOLO);
-    }
+  if (buddy_) {
+    goal->set_climb_goal(winch::BUDDY);
   } else {
-    goal->set_climb_goal(winch::NONE);
+    if (should_climb_) {
+      goal->set_climb_goal(winch::SOLO);
+    } else {
+      goal->set_climb_goal(winch::NONE);
+    }
   }
   return goal;
 }
@@ -303,18 +303,14 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       buddy_ = false;
       high_gear_ = false;
       crawler_down_ = true;
+      brake_ = false;
       break;
     case DROP_FORKS:
       buddy_ = true;
+      should_climb_ = false;
       break;
-    case BUDDY_CLIMB:
-      elevator_height_ = kClimbHeight;
-      wrist_angle_ = kClimbAngle;
-      should_climb_ = true;
-      buddy_ = true;
-      high_gear_ = false;
+    case DROP_CRAWLERS:
       crawler_down_ = true;
-      break;
     case CRAWL:
       crawling_ = true;
       high_gear_ = false;
@@ -329,6 +325,9 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case BRAKE:
       brake_ = true;
       break;
+    case WINCH:
+      buddy_ = true;
+      should_climb_ = true;
   }
 
   // Godmode
