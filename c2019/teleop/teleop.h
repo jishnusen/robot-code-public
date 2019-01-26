@@ -15,6 +15,10 @@
 namespace c2019 {
 namespace teleop {
 
+constexpr double kGodmodeButtonThreshold = .25;
+constexpr double kGodmodeElevatorMultiplier = 6;
+constexpr double kGodmodeWristMultiplier = 10;
+
 class TeleopBase {
  public:
   TeleopBase();
@@ -72,10 +76,6 @@ class TeleopBase {
   bool had_cargo_, had_hp_hatch_, had_ground_hatch_ = false;
 
   c2019::superstructure::SuperstructureStatusProto superstructure_status_;
-
-  constexpr double kGodmodeButtonThreshold = .25;
-  constexpr double kGodmodeElevatorMultiplier = 6;
-  constexpr double kGodmodeWristMultiplier = 10;
 };
 
 }  // namespace teleop
