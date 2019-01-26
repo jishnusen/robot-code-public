@@ -201,19 +201,13 @@ void TeleopBase::SendSuperstructureMessage() {
   } else if (hp_hatch_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
-    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_IDLE);
+    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
   }
 
   // Handoff
   if (handoff_->is_pressed()) {
-    if (has_ground_hatch_) {
-      superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
-      superstructure_goal->set_intake_goal(c2019::superstructure::POP);
-      if (has_hp_hatch_) {
-        superstructure_goal->set_intake_goal(
-            c2019::superstructure::PREP_HANDOFF);
-      }
-    }
+    superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
+    superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
   }
 
   // Scoring positions - auto detects game piece
@@ -279,7 +273,7 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   if (drop_forks) {
-    superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
+    superstructure_goal->set_score_goal(c2019::superstructure::BUDDY_CLIMB);
   }
   if (crawl_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
