@@ -210,7 +210,8 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
       superstructure_goal->set_intake_goal(c2019::superstructure::POP);
       if (has_hp_hatch_) {
-        superstructure_goal->set_intake_goal(c2019::superstructure::SPIT);
+        superstructure_goal->set_intake_goal(
+            c2019::superstructure::PREP_HANDOFF);
       }
     }
   }
