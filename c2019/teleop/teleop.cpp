@@ -33,9 +33,10 @@ TeleopBase::TeleopBase()
   crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
-  drop_forks_ = gamepad_.MakeAxisRange(46, 134, 0, 1, 0.8);
-  drop_forks_safety_ =
-      gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
+  drop_forks_ = gamepad_.MakeAxisRange(-134, -46, 0, 1, 0.8);
+  drop_crawlers_ = gamepad_.MakeAxisRange(46, 134, 0, 1, 0.8);
+
+  safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
 
   // scoring positions
   stow_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
@@ -45,7 +46,7 @@ TeleopBase::TeleopBase()
   level_3_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::Y_BUTTON));
   ship_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::X_BUTTON));
   // scoring modes
-  forwards_ = gamepad_.MakeAxisRange(0, 45, 0, 1, 0.8);
+  forwards_ = gamepad_.MakeAxisRange(-45, 45, 0, 1, 0.8);
   backwards_ = gamepad_.MakeAxisRange(135, 180, 0, 1, 0.8);
   // vision buttons?
   // intake buttons
@@ -160,9 +161,6 @@ void TeleopBase::SendSuperstructureMessage() {
   bool ground_hatch_outtake_ =
       cargo_outtake_->is_pressed() && hp_hatch_outtake_->is_pressed();
 
-  bool drop_forks =
-      drop_forks_->is_pressed() && drop_forks_safety_->is_pressed();
-
   double godmode_elevator = -gamepad_.wpilib_joystick()->GetRawAxis(5);
   double godmode_wrist = gamepad_.wpilib_joystick()->GetRawAxis(4);
 
@@ -272,8 +270,11 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Climbing buttons
-  if (drop_forks) {
+  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
+  }
+  if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
   }
   if (crawl_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
