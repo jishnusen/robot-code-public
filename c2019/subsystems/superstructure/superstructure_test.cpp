@@ -419,10 +419,10 @@ TEST_F(SuperstructureTest, Climb) {
   EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
 }
 
-TEST_F(SuperstructureTest, DropForks) {
+TEST_F(SuperstructureTest, BuddyClimb) {
   CalibrateDisabled();
-  SetGoal(ScoreGoal::DROP_FORKS, IntakeGoal::INTAKE_NONE, true);
-  RunFor(10);
+  SetGoal(ScoreGoal::BUDDY_CLIMB, IntakeGoal::INTAKE_NONE, true);
+  RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
 
