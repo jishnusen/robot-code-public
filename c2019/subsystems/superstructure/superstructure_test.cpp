@@ -512,6 +512,8 @@ TEST_F(SuperstructureTest, Handoff) {
   RunFor(10);
   EXPECT_EQ(superstructure_status_proto_->hatch_intake_state(), HATCH_CARRYING);
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
+  EXPECT_EQ(superstructure_status_proto_->elevator_height(), kStowHeight);
+  EXPECT_EQ(superstructure_status_proto_->wrist_angle(), kStowAngle);
 }
 
 }  // namespace superstructure
