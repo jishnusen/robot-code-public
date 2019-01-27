@@ -7,13 +7,15 @@ package c2019.ground_hatch_intake;
 enum State {
   IDLE = 0;
   INTAKING = 1;
-  CARRYING = 2;
-  OUTTAKING = 3;
+  PICKING_UP = 2;
+  CARRYING = 3;
+  OUTTAKING = 4;
 }
 
 message GroundHatchIntakeStatus {
   required uint64 timestamp = 1;
   required State state = 2;
+  required bool has_hatch = 3;
 }
 
 message GroundHatchIntakeOutput {
@@ -24,10 +26,9 @@ message GroundHatchIntakeOutput {
 
 enum Goal {
   NONE = 0; 
-  INTAKE = 1; 
-  HOLD = 2;
-  OUTTAKE = 3;
-  LOOSE = 4;
+  REQUEST_HATCH = 1;
+  EJECT = 2;
+  RISE = 3;
 }
 
 message GroundHatchIntakeGoal {
