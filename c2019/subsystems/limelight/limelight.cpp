@@ -6,105 +6,69 @@ using muan::queues::QueueManager;
 namespace c2019 {
 namespace limelight {
 
-Limelight::Limelight(double limelight_height, double limelight_angle,
-                     double object_height)
+Limelight::Limelight(const double limelight_height,const double limelight_angle,
+                     const double object_height)
     : status_queue_{QueueManager<LimelightStatusProto>::Fetch()},
       limelight_height_(limelight_height),
       limelight_angle_(limelight_angle),
       object_height_(object_height) {}
 
-void Limelight::GetTable() {
-  auto inst = nt::NetworkTableInstance::GetDefault();
-  std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight");
-  target_horizontal_angle_ = table->GetEntry("tx").GetDouble(0);
-  target_vertical_angle_ = table->GetEntry("ty").GetDouble(0);
-  target_area_ = table->GetEntry("ta").GetDouble(0);
-  target_skew_ = table->GetEntry("ts").GetDouble(0);
-  target_present_ = table->GetEntry("tv").GetDouble(0);
-}
-
-double Limelight::ObjectDistance(double vertical_angle) {
-  const double distance =
-      (limelight_height_ - object_height_ * 0.0254) *
-      std::tan((M_PI / 180.) * (limelight_angle_ + vertical_angle));
-  distance_ = 2.577 * distance - 0.7952;
-  distance_ = distance;
-  return distance_;
-}
-
 void Limelight::Update() {
-  LimelightStatusProto status;
-  LimelightGoalProto goal;
-
-  if (goal_reader_.ReadLastMessage(&goal)) {
     auto inst = nt::NetworkTableInstance::GetDefault();
     std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight");
-    table->PutNumber("ledMode", static_cast<int>(goal->limelight_state()));
-  }
-  status->set_has_target(target_present_);
-  if (target_present_) {
-    status->set_dist(ObjectDistance(target_vertical_angle_));
-    status->set_theta(target_horizontal_angle_);
-    status->set_relative_x(std::cos(status->theta() * (M_PI / 180.)) *
-                           status->dist());
-    status->set_relative_y(std::sin(status->theta() * (M_PI / 180.)) *
-                           status->dist());
-    status->set_target_skew(target_skew_);
-  }
-  status_queue_->WriteMessage(status);
-}
+    double target_vertical_angle = table->GetEntry("ty").GetDouble(0);
+    double target_horizontal_angle = table->GetEntry("tx").GetDouble(0);
+    double target_1_horizontal_angle =
+        table->GetEntry("tx0").GetDouble(0) * (59.6 / 2.0) * (M_PI / 180.);
+    double target_2_horizontal_angle =
+        table->GetEntry("tx1").GetDouble(0) * (59.6 / 2.0) * (M_PI / 180.);
 
-//////////////////////////////////////////////////////////////////// Front is Up
-/// and Back is Down ////////////////////////
-BackLimelight::BackLimelight(double back_limelight_height,
-                             double back_limelight_angle,
-                             double back_object_height, double back_dist_factor,
-                             double back_dist_offset)
-    : status_queue_{QueueManager<LimelightStatusProto>::Fetch()},
-      back_limelight_height_(back_limelight_height),
-      back_limelight_angle_(back_limelight_angle),
-      back_object_height_(back_object_height),
-      back_dist_factor_(back_dist_factor),
-      back_dist_offset_(back_dist_offset) {}
+    std::vector<double> zero = {0, 0};
+    std::vector<double> y_corner = table->GetEntry("tcorny").GetDoubleArray(zero);
+    std::vector<double> x_corner = table->GetEntry("tcornx").GetDoubleArray(zero);
 
-void BackLimelight::GetBackTable() {
-  auto inst = nt::NetworkTableInstance::GetDefault();
-  std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-back");
-  back_target_horizontal_angle_ = table->GetEntry("tx").GetDouble(0);
-  back_target_vertical_angle_ = table->GetEntry("ty").GetDouble(0);
-  back_target_area_ = table->GetEntry("ta").GetDouble(0);
-  back_target_skew_ = table->GetEntry("ts").GetDouble(0);
-  back_target_present_ = table->GetEntry("tv").GetDouble(0);
-}
+    slope_  = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
 
-double BackLimelight::BackObjectDistance(double back_vertical_angle) {
-  back_distance_ =
-      (back_limelight_height_ - back_object_height_) *
-      tan((M_PI / 180.) * (back_limelight_angle_ + back_vertical_angle));
-  return back_distance_;
-}
+    table->PutNumber("pipeline", 0);
+    target_dist_ =
+        std::tan((target_vertical_angle + limelight_angle_) * (M_PI / 180.)) * (limelight_height_ - object_height_  * 0.0254);
+    double distance = target_dist_ * 2.70247 - 1.0116;
 
-void BackLimelight::UpdateBack() {
+    horiz_angle_ = (target_horizontal_angle * (M_PI / 180.));
+
+    target_1_horizontal_angle_ =
+        std::min(target_1_horizontal_angle, target_2_horizontal_angle);
+    target_2_horizontal_angle_ =
+        std::max(target_1_horizontal_angle, target_2_horizontal_angle);
+    double model_width = -.0305387 * pow(target_dist_, 4) +
+                         0.21889895 * pow(target_dist_, 3) -
+                         .6260213 * pow(target_dist_, 2) +
+                         0.913154444 * target_dist_ - 0.714746 + 0.08;
+    double heading = target_1_horizontal_angle_ - target_2_horizontal_angle_;
+    double skim_error = model_width - heading;
+    double heading_model = 544.0577 * pow(skim_error, 3) -
+                           88.244 * pow(skim_error, 2) + 5.7379 * skim_error -
+                           0.02217;
+    heading_model_ = heading_model * (-0.002 * pow(horiz_angle_, 2) -
+                                     0.058 * horiz_angle_ - 0.155);
+
+    target_y_ =
+        distance * std::sin(horiz_angle_ + 2 * M_PI * std::abs(heading_model));
+    target_x_ =
+        distance * std::cos(horiz_angle_ + 2 * M_PI * std::abs(heading_model));
+    distance_ = distance;
+ 
+  
   LimelightStatusProto status;
-  LimelightGoalProto goal;
-
-  if (goal_reader_.ReadLastMessage(&goal)) {
-    auto inst = nt::NetworkTableInstance::GetDefault();
-    std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-back");
-    table->PutNumber("ledMode", static_cast<int>(goal->back_limelight_state()));
-  }
-
-  status->set_back_has_target(back_target_present_);
-  if (back_target_present_) {
-    status->set_back_dist(
-        (BackObjectDistance(back_target_vertical_angle_) * back_dist_factor_) -
-        back_dist_offset_);
-    status->set_back_theta(back_target_horizontal_angle_);
-    status->set_back_relative_x(std::cos(status->back_theta() * (M_PI / 180.)) *
-                                status->back_dist());
-    status->set_back_relative_y(std::sin(status->back_theta() * (M_PI / 180.)) *
-                                status->back_dist());
-  }
+  status->set_target_dist(distance_ * 1.1 * 1.);
+  status->set_skew(target_skew_);
+  status->set_target_x(target_x_);
+  status->set_target_y(target_y_);
+  status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
+  status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
+  status->set_heading(std::abs(2 * M_PI * heading_model_) * 2);
+  status->set_to_the_left(slope_ > 0);
+  status->set_horiz_angle(std::copysign(std::abs(horiz_angle_) + 0.1, horiz_angle_));
   status_queue_->WriteMessage(status);
 }
 

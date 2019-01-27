@@ -17,53 +17,26 @@ class Limelight {
  public:
   Limelight(double limelight_height, double limelight_angle,
             double object_height);
-  void GetTable();
   void Update();
-  double ObjectDistance(double vertical_angle);
-
  private:
   LimelightStatusQueue* status_queue_;
   LimelightGoalQueue::QueueReader goal_reader_{
       muan::queues::QueueManager<LimelightGoalProto>::Fetch()->MakeReader()};
   // FRIEND_TEST(LimelightTest, HasNoTarget);
+  double target_dist_ = 0;
+  double target_x_ = 0;
+  double target_y_ = 0;
+  double target_skew_ = 0;
+  double horiz_angle_ = 0;
+  double target_1_horizontal_angle_ = 0;
+  double target_2_horizontal_angle_ = 0;
+  double distance_ = 0;
+  double heading_model_ = 0;
+  double slope_ = 0;
   double limelight_height_;
   double limelight_angle_;
   double object_height_;
-  double distance_;
-  double target_vertical_angle_;
-  double target_horizontal_angle_;
-  double target_area_;
-  double target_skew_;
-  bool target_present_;
 };
-
-class BackLimelight {
- public:
-  BackLimelight(double back_limelight_height, double back_limelight_angle,
-                double back_object_height, double back_dist_factor,
-                double back_dist_offset);
-  void GetBackTable();
-  void UpdateBack();
-  double BackObjectDistance(double back_vertical_angle);
-
- private:
-  LimelightStatusQueue* status_queue_;
-  LimelightGoalQueue::QueueReader goal_reader_{
-      muan::queues::QueueManager<LimelightGoalProto>::Fetch()->MakeReader()};
-  // FRIEND_TEST(LimelightTest, HasNoTarget);
-  double back_limelight_height_;
-  double back_limelight_angle_;
-  double back_object_height_;
-  double back_dist_factor_ = 1;
-  double back_dist_offset_ = 0;
-  double back_distance_;
-  double back_target_vertical_angle_;
-  double back_target_horizontal_angle_;
-  double back_target_area_;
-  double back_target_skew_;
-  bool back_target_present_;
-};
-
 }  // namespace limelight
 }  // namespace c2019
 

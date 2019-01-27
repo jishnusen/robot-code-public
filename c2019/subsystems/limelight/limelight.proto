@@ -6,17 +6,15 @@ package c2019.limelight;
 
 message LimelightStatus {
   required uint64 timestamp = 1;
-  optional double dist = 2;
-  optional double back_dist = 3;
-  optional double theta = 4;
-  optional double back_theta = 5;
-  optional double relative_x = 6;
-  optional double back_relative_x = 7;
-  optional double relative_y = 8;
-  optional double back_relative_y = 9;
-  optional double target_skew = 10;
-  optional bool has_target = 11;
-  optional bool back_has_target = 12;
+  optional double target_dist  = 2;
+  optional double target_x = 3;
+  optional double target_y = 4;
+  optional double skew = 5;
+  optional double target_1_horizontal_angle = 6;
+  optional double target_2_horizontal_angle = 7;
+  optional double heading = 8;
+  optional double horiz_angle = 9;
+  optional bool to_the_left = 10;
 
 }
 
