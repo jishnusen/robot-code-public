@@ -40,7 +40,6 @@ TeleopBase::TeleopBase()
 
   // scoring positions
   stow_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
-
   level_1_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::A_BUTTON));
   level_2_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::B_BUTTON));
   level_3_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::Y_BUTTON));
@@ -64,7 +63,7 @@ TeleopBase::TeleopBase()
   // handoff button
   handoff_ = gamepad_.MakePov(0, muan::teleop::Pov::kEast);
 
-  // quickturn - ??
+  // quickturn
   quickturn_ = wheel_.MakeButton(5);
 }
 
@@ -154,8 +153,7 @@ void TeleopBase::SendDrivetrainMessage() {
 void TeleopBase::SendSuperstructureMessage() {
   SuperstructureGoalProto superstructure_goal;
 
-  // Ground hatch intake and outtake is true if both intakes/outtakes are
-  // pressed
+  // Ground hatch intake and outtake is both trigger and bumper
   bool ground_hatch_intake_ =
       cargo_intake_->is_pressed() && hp_hatch_intake_->is_pressed();
   bool ground_hatch_outtake_ =
@@ -270,6 +268,7 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Climbing buttons
+  // drop forks and drop crawlers require safety button to prevent an oops
   if (drop_forks_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
