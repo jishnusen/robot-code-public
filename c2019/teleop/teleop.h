@@ -3,7 +3,7 @@
 
 #include <atomic>
 #include "WPILib.h"
-#include "c2019/autonomous/queue_types.h"
+#include "c2019/commands/queue_types.h"
 #include "c2019/subsystems/superstructure/queue_types.h"
 #include "c2019/subsystems/superstructure/superstructure.h"
 #include "muan/queues/queue_manager.h"
@@ -43,16 +43,12 @@ class TeleopBase {
   muan::teleop::Joystick gamepad_;
 
   void SendSuperstructureMessage();
-  // autonomous::AutoStatusQueue::QueueReader auto_status_reader_;
-
-  // driving
-  muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_;
-
-  bool high_gear_;
 
   // climbing buttons
-  muan::teleop::Button *climb_, *crawl_, *drop_forks_, *drop_crawlers_,
-      *safety_, *brake_;
+  muan::teleop::Button *climb_, *crawl_, *drop_forks_, *drop_crawlers_, *brake_;
+
+  // safety button
+  muan::teleop::Button *safety_;
 
   // intake/outtake buttons
   muan::teleop::Button *cargo_intake_, *cargo_outtake_, *hp_hatch_intake_,
@@ -63,8 +59,6 @@ class TeleopBase {
   muan::teleop::Button *stow_;
   // scoring modes
   muan::teleop::Button *forwards_, *backwards_;
-  // vision buttons
-  // muan::teleop::Button *align_;
   // handoff
   muan::teleop::Button *handoff_;
 
@@ -77,6 +71,17 @@ class TeleopBase {
   bool had_cargo_, had_hp_hatch_, had_ground_hatch_ = false;
 
   c2019::superstructure::SuperstructureStatusProto superstructure_status_;
+
+  // vision buttons
+  commands::AutoStatusQueue::QueueReader auto_status_reader_;
+  commands::AutoGoalQueue *auto_goal_queue_;
+
+  muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_,
+      *exit_auto_;
+  muan::teleop::Button *test_auto_, *drive_straight_;
+
+  bool high_gear_;
+  bool running_command_;
 };
 
 }  // namespace teleop
