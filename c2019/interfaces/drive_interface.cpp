@@ -69,7 +69,7 @@ void DrivetrainInterface::SetBrakeMode(bool mode) {
 DrivetrainInterface::DrivetrainInterface()
     : input_queue_{QueueManager<InputProto>::Fetch()},
       output_reader_{QueueManager<OutputProto>::Fetch()->MakeReader()},
-      pigeon_{&right_slave_a_},
+      pigeon_{&left_slave_a_},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
   left_master_.ConfigSelectedFeedbackSensor(
@@ -102,12 +102,12 @@ DrivetrainInterface::DrivetrainInterface()
   right_slave_b_.Follow(right_master_);
 
   right_master_.SetInverted(false);
-  right_master_.SetSensorPhase(true);
+  right_master_.SetSensorPhase(false);
   right_slave_a_.SetInverted(false);
   right_slave_b_.SetInverted(false);
 
   left_master_.SetInverted(true);
-  left_master_.SetSensorPhase(true);
+  left_master_.SetSensorPhase(false);
   left_slave_a_.SetInverted(true);
   left_slave_b_.SetInverted(true);
 
@@ -131,6 +131,12 @@ void DrivetrainInterface::ReadSensors() {
 
   sensors->set_gyro(-(pigeon_.GetFusedHeading() - pigeon_offset_) * M_PI /
                     180.);
+
+
+  auto inst = nt::NetworkTableInstance::GetDefault();
+  std::shared_ptr<nt::NetworkTable> front_table = inst.GetTable("limelight");
+  std::shared_ptr<nt::NetworkTable> rear_table = inst.GetTable("limelight-back");
+  std::cout << "Has front target: " << front_table->GetEntry("tv").GetDouble(-1) << "\t" << "Has rear target: " << rear_table->GetEntry("tv").GetDouble(-1) << std::endl;
 
   input_queue_->WriteMessage(sensors);
 }
@@ -179,7 +185,7 @@ void DrivetrainInterface::WriteActuators() {
       break;
   }
 
-  shifter_.Set(outputs->high_gear());
+  shifter_.Set(false);
 }
 
 }  // namespace interfaces

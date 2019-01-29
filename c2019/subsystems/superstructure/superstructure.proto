@@ -64,9 +64,10 @@ enum HatchIntakeState {
 }
 
 enum CargoIntakeState {
-  CARGO_IDLE = 0;
+  CARGO_HOLDING = 0;
   CARGO_INTAKING = 1;
-  CARGO_OUTTAKING = 2;
+  CARGO_PICKING_UP = 2;
+  CARGO_OUTTAKING = 3;
 }
 
 enum ClimbType {
@@ -96,16 +97,16 @@ message SuperstructureStatus {
   required HatchIntakeState hatch_intake_state = 19;
   required bool has_hp_hatch = 20;
   required CargoIntakeState cargo_intake_state = 21;
-  required bool has_cargo = 22;
-  required ClimbType climb_type = 23;
-  required bool climb = 24;
-  required double winch_current = 25;
+  required ClimbType climb_type = 22;
+  required bool climb = 23;
+  required double winch_current = 24;
+  required bool has_cargo = 25;
 }
 
 message SuperstructureInput {
   required uint64 timestamp = 1;
   required bool hatch_intake_proxy = 2;
-  required bool cargo_proxy = 3;
+  required double cargo_current = 3;
   required double hatch_ground_current = 4;
   required double elevator_encoder = 5;
   required double wrist_encoder = 6;

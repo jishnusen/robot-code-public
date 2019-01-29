@@ -3,6 +3,7 @@
 
 #include "c2019/subsystems/superstructure/superstructure.pb.h"
 #include "muan/proto/stack_proto.h"
+#include "muan/queues/queue_manager.h"
 
 namespace c2019 {
 

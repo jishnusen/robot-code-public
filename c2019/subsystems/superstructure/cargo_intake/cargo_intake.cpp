@@ -11,16 +11,30 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
   double roller_voltage = 0;
 
   if (outputs_enabled) {
-    switch (run_intake_) {
-      case Goal::INTAKE:
+    switch (state_) {
+      case HOLDING:
+        roller_voltage = 0;
+        break;
+      case INTAKING:
         roller_voltage = 12;
+        if (input->current() > kCurrentThreshold) {
+          state_ = PICKING_UP;
+          pickup_counter_ = 0;
+        }
         break;
-      case Goal::OUTTAKE:
-        roller_voltage = -4;
-        break;
-      case Goal::IDLE:
-        if (input->has_cargo()) {
-          roller_voltage = -2;
+      case PICKING_UP:
+        roller_voltage = 12;
+        pickup_counter_++;
+        if (pickup_counter_ > kPickupTicks) {
+          state_ = HOLDING;
+          pickup_counter_ = 0;
+        }
+      case OUTTAKING:
+        roller_voltage = -12;
+        outtake_counter_++;
+        if (outtake_counter_ > kOuttakeTicks) {
+          state_ = HOLDING;
+          outtake_counter_ = 0;
         }
         break;
     }
@@ -29,12 +43,27 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
   }
 
   (*output)->set_roller_voltage(roller_voltage);
-  (*status)->set_state(run_intake_);
-  (*status)->set_has_cargo(input->has_cargo());
+  (*status)->set_state(state_);
+  bool has_cargo = prev_state_ == PICKING_UP && state_ == HOLDING;
+  prev_state_ = state_;
+  (*status)->set_has_cargo(has_cargo);
 }
 
 void CargoIntake::SetGoal(const CargoIntakeGoalProto& goal) {
-  run_intake_ = goal->goal();
+  switch (goal->goal()) {
+    case NONE:
+      break;
+    case INTAKE:
+      state_ = INTAKING;
+      break;
+    case STOP_INTAKE:
+      state_ = HOLDING;
+      break;
+    case OUTTAKE:
+      outtake_counter_ = 0;
+      state_ = OUTTAKING;
+      break;
+  }
 }
 
 }  // namespace cargo_intake
