@@ -31,14 +31,18 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // climbing buttons
-  crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
+
+  // CHANGE SAFETY BACK TO RIGHT_CLICK_IN
+  safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
+
   climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeAxisRange(-134, -46, 0, 1, 0.8);
   drop_crawlers_ = gamepad_.MakeAxisRange(46, 134, 0, 1, 0.8);
 
   // Safety button for various functions
-  safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
+  // safety_ =
+  // gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
 
   // scoring positions
   stow_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
@@ -251,20 +255,20 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (level_1_->is_pressed()) {
     if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (forwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_ROCKET_FIRST);
-      } else if (backwards_->is_pressed()) {
+      if (backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_BACKWARDS);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_FIRST);
       }
     } else {
-      if (forwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_ROCKET_FIRST);
-      } else if (backwards_->is_pressed()) {
+      if (backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_BACKWARDS);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_ROCKET_FIRST);
       }
     }
   }
@@ -288,20 +292,20 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (ship_->is_pressed()) {
     if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (forwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_SHIP_FORWARDS);
-      } else if (backwards_->is_pressed()) {
+      if (backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_SHIP_BACKWARDS);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_SHIP_FORWARDS);
       }
     } else {
-      if (forwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_SHIP_FORWARDS);
-      } else if (backwards_->is_pressed()) {
+      if (backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_SHIP_BACKWARDS);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_SHIP_FORWARDS);
       }
     }
   }
