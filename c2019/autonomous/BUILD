@@ -15,6 +15,7 @@ cc_library(
         ":autonomous_proto",
         "//muan/proto:stack_proto",
         "//muan/queues:queue_manager",
+	"//c2019/subsystems/limelight:limelight_queues",
     ],
 )
 

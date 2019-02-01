@@ -7,7 +7,7 @@
 
 namespace c2019 {
 namespace autonomous {
-
+using LimelightStatus = c2019::limelight::StatusProto;
 using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
@@ -78,7 +78,19 @@ void AutonomousBase::StartDrivePath(double x, double y, double heading,
 
   drivetrain_goal_queue_->WriteMessage(goal);
 }
-
+void AutonomousBase::StartDriveVision(){
+   LimelightStatus status;
+   if (!drivetrain_status_reader_.ReadLastMessage(&status)) {
+     LOG(WARNING, "No limelight status message provided.");
+     return;
+  }
+  double x = status->target_dist() * std::cos(-status->horiz_angle());
+  double y = status->target_dist() * std::sin(-status->horiz_angle());
+  double heading = status->heading() * (status->to_the_left() ? 1 : -1);
+  x = x - (std::cos(heading) * 0.5);
+   y = y - (std::sin(heading) * 0.5);
+  StartDrivePath(x, y, heading, 1);
+}
 bool AutonomousBase::IsDriveComplete() {
   DrivetrainGoal goal;
   DrivetrainStatus status;

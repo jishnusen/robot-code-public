@@ -15,6 +15,8 @@ message LimelightStatus {
   optional double heading = 8;
   optional double horiz_angle = 9;
   optional bool to_the_left = 10;
+  optional double difference = 11;
+  optional double heading_model = 12;
 
 }
 

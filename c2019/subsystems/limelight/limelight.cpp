@@ -32,7 +32,10 @@ void Limelight::Update() {
     table->PutNumber("pipeline", 0);
     target_dist_ =
         std::tan((target_vertical_angle + limelight_angle_) * (M_PI / 180.)) * (limelight_height_ - object_height_  * 0.0254);
-    double distance = target_dist_ * 2.70247 - 1.0116;
+    
+    target_dist_ =
+        std::tan((target_vertical_angle + 60.0) * (M_PI / 180.)) * ((limelight_height_ - object_height_)  * 0.0254);
+    double distance = 2.497*pow(target_dist_, 2) -0.0397*target_dist_ + 0.2124;
 
     horiz_angle_ = (target_horizontal_angle * (M_PI / 180.));
 
@@ -40,34 +43,20 @@ void Limelight::Update() {
         std::min(target_1_horizontal_angle, target_2_horizontal_angle);
     target_2_horizontal_angle_ =
         std::max(target_1_horizontal_angle, target_2_horizontal_angle);
-    double model_width = -.0305387 * pow(target_dist_, 4) +
-                         0.21889895 * pow(target_dist_, 3) -
-                         .6260213 * pow(target_dist_, 2) +
-                         0.913154444 * target_dist_ - 0.714746 + 0.08;
-    double heading = target_1_horizontal_angle_ - target_2_horizontal_angle_;
-    double skim_error = model_width - heading;
-    double heading_model = 544.0577 * pow(skim_error, 3) -
-                           88.244 * pow(skim_error, 2) + 5.7379 * skim_error -
-                           0.02217;
-    heading_model_ = heading_model * (-0.002 * pow(horiz_angle_, 2) -
-                                     0.058 * horiz_angle_ - 0.155);
-
-    target_y_ =
-        distance * std::sin(horiz_angle_ + 2 * M_PI * std::abs(heading_model));
-    target_x_ =
-        distance * std::cos(horiz_angle_ + 2 * M_PI * std::abs(heading_model));
-    distance_ = distance;
- 
-  
+  double difference = target_1_horizontal_angle - target_2_horizontal_angle;
+  double heading_model = 7.49562907*pow(target_dist_, 4) - 20.2223*pow(target_dist_, 3) +20.6362229*pow(target_dist_, 2) -9.9716668*target_dist_ + 2.19656;
+  double skim_error = heading_model - std::abs(difference);
+  double final_heading = -445.775*pow(skim_error, 2) + 32.7477*skim_error -.0041;
+//  double tx_factor = 1 + 0.4*std::abs(target_horizontal_angle); 
   LimelightStatusProto status;
-  status->set_target_dist(distance_ * 1.1 * 1.);
+  status->set_target_dist(distance);
   status->set_skew(target_skew_);
-  status->set_target_x(target_x_);
-  status->set_target_y(target_y_);
   status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
   status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
-  status->set_heading(std::abs(2 * M_PI * heading_model_) * 2);
   status->set_to_the_left(slope_ > 0);
+  status->set_heading(std::abs(1.4*final_heading-.17));
+ // status->set_heading_model(heading_model);
+ // status->set_difference(difference);
   status->set_horiz_angle(std::copysign(std::abs(horiz_angle_) + 0.1, horiz_angle_));
   status_queue_->WriteMessage(status);
 }

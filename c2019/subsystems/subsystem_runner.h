@@ -25,7 +25,7 @@ class SubsystemRunner {
   muan::subsystems::drivetrain::Drivetrain drivetrain_{
       c2019::subsystems::drivetrain::GetDrivetrainConfig()};
   // interfaces::InterfaceRunner interface_runner_;
-  c2019::limelight::Limelight limelight_{51 * 0.0254, 60, (51 - 12) * 0.0254};
+  c2019::limelight::Limelight limelight_{45, 60, 38};
   std::atomic<bool> running_;
 };
 
