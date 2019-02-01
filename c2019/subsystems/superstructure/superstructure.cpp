@@ -343,6 +343,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case WINCH:
       buddy_ = true;
       should_climb_ = true;
+      break;
   }
 
   // Godmode
