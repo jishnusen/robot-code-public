@@ -312,7 +312,7 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
-  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
+  /*if (drop_forks_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
   if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
@@ -326,7 +326,7 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (brake_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
-  }
+  }*/
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }
