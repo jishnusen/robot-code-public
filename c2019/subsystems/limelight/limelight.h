@@ -18,20 +18,17 @@ class Limelight {
   Limelight(double limelight_height, double limelight_angle,
             double object_height);
   void Update();
+
  private:
   LimelightStatusQueue* status_queue_;
   LimelightGoalQueue::QueueReader goal_reader_{
       muan::queues::QueueManager<LimelightGoalProto>::Fetch()->MakeReader()};
   // FRIEND_TEST(LimelightTest, HasNoTarget);
   double target_dist_ = 0;
-  double target_x_ = 0;
-  double target_y_ = 0;
   double target_skew_ = 0;
   double horiz_angle_ = 0;
   double target_1_horizontal_angle_ = 0;
   double target_2_horizontal_angle_ = 0;
-  double distance_ = 0;
-  double heading_model_ = 0;
   double slope_ = 0;
   double limelight_height_;
   double limelight_angle_;
