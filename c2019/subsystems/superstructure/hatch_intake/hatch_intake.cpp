@@ -52,7 +52,7 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
       flutes = false;
       backplate = true;
       counter_++;
-      if (!input->hatch_proxy() && counter_ > kScoreTicks) {
+      if (counter_ > kScoreTicks) {
         counter_ = 0;
         flutes = false;
         backplate = false;

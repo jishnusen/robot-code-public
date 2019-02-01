@@ -10,15 +10,15 @@ namespace c2019 {
 namespace wrist {
 
 // Angle constants
-static constexpr double kMinAngle = 0;
+static constexpr double kMinAngle = 0.05;
 static constexpr double kStowAngle =
     M_PI / 3;  // TODO(Apurva) find value for this
-static constexpr double kMaxAngle = M_PI;
+static constexpr double kMaxAngle = 210 * (M_PI / 180.);
 
 // Hall Calibration constants
 static constexpr double kCalibVoltage = 0;
 static constexpr double kHallEffectAngle =
-    2.03;  // TODO(Apurva) find value for this
+    1.67;  // TODO(Apurva) find value for this
 
 // Manual voltage control constants
 static constexpr double kHoldingVoltage =

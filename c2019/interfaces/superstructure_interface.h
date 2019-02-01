@@ -25,7 +25,6 @@ constexpr uint32_t kCargoIntake = 13;
 
 constexpr uint32_t kGroundSnap = 1;
 constexpr uint32_t kArrow = 3;
-constexpr uint32_t kBackplate = 2;
 
 class SuperstructureInterface {
  public:
@@ -44,7 +43,6 @@ class SuperstructureInterface {
   PowerDistributionPanel pdp_{0};
   Solenoid ground_intake_snap_{kGroundSnap};
   Solenoid arrow_solenoid_{kArrow};
-  Solenoid backplate_solenoid_{kBackplate};
 
   TalonSRX elevator_master_{kElevatorMaster};
   VictorSPX elevator_slave_a_{kElevatorSlaveA};

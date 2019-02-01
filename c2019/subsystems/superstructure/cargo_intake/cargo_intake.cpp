@@ -13,7 +13,7 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
   if (outputs_enabled) {
     switch (state_) {
       case HOLDING:
-        roller_voltage = 0;
+        roller_voltage = 4;
         break;
       case INTAKING:
         roller_voltage = 12;
@@ -52,6 +52,7 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
 void CargoIntake::SetGoal(const CargoIntakeGoalProto& goal) {
   switch (goal->goal()) {
     case NONE:
+      state_ = HOLDING;
       break;
     case INTAKE:
       state_ = INTAKING;

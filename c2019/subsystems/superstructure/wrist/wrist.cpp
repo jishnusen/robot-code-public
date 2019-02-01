@@ -34,16 +34,15 @@ void Wrist::Update(const WristInputProto& input, WristOutputProto* output,
   (*status)->set_wrist_encoder_fault(false);
   (*status)->set_wrist_velocity(input->wrist_velocity());
 
-  (*output)->set_wrist_setpoint_ff(CalculateFeedForwards(
-      input->has_panel(), input->has_cargo(), calibrated_encoder));
+  (*output)->set_wrist_setpoint_ff(1.1 * std::cos(calibrated_encoder));
   if (outputs_enabled) {
     if (is_calibrated()) {
       (*output)->set_output_type(POSITION);
       (*output)->set_wrist_setpoint(goal_ - hall_calibration_.offset());
-      if (calibrated_encoder <= goal_ + 1e-2 && goal_ < 1e-2) {
-        (*output)->set_output_type(OPEN_LOOP);
-        (*output)->set_wrist_setpoint(0);
-      }
+      /* if (calibrated_encoder <= goal_ + 1e-2 && goal_ < 1e-2) { */
+      /*   (*output)->set_output_type(OPEN_LOOP); */
+      /*   (*output)->set_wrist_setpoint(0); */
+      /* } */
     } else {
       (*output)->set_output_type(OPEN_LOOP);
       (*output)->set_wrist_setpoint(0);

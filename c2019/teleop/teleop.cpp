@@ -192,6 +192,11 @@ void TeleopBase::SendDrivetrainMessage() {
 void TeleopBase::SendSuperstructureMessage() {
   SuperstructureGoalProto superstructure_goal;
 
+  superstructure_goal->set_score_goal(c2019::superstructure::NONE);
+  superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
+
+  has_hp_hatch_ = false;
+
   // Ground hatch intake and outtake is both trigger and bumper
   bool ground_hatch_intake_ =
       cargo_intake_->is_pressed() && hp_hatch_intake_->is_pressed();
@@ -251,18 +256,18 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (level_1_->is_pressed()) {
     if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (forwards_->is_pressed()) {
+      if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_FIRST);
-      } else if (backwards_->is_pressed()) {
+      } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_BACKWARDS);
       }
     } else {
-      if (forwards_->is_pressed()) {
+      if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_FIRST);
-      } else if (backwards_->is_pressed()) {
+      } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_BACKWARDS);
       }
@@ -288,18 +293,18 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (ship_->is_pressed()) {
     if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (forwards_->is_pressed()) {
+      if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_SHIP_FORWARDS);
-      } else if (backwards_->is_pressed()) {
+      } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_SHIP_BACKWARDS);
       }
     } else {
-      if (forwards_->is_pressed()) {
+      if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_SHIP_FORWARDS);
-      } else if (backwards_->is_pressed()) {
+      } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_SHIP_BACKWARDS);
       }
@@ -309,10 +314,12 @@ void TeleopBase::SendSuperstructureMessage() {
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
   if (drop_forks_->is_pressed() && safety_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
+    /* superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
+     */
   }
   if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
+    /* superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
+     */
   }
   if (crawl_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);

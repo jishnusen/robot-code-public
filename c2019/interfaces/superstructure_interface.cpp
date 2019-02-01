@@ -6,26 +6,26 @@ namespace interfaces {
 constexpr double kElevatorConversionFactor =
     (4096) / (M_PI * 1.25 * 0.0254 * 1.6);
 
-constexpr double kWristConversionFactor = (4096) / 2.933;
+constexpr double kWristConversionFactor = (4096 * 2.933) / (2 * M_PI);
 
-constexpr double kElevatorP = 0.3;
+constexpr double kElevatorP = 0.15;
 constexpr double kElevatorI = 0.0;
-constexpr double kElevatorD = 10.0;
+constexpr double kElevatorD = 4.0;
 constexpr double kElevatorF = 0.06;
 constexpr double kElevatorIZone = 0.;
 constexpr double kElevatorMaxIntegral = 5e9;
 constexpr double kElevatorDeadband = 0.001;
 
-constexpr double kWristP = 3.0;
+constexpr double kWristP = 2.5;
 constexpr double kWristI = 0.0;
-constexpr double kWristD = 50.0;
-constexpr double kWristF = 1.06;
+constexpr double kWristD = 35.0;
+constexpr double kWristF = 0.8;
 constexpr double kWristIZone = 0.;
 constexpr double kWristMaxIntegral = 5e9;
 constexpr double kWristDeadband = 0.001;
 
-constexpr uint32_t kGroundPDPSlot = 1;
-constexpr uint32_t kCargoPDPSlot = 2;
+constexpr uint32_t kGroundPDPSlot = 7;
+constexpr uint32_t kCargoPDPSlot = 6;
 
 using c2019::superstructure::TalonOutput;
 using muan::queues::QueueManager;
@@ -42,6 +42,25 @@ void SuperstructureInterface::ReadSensors() {
 
   inputs->set_hatch_ground_current(pdp_.GetCurrent(kGroundPDPSlot));
   inputs->set_cargo_current(pdp_.GetCurrent(kCargoPDPSlot));
+  inputs->set_current_1(pdp_.GetCurrent(1));
+  inputs->set_current_2(pdp_.GetCurrent(2));
+  inputs->set_current_3(pdp_.GetCurrent(3));
+  inputs->set_current_4(pdp_.GetCurrent(4));
+  inputs->set_current_5(pdp_.GetCurrent(5));
+  inputs->set_current_6(pdp_.GetCurrent(6));
+  inputs->set_current_7(pdp_.GetCurrent(7));
+  inputs->set_current_8(pdp_.GetCurrent(8));
+  inputs->set_current_9(pdp_.GetCurrent(9));
+  inputs->set_current_10(pdp_.GetCurrent(10));
+  inputs->set_current_11(pdp_.GetCurrent(11));
+  inputs->set_current_12(pdp_.GetCurrent(12));
+  inputs->set_current_13(pdp_.GetCurrent(13));
+  inputs->set_current_14(pdp_.GetCurrent(14));
+  inputs->set_current_15(pdp_.GetCurrent(15));
+  inputs->set_wrist_current(wrist_.GetOutputCurrent());
+  inputs->set_elevator_current(elevator_master_.GetOutputCurrent());
+  inputs->set_wrist_voltage(wrist_.GetMotorOutputVoltage());
+  inputs->set_elevator_voltage(elevator_master_.GetMotorOutputVoltage());
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
@@ -58,8 +77,6 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
 
   input_queue_->WriteMessage(inputs);
-  std::cout << elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed()
-            << std::endl;
 }
 
 void SuperstructureInterface::LoadGains() {
@@ -92,10 +109,10 @@ void SuperstructureInterface::LoadGains() {
       LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
   elevator_master_.ConfigForwardLimitSwitchSource(
       LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
-  elevator_master_.ConfigMotionCruiseVelocity(2865 * 10, 100);
-  elevator_master_.ConfigMotionAcceleration(3820 * 10, 100);
-  wrist_.ConfigMotionCruiseVelocity(2865, 100);
-  wrist_.ConfigMotionAcceleration(3820, 100);
+  elevator_master_.ConfigMotionCruiseVelocity(2865 * 5, 100);
+  elevator_master_.ConfigMotionAcceleration(3820 * 5, 100);
+  wrist_.ConfigMotionCruiseVelocity(2865 * 0.6, 100);
+  wrist_.ConfigMotionAcceleration(3820 * 0.6, 100);
   elevator_master_.ConfigAllowableClosedloopError(0, kElevatorDeadband, 0);
 
   elevator_master_.ConfigForwardSoftLimitEnable(false);
@@ -137,7 +154,7 @@ void SuperstructureInterface::WriteActuators() {
       elevator_master_.Set(
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
-          DemandType_ArbitraryFeedForward, 0.1);
+          DemandType_ArbitraryFeedForward, 1. / 12.);
   }
 
   switch (outputs->wrist_setpoint_type()) {
@@ -145,7 +162,7 @@ void SuperstructureInterface::WriteActuators() {
       wrist_.Set(ControlMode::PercentOutput, outputs->wrist_setpoint() / 12.);
     case TalonOutput::POSITION:
       wrist_.Set(ControlMode::MotionMagic,
-                 outputs->wrist_setpoint() * kWristConversionFactor);
+                 outputs->wrist_setpoint() * kWristConversionFactor, DemandType_ArbitraryFeedForward, outputs->wrist_setpoint_ff() / 12.);
   }
 
   cargo_intake_.Set(ControlMode::PercentOutput,
@@ -154,8 +171,7 @@ void SuperstructureInterface::WriteActuators() {
                            outputs->hatch_roller_voltage() / 12.);
 
   ground_intake_snap_.Set(outputs->snap_down());
-  arrow_solenoid_.Set(outputs->arrow_solenoid());
-  backplate_solenoid_.Set(outputs->backplate_solenoid());
+  arrow_solenoid_.Set(!outputs->arrow_solenoid());
 }
 
 }  // namespace interfaces

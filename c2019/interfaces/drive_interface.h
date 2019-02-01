@@ -27,6 +27,8 @@ constexpr uint32_t kLeftSlaveB = 6;
 constexpr uint32_t kRightSlaveA = 3;
 constexpr uint32_t kRightSlaveB = 4;
 
+constexpr uint32_t kBackplate = 2;
+
 class DrivetrainInterface {
  public:
   DrivetrainInterface();
@@ -49,6 +51,7 @@ class DrivetrainInterface {
 
   VictorSPX right_slave_a_{kRightSlaveA};
   VictorSPX right_slave_b_{kRightSlaveB};
+  Solenoid backplate_solenoid_{kBackplate};
 
   PigeonIMU pigeon_;
   double pigeon_offset_ = 0;

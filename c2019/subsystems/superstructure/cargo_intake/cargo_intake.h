@@ -9,7 +9,7 @@ namespace cargo_intake {
 
 constexpr int kPickupTicks = 2;
 constexpr int kOuttakeTicks = 10;
-constexpr double kCurrentThreshold = 50;
+constexpr double kCurrentThreshold = 25;
 
 class CargoIntake {
  public:

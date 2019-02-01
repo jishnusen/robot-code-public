@@ -21,23 +21,25 @@ Superstructure::Superstructure()
 void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
   // If wrist angle is higher than safe angle, cap elevator to safe height
   if (elevator_status_->elevator_height() > kElevatorSafeHeight) {
-    *wrist_goal =
-        muan::utils::Cap(*wrist_goal, kWristMinAngle, kWristSafeAngle);
+    *wrist_goal = muan::utils::Cap(*wrist_goal, wrist::kMinAngle,
+                                   kWristSafeForwardsAngle);
   }
 
-  if ((wrist_status_->wrist_angle() > kWristSafeAngle &&
-       *wrist_goal < kWristSafeAngle) ||
-      (wrist_status_->wrist_angle() < kWristSafeAngle &&
-       *wrist_goal > kWristSafeAngle)) {
-    *elevator_goal =
-        muan::utils::Cap(*elevator_goal, 0, kElevatorPassThroughHeight);
+  if ((wrist_status_->wrist_angle() > kWristSafeBackwardsAngle &&
+       *wrist_goal < kWristSafeBackwardsAngle) ||
+      (wrist_status_->wrist_angle() < kWristSafeForwardsAngle &&
+       *wrist_goal > kWristSafeForwardsAngle) ||
+      (wrist_status_->wrist_angle() > kWristSafeForwardsAngle &&
+       wrist_status_->wrist_angle() < kWristSafeBackwardsAngle)) {
+    std::cout << "CAPPING ELEVATOR : (" << std::endl;
+    *elevator_goal = 0.;
     if (elevator_status_->elevator_height() > kElevatorPassThroughHeight) {
-      if (wrist_status_->wrist_angle() > kWristSafeAngle) {
-        *wrist_goal =
-            muan::utils::Cap(*wrist_goal, kWristSafeAngle, kWristMaxAngle);
+      if (wrist_status_->wrist_angle() > kWristSafeBackwardsAngle) {
+        *wrist_goal = muan::utils::Cap(*wrist_goal, kWristSafeBackwardsAngle,
+                                       wrist::kMaxAngle);
       } else {
-        *wrist_goal =
-            muan::utils::Cap(*wrist_goal, kWristMinAngle, kWristSafeAngle);
+        *wrist_goal = muan::utils::Cap(*wrist_goal, wrist::kMinAngle,
+                                       kWristSafeForwardsAngle);
       }
     }
   }
@@ -157,6 +159,10 @@ void Superstructure::Update() {
   double capped_wrist_angle = wrist_angle_;
   // Now we make them safe so stuff doesn't break
   BoundGoal(&capped_elevator_height, &capped_wrist_angle);
+
+  std::cout << "Uncapped: "
+            << "\t" << elevator_height_ << "Capped: "
+            << "\t" << capped_elevator_height << std::endl;
 
   hatch_intake_input->set_hatch_proxy(input->hatch_intake_proxy());
   cargo_intake_input->set_current(input->cargo_current());
@@ -345,9 +351,10 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   elevator_height_ += goal->elevator_god_mode_goal() * 0.005;
   wrist_angle_ += goal->wrist_god_mode_goal() * 0.005;
 
-  elevator_height_ = muan::utils::Cap(elevator_height_, kElevatorMinHeight,
-                                      kElevatorMaxHeight);
-  wrist_angle_ = muan::utils::Cap(wrist_angle_, kWristMinAngle, kWristMaxAngle);
+  elevator_height_ = muan::utils::Cap(elevator_height_, elevator::kMinHeight,
+                                      elevator::kMaxHeight);
+  wrist_angle_ =
+      muan::utils::Cap(wrist_angle_, wrist::kMinAngle, wrist::kMaxAngle);
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
@@ -398,12 +405,14 @@ void Superstructure::RunStateMachine() {
       }
       break;
     case INTAKING_WRIST:
-      if (hatch_intake_status_->has_hatch() || cargo_intake_status_->has_cargo()) {
+      if (hatch_intake_status_->has_hatch() ||
+          cargo_intake_status_->has_cargo()) {
         GoToState(HOLDING);
       }
       break;
     case INTAKING_TO_STOW:
-      if (hatch_intake_status_->has_hatch() || cargo_intake_status_->has_cargo()) {
+      if (hatch_intake_status_->has_hatch() ||
+          cargo_intake_status_->has_cargo()) {
         elevator_height_ = kStowHeight;
         wrist_angle_ = kStowAngle;
         GoToState(HOLDING);
@@ -416,12 +425,13 @@ void Superstructure::GoToState(SuperstructureState desired_state,
                                IntakeGoal intake) {
   switch (state_) {
     case CALIBRATING:
-      if (wrist_status_->is_calibrated() && elevator_status_->is_calibrated()) {
-        state_ = desired_state;
-      } else {
-        LOG(ERROR, "Tried to go to invalid state %d while calibrating!",
-            static_cast<int>(desired_state));
-      }
+      /* if (wrist_status_->is_calibrated() &&
+       * elevator_status_->is_calibrated()) { */
+      state_ = desired_state;
+      /* } else { */
+      /*   LOG(ERROR, "Tried to go to invalid state %d while calibrating!", */
+      /*       static_cast<int>(desired_state)); */
+      /* } */
       break;
     case INTAKING_WRIST:
     case INTAKING_GROUND:

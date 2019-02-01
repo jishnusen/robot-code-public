@@ -133,11 +133,6 @@ void DrivetrainInterface::ReadSensors() {
                     180.);
 
 
-  auto inst = nt::NetworkTableInstance::GetDefault();
-  std::shared_ptr<nt::NetworkTable> front_table = inst.GetTable("limelight");
-  std::shared_ptr<nt::NetworkTable> rear_table = inst.GetTable("limelight-back");
-  std::cout << "Has front target: " << front_table->GetEntry("tv").GetDouble(-1) << "\t" << "Has rear target: " << rear_table->GetEntry("tv").GetDouble(-1) << std::endl;
-
   input_queue_->WriteMessage(sensors);
 }
 
@@ -186,6 +181,7 @@ void DrivetrainInterface::WriteActuators() {
   }
 
   shifter_.Set(false);
+  backplate_solenoid_.Set(outputs->high_gear());
 }
 
 }  // namespace interfaces

@@ -68,11 +68,11 @@ class SuperstructureTest : public ::testing::Test {
     // TODO(Hanson) figure out actual safe heights and angles
     if (superstructure_status_proto_->elevator_height() > kElevatorSafeHeight ||
         superstructure_status_proto_->elevator_goal() > kElevatorSafeHeight) {
-      EXPECT_LE(superstructure_status_proto_->wrist_goal(), kWristSafeAngle);
-      EXPECT_LE(superstructure_status_proto_->wrist_angle(), kWristSafeAngle);
+      EXPECT_LE(superstructure_status_proto_->wrist_goal(), kWristSafeForwardsAngle);
+      EXPECT_LE(superstructure_status_proto_->wrist_angle(), kWristSafeForwardsAngle);
     }
 
-    if (superstructure_status_proto_->wrist_angle() > kWristSafeAngle) {
+    if (superstructure_status_proto_->wrist_angle() > kWristSafeForwardsAngle) {
       EXPECT_LE(superstructure_status_proto_->elevator_goal(),
                 kElevatorSafeHeight);
       EXPECT_LE(superstructure_status_proto_->elevator_height(),
@@ -386,6 +386,16 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   EXPECT_FALSE(superstructure_status_proto_->has_ground_hatch());
   EXPECT_FALSE(superstructure_status_proto_->has_hp_hatch());
+
+  EXPECT_TRUE(superstructure_output_proto_->arrow_solenoid());
+  SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_HATCH, true);
+  RunFor(1);
+  EXPECT_TRUE(superstructure_output_proto_->backplate_solenoid());
+  EXPECT_FALSE(superstructure_output_proto_->arrow_solenoid());
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(100);
+  EXPECT_FALSE(superstructure_output_proto_->backplate_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->arrow_solenoid());
 }
 
 TEST_F(SuperstructureTest, GodmodeElevator) {
