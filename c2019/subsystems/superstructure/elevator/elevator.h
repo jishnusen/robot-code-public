@@ -11,7 +11,7 @@ namespace elevator {
 
 // Height constraints
 constexpr double kMinHeight = 0.;
-constexpr double kMaxHeight = 2.;
+constexpr double kMaxHeight = 1.793;
 constexpr double kSecondStageHeight = 1.;
 
 // Setting max voltage so that people don't die

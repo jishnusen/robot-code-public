@@ -31,18 +31,14 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // climbing buttons
-
-  // CHANGE SAFETY BACK TO RIGHT_CLICK_IN
-  safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
-
+  crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeAxisRange(-134, -46, 0, 1, 0.8);
   drop_crawlers_ = gamepad_.MakeAxisRange(46, 134, 0, 1, 0.8);
 
   // Safety button for various functions
-  // safety_ =
-  // gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
+  safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
 
   // scoring positions
   stow_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
@@ -196,6 +192,9 @@ void TeleopBase::SendDrivetrainMessage() {
 void TeleopBase::SendSuperstructureMessage() {
   SuperstructureGoalProto superstructure_goal;
 
+  superstructure_goal->set_score_goal(c2019::superstructure::NONE);
+  superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
+
   // Ground hatch intake and outtake is both trigger and bumper
   bool ground_hatch_intake_ =
       cargo_intake_->is_pressed() && hp_hatch_intake_->is_pressed();
@@ -255,20 +254,20 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (level_1_->is_pressed()) {
     if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_ROCKET_BACKWARDS);
-      } else {
+      if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_FIRST);
-      }
-    } else {
-      if (backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_ROCKET_BACKWARDS);
       } else {
         superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_BACKWARDS);
+      }
+    } else {
+      if (!backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_FIRST);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_ROCKET_BACKWARDS);
       }
     }
   }
@@ -292,20 +291,20 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (ship_->is_pressed()) {
     if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_SHIP_BACKWARDS);
-      } else {
+      if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_SHIP_FORWARDS);
-      }
-    } else {
-      if (backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_SHIP_BACKWARDS);
       } else {
         superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_SHIP_BACKWARDS);
+      }
+    } else {
+      if (!backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_SHIP_FORWARDS);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_SHIP_BACKWARDS);
       }
     }
   }
@@ -314,6 +313,9 @@ void TeleopBase::SendSuperstructureMessage() {
   // drop forks and drop crawlers require safety button to prevent an oops
   /*if (drop_forks_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
+  }
+  if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
   }
   if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
@@ -329,7 +331,6 @@ void TeleopBase::SendSuperstructureMessage() {
   }*/
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
-}
 
 }  // namespace teleop
-}  // namespace c2019
+}  // namespace teleop

@@ -69,7 +69,7 @@ void DrivetrainInterface::SetBrakeMode(bool mode) {
 DrivetrainInterface::DrivetrainInterface()
     : input_queue_{QueueManager<InputProto>::Fetch()},
       output_reader_{QueueManager<OutputProto>::Fetch()->MakeReader()},
-      pigeon_{&right_slave_a_},
+      pigeon_{&left_slave_a_},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
   left_master_.ConfigSelectedFeedbackSensor(
@@ -101,10 +101,15 @@ DrivetrainInterface::DrivetrainInterface()
   right_slave_a_.Follow(right_master_);
   right_slave_b_.Follow(right_master_);
 
-  right_master_.SetInverted(true);
-  right_master_.SetSensorPhase(true);
-  right_slave_a_.SetInverted(true);
-  right_slave_b_.SetInverted(true);
+  right_master_.SetInverted(false);
+  right_master_.SetSensorPhase(false);
+  right_slave_a_.SetInverted(false);
+  right_slave_b_.SetInverted(false);
+
+  left_master_.SetInverted(true);
+  left_master_.SetSensorPhase(false);
+  left_slave_a_.SetInverted(true);
+  left_slave_b_.SetInverted(true);
 
   LoadGains();
   SetBrakeMode(false);
@@ -127,12 +132,15 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_gyro(-(pigeon_.GetFusedHeading() - pigeon_offset_) * M_PI /
                     180.);
 
+
   input_queue_->WriteMessage(sensors);
 }
 
 void DrivetrainInterface::WriteActuators() {
   OutputProto outputs;
   muan::wpilib::DriverStationProto ds;
+
+  QueueManager<muan::wpilib::DriverStationProto>::Fetch()->ReadLastMessage(&ds);
 
   if (!output_reader_.ReadLastMessage(&outputs)) {
     left_master_.Set(ControlMode::PercentOutput, 0);
@@ -172,7 +180,8 @@ void DrivetrainInterface::WriteActuators() {
       break;
   }
 
-  shifter_.Set(outputs->high_gear());
+  shifter_.Set(false);
+  backplate_solenoid_.Set(outputs->high_gear());
 }
 
 }  // namespace interfaces

@@ -20,14 +20,27 @@ Superstructure::Superstructure()
 
 void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
   // If wrist angle is higher than safe angle, cap elevator to safe height
-  if (wrist_status_->wrist_angle() > kWristSafeAngle) {
-    *elevator_goal = muan::utils::Cap(*elevator_goal, 0, kElevatorSafeHeight);
+  if (elevator_status_->elevator_height() > kElevatorSafeHeight) {
+    *wrist_goal = muan::utils::Cap(*wrist_goal, wrist::kMinAngle,
+                                   kWristSafeForwardsAngle);
   }
 
-  // If elevator is higher than safe height, cap wrist to safe angle
-  if (elevator_status_->elevator_height() > kElevatorSafeHeight) {
-    *wrist_goal =
-        muan::utils::Cap(*wrist_goal, kWristMinAngle, kWristSafeAngle);
+  if ((wrist_status_->wrist_angle() > kWristSafeBackwardsAngle &&
+       *wrist_goal < kWristSafeBackwardsAngle) ||
+      (wrist_status_->wrist_angle() < kWristSafeForwardsAngle &&
+       *wrist_goal > kWristSafeForwardsAngle) ||
+      (wrist_status_->wrist_angle() > kWristSafeForwardsAngle &&
+       wrist_status_->wrist_angle() < kWristSafeBackwardsAngle)) {
+    *elevator_goal = 0.;
+    if (elevator_status_->elevator_height() > kElevatorPassThroughHeight) {
+      if (wrist_status_->wrist_angle() > kWristSafeBackwardsAngle) {
+        *wrist_goal = muan::utils::Cap(*wrist_goal, kWristSafeBackwardsAngle,
+                                       wrist::kMaxAngle);
+      } else {
+        *wrist_goal = muan::utils::Cap(*wrist_goal, wrist::kMinAngle,
+                                       kWristSafeForwardsAngle);
+      }
+    }
   }
 }
 
@@ -80,8 +93,10 @@ cargo_intake::CargoIntakeGoalProto Superstructure::PopulateCargoIntakeGoal() {
     goal->set_goal(cargo_intake::INTAKE);
   } else if (intake_goal_ == OUTTAKE_CARGO) {
     goal->set_goal(cargo_intake::OUTTAKE);
+  } else if (intake_goal_ == INTAKE_NONE) {
+    goal->set_goal(cargo_intake::NONE);
   } else {
-    goal->set_goal(cargo_intake::IDLE);
+    goal->set_goal(cargo_intake::STOP_INTAKE);
   }
   return goal;
 }
@@ -145,7 +160,7 @@ void Superstructure::Update() {
   BoundGoal(&capped_elevator_height, &capped_wrist_angle);
 
   hatch_intake_input->set_hatch_proxy(input->hatch_intake_proxy());
-  cargo_intake_input->set_has_cargo(input->cargo_proxy());
+  cargo_intake_input->set_current(input->cargo_current());
   ground_hatch_intake_input->set_current(input->hatch_ground_current());
   elevator_input->set_elevator_encoder(input->elevator_encoder());
   elevator_input->set_zeroed(input->elevator_zeroed());
@@ -196,7 +211,6 @@ void Superstructure::Update() {
   status_->set_has_hp_hatch(hatch_intake_status_->has_hatch());
   status_->set_cargo_intake_state(
       static_cast<CargoIntakeState>(cargo_intake_status_->state()));
-  status_->set_has_cargo(cargo_intake_status_->has_cargo());
   status_->set_climb_type(static_cast<ClimbType>(winch_status_->climb_type()));
   status_->set_climb(winch_status_->climb());
   status_->set_winch_current(winch_status_->winch_current());
@@ -206,6 +220,7 @@ void Superstructure::Update() {
   status_->set_wrist_goal(wrist_angle_);
   status_->set_wrist_angle(wrist_status_->wrist_angle());
   status_->set_elevator_height(elevator_status_->elevator_height());
+  status_->set_has_cargo(cargo_intake_status_->has_cargo());
 
   output->set_arrow_solenoid(hatch_intake_output->flute_solenoid());
   output->set_backplate_solenoid(hatch_intake_output->backplate_solenoid());
@@ -334,9 +349,10 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   elevator_height_ += goal->elevator_god_mode_goal() * 0.005;
   wrist_angle_ += goal->wrist_god_mode_goal() * 0.005;
 
-  elevator_height_ = muan::utils::Cap(elevator_height_, kElevatorMinHeight,
-                                      kElevatorMaxHeight);
-  wrist_angle_ = muan::utils::Cap(wrist_angle_, kWristMinAngle, kWristMaxAngle);
+  elevator_height_ = muan::utils::Cap(elevator_height_, elevator::kMinHeight,
+                                      elevator::kMaxHeight);
+  wrist_angle_ =
+      muan::utils::Cap(wrist_angle_, wrist::kMinAngle, wrist::kMaxAngle);
 
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
@@ -344,8 +360,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case INTAKE_HATCH:
     case INTAKE_CARGO:
-      if (!hatch_intake_status_->has_hatch() ||
-          !cargo_intake_status_->has_cargo()) {
+      if (!hatch_intake_status_->has_hatch()) {
         if (elevator_height_ < 1e-5 && wrist_angle_ < 1e-5) {
           GoToState(INTAKING_TO_STOW, goal->intake_goal());
         } else {
@@ -388,8 +403,8 @@ void Superstructure::RunStateMachine() {
       }
       break;
     case INTAKING_WRIST:
-      if (cargo_intake_status_->has_cargo() ||
-          hatch_intake_status_->has_hatch()) {
+      if (hatch_intake_status_->has_hatch() ||
+          cargo_intake_status_->has_cargo()) {
         GoToState(HOLDING);
       }
       break;

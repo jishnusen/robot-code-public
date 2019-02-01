@@ -29,11 +29,15 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
 
   switch (state_) {
     case IDLE:
-      flutes = false;
+      flutes = true;
       backplate = false;
+      if (input->hatch_proxy()) {
+        backplate = true;
+        state_ = (CARRYING);
+      }
       break;
     case INTAKING:
-      flutes = true;
+      flutes = false;
       backplate = false;
       if (input->hatch_proxy()) {
         backplate = true;
@@ -48,7 +52,7 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
       flutes = false;
       backplate = true;
       counter_++;
-      if (!input->hatch_proxy() && counter_ > kScoreTicks) {
+      if (counter_ > kScoreTicks) {
         counter_ = 0;
         flutes = false;
         backplate = false;

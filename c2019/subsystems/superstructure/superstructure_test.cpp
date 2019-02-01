@@ -68,11 +68,13 @@ class SuperstructureTest : public ::testing::Test {
     // TODO(Hanson) figure out actual safe heights and angles
     if (superstructure_status_proto_->elevator_height() > kElevatorSafeHeight ||
         superstructure_status_proto_->elevator_goal() > kElevatorSafeHeight) {
-      EXPECT_LE(superstructure_status_proto_->wrist_goal(), kWristSafeAngle);
-      EXPECT_LE(superstructure_status_proto_->wrist_angle(), kWristSafeAngle);
+      EXPECT_LE(superstructure_status_proto_->wrist_goal(),
+                kWristSafeForwardsAngle);
+      EXPECT_LE(superstructure_status_proto_->wrist_angle(),
+                kWristSafeForwardsAngle);
     }
 
-    if (superstructure_status_proto_->wrist_angle() > kWristSafeAngle) {
+    if (superstructure_status_proto_->wrist_angle() > kWristSafeForwardsAngle) {
       EXPECT_LE(superstructure_status_proto_->elevator_goal(),
                 kElevatorSafeHeight);
       EXPECT_LE(superstructure_status_proto_->elevator_height(),
@@ -167,10 +169,10 @@ class SuperstructureTest : public ::testing::Test {
 
   void SetIntakeInputs(bool has_ground_hatch, bool has_hp_hatch,
                        bool has_cargo) {
-    superstructure_input_proto_->set_hatch_ground_current(5000000 *
+    superstructure_input_proto_->set_hatch_ground_current(5e6 *
                                                           has_ground_hatch);
     superstructure_input_proto_->set_hatch_intake_proxy(has_hp_hatch);
-    superstructure_input_proto_->set_cargo_proxy(has_cargo);
+    superstructure_input_proto_->set_cargo_current(5e6 * has_cargo);
     WriteMessages();
   }
 
@@ -194,7 +196,7 @@ class SuperstructureTest : public ::testing::Test {
     EXPECT_EQ(superstructure_status_proto_->has_ground_hatch(),
               has_ground_hatch);
     EXPECT_EQ(superstructure_status_proto_->has_hp_hatch(), has_hp_hatch);
-    EXPECT_EQ(superstructure_status_proto_->has_cargo(), has_cargo);
+    EXPECT_EQ(has_cargo, superstructure_status_proto_->has_cargo());
 
     EXPECT_EQ(superstructure_output_proto_->arrow_solenoid(), arrow_solenoid);
     EXPECT_EQ(superstructure_output_proto_->backplate_solenoid(),
@@ -346,19 +348,23 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_CARGO, true);
   RunFor(2);
   EXPECT_EQ(superstructure_status_proto_->state(), INTAKING_WRIST);
-  // Moment goal isn't intake cargo (button not held down) roller's stop running
+
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(2);
-  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), 0);
-  // OK Back to running rollers
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_CARGO, true);
   RunFor(2);
   EXPECT_EQ(superstructure_status_proto_->state(), INTAKING_WRIST);
   SetIntakeInputs(false, false, true);
-  RunFor(2);
+  RunFor(20);
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
-  EXPECT_TRUE(superstructure_status_proto_->has_cargo());
-  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), -2);
+  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), 0);
+
+  SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_CARGO, true);
+  RunFor(2);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), -12);
+  RunFor(10);
+  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), -12);
+  RunFor(1);
+  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), 0);
 
   // INTAKE_GROUND
   // Get Rid of Cargo
@@ -383,7 +389,16 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
   EXPECT_FALSE(superstructure_status_proto_->has_ground_hatch());
   EXPECT_FALSE(superstructure_status_proto_->has_hp_hatch());
-  EXPECT_FALSE(superstructure_status_proto_->has_cargo());
+
+  EXPECT_TRUE(superstructure_output_proto_->arrow_solenoid());
+  SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_HATCH, true);
+  RunFor(1);
+  EXPECT_TRUE(superstructure_output_proto_->backplate_solenoid());
+  EXPECT_FALSE(superstructure_output_proto_->arrow_solenoid());
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(100);
+  EXPECT_FALSE(superstructure_output_proto_->backplate_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->arrow_solenoid());
 }
 
 TEST_F(SuperstructureTest, GodmodeElevator) {
@@ -437,6 +452,7 @@ TEST_F(SuperstructureTest, BuddyClimb) {
   RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
+
   EXPECT_EQ(superstructure_output_proto_->winch_voltage(), 12);
 
   SetGoal(ScoreGoal::CLIMB, IntakeGoal::INTAKE_NONE, true);
