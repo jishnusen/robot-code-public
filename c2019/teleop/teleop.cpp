@@ -331,6 +331,7 @@ void TeleopBase::SendSuperstructureMessage() {
   }*/
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
+}
 
 }  // namespace teleop
-}  // namespace teleop
+}  // namespace c2019

@@ -9,6 +9,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//c2019/commands:commands",
+        "//c2019/subsystems/superstructure:superstructure",
         "//c2019/subsystems/superstructure:superstructure_queues",
         "//muan/logging:logger",
         "//muan/queues:queue_manager",
