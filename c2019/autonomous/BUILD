@@ -47,6 +47,7 @@ cc_library(
         "//muan/queues:queue_manager",
         "//muan/subsystems/drivetrain:drivetrain_queues",
         "//muan/wpilib:wpilib_queues",
+        "//c2019/subsystems/limelight:limelight",
     ],
 )
 

@@ -1,13 +1,19 @@
 #include "c2019/autonomous/none.h"
+#include "c2019/subsystems/limelight/limelight.h"
 
 namespace c2019 {
 namespace autonomous {
 
+using LimelightStatus = c2019::limelight::LimelightStatusProto;
+
 void None::NoneAuto() {
-  SetFieldPosition(1678.1678, 1678.1678, 0.0);
+  LimelightStatus status;
+
+  SetFieldPosition(0.0, 0.0, 0.0);
   LOG(INFO, "Running NONE auto");
 
-  ExitAutonomous();
+  StartDriveVision();
+  WaitUntilDriveComplete();  // :)
 }
 
 }  // namespace autonomous

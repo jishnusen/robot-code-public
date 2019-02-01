@@ -1,13 +1,13 @@
 #include "c2019/autonomous/autonomous_base.h"
 
 #include <chrono>
-
+#include "c2019/subsystems/limelight/limelight.h"
 #include "muan/logging/logger.h"
 #include "muan/queues/queue_manager.h"
 
 namespace c2019 {
 namespace autonomous {
-using LimelightStatus = c2019::limelight::StatusProto;
+using LimelightStatus = c2019::limelight::LimelightStatusProto;
 using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
@@ -20,7 +20,9 @@ AutonomousBase::AutonomousBase()
       drivetrain_goal_queue_(QueueManager<DrivetrainGoal>::Fetch()),
       drivetrain_status_reader_(
           QueueManager<DrivetrainStatus>::Fetch()->MakeReader()),
-      auto_status_queue_(QueueManager<AutoStatusProto>::Fetch()) {}
+      auto_status_queue_(QueueManager<AutoStatusProto>::Fetch()),
+      limelight_status_reader_(
+          QueueManager<LimelightStatus>::Fetch()->MakeReader()) {}
 
 bool AutonomousBase::IsAutonomous() {
   DriverStationProto driver_station;
@@ -78,17 +80,17 @@ void AutonomousBase::StartDrivePath(double x, double y, double heading,
 
   drivetrain_goal_queue_->WriteMessage(goal);
 }
-void AutonomousBase::StartDriveVision(){
-   LimelightStatus status;
-   if (!drivetrain_status_reader_.ReadLastMessage(&status)) {
-     LOG(WARNING, "No limelight status message provided.");
-     return;
+void AutonomousBase::StartDriveVision() {
+  LimelightStatus status;
+  if (!limelight_status_reader_.ReadLastMessage(&status)) {
+    LOG(WARNING, "No limelight status message provided.");
+    return;
   }
   double x = status->target_dist() * std::cos(-status->horiz_angle());
   double y = status->target_dist() * std::sin(-status->horiz_angle());
   double heading = status->heading() * (status->to_the_left() ? 1 : -1);
   x = x - (std::cos(heading) * 0.5);
-   y = y - (std::sin(heading) * 0.5);
+  y = y - (std::sin(heading) * 0.5);
   StartDrivePath(x, y, heading, 1);
 }
 bool AutonomousBase::IsDriveComplete() {
@@ -120,9 +122,10 @@ bool AutonomousBase::IsDrivetrainNear(double x, double y, double distance) {
 
   if (drivetrain_status_reader_.ReadLastMessage(&status)) {
     Eigen::Vector2d field_position =
-        transform_f0_ * (Eigen::Vector2d() << status->profiled_x_goal(),
-                         status->profiled_y_goal())
-                            .finished();
+        transform_f0_ *
+        (Eigen::Vector2d() << status->profiled_x_goal(),
+         status->profiled_y_goal())
+            .finished();
     if ((field_position(0) - x) * (field_position(0) - x) +
             (field_position(1) - y) * (field_position(1) - y) <
         distance * distance) {

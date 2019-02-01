@@ -1,8 +1,8 @@
 #ifndef C2019_AUTONOMOUS_DRIVE_STRAIGHT_H_
 #define C2019_AUTONOMOUS_DRIVE_STRAIGHT_H_
 
-#include "muan/logging/logger.h"
 #include "c2019/autonomous/autonomous_base.h"
+#include "muan/logging/logger.h"
 
 namespace c2019 {
 namespace autonomous {

@@ -2,14 +2,14 @@
 #define C2019_AUTONOMOUS_AUTONOMOUS_BASE_H_
 
 #include <string>
-
 #include "Eigen/Dense"
+#include "c2019/autonomous/queue_types.h"
+#include "c2019/subsystems/limelight/limelight.h"
 #include "gtest/gtest.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/webdash/queue_types.h"
 #include "muan/wpilib/queue_types.h"
 #include "third_party/aos/common/util/phased_loop.h"
-#include "c2019/autonomous/queue_types.h"
 
 namespace c2019 {
 namespace autonomous {
@@ -36,6 +36,7 @@ class AutonomousBase {
                       double path_voltage = 9.0);
 
   bool IsDriveComplete();
+  void StartDriveVision();
   bool IsDrivetrainNear(double x, double y, double distance);
 
   void WaitUntilDriveComplete();
@@ -53,6 +54,7 @@ class AutonomousBase {
   muan::subsystems::drivetrain::StatusQueue::QueueReader
       drivetrain_status_reader_;
   c2019::autonomous::AutoStatusQueue* auto_status_queue_;
+  c2019::limelight::LimelightStatusQueue::QueueReader limelight_status_reader_;
 
   Eigen::Transform<double, 2, Eigen::AffineCompact> transform_f0_;
   double theta_offset_ = 0.0;
