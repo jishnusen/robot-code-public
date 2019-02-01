@@ -17,7 +17,7 @@ namespace teleop {
 
 // TODO(Hanson) tune these with Nathan
 constexpr double kGodmodeButtonThreshold = .25;
-constexpr double kGodmodeElevatorMultiplier = 6;
+constexpr double kGodmodeElevatorMultiplier = 3;
 constexpr double kGodmodeWristMultiplier = 10;
 
 class TeleopBase {
