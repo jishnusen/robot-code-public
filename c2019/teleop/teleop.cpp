@@ -52,7 +52,7 @@ TeleopBase::TeleopBase()
   // intake buttons
   ground_intake_height_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
   cargo_intake_ = gamepad_.MakeAxis(3, 0.3);
-  hp_hatch_intake_ =
+  ground_hatch_intake_ =
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_BUMPER));
   // outtake buttons
   cargo_outtake_ = gamepad_.MakeAxis(2, 0.7);
@@ -196,8 +196,6 @@ void TeleopBase::SendSuperstructureMessage() {
   superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
 
   // Ground hatch intake and outtake is both trigger and bumper
-  bool ground_hatch_intake_ =
-      cargo_intake_->is_pressed() && hp_hatch_intake_->is_pressed();
   bool ground_hatch_outtake_ =
       cargo_outtake_->is_pressed() && hp_hatch_outtake_->is_pressed();
 
@@ -228,15 +226,16 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   } else if (cargo_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_CARGO);
-  } else if (ground_hatch_intake_) {
+  } else if (ground_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::INTAKE_GROUND_HATCH);
   } else if (ground_hatch_outtake_) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::OUTTAKE_GROUND_HATCH);
-  } else if (hp_hatch_intake_->is_pressed()) {
+  } /*else if (hp_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
-  } else if (hp_hatch_outtake_->is_pressed()) {
+  }*/
+  else if (hp_hatch_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
