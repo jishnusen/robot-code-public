@@ -1,5 +1,7 @@
 #include "c2019/subsystems/limelight/limelight.h"
+#include <algorithm>
 #include <memory>
+#include <vector>
 
 using muan::queues::QueueManager;
 
