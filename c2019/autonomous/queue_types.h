@@ -8,8 +8,8 @@
 namespace c2019 {
 namespace autonomous {
 
-using AutoStatusProto = muan::proto::StackProto<AutonomousStatus, 1024>;
-using AutoStatusQueue = muan::queues::MessageQueue<AutoStatusProto>;
+/* using AutoStatusProto = muan::proto::StackProto<AutonomousStatus, 1024>; */
+/* using AutoStatusQueue = muan::queues::MessageQueue<AutoStatusProto>; */
 
 }
 }

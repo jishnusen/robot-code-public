@@ -23,7 +23,7 @@ constexpr double kHighGearPositionF = .15;
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
-constexpr double kHighGearVelocityF = 0;
+constexpr double kHighGearVelocityF = 0.08;
 
 constexpr double kIZone = 0;
 
@@ -85,10 +85,10 @@ DrivetrainInterface::DrivetrainInterface()
   left_master_.ConfigVoltageCompSaturation(12.0, 100);
   left_master_.ConfigVoltageMeasurementFilter(32, 100);
 
-  left_master_.SetSelectedSensorPosition(0, kPositionSlot, kSetupTimeout);
-  right_master_.SetSelectedSensorPosition(0, kPositionSlot, kSetupTimeout);
-  left_master_.SetSelectedSensorPosition(0, kVelocitySlot, kSetupTimeout);
-  right_master_.SetSelectedSensorPosition(0, kVelocitySlot, kSetupTimeout);
+  left_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
+  right_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
+  left_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
+  right_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
 
   left_master_.SetSensorPhase(true);
 

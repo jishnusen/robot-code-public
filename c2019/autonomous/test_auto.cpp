@@ -9,7 +9,6 @@ void TestAuto::Run() {
 
   StartDrivePath(2.55, 1.2, 0, 1, false);
   WaitUntilDriveComplete();
-  ExitAutonomous();
 }
 
 }  // namespace autonomous

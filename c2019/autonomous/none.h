@@ -2,7 +2,6 @@
 #define C2019_AUTONOMOUS_NONE_H_
 
 #include "c2019/autonomous/autonomous_base.h"
-#include "c2019/subsystems/limelight/limelight.h"
 #include "muan/logging/logger.h"
 
 namespace c2019 {

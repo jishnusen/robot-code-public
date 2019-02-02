@@ -18,7 +18,7 @@ message LimelightStatus {
   optional bool to_the_left = 11;
   optional double difference = 12;
   optional double heading_model = 13;
-
+  required bool has_target = 14;
 }
 
 enum LimelightState {

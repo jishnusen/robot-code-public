@@ -50,25 +50,33 @@ void Limelight::Update() {
   target_2_horizontal_angle_ =
       std::max(target_1_horizontal_angle, target_2_horizontal_angle);
   double difference = target_1_horizontal_angle - target_2_horizontal_angle;
+  target_dist_ = target_dist_;
+  /* double heading_model = */
+  /*     7.49562907 * pow(target_dist_, 4) - 20.2223 * pow(target_dist_, 3) + */
+  /*     20.6362229 * pow(target_dist_, 2) - 9.9716668 * target_dist_ + 2.19656; */
   double heading_model =
-      7.49562907 * pow(target_dist_, 4) - 20.2223 * pow(target_dist_, 3) +
-      20.6362229 * pow(target_dist_, 2) - 9.9716668 * target_dist_ + 2.19656;
+      0.3884744 * pow(target_dist_, 4) - 1.60138354 * pow(target_dist_, 3) +
+      2.8595594 * pow(target_dist_, 2) - 2.5235603 * target_dist_ + 1.09079;
   double skim_error = heading_model - std::abs(difference);
   double final_heading =
-      -445.775 * pow(skim_error, 2) + 32.7477 * skim_error - .0041;
+      13.424119452681966 * skim_error - 0.7052851048332557;
+  double has_target = table->GetEntry("tv").GetDouble(0);
   //  double tx_factor = 1 + 0.4*std::abs(target_horizontal_angle);
   LimelightStatusProto status;
-  status->set_target_dist(distance);
+  status->set_target_dist(distance / 2.0);
   status->set_skew(target_skew_);
   status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
   status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
   status->set_target_3_horizontal_angle(target_3_horizontal_angle);
   status->set_to_the_left(slope_ > 0);
-  status->set_heading(std::abs(1.4 * final_heading - .17));
-  // status->set_heading_model(heading_model);
-  // status->set_difference(difference);
+  /* status->set_heading(std::abs(1.4 * final_heading - .17)); */
+  status->set_heading(std::abs(final_heading));
+  status->set_has_target(has_target == 1);
+  status->set_heading_model(heading_model);
+  status->set_difference(difference);
   status->set_horiz_angle(
-      std::copysign(std::abs(horiz_angle_) + 0.1, horiz_angle_));
+      std::copysign(std::abs(horiz_angle_), horiz_angle_));
+
   status_queue_->WriteMessage(status);
 }
 
