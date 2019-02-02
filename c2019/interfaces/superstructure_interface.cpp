@@ -74,7 +74,8 @@ void SuperstructureInterface::ReadSensors() {
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
-  inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+  inputs->set_wrist_hall(
+      !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
 
   input_queue_->WriteMessage(inputs);
 }
@@ -162,7 +163,9 @@ void SuperstructureInterface::WriteActuators() {
       wrist_.Set(ControlMode::PercentOutput, outputs->wrist_setpoint() / 12.);
     case TalonOutput::POSITION:
       wrist_.Set(ControlMode::MotionMagic,
-                 outputs->wrist_setpoint() * kWristConversionFactor, DemandType_ArbitraryFeedForward, outputs->wrist_setpoint_ff() / 12.);
+                 outputs->wrist_setpoint() * kWristConversionFactor,
+                 DemandType_ArbitraryFeedForward,
+                 outputs->wrist_setpoint_ff() / 12.);
   }
 
   cargo_intake_.Set(ControlMode::PercentOutput,

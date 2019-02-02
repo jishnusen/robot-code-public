@@ -31,7 +31,7 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // climbing buttons
-  crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
+  pop_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeAxisRange(-134, -46, 0, 1, 0.8);
@@ -131,7 +131,7 @@ void TeleopBase::Update() {
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
 
-  if (exit_auto_->was_clicked()) {
+  if (exit_auto_->was_clihas_groundcked()) {
     auto_goal->set_run_command(false);
     auto_goal_queue_->WriteMessage(auto_goal);
   } else if (!auto_status->running_command()) {
@@ -195,6 +195,8 @@ void TeleopBase::SendSuperstructureMessage() {
   superstructure_goal->set_score_goal(c2019::superstructure::NONE);
   superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
 
+  has_hp_hatch_ = false;
+
   // Ground hatch intake and outtake is both trigger and bumper
   bool ground_hatch_outtake_ =
       cargo_outtake_->is_pressed() && hp_hatch_outtake_->is_pressed();
@@ -225,13 +227,21 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_score_goal(c2019::superstructure::STOW);
     }
   } else if (cargo_outtake_->is_pressed()) {
-    superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_CARGO);
+    if (!has_ground_hatch_) {
+      superstructure_goal->set_intake_goal(
+          c2019::superstructure::OUTTAKE_CARGO);
+    } else {
+      superstructure_goal->set_intake_goal(
+          c2019::superstructure::OUTTAKE_GROUND_HATCH);
+    }
   } else if (ground_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::INTAKE_GROUND_HATCH);
   } else if (ground_hatch_outtake_) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::OUTTAKE_GROUND_HATCH);
+  } else if (pop_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::POP);
   } /*else if (hp_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
   }*/
