@@ -48,7 +48,7 @@ class TeleopBase {
   muan::teleop::Button *climb_, *crawl_, *drop_forks_, *drop_crawlers_, *brake_;
 
   // safety button
-  muan::teleop::Button *safety_;
+  muan::teleop::Button *safety_, *switch_;
 
   // intake/outtake buttons
   muan::teleop::Button *cargo_intake_, *cargo_outtake_, *ground_hatch_intake_,
@@ -67,8 +67,12 @@ class TeleopBase {
 
   bool ground_hatch_outtake_;
 
-  bool has_cargo_, has_hp_hatch_, has_ground_hatch_ = false;
-  bool had_cargo_, had_hp_hatch_, had_ground_hatch_ = false;
+  bool has_cargo_ = false;
+  bool has_hp_hatch_ = false;
+  bool has_ground_hatch_ = false;
+  bool had_cargo_ = false;
+  bool had_hp_hatch_ = false;
+  bool had_ground_hatch_ = false;
 
   c2019::superstructure::SuperstructureStatusProto superstructure_status_;
 

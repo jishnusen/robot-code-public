@@ -32,7 +32,9 @@ TeleopBase::TeleopBase()
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // climbing buttons
   pop_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
-  climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
+  // crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
+  switch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
+  // climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeAxisRange(-134, -46, 0, 1, 0.8);
   drop_crawlers_ = gamepad_.MakeAxisRange(46, 134, 0, 1, 0.8);
@@ -108,7 +110,7 @@ void TeleopBase::Update() {
   superstructure_status_queue_->ReadLastMessage(&superstructure_status);
 
   has_cargo_ = superstructure_status_->has_cargo();
-  has_hp_hatch_ = superstructure_status_->has_hp_hatch();
+  // has_hp_hatch_ = superstructure_status_->has_hp_hatch();
   has_ground_hatch_ = superstructure_status_->has_ground_hatch();
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
@@ -131,7 +133,7 @@ void TeleopBase::Update() {
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
 
-  if (exit_auto_->was_clihas_groundcked()) {
+  if (exit_auto_->was_clicked()) {
     auto_goal->set_run_command(false);
     auto_goal_queue_->WriteMessage(auto_goal);
   } else if (!auto_status->running_command()) {
@@ -195,7 +197,9 @@ void TeleopBase::SendSuperstructureMessage() {
   superstructure_goal->set_score_goal(c2019::superstructure::NONE);
   superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
 
-  has_hp_hatch_ = false;
+  if (switch_->was_clicked()) {
+    has_hp_hatch_ = !has_hp_hatch_;
+  }
 
   // Ground hatch intake and outtake is both trigger and bumper
   bool ground_hatch_outtake_ =
@@ -238,7 +242,6 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::INTAKE_GROUND_HATCH);
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
-    superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
   } else if (ground_hatch_outtake_) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::OUTTAKE_GROUND_HATCH);
@@ -255,8 +258,8 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Handoff
   if (handoff_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
-    superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
+    /*superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
+    superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);*/
   }
 
   // Scoring positions - auto detects game piece

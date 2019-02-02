@@ -77,7 +77,8 @@ Superstructure::PopulateGroundHatchIntakeGoal() {
 
 hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
   hatch_intake::HatchIntakeGoalProto goal;
-  if (intake_goal_ == INTAKE_HATCH || intake_goal_ == PREP_HANDOFF) {
+  if (intake_goal_ == INTAKE_HATCH || intake_goal_ == PREP_HANDOFF ||
+      intake_goal_ == POP) {
     goal->set_goal(hatch_intake::INTAKE);
   } else if (intake_goal_ == OUTTAKE_HATCH) {
     goal->set_goal(hatch_intake::SCORE);
