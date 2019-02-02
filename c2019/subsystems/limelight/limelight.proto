@@ -12,11 +12,12 @@ message LimelightStatus {
   optional double skew = 5;
   optional double target_1_horizontal_angle = 6;
   optional double target_2_horizontal_angle = 7;
-  optional double heading = 8;
-  optional double horiz_angle = 9;
-  optional bool to_the_left = 10;
-  optional double difference = 11;
-  optional double heading_model = 12;
+  optional double target_3_horizontal_angle = 8;
+  optional double heading = 9;
+  optional double horiz_angle = 10;
+  optional bool to_the_left = 11;
+  optional double difference = 12;
+  optional double heading_model = 13;
 
 }
 

@@ -88,10 +88,10 @@ void AutonomousBase::StartDriveVision() {
   }
   double x = status->target_dist() * std::cos(-status->horiz_angle());
   double y = status->target_dist() * std::sin(-status->horiz_angle());
-  double heading = status->heading() * (status->to_the_left() ? 1 : -1);
+  double heading = status->heading() * -1;
   x = x - (std::cos(heading) * 0.5);
   y = y - (std::sin(heading) * 0.5);
-  StartDrivePath(x, y, heading, 1);
+  StartDrivePath(-x, -y, status->heading(), 1);
 }
 bool AutonomousBase::IsDriveComplete() {
   DrivetrainGoal goal;

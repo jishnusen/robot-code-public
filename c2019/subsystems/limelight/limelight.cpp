@@ -24,6 +24,8 @@ void Limelight::Update() {
       table->GetEntry("tx0").GetDouble(0) * (59.6 / 2.0) * (M_PI / 180.);
   double target_2_horizontal_angle =
       table->GetEntry("tx1").GetDouble(0) * (59.6 / 2.0) * (M_PI / 180.);
+  double target_3_horizontal_angle =
+      table->GetEntry("tx2").GetDouble(0) * (59.6 / 2.0) * (M_PI / 180.);
 
   std::vector<double> zero = {0, 0};
   std::vector<double> y_corner = table->GetEntry("tcorny").GetDoubleArray(zero);
@@ -60,6 +62,7 @@ void Limelight::Update() {
   status->set_skew(target_skew_);
   status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
   status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
+  status->set_target_3_horizontal_angle(target_3_horizontal_angle);
   status->set_to_the_left(slope_ > 0);
   status->set_heading(std::abs(1.4 * final_heading - .17));
   // status->set_heading_model(heading_model);
