@@ -10,16 +10,14 @@ namespace c2019 {
 namespace wrist {
 
 // Angle constants
-static constexpr double kMinAngle = 0.05;
+static constexpr double kMinAngle = 0.0;
 static constexpr double kStowAngle =
     M_PI / 3;  // TODO(Apurva) find value for this
 static constexpr double kMaxAngle = 210 * (M_PI / 180.);
 
 // Hall Calibration constants
 static constexpr double kCalibVoltage = 0;
-static constexpr double kHallEffectAngle =
-    1.67;  // TODO(Apurva) find value for this
-
+static constexpr double kHallEffectAngle = 1.6;
 // Manual voltage control constants
 static constexpr double kHoldingVoltage =
     5;  // TODO(Apurva) find value for this
@@ -48,9 +46,7 @@ class Wrist {
     return hall_calibration_.is_calibrated();
   }
 
-  inline double offset() const {
-    return hall_calibration_.offset();
-  }
+  inline double offset() const { return hall_calibration_.offset(); }
 
  private:
   double goal_;

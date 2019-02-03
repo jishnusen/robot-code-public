@@ -34,7 +34,7 @@ void Wrist::Update(const WristInputProto& input, WristOutputProto* output,
   (*status)->set_wrist_encoder_fault(false);
   (*status)->set_wrist_velocity(input->wrist_velocity());
 
-  (*output)->set_wrist_setpoint_ff(1.1 * std::cos(calibrated_encoder));
+  (*output)->set_wrist_setpoint_ff(1.53 * std::cos(calibrated_encoder));
   if (outputs_enabled) {
     if (is_calibrated()) {
       (*output)->set_output_type(POSITION);

@@ -14,7 +14,7 @@ constexpr double kElevatorD = 4.0;
 constexpr double kElevatorF = 0.06;
 constexpr double kElevatorIZone = 0.;
 constexpr double kElevatorMaxIntegral = 5e9;
-constexpr double kElevatorDeadband = 0.001;
+constexpr double kElevatorDeadband = 0.0;
 
 constexpr double kWristP = 2.5;
 constexpr double kWristI = 0.0;
@@ -22,7 +22,7 @@ constexpr double kWristD = 35.0;
 constexpr double kWristF = 0.8;
 constexpr double kWristIZone = 0.;
 constexpr double kWristMaxIntegral = 5e9;
-constexpr double kWristDeadband = 0.001;
+constexpr double kWristDeadband = 0.0;
 
 constexpr uint32_t kGroundPDPSlot = 7;
 constexpr uint32_t kCargoPDPSlot = 6;

@@ -61,6 +61,7 @@ TeleopBase::TeleopBase()
 
   // handoff
   handoff_ = gamepad_.MakePov(0, muan::teleop::Pov::kEast);
+  pop_ = gamepad_.MakePov(0, muan::teleop::Pov::kWest);
 
   // gear shifting - throttle buttons
   shifting_low_ = throttle_.MakeButton(4);
@@ -247,6 +248,9 @@ void TeleopBase::SendSuperstructureMessage() {
   if (handoff_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
     superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
+  }
+  if (pop_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::POP);
   }
 
   // Scoring positions - auto detects game piece

@@ -44,23 +44,24 @@ constexpr double kClimbHeight = 0.;
 constexpr double kElevatorSafeHeight = 0.3;
 constexpr double kElevatorPassThroughHeight = 0.023;
 constexpr double kElevatorHandoffTolerance = 2e-3;
+constexpr double kElevatorWristHorizHeight = 0.05;
 
 // wrist constants
-constexpr double kHatchForwardsAngle = 0.08;
-constexpr double kHatchThirdAngle = 0.11;
-constexpr double kHatchBackwardsAngle = 3.1;
-constexpr double kCargoRocketFirstAngle = .922;
-constexpr double kCargoRocketSecondAngle = .922;
-constexpr double kCargoRocketThirdAngle = .922;
+constexpr double kHatchForwardsAngle = 0.03;
+constexpr double kHatchThirdAngle = 0.06;
+constexpr double kHatchBackwardsAngle = 3.05;
+constexpr double kCargoRocketFirstAngle = .87;
+constexpr double kCargoRocketSecondAngle = .87;
+constexpr double kCargoRocketThirdAngle = .87;
 constexpr double kCargoRocketBackwardsAngle = M_PI;
-constexpr double kCargoShipForwardsAngle = 0.105;
-constexpr double kCargoShipBackwardsAngle = 2.775;
-constexpr double kCargoGroundAngle = 0.095;
-constexpr double kHandoffAngle = 3.576;
-constexpr double kStowAngle = 1.25;
-constexpr double kClimbAngle = 0.05;
-constexpr double kWristSafeForwardsAngle = 1.35;
-constexpr double kWristSafeBackwardsAngle = 2.7;
+constexpr double kCargoShipForwardsAngle = 0.05;
+constexpr double kCargoShipBackwardsAngle = 2.72;
+constexpr double kCargoGroundAngle = 0.045;
+constexpr double kHandoffAngle = 3.52;
+constexpr double kStowAngle = 1.2;
+constexpr double kClimbAngle = 0.0;
+constexpr double kWristSafeForwardsAngle = 1.3;
+constexpr double kWristSafeBackwardsAngle = 2.65;
 constexpr double kWristHandoffTolerance = 3. * (M_PI / 180.);
 
 class Superstructure {

@@ -25,6 +25,10 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
                                    kWristSafeForwardsAngle);
   }
 
+  if (elevator_status_->elevator_height() < kElevatorWristHorizHeight) {
+    *wrist_goal = muan::utils::Cap(*wrist_goal, wrist::kMinAngle, M_PI);
+  }
+
   if ((wrist_status_->wrist_angle() > kWristSafeBackwardsAngle &&
        *wrist_goal < kWristSafeBackwardsAngle) ||
       (wrist_status_->wrist_angle() < kWristSafeForwardsAngle &&
