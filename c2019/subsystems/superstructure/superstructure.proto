@@ -133,6 +133,7 @@ message SuperstructureInput {
   required double elevator_current = 25;
   required double wrist_voltage = 26;
   required double elevator_voltage = 27;
+  required bool cargo_proxy = 28;
 }
 
 message SuperstructureGoal {

@@ -35,7 +35,7 @@ void GroundHatchIntake::Update(const GroundHatchIntakeInputProto& input,
         break;
       case CARRYING:
         voltage = kHoldingVoltage;
-        snap_down = true;
+        snap_down = false;
         break;
       case OUTTAKING:
         voltage = kOuttakeVoltage;

@@ -37,4 +37,5 @@ message CargoIntakeOutput {
 message CargoIntakeInput {
   required uint64 timestamp = 1;
   required double current = 2;
+  required bool cargo_proxy = 3;
 }

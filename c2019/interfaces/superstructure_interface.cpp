@@ -76,6 +76,12 @@ void SuperstructureInterface::ReadSensors() {
                             kWristConversionFactor);
   inputs->set_wrist_hall(
       !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+  inputs->set_cargo_proxy(
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P) ||
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
+  inputs->set_hatch_intake_proxy(
+      canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR) &&
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CS));
 
   input_queue_->WriteMessage(inputs);
 }
@@ -175,6 +181,7 @@ void SuperstructureInterface::WriteActuators() {
 
   ground_intake_snap_.Set(outputs->snap_down());
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
+  backplate_solenoid_.Set(outputs->backplate_solenoid());
 }
 
 }  // namespace interfaces

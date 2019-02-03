@@ -132,7 +132,6 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_gyro(-(pigeon_.GetFusedHeading() - pigeon_offset_) * M_PI /
                     180.);
 
-
   input_queue_->WriteMessage(sensors);
 }
 
@@ -162,8 +161,10 @@ void DrivetrainInterface::WriteActuators() {
     case TalonOutput::POSITION:
       left_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kPositionSlot, 0);
-      left_master_.Set(ControlMode::Position, outputs->left_setpoint() * kDriveConversionFactor);
-      right_master_.Set(ControlMode::Position, outputs->right_setpoint() * kDriveConversionFactor);
+      left_master_.Set(ControlMode::Position,
+                       outputs->left_setpoint() * kDriveConversionFactor);
+      right_master_.Set(ControlMode::Position,
+                        outputs->right_setpoint() * kDriveConversionFactor);
       break;
     case TalonOutput::VELOCITY:
       SetBrakeMode(true);
@@ -171,17 +172,17 @@ void DrivetrainInterface::WriteActuators() {
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1);
-                       /* DemandType_ArbitraryFeedForward, */
-                       /* outputs->left_setpoint_ff() / 12.); */
+      /* DemandType_ArbitraryFeedForward, */
+      /* outputs->left_setpoint_ff() / 12.); */
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
-          /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.); */
+      /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
+       */
       break;
   }
 
   shifter_.Set(false);
-  backplate_solenoid_.Set(outputs->high_gear());
 }
 
 }  // namespace interfaces
