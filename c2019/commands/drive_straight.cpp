@@ -52,9 +52,9 @@ void DriveStraight::operator()() {
   SetFieldPosition(0.0, 0.0, 0.0);
   
   StartDriveVision();
+  
   WaitUntilDriveComplete();  // :)
   ExitAutonomous();
 }
-
 }  // namespace commands
 }  // namespace c2019

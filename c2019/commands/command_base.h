@@ -36,6 +36,7 @@ class CommandBase {
                       double extra_distance_final = 0,
                       double path_voltage = 9.0);
   void StartDriveVision();
+  void StartPointTurn(double heading);
 
   bool IsDriveComplete();
   bool IsDrivetrainNear(double x, double y, double distance);

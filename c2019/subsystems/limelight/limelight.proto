@@ -19,6 +19,12 @@ message LimelightStatus {
   optional double difference = 12;
   optional double heading_model = 13;
   required bool has_target = 14;
+  optional double skim_error = 15;
+  optional double overall_tx = 16;
+  optional double unfiltered_horiz_angle_1 = 17;
+  optional double unfiltered_horiz_angle_2 = 18;
+  optional double unfiltered_horiz_angle_3 = 19;
+  optional double slope = 20;
 }
 
 enum LimelightState {

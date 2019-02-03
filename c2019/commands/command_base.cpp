@@ -83,6 +83,12 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
 
   drivetrain_goal_queue_->WriteMessage(goal);
 }
+void CommandBase::StartPointTurn(double heading) {
+  DrivetrainGoal goal;
+  goal->set_point_turn_goal(heading);
+  goal->set_high_gear(false);
+  drivetrain_goal_queue_->WriteMessage(goal);
+}
 
 void CommandBase::StartDriveVision() {
   LimelightStatusProto status;
@@ -93,9 +99,9 @@ void CommandBase::StartDriveVision() {
   double x = status->target_dist() * std::cos(status->horiz_angle());
   double y = status->target_dist() * std::sin(status->horiz_angle());
   double left = status->to_the_left() ? 1 : -1;
-  x = x - (std::cos(status->heading() * left * 2.0) * 0.25);
-  y = y + (std::sin(status->heading() * left * 2.0) * 0.25);
-  StartDrivePath(-x, y, status->heading() * left * 2.0, -1);
+  x = x - (std::cos(status->heading() * left)*.8);
+  y = y - (std::sin(status->heading() * left) * .6);
+  StartDrivePath(x, -y, status->heading() * left, 1);
 }
 
 bool CommandBase::IsDriveComplete() {
@@ -109,6 +115,10 @@ bool CommandBase::IsDriveComplete() {
           std::abs(status->profiled_y_goal() - goal->path_goal().y()) < 1e-1 &&
           status->profile_complete()) {
         return true;
+      }
+    } else if (goal->has_point_turn_goal()) {
+      if (std::abs(status->heading_error()) < 1e-2) {
+	return true;
       }
     }
   }
