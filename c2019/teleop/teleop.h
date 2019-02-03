@@ -74,8 +74,6 @@ class TeleopBase {
   bool had_hp_hatch_ = false;
   bool had_ground_hatch_ = false;
 
-  c2019::superstructure::SuperstructureStatusProto superstructure_status_;
-
   // vision buttons
   commands::AutoStatusQueue::QueueReader auto_status_reader_;
   commands::AutoGoalQueue *auto_goal_queue_;

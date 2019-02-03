@@ -292,7 +292,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case HATCH_ROCKET_THIRD:
       elevator_height_ = kHatchRocketThirdHeight;
-      wrist_angle_ = kHatchForwardsAngle;
+      wrist_angle_ = kHatchThirdAngle;
       break;
     case HATCH_SHIP_FORWARDS:
       elevator_height_ = kHatchShipForwardsHeight;

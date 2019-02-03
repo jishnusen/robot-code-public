@@ -100,17 +100,18 @@ void TeleopBase::Update() {
 
   auto_status_reader_.ReadLastMessage(&auto_status);
 
+  SuperstructureStatusProto superstructure_status;
+  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
+      &superstructure_status);
+
+  has_cargo_ = superstructure_status->has_cargo();
+  has_hp_hatch_ = superstructure_status->has_hp_hatch();
+  has_ground_hatch_ = superstructure_status->has_ground_hatch();
+
   if (RobotController::IsSysActive() && !auto_status->running_command()) {
     SendDrivetrainMessage();
     SendSuperstructureMessage();
   }
-
-  SuperstructureStatusProto superstructure_status;
-  superstructure_status_queue_->ReadLastMessage(&superstructure_status);
-
-  has_cargo_ = superstructure_status_->has_cargo();
-  // has_hp_hatch_ = superstructure_status_->has_hp_hatch();
-  has_ground_hatch_ = superstructure_status_->has_ground_hatch();
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
@@ -196,7 +197,8 @@ void TeleopBase::SendSuperstructureMessage() {
   superstructure_goal->set_score_goal(c2019::superstructure::NONE);
   superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
 
-  has_hp_hatch_ = !has_cargo_;
+  std::cout << "has cargo: " << has_cargo_ << " has_hp_hatch: " << has_hp_hatch_
+            << std::endl;
 
   double godmode_elevator = -gamepad_.wpilib_joystick()->GetRawAxis(5);
   double godmode_wrist = gamepad_.wpilib_joystick()->GetRawAxis(4);
@@ -252,15 +254,7 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(c2019::superstructure::STOW);
   }
   if (level_1_->is_pressed()) {
-    if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (!backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_ROCKET_FIRST);
-      } else {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_ROCKET_BACKWARDS);
-      }
-    } else {
+    if (has_cargo_ || safety_->is_pressed()) {
       if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_FIRST);
@@ -268,42 +262,50 @@ void TeleopBase::SendSuperstructureMessage() {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_BACKWARDS);
       }
+    } else {
+      if (!backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_FIRST);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_BACKWARDS);
+      }
     }
   }
   if (level_2_->is_pressed()) {
-    if (has_hp_hatch_ || safety_->is_pressed()) {
-      superstructure_goal->set_score_goal(
-          c2019::superstructure::HATCH_ROCKET_SECOND);
-    } else {
+    if (has_cargo_ || safety_->is_pressed()) {
       superstructure_goal->set_score_goal(
           c2019::superstructure::CARGO_ROCKET_SECOND);
+    } else {
+      superstructure_goal->set_score_goal(
+          c2019::superstructure::HATCH_ROCKET_SECOND);
     }
   }
   if (level_3_->is_pressed()) {
-    if (has_hp_hatch_ || safety_->is_pressed()) {
-      superstructure_goal->set_score_goal(
-          c2019::superstructure::HATCH_ROCKET_THIRD);
-    } else {
+    if (has_cargo_ || safety_->is_pressed()) {
       superstructure_goal->set_score_goal(
           c2019::superstructure::CARGO_ROCKET_THIRD);
+    } else {
+      superstructure_goal->set_score_goal(
+          c2019::superstructure::HATCH_ROCKET_THIRD);
     }
   }
   if (ship_->is_pressed()) {
-    if (has_hp_hatch_ || safety_->is_pressed()) {
-      if (!backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_SHIP_FORWARDS);
-      } else {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_SHIP_BACKWARDS);
-      }
-    } else {
+    if (has_cargo_ || safety_->is_pressed()) {
       if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_SHIP_FORWARDS);
       } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_SHIP_BACKWARDS);
+      }
+    } else {
+      if (!backwards_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_SHIP_FORWARDS);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_SHIP_BACKWARDS);
       }
     }
   }
