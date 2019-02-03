@@ -35,34 +35,25 @@ bool DriveStraight::IsAutonomous() {
 }
 
 void DriveStraight::operator()() {
-  std::cout << "starting drive straight" << std::endl;
   EnterAutonomous();
-  std::cout << "starting drive straight" << std::endl;
   LimelightStatusProto status;
-  std::cout << "starting drive straight" << std::endl;
   if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status)) {
-    std::cout << "starting drive straight" << std::endl;
     LOG(WARNING, "No limelight status message provided.");
     ExitAutonomous();
     return;
   }
 
   if (!status->has_target()) {
-  std::cout << "starting drive straight" << std::endl;
     LOG(WARNING, "we fucked up sorry livy");
     ExitAutonomous();
     return;
   }
-  std::cout << "starting drive straight" << std::endl;
+
+  SetFieldPosition(0.0, 0.0, 0.0);
   
   StartDriveVision();
-  LOG(INFO, "Running VISION auto");
-  std::cout << "starting drive straight" << std::endl;
-
-  StartDrivePath(1.0, 0, 0, 1, false);
   WaitUntilDriveComplete();  // :)
   ExitAutonomous();
-  std::cout << "ending drive straight" << std::endl;
 }
 
 }  // namespace commands

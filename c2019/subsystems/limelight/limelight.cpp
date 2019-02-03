@@ -53,13 +53,13 @@ void Limelight::Update() {
   target_dist_ = target_dist_;
   /* double heading_model = */
   /*     7.49562907 * pow(target_dist_, 4) - 20.2223 * pow(target_dist_, 3) + */
-  /*     20.6362229 * pow(target_dist_, 2) - 9.9716668 * target_dist_ + 2.19656; */
+  /*     20.6362229 * pow(target_dist_, 2) - 9.9716668 * target_dist_ + 2.19656;
+   */
   double heading_model =
       0.3884744 * pow(target_dist_, 4) - 1.60138354 * pow(target_dist_, 3) +
       2.8595594 * pow(target_dist_, 2) - 2.5235603 * target_dist_ + 1.09079;
   double skim_error = heading_model - std::abs(difference);
-  double final_heading =
-      13.424119452681966 * skim_error - 0.7052851048332557;
+  double final_heading = 14* (skim_error - 0.021);
   double has_target = table->GetEntry("tv").GetDouble(0);
   //  double tx_factor = 1 + 0.4*std::abs(target_horizontal_angle);
   LimelightStatusProto status;
@@ -74,8 +74,7 @@ void Limelight::Update() {
   status->set_has_target(has_target == 1);
   status->set_heading_model(heading_model);
   status->set_difference(difference);
-  status->set_horiz_angle(
-      std::copysign(std::abs(horiz_angle_), horiz_angle_));
+  status->set_horiz_angle(std::copysign(std::abs(horiz_angle_), horiz_angle_));
 
   status_queue_->WriteMessage(status);
 }
