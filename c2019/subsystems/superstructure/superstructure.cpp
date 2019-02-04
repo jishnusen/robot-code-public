@@ -237,7 +237,8 @@ void Superstructure::Update() {
   output->set_winch_voltage(winch_output->winch_voltage());
   output->set_drop_forks(winch_output->drop_forks());
   output->set_elevator_high_gear(elevator_output->high_gear());
-  output->set_crawler_solenoid(elevator_output->crawler_solenoid());
+  output->set_crawler_one_solenoid(elevator_output->crawler_one_solenoid());
+  output->set_crawler_two_solenoid(elevator_output->crawler_two_solenoid());
   output->set_crawler_voltage(elevator_output->crawler_voltage());
   output->set_brake(elevator_output->brake());
   output->set_elevator_setpoint(elevator_output->elevator_setpoint());

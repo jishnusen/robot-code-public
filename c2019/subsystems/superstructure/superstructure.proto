@@ -166,7 +166,8 @@ message SuperstructureOutput {
   required double winch_voltage = 13;
   required bool drop_forks = 14;
   required bool elevator_high_gear = 15;
-  required bool crawler_solenoid = 16;
-  required double crawler_voltage = 17;
-  required bool brake = 18;
+  required bool crawler_one_solenoid = 16;
+  required bool crawler_two_solenoid = 17;
+  required double crawler_voltage = 18;
+  required bool brake = 19;
 }
