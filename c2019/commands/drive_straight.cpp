@@ -36,22 +36,24 @@ bool DriveStraight::IsAutonomous() {
 
 void DriveStraight::operator()() {
   EnterAutonomous();
-  LimelightStatusProto status;
-  if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status)) {
-    LOG(WARNING, "No limelight status message provided.");
-    ExitAutonomous();
-    return;
-  }
+  /* LimelightStatusProto status; */
+  /* if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status)) { */
+  /*   LOG(WARNING, "No limelight status message provided."); */
+  /*   ExitAutonomous(); */
+  /*   return; */
+  /* } */
 
-  if (!status->has_target()) {
-    LOG(WARNING, "we fucked up sorry livy");
-    ExitAutonomous();
-    return;
-  }
+  /* if (!status->has_target()) { */
+  /*   LOG(WARNING, "we fucked up sorry livy"); */
+  /*   ExitAutonomous(); */
+  /*   return; */
+  /* } */
 
   SetFieldPosition(0.0, 0.0, 0.0);
+  GoTo(superstructure::STOW, superstructure::INTAKE_NONE);
   
   StartDriveVision();
+  /* StartDrivePath(1.0, 0, 0, 1, false); */
   
   WaitUntilDriveComplete();  // :)
   ExitAutonomous();

@@ -72,10 +72,9 @@ void Limelight::Update() {
   /*double heading_model =
       0.3884744 * pow(target_dist_, 4) - 1.60138354 * pow(target_dist_, 3) +
       2.8595594 * pow(target_dist_, 2) - 2.5235603 * target_dist_ + 1.09079;*/
-  double heading_model = 0.19032078*pow(target_dist_,2) -0.6167654*target_dist_ + 0.61464354;
+  double heading_model = 0.3616 * target_dist_ * target_dist_ - 1.04477 * target_dist_ + 0.8617;
   double skim_error = heading_model - std::abs(difference);
   double has_target = table->GetEntry("tv").GetDouble(0);
-  skim_error = (skim_error)*(target_dist_);
   //double error_sub = 0.0273021*pow((distance/2.0), 2) -0.0130306*(distance/2.0) + 0.00812367;
   //  double tx_factor = 1 + 0.4*std::abs(target_horizontal_angle);
   //double final_heading = 16* (skim_error - 0.02);
@@ -92,7 +91,7 @@ void Limelight::Update() {
   status->set_to_the_left(slope_ > 0);
   status->set_skim_error(skim_error);
   /* status->set_heading(std::abs(1.4 * final_heading - .17)); */
-  status->set_heading(skim_error * 25);
+  status->set_heading(std::abs(skim_error * 100));
   status->set_has_target(has_target == 1);
   status->set_heading_model(heading_model);
   status->set_difference(difference);

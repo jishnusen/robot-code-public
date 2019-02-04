@@ -10,6 +10,7 @@
 #include "muan/wpilib/queue_types.h"
 #include "third_party/aos/common/util/phased_loop.h"
 #include "c2019/commands/queue_types.h"
+#include "c2019/subsystems/superstructure/queue_types.h"
 
 namespace c2019 {
 namespace commands {
@@ -45,6 +46,7 @@ class CommandBase {
   void WaitUntilDrivetrainNear(double x, double y, double distance);
 
   void SetFieldPosition(double x, double y, double theta);
+  void GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal);
 
   // Set the robot-space (robot poweron position) transformation. The parameters
   // are the position of the robot (right now) in field coordinates (F).

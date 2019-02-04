@@ -4,19 +4,38 @@ option cc_enable_arenas = true;
 
 package c2019.cargo_intake;
 
+enum Goal {
+  NONE = 0;
+  INTAKE = 1;
+  STOP_INTAKE = 2;
+  OUTTAKE = 3;
+}
+
 enum State {
-  IDLE = 0;
+  HOLDING = 0;
   INTAKING = 1;
-  CARRYING = 2;
+  PICKING_UP = 2;
   OUTTAKING = 3;
+}
+
+message CargoIntakeGoal{
+  required uint64 timestamp = 1;
+  required Goal goal = 2;
 }
 
 message CargoIntakeStatus {
   required uint64 timestamp = 1;
   required State state = 2;
+  required bool has_cargo = 3;
 }
 
 message CargoIntakeOutput {
   required uint64 timestamp = 1;
   required double roller_voltage = 2;
+}
+
+message CargoIntakeInput {
+  required uint64 timestamp = 1;
+  required double current = 2;
+  required bool cargo_proxy = 3;
 }

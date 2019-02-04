@@ -36,6 +36,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":command_queues",
+        "//c2019/subsystems/superstructure:superstructure_queues",
         "//c2019/subsystems/limelight:limelight_queues",
         "//muan/logging:logger",
         "//muan/queues:queue_manager",

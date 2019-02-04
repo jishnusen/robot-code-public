@@ -7,17 +7,36 @@ package c2019.ground_hatch_intake;
 enum State {
   IDLE = 0;
   INTAKING = 1;
-  CARRYING = 2;
-  OUTTAKING = 3;
+  PICKING_UP = 2;
+  CARRYING = 3;
+  OUTTAKING = 4;
 }
 
 message GroundHatchIntakeStatus {
   required uint64 timestamp = 1;
   required State state = 2;
+  required bool has_hatch = 3;
 }
 
 message GroundHatchIntakeOutput {
   required uint64 timestamp = 1;
   required double roller_voltage = 2;
   required bool snap_down = 3;
+}
+
+enum Goal {
+  NONE = 0; 
+  REQUEST_HATCH = 1;
+  EJECT = 2;
+  RISE = 3;
+}
+
+message GroundHatchIntakeGoal {
+  required uint64 timestamp = 1;
+  required Goal goal = 2;
+}
+
+message GroundHatchIntakeInput {
+  required uint64 timestamp = 1;
+  required double current = 2;  
 }

@@ -4,6 +4,7 @@
 #include <atomic>
 
 #include "c2019/interfaces/interface_runner.h"
+#include "c2019/subsystems/superstructure/superstructure.h"
 #include "c2019/subsystems/drivetrain/drivetrain_base.h"
 #include "c2019/subsystems/limelight/limelight.h"
 #include "muan/subsystems/drivetrain/drivetrain.h"
@@ -26,6 +27,7 @@ class SubsystemRunner {
       c2019::subsystems::drivetrain::GetDrivetrainConfig()};
   interfaces::InterfaceRunner interface_runner_;
   c2019::limelight::Limelight limelight_{45, 60, 29};
+  c2019::superstructure::Superstructure superstructure_;
   std::atomic<bool> running_;
 };
 
