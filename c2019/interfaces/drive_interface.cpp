@@ -182,7 +182,7 @@ void DrivetrainInterface::WriteActuators() {
       break;
   }
 
-  shifter_.Set(false);
+  shifter_.Set(outputs->high_gear());
 }
 
 }  // namespace interfaces
