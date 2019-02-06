@@ -48,6 +48,8 @@ class Elevator {
   double prev_encoder_ = 0.;
   int num_encoder_fault_ticks_ = 0;
   bool encoder_fault_ = false;
+
+  int counter_ = 0;
 };
 
 }  // namespace elevator

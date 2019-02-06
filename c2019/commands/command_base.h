@@ -4,13 +4,12 @@
 #include <string>
 
 #include "Eigen/Dense"
+#include "c2019/commands/queue_types.h"
 #include "gtest/gtest.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/webdash/queue_types.h"
 #include "muan/wpilib/queue_types.h"
 #include "third_party/aos/common/util/phased_loop.h"
-#include "c2019/commands/queue_types.h"
-#include "c2019/subsystems/superstructure/queue_types.h"
 
 namespace c2019 {
 namespace commands {
@@ -28,7 +27,6 @@ class CommandBase {
   virtual bool IsAutonomous();
   void EnterAutonomous();
   void ExitAutonomous();
-
   void Wait(uint32_t num_cycles);
 
   void StartDrivePath(double x, double y, double heading,
@@ -36,8 +34,8 @@ class CommandBase {
                       double extra_distance_initial = 0,
                       double extra_distance_final = 0,
                       double path_voltage = 9.0);
+
   void StartDriveVision();
-  void StartPointTurn(double heading);
 
   bool IsDriveComplete();
   bool IsDrivetrainNear(double x, double y, double distance);
@@ -46,7 +44,6 @@ class CommandBase {
   void WaitUntilDrivetrainNear(double x, double y, double distance);
 
   void SetFieldPosition(double x, double y, double theta);
-  void GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal);
 
   // Set the robot-space (robot poweron position) transformation. The parameters
   // are the position of the robot (right now) in field coordinates (F).
@@ -59,7 +56,6 @@ class CommandBase {
       drivetrain_status_reader_;
   c2019::commands::AutoStatusQueue* auto_status_queue_;
   c2019::commands::AutoGoalQueue::QueueReader auto_goal_reader_;
-
   Eigen::Transform<double, 2, Eigen::AffineCompact> transform_f0_;
   double theta_offset_ = 0.0;
 

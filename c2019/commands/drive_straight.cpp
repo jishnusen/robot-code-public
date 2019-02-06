@@ -37,7 +37,8 @@ bool DriveStraight::IsAutonomous() {
 void DriveStraight::operator()() {
   EnterAutonomous();
   /* LimelightStatusProto status; */
-  /* if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status)) { */
+  /* if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status))
+   * { */
   /*   LOG(WARNING, "No limelight status message provided."); */
   /*   ExitAutonomous(); */
   /*   return; */
@@ -49,14 +50,13 @@ void DriveStraight::operator()() {
   /*   return; */
   /* } */
 
-  SetFieldPosition(0.0, 0.0, 0.0);
-  GoTo(superstructure::STOW, superstructure::INTAKE_NONE);
-  
-  StartDriveVision();
-  /* StartDrivePath(1.0, 0, 0, 1, false); */
-  
+  SetFieldPosition(0, 0, 0.0);
+  LOG(INFO, "Running NONE auto");
+
+  StartDrivePath(3.0, 0, 0, 1, false);
   WaitUntilDriveComplete();  // :)
   ExitAutonomous();
 }
+
 }  // namespace commands
 }  // namespace c2019

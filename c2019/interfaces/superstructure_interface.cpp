@@ -182,6 +182,8 @@ void SuperstructureInterface::WriteActuators() {
   ground_intake_snap_.Set(outputs->snap_down());
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
   backplate_solenoid_.Set(outputs->backplate_solenoid());
+  crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
+  crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
 }
 
 }  // namespace interfaces

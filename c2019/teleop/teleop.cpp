@@ -186,15 +186,18 @@ void TeleopBase::SendDrivetrainMessage() {
     high_gear_ = false;
   }
 
-  if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status)) {
-   std::cout << vision_->is_pressed() << "\t" << lime_status->has_target() << std::endl;
-	  if (vision_->is_pressed() && lime_status->has_target()) {
-	    std::cout << "running" << std::endl;
-	    wheel += lime_status->horiz_angle() * -1*(4.9/lime_status->target_dist());
-	    throttle = 0.39*(lime_status->target_dist() - 0.59);
-	    std::cout<< throttle <<std::endl;
-	  }
-}
+  if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
+          &lime_status)) {
+    std::cout << vision_->is_pressed() << "\t" << lime_status->has_target()
+              << std::endl;
+    if (vision_->is_pressed() && lime_status->has_target()) {
+      std::cout << "running" << std::endl;
+      wheel +=
+          lime_status->horiz_angle() * -1 * (4.9 / lime_status->target_dist());
+      throttle = 0.39 * (lime_status->target_dist() - 0.59);
+      std::cout << throttle << std::endl;
+    }
+  }
 
   drivetrain_goal->set_high_gear(high_gear_);
 

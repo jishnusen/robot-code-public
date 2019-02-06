@@ -13,7 +13,6 @@ using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
 using c2019::limelight::LimelightStatusProto;
-using c2019::superstructure::SuperstructureGoalProto;
 
 CommandBase::CommandBase()
     : driver_station_reader_(
@@ -84,21 +83,6 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
 
   drivetrain_goal_queue_->WriteMessage(goal);
 }
-void CommandBase::StartPointTurn(double heading) {
-  DrivetrainGoal goal;
-  goal->set_point_turn_goal(heading);
-  goal->set_high_gear(false);
-  drivetrain_goal_queue_->WriteMessage(goal);
-}
-
-void CommandBase::GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal) {
-  SuperstructureGoalProto superstructure_goal;
-
-  superstructure_goal->set_score_goal(score_goal);
-  superstructure_goal->set_intake_goal(intake_goal);
-
-  QueueManager<SuperstructureGoalProto>::Fetch()->WriteMessage(superstructure_goal);
-}
 
 void CommandBase::StartDriveVision() {
   LimelightStatusProto status;
@@ -108,10 +92,9 @@ void CommandBase::StartDriveVision() {
   }
   double x = status->target_dist() * std::cos(status->horiz_angle());
   double y = status->target_dist() * std::sin(status->horiz_angle());
-  double left = status->to_the_left() ? 1 : -1;
-  x = x - (std::cos(status->heading() * left)*.8);
-  y = y - (std::sin(status->heading() * left) * .8);
-  StartDrivePath(x, -y, status->heading() * left, 1);
+  x = x - (std::cos(status->heading()) * 0.8);
+  // y = y + (std::sin(status->heading()) * 0.8);
+  StartDrivePath(x, y, 0, 1);
 }
 
 bool CommandBase::IsDriveComplete() {
@@ -125,10 +108,6 @@ bool CommandBase::IsDriveComplete() {
           std::abs(status->profiled_y_goal() - goal->path_goal().y()) < 1e-1 &&
           status->profile_complete()) {
         return true;
-      }
-    } else if (goal->has_point_turn_goal()) {
-      if (std::abs(status->heading_error()) < 1e-2) {
-	return true;
       }
     }
   }
@@ -147,9 +126,10 @@ bool CommandBase::IsDrivetrainNear(double x, double y, double distance) {
 
   if (drivetrain_status_reader_.ReadLastMessage(&status)) {
     Eigen::Vector2d field_position =
-        transform_f0_ * (Eigen::Vector2d() << status->profiled_x_goal(),
-                         status->profiled_y_goal())
-                            .finished();
+        transform_f0_ *
+        (Eigen::Vector2d() << status->profiled_x_goal(),
+         status->profiled_y_goal())
+            .finished();
     if ((field_position(0) - x) * (field_position(0) - x) +
             (field_position(1) - y) * (field_position(1) - y) <
         distance * distance) {

@@ -15,6 +15,7 @@ cc_library(
         ":commands_proto",
         "//muan/proto:stack_proto",
         "//muan/queues:queue_manager",
+	"//c2019/subsystems/limelight:limelight_queues",
     ],
 )
 
@@ -36,12 +37,11 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":command_queues",
-        "//c2019/subsystems/superstructure:superstructure_queues",
-        "//c2019/subsystems/limelight:limelight_queues",
         "//muan/logging:logger",
         "//muan/queues:queue_manager",
         "//muan/subsystems/drivetrain:drivetrain_queues",
         "//muan/wpilib:wpilib_queues",
+        "//c2019/subsystems/limelight:limelight_queues",
     ],
 )
 
@@ -73,6 +73,5 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":command_base",
-        "//c2019/subsystems/limelight:limelight_queues",
     ],
 )

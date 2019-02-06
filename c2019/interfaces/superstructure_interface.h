@@ -28,6 +28,9 @@ constexpr uint32_t kArrow = 3;
 
 constexpr uint32_t kBackplate = 2;
 
+constexpr uint32_t kCrawlerOne = 4;
+constexpr uint32_t kCrawlerTwo = 5;
+
 class SuperstructureInterface {
  public:
   SuperstructureInterface();
@@ -46,6 +49,8 @@ class SuperstructureInterface {
   Solenoid ground_intake_snap_{kGroundSnap};
   Solenoid arrow_solenoid_{kArrow};
   Solenoid backplate_solenoid_{kBackplate};
+  Solenoid crawler_one_solenoid_{kCrawlerOne};
+  Solenoid crawler_two_solenoid_{kCrawlerTwo};
 
   TalonSRX elevator_master_{kElevatorMaster};
   VictorSPX elevator_slave_a_{kElevatorSlaveA};
