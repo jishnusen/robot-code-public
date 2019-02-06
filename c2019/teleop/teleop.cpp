@@ -1,6 +1,7 @@
 #include "c2019/teleop/teleop.h"
 #include "c2019/commands/drive_straight.h"
 #include "c2019/commands/test_auto.h"
+#include "c2019/subsystems/limelight/queue_types.h"
 #include "muan/logging/logger.h"
 
 namespace c2019 {
@@ -14,6 +15,7 @@ using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using c2019::commands::Command;
 using c2019::superstructure::SuperstructureGoalProto;
 using c2019::superstructure::SuperstructureStatusProto;
+using c2019::limelight::LimelightStatusProto;
 
 using commands::AutoGoalProto;
 using commands::AutoStatusProto;
@@ -74,6 +76,7 @@ TeleopBase::TeleopBase()
   exit_auto_ = throttle_.MakeButton(6);
   test_auto_ = throttle_.MakeButton(8);
   drive_straight_ = throttle_.MakeButton(7);
+  vision_ = throttle_.MakeButton(1);
 }
 
 void TeleopBase::operator()() {
@@ -169,6 +172,7 @@ void TeleopBase::Update() {
 
 void TeleopBase::SendDrivetrainMessage() {
   DrivetrainGoal drivetrain_goal;
+  LimelightStatusProto lime_status;
 
   double throttle = -throttle_.wpilib_joystick()->GetRawAxis(1);
   double wheel = -wheel_.wpilib_joystick()->GetRawAxis(0);
@@ -181,6 +185,16 @@ void TeleopBase::SendDrivetrainMessage() {
   if (shifting_low_->was_clicked()) {
     high_gear_ = false;
   }
+
+  if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status)) {
+   std::cout << vision_->is_pressed() << "\t" << lime_status->has_target() << std::endl;
+	  if (vision_->is_pressed() && lime_status->has_target()) {
+	    std::cout << "running" << std::endl;
+	    wheel += lime_status->horiz_angle() * -1*(4.9/lime_status->target_dist());
+	    throttle = 0.39*(lime_status->target_dist() - 0.59);
+	    std::cout<< throttle <<std::endl;
+	  }
+}
 
   drivetrain_goal->set_high_gear(high_gear_);
 

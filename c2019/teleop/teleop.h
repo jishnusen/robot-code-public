@@ -80,7 +80,7 @@ class TeleopBase {
 
   muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_,
       *exit_auto_;
-  muan::teleop::Button *test_auto_, *drive_straight_;
+  muan::teleop::Button *test_auto_, *drive_straight_, *vision_;
 
   bool high_gear_;
   bool running_command_;
