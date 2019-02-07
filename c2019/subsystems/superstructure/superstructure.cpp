@@ -187,6 +187,8 @@ void Superstructure::Update() {
   elevator_.Update(elevator_input, &elevator_output, &elevator_status_,
                    driver_station->is_sys_active());
 
+  status_->set_braked(elevator_status_->braked());
+
   wrist_.SetGoal(wrist_goal);
   wrist_.Update(wrist_input, &wrist_output, &wrist_status_,
                 driver_station->is_sys_active());
@@ -407,10 +409,11 @@ void Superstructure::RunStateMachine() {
     case CALIBRATING:
       /* elevator_height_ = elevator_status_->elevator_height(); */
       /* wrist_angle_ = wrist_status_->wrist_angle(); */
-      /* if (elevator_status_->is_calibrated() && wrist_status_->is_calibrated()) { */
-        elevator_height_ = kStowHeight;
-        wrist_angle_ = kStowAngle;
-        GoToState(HOLDING);
+      /* if (elevator_status_->is_calibrated() &&
+       * wrist_status_->is_calibrated()) { */
+      elevator_height_ = kStowHeight;
+      wrist_angle_ = kStowAngle;
+      GoToState(HOLDING);
       /* } */
       break;
     case HOLDING:
@@ -449,8 +452,9 @@ void Superstructure::GoToState(SuperstructureState desired_state,
                                IntakeGoal intake) {
   switch (state_) {
     case CALIBRATING:
-      /* if (wrist_status_->is_calibrated() && elevator_status_->is_calibrated()) { */
-        state_ = desired_state;
+      /* if (wrist_status_->is_calibrated() &&
+       * elevator_status_->is_calibrated()) { */
+      state_ = desired_state;
       /* } else { */
       /*   LOG(ERROR, "Tried to go to invalid state %d while calibrating!", */
       /*       static_cast<int>(desired_state)); */

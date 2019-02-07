@@ -446,7 +446,8 @@ TEST_F(SuperstructureTest, BuddyClimb) {
   RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
-  EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_one_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_two_solenoid());
 
   SetGoal(ScoreGoal::WINCH, IntakeGoal::INTAKE_NONE, true);
   RunFor(3);
@@ -467,7 +468,8 @@ TEST_F(SuperstructureTest, BuddyClimb) {
 
   CheckGoal(kClimbHeight, kClimbAngle);
   EXPECT_EQ(superstructure_output_proto_->crawler_voltage(), 12);
-  EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_one_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_two_solenoid());
   EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
 }
 
@@ -490,7 +492,8 @@ TEST_F(SuperstructureTest, Crawl) {
   CheckGoal(kClimbHeight, kClimbAngle);
   EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
   EXPECT_EQ(superstructure_output_proto_->crawler_voltage(), 12);
-  EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_one_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_two_solenoid());
 }
 
 TEST_F(SuperstructureTest, CrawlBraked) {
@@ -511,7 +514,8 @@ TEST_F(SuperstructureTest, CrawlBraked) {
 
   CheckGoal(kClimbHeight, kClimbAngle);
   EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
-  EXPECT_TRUE(superstructure_output_proto_->crawler_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_one_solenoid());
+  EXPECT_TRUE(superstructure_output_proto_->crawler_two_solenoid());
   EXPECT_EQ(superstructure_output_proto_->crawler_voltage(), 12);
   EXPECT_TRUE(superstructure_output_proto_->brake());
 }
@@ -519,22 +523,26 @@ TEST_F(SuperstructureTest, CrawlBraked) {
 TEST_F(SuperstructureTest, Brake) {
   CalibrateDisabled();
 
-  SetGoal(ScoreGoal::CLIMB, IntakeGoal::INTAKE_NONE, true);
+  SetGoal(ScoreGoal::HATCH_ROCKET_THIRD, IntakeGoal::INTAKE_NONE, true);
   RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
 
-  CheckGoal(kClimbHeight, kClimbAngle);
-  EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
+  CheckGoal(kHatchRocketThirdHeight, kClimbAngle);
+
+  aos::time::EnableMockTime(aos::monotonic_clock::now());
 
   SetGoal(ScoreGoal::BRAKE, IntakeGoal::INTAKE_NONE, true);
   RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  aos::time::IncrementMockTime(std::chrono::milliseconds(210));
+
   RunFor(1000);
 
-  CheckGoal(kClimbHeight, kClimbAngle);
-  EXPECT_FALSE(superstructure_output_proto_->elevator_high_gear());
+  EXPECT_EQ(superstructure_output_proto_->elevator_setpoint(), 0);
+  EXPECT_EQ(superstructure_output_proto_->elevator_setpoint_type(), OPEN_LOOP);
   EXPECT_TRUE(superstructure_output_proto_->brake());
+  EXPECT_TRUE(superstructure_status_proto_->braked());
 }
 
 TEST_F(SuperstructureTest, Handoff) {

@@ -330,10 +330,10 @@ void TeleopBase::SendSuperstructureMessage() {
   }
   if (climb_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
-  }
+  }*/
   if (brake_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
-  }*/
+  }
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }
