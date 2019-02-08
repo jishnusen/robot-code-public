@@ -31,11 +31,11 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // climbing buttons
-  crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
-  climb_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
+  winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
+  crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
-  drop_forks_ = gamepad_.MakeAxisRange(-134, -46, 0, 1, 0.8);
-  drop_crawlers_ = gamepad_.MakeAxisRange(46, 134, 0, 1, 0.8);
+  drop_forks_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
+  drop_crawlers_ = gamepad_.MakeAxisRange(75, 105, 0, 1, 0.8);
 
   // Safety button for various functions
   safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
@@ -46,8 +46,7 @@ TeleopBase::TeleopBase()
   level_2_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::B_BUTTON));
   level_3_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::Y_BUTTON));
   ship_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::X_BUTTON));
-  // scoring modes
-  forwards_ = gamepad_.MakeAxisRange(-45, 45, 0, 1, 0.8);
+  // backwards scoring mode
   backwards_ = gamepad_.MakeAxisRange(135, 180, 0, 1, 0.8);
   // intake buttons
   ground_intake_height_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
@@ -151,8 +150,6 @@ void TeleopBase::Update() {
 
     auto_goal_queue_->WriteMessage(auto_goal);
 
-    // TODO(jishnu) add actual commands
-    // NOTE: not using a switch here due to cross-initialization of the threads
     if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
       commands::DriveStraight drive_straight_command;
       std::thread drive_straight_thread(drive_straight_command);
@@ -198,9 +195,6 @@ void TeleopBase::SendSuperstructureMessage() {
   superstructure_goal->set_score_goal(c2019::superstructure::NONE);
   superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
 
-  std::cout << "has cargo: " << has_cargo_ << " has_hp_hatch: " << has_hp_hatch_
-            << std::endl;
-
   double godmode_elevator = -gamepad_.wpilib_joystick()->GetRawAxis(5);
   double godmode_wrist = gamepad_.wpilib_joystick()->GetRawAxis(4);
 
@@ -245,7 +239,7 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Handoff
-  if (handoff_->is_pressed()) {
+  if (handoff_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
     superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
   }
@@ -255,7 +249,11 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Scoring positions - auto detects game piece
   if (stow_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::STOW);
+    if (!safety_->is_pressed()) {
+      superstructure_goal->set_score_goal(c2019::superstructure::STOW);
+    } else {  // safety + stow to go to climb height
+      superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
+    }
   }
   if (level_1_->is_pressed()) {
     if (has_cargo_ || safety_->is_pressed()) {
@@ -316,22 +314,19 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
-  /*if (drop_forks_->is_pressed() && safety_->is_pressed()) {
+  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
   if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
   }
-  if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
+  if (winch_->is_pressed() && safety_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
   }
   if (crawl_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
   }
-  if (climb_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
-  }*/
-  if (brake_->is_pressed()) {
+  if (brake_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
   }
 
