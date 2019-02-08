@@ -70,9 +70,6 @@ class SuperstructureTest : public ::testing::Test {
             kWristSafeBackwardsAngle) {
       EXPECT_NEAR(superstructure_status_proto_->elevator_goal(), 0, 1e-3);
     }
-
-    EXPECT_NEAR(superstructure_output_proto_->elevator_setpoint(), 0, 12);
-    EXPECT_NEAR(superstructure_output_proto_->wrist_setpoint(), 0, 12);
   }
 
   void ReadMessages() {
@@ -516,22 +513,33 @@ TEST_F(SuperstructureTest, Brake) {
 }
 
 TEST_F(SuperstructureTest, Handoff) {
+  CalibrateDisabled();
   SetIntakeInputs(false, false, false);
-  EXPECT_FALSE(superstructure_status_proto_->has_hp_hatch);
-  EXPECT_FALSE(superstructure_status_proto_->has_ground_hatch);
+  EXPECT_FALSE(superstructure_status_proto_->has_hp_hatch());
+  EXPECT_FALSE(superstructure_status_proto_->has_ground_hatch());
 
-  SetGoals(ScoreGoal::HANDOFF, IntakeGoal::INTAKE_GROUND_HATCH, true);
+  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::INTAKE_GROUND_HATCH, true);
   RunFor(3);
-  SetGoals(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
 
   CheckGoal(kHandoffHeight, kHandoffAngle);
 
   SetIntakeInputs(true, false, false);
-  RunFor(100);
-  SetGoals(ScoreGoal::NONE, IntakeGoal::POP);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::POP, true);
+  RunFor(3);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
 
   SetIntakeInputs(true, true, false);
+  SetGoal(ScoreGoal::STOW, IntakeGoal::INTAKE_NONE, true);
+  RunFor(3);
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
+
+  SetIntakeInputs(false, true, false);
+
+  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
 }
 
 }  // namespace superstructure
