@@ -75,6 +75,7 @@ TeleopBase::TeleopBase()
   // TODO(jishnu) change these buttons to whatever Nathan wants
   exit_auto_ = throttle_.MakeButton(6);
   test_auto_ = throttle_.MakeButton(8);
+  vision_intake_ = throttle_.MakeButton(2);
   drive_straight_ = throttle_.MakeButton(7);
   vision_ = throttle_.MakeButton(1);
 }
@@ -192,9 +193,15 @@ void TeleopBase::SendDrivetrainMessage() {
               << std::endl;
     if (vision_->is_pressed() && lime_status->has_target()) {
       std::cout << "running" << std::endl;
+    if(vision_intake_->is_pressed()){
+	distance_factor_ = 0.40;
+  }
+    else{
+	distance_factor_ = 0.59;
+}
       wheel +=
-          lime_status->horiz_angle() * -1 * (4.9 / lime_status->target_dist());
-      throttle = 0.39 * (lime_status->target_dist() - 0.59);
+          lime_status->horiz_angle() * -1 * (3.5 / lime_status->target_dist());
+      throttle = 0.41 * (lime_status->target_dist() - distance_factor_)/(1+status->horiz_angle());
       std::cout << throttle << std::endl;
     }
   }

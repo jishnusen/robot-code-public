@@ -80,10 +80,12 @@ class TeleopBase {
 
   muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_,
       *exit_auto_;
-  muan::teleop::Button *test_auto_, *drive_straight_, *vision_;
+  muan::teleop::Button *test_auto_, *drive_straight_, *vision_, *vision_intake_;
 
   bool high_gear_;
   bool running_command_;
+  double distance_factor_;
+  double last_horiz_angle_;
 };
 
 }  // namespace teleop

@@ -137,6 +137,7 @@ void SuperstructureInterface::SetBrakeMode(bool mode) {
   NeutralMode neutral_mode = mode ? NeutralMode::Brake : NeutralMode::Coast;
   ground_hatch_intake_.SetNeutralMode(neutral_mode);
   elevator_master_.SetNeutralMode(neutral_mode);
+  wrist_.SetNeutralMode(neutral_mode);
 }
 
 void SuperstructureInterface::WriteActuators() {
