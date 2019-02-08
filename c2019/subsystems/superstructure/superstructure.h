@@ -48,7 +48,6 @@ constexpr double kElevatorWristHorizHeight = 0.05;
 
 // wrist constants
 constexpr double kHatchForwardsAngle = 0.03;
-constexpr double kHatchThirdAngle = 0.06;
 constexpr double kHatchBackwardsAngle = 3.05;
 constexpr double kCargoRocketFirstAngle = .87;
 constexpr double kCargoRocketSecondAngle = .87;
@@ -59,7 +58,7 @@ constexpr double kCargoShipBackwardsAngle = 2.72;
 constexpr double kCargoGroundAngle = 0.045;
 constexpr double kHandoffAngle = 3.52;
 constexpr double kStowAngle = 1.2;
-constexpr double kClimbAngle = 0.06;
+constexpr double kClimbAngle = 0.05;
 constexpr double kWristSafeForwardsAngle = 1.3;
 constexpr double kWristSafeBackwardsAngle = 2.65;
 constexpr double kWristHandoffTolerance = 3. * (M_PI / 180.);

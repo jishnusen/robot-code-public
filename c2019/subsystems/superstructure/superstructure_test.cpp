@@ -65,20 +65,10 @@ class SuperstructureTest : public ::testing::Test {
   }
 
   void LogicCheck() {
-    // TODO(Hanson) figure out actual safe heights and angles
-    if (superstructure_status_proto_->elevator_height() > kElevatorSafeHeight ||
-        superstructure_status_proto_->elevator_goal() > kElevatorSafeHeight) {
-      EXPECT_LE(superstructure_status_proto_->wrist_goal(),
-                kWristSafeForwardsAngle);
-      EXPECT_LE(superstructure_status_proto_->wrist_angle(),
-                kWristSafeForwardsAngle);
-    }
-
-    if (superstructure_status_proto_->wrist_angle() > kWristSafeForwardsAngle) {
-      EXPECT_LE(superstructure_status_proto_->elevator_goal(),
-                kElevatorSafeHeight);
-      EXPECT_LE(superstructure_status_proto_->elevator_height(),
-                kElevatorSafeHeight);
+    if (superstructure_status_proto_->wrist_angle() > kWristSafeForwardsAngle &&
+        superstructure_status_proto_->wrist_angle() <
+            kWristSafeBackwardsAngle) {
+      EXPECT_NEAR(superstructure_status_proto_->elevator_goal(), 0, 1e-3);
     }
 
     EXPECT_NEAR(superstructure_output_proto_->elevator_setpoint(), 0, 12);
@@ -172,7 +162,7 @@ class SuperstructureTest : public ::testing::Test {
     superstructure_input_proto_->set_hatch_ground_current(5e6 *
                                                           has_ground_hatch);
     superstructure_input_proto_->set_hatch_intake_proxy(has_hp_hatch);
-    superstructure_input_proto_->set_cargo_current(5e6 * has_cargo);
+    superstructure_input_proto_->set_cargo_proxy(has_cargo);
     WriteMessages();
   }
 
@@ -230,7 +220,7 @@ TEST_F(SuperstructureTest, ScoreGoals) {
 
   // CARGO_ROCKET_FIRST
   SetGoal(ScoreGoal::CARGO_ROCKET_FIRST, IntakeGoal::INTAKE_NONE, true);
-  RunFor(1);
+  RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(10);
   CheckGoal(kCargoRocketFirstHeight, kCargoRocketFirstAngle);
@@ -351,19 +341,19 @@ TEST_F(SuperstructureTest, IntakeGoals) {
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(2);
-  EXPECT_EQ(superstructure_status_proto_->state(), INTAKING_WRIST);
   SetIntakeInputs(false, false, true);
   RunFor(20);
+  EXPECT_TRUE(superstructure_status_proto_->has_cargo());
   EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
-  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), 0);
+  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), 4);
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_CARGO, true);
   RunFor(2);
+  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), -12);
+
+  SetIntakeInputs(false, false, false);
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), -12);
   RunFor(10);
-  EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), -12);
-  RunFor(1);
   EXPECT_EQ(superstructure_output_proto_->cargo_roller_voltage(), 0);
 
   // INTAKE_GROUND
@@ -390,37 +380,17 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   EXPECT_FALSE(superstructure_status_proto_->has_ground_hatch());
   EXPECT_FALSE(superstructure_status_proto_->has_hp_hatch());
 
-  EXPECT_TRUE(superstructure_output_proto_->arrow_solenoid());
+  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(3);
   SetGoal(ScoreGoal::NONE, IntakeGoal::OUTTAKE_HATCH, true);
   RunFor(1);
+
   EXPECT_TRUE(superstructure_output_proto_->backplate_solenoid());
   EXPECT_FALSE(superstructure_output_proto_->arrow_solenoid());
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(100);
+  RunFor(200);
   EXPECT_FALSE(superstructure_output_proto_->backplate_solenoid());
   EXPECT_TRUE(superstructure_output_proto_->arrow_solenoid());
-}
-
-TEST_F(SuperstructureTest, GodmodeElevator) {
-  CalibrateDisabled();
-  SetIntakeInputs(false, false, false);
-  SetGoal(ScoreGoal::HATCH_SHIP_FORWARDS, IntakeGoal::INTAKE_NONE, true);
-  RunFor(3);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(1000);
-  CheckGoal(kHatchShipForwardsHeight, kHatchForwardsAngle);
-
-  EXPECT_TRUE(Godmode(6, 0, 30, true));
-}
-
-TEST_F(SuperstructureTest, GodmodeWrist) {
-  CalibrateDisabled();
-  SetGoal(ScoreGoal::CARGO_SHIP_BACKWARDS, IntakeGoal::INTAKE_NONE, true);
-  RunFor(3);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
-  RunFor(1000);
-  CheckGoal(kCargoShipBackwardsHeight, kCargoShipBackwardsAngle);
-  EXPECT_TRUE(Godmode(0, -10, 10, true));
 }
 
 TEST_F(SuperstructureTest, Climb) {
@@ -528,7 +498,7 @@ TEST_F(SuperstructureTest, Brake) {
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(1000);
 
-  CheckGoal(kHatchRocketThirdHeight, kClimbAngle);
+  CheckGoal(kHatchRocketThirdHeight, kHatchForwardsAngle);
 
   aos::time::EnableMockTime(aos::monotonic_clock::now());
 
@@ -546,24 +516,22 @@ TEST_F(SuperstructureTest, Brake) {
 }
 
 TEST_F(SuperstructureTest, Handoff) {
-  CalibrateDisabled();
   SetIntakeInputs(false, false, false);
-  SetGoal(ScoreGoal::HANDOFF, IntakeGoal::PREP_HANDOFF, true);
+  EXPECT_FALSE(superstructure_status_proto_->has_hp_hatch);
+  EXPECT_FALSE(superstructure_status_proto_->has_ground_hatch);
+
+  SetGoals(ScoreGoal::HANDOFF, IntakeGoal::INTAKE_GROUND_HATCH, true);
   RunFor(3);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_GROUND_HATCH, true);
-  RunFor(2);
-  SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  SetGoals(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
+
+  CheckGoal(kHandoffHeight, kHandoffAngle);
+
   SetIntakeInputs(true, false, false);
-  EXPECT_EQ(superstructure_status_proto_->hatch_intake_state(), HATCH_INTAKING);
-  RunFor(10);
+  RunFor(100);
+  SetGoals(ScoreGoal::NONE, IntakeGoal::POP);
+
   SetIntakeInputs(true, true, false);
-  RunFor(1);
-  EXPECT_EQ(superstructure_status_proto_->state(), INTAKING_TO_STOW);
-  RunFor(10);
-  EXPECT_EQ(superstructure_status_proto_->hatch_intake_state(), HATCH_CARRYING);
-  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);
-  EXPECT_EQ(superstructure_status_proto_->elevator_height(), kStowHeight);
-  EXPECT_EQ(superstructure_status_proto_->wrist_angle(), kStowAngle);
 }
 
 }  // namespace superstructure
