@@ -86,15 +86,17 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
 
 void CommandBase::StartDriveVision() {
   LimelightStatusProto status;
+  DrivetrainStatus drive_status;
+  drivetrain_status_reader_.ReadLastMessage(&drive_status);
   if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status)) {
     LOG(WARNING, "No limelight status message provided.");
     return;
   }
   double x = status->target_dist() * std::cos(status->horiz_angle());
   double y = status->target_dist() * std::sin(status->horiz_angle());
-  x = x - (std::cos(status->heading()) * 0.8);
+  std::cout << x << y << std::endl;
   // y = y + (std::sin(status->heading()) * 0.8);
-  StartDrivePath(x, y, 0, 1);
+  StartDrivePath(x + drive_status->estimated_x_position(), y + drive_status->estimated_y_position(), theta_offset_ + (30. * (M_PI / 180.)), 1);
 }
 
 bool CommandBase::IsDriveComplete() {

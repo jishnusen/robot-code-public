@@ -174,6 +174,9 @@ void TeleopBase::Update() {
 void TeleopBase::SendDrivetrainMessage() {
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
+  SuperstructureStatusProto super_status;
+
+  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(&super_status);
 
   double throttle = -throttle_.wpilib_joystick()->GetRawAxis(1);
   double wheel = -wheel_.wpilib_joystick()->GetRawAxis(0);
@@ -189,20 +192,32 @@ void TeleopBase::SendDrivetrainMessage() {
 
   if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
           &lime_status)) {
-    std::cout << vision_->is_pressed() << "\t" << lime_status->has_target()
-              << std::endl;
+    if (vision_->is_pressed()) {
+      if (super_status->elevator_goal() == 0.987) {
+          std::cout << "capping" << std::endl;
+          score_possible_ = lime_status->target_dist() > 1.07;
+          override_goal_ = superstructure::LIMELIGHT_OVERRIDE;
+      }
+    }
     if (vision_->is_pressed() && lime_status->has_target()) {
-      std::cout << "running" << std::endl;
-    if(vision_intake_->is_pressed()){
-	distance_factor_ = 0.40;
-  }
-    else{
-	distance_factor_ = 0.59;
-}
-      wheel +=
-          lime_status->horiz_angle() * -1 * (3.5 / lime_status->target_dist());
-      throttle = 0.41 * (lime_status->target_dist() - distance_factor_)/(1+status->horiz_angle());
-      std::cout << throttle << std::endl;
+	if (lime_status->target_dist() < 1.07) {
+	  score_possible_ = true;
+	}
+      if (vision_intake_->is_pressed()) {
+        distance_factor_ = 0.61;
+      } else {
+        distance_factor_ = 0.61;
+      }
+      wheel = lime_status->horiz_angle() * -1 *
+              (5.0 / pow(1 + lime_status->target_dist(), 2));
+      throttle = 0.41 * (lime_status->target_dist() - distance_factor_) /
+                 (1 + lime_status->horiz_angle());
+
+      if (lime_status->target_dist() < 0.6 &&
+          lime_status->horiz_angle() > 0.05) {
+        quickturn = true;
+        wheel = lime_status->horiz_angle() * 0.1;
+      }
     }
   }
 
@@ -356,6 +371,9 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
   }*/
 
+  if (!score_possible_) {
+    superstructure_goal->set_score_goal(override_goal_);
+  }
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }
 

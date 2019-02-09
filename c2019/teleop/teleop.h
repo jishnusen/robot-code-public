@@ -86,6 +86,8 @@ class TeleopBase {
   bool running_command_;
   double distance_factor_;
   double last_horiz_angle_;
+  bool score_possible_;
+  superstructure::ScoreGoal override_goal_;
 };
 
 }  // namespace teleop

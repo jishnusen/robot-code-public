@@ -351,6 +351,13 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       buddy_ = true;
       should_climb_ = true;
       break;
+    case LIMELIGHT_OVERRIDE:
+      if (elevator_height_ == kHatchRocketSecondHeight) {
+	wrist_angle_ = 1.0;
+      } else {
+        wrist_angle_ = kHatchForwardsAngle;
+      }
+      break;
   }
 
   // Godmode

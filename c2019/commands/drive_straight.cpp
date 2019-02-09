@@ -50,11 +50,12 @@ void DriveStraight::operator()() {
   /*   return; */
   /* } */
 
-  SetFieldPosition(0, 0, 0.0);
+  SetFieldPosition(1.8, -1.2, 0.0);
   LOG(INFO, "Running NONE auto");
 
-  StartDrivePath(3.0, 0, 0, 1, false);
-  WaitUntilDriveComplete();  // :)
+  StartDrivePath(3.8, -2.9, -30 * (M_PI / 180.), 1, false, 0.2);
+  WaitUntilDriveComplete();
+  WaitUntilDriveComplete();
   ExitAutonomous();
 }
 

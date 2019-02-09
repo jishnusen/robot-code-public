@@ -72,6 +72,7 @@ void Limelight::Update() {
   else{
 	heading_ =((skew+90)/8.);
 }
+
   double has_target = table->GetEntry("tv").GetDouble(0);
   LimelightStatusProto status;
   status->set_target_dist(distance / 2.2);
@@ -82,7 +83,7 @@ void Limelight::Update() {
   status->set_heading(heading_);
   status->set_has_target(has_target == 1);
   status->set_difference(difference);
-  status->set_horiz_angle(std::copysign(std::sqrt(std::abs(horiz_angle_)), horiz_angle_));
+  status->set_horiz_angle(std::copysign(std::abs(horiz_angle_), horiz_angle_));
   status->set_overall_tx(target_horizontal_angle / (59.6 * 0.5));
   status->set_unfiltered_horiz_angle_1(target_1_horizontal_angle);
   status->set_unfiltered_horiz_angle_2(target_2_horizontal_angle);
