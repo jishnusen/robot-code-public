@@ -13,9 +13,9 @@ using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using c2019::commands::Command;
+using c2019::limelight::LimelightStatusProto;
 using c2019::superstructure::SuperstructureGoalProto;
 using c2019::superstructure::SuperstructureStatusProto;
-using c2019::limelight::LimelightStatusProto;
 
 using commands::AutoGoalProto;
 using commands::AutoStatusProto;
@@ -176,7 +176,8 @@ void TeleopBase::SendDrivetrainMessage() {
   LimelightStatusProto lime_status;
   SuperstructureStatusProto super_status;
 
-  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(&super_status);
+  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
+      &super_status);
 
   double throttle = -throttle_.wpilib_joystick()->GetRawAxis(1);
   double wheel = -wheel_.wpilib_joystick()->GetRawAxis(0);
@@ -194,15 +195,17 @@ void TeleopBase::SendDrivetrainMessage() {
           &lime_status)) {
     if (vision_->is_pressed()) {
       if (super_status->elevator_goal() == 0.987) {
-          std::cout << "capping" << std::endl;
-          score_possible_ = lime_status->target_dist() > 1.07;
-          override_goal_ = superstructure::LIMELIGHT_OVERRIDE;
+        bool score_possible = lime_status->target_dist() < 1.07;
+        wants_override_ = true;
+        override_goal_ = score_possible ? superstructure::HATCH_ROCKET_SECOND
+                                        : superstructure::LIMELIGHT_OVERRIDE;
+      } else {
+        wants_override_ = false;
       }
+    } else {
+      wants_override_ = false;
     }
     if (vision_->is_pressed() && lime_status->has_target()) {
-	if (lime_status->target_dist() < 1.07) {
-	  score_possible_ = true;
-	}
       if (vision_intake_->is_pressed()) {
         distance_factor_ = 0.61;
       } else {
@@ -371,7 +374,10 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
   }*/
 
-  if (!score_possible_) {
+  /* if (superstructure_goal->score_goal() != superstructure::NONE) { */
+  /*   cached_goal_ = superstructure_goal->score_goal(); */
+  /* } */
+  if (wants_override_) {
     superstructure_goal->set_score_goal(override_goal_);
   }
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
