@@ -258,72 +258,89 @@ void Superstructure::Update() {
 void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   // These set the member variable goals before they are constrained
   // They are set based on the score goal enumerator
+  should_climb_ = false;
+  crawling_ = false;
   switch (goal->score_goal()) {
     case NONE:
       break;
     case CARGO_ROCKET_FIRST:
       elevator_height_ = kCargoRocketFirstHeight;
       wrist_angle_ = kCargoRocketFirstAngle;
+      high_gear_ = true;
       break;
     case CARGO_ROCKET_BACKWARDS:
       elevator_height_ = kCargoRocketBackwardsHeight;
       wrist_angle_ = kCargoRocketBackwardsAngle;
+      high_gear_ = true;
       break;
     case CARGO_ROCKET_SECOND:
       elevator_height_ = kCargoRocketSecondHeight;
       wrist_angle_ = kCargoRocketSecondAngle;
+      high_gear_ = true;
       break;
     case CARGO_ROCKET_THIRD:
       elevator_height_ = kCargoRocketThirdHeight;
       wrist_angle_ = kCargoRocketThirdAngle;
+      high_gear_ = true;
       break;
     case CARGO_SHIP_FORWARDS:
       elevator_height_ = kCargoShipForwardsHeight;
       wrist_angle_ = kCargoShipForwardsAngle;
+      high_gear_ = true;
       break;
     case CARGO_SHIP_BACKWARDS:
       elevator_height_ = kCargoShipBackwardsHeight;
       wrist_angle_ = kCargoShipBackwardsAngle;
+      high_gear_ = true;
       break;
     case HATCH_ROCKET_FIRST:
       elevator_height_ = kHatchRocketFirstHeight;
       wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
       break;
     case HATCH_ROCKET_BACKWARDS:
       elevator_height_ = kHatchRocketBackwardsHeight;
       wrist_angle_ = kHatchBackwardsAngle;
+      high_gear_ = true;
       break;
     case HATCH_ROCKET_SECOND:
       elevator_height_ = kHatchRocketSecondHeight;
       wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
       break;
     case HATCH_ROCKET_THIRD:
       elevator_height_ = kHatchRocketThirdHeight;
       wrist_angle_ = kHatchThirdAngle;
+      high_gear_ = true;
       break;
     case HATCH_SHIP_FORWARDS:
       elevator_height_ = kHatchShipForwardsHeight;
       wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
       break;
     case HATCH_SHIP_BACKWARDS:
       elevator_height_ = kHatchShipBackwardsHeight;
       wrist_angle_ = kHatchBackwardsAngle;
+      high_gear_ = true;
       break;
     case HANDOFF:
       elevator_height_ = kHandoffHeight;
       wrist_angle_ = kHandoffAngle;
+      high_gear_ = true;
       break;
     case STOW:
       elevator_height_ = kStowHeight;
       wrist_angle_ = kStowAngle;
+      high_gear_ = true;
       break;
     case CARGO_GROUND:
       elevator_height_ = kCargoGroundHeight;
       wrist_angle_ = kCargoGroundAngle;
+      high_gear_ = true;
+      break;
     case CLIMB:
       elevator_height_ = kClimbHeight;
       wrist_angle_ = kClimbAngle;
-      should_climb_ = true;
       buddy_ = false;
       high_gear_ = false;
       crawler_down_ = true;
@@ -331,7 +348,6 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case DROP_FORKS:
       buddy_ = true;
-      should_climb_ = false;
       break;
     case DROP_CRAWLERS:
       crawler_down_ = true;
