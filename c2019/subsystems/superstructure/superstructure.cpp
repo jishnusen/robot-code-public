@@ -351,6 +351,12 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case DROP_CRAWLERS:
       crawler_down_ = true;
+      break;
+    case LOWER_CRAWLERS:
+      elevator_height_ = kCrawlerHeight;
+      wrist_angle = kClimbAngle;
+      high_gear_ = false;
+      break;
     case CRAWL:
       crawling_ = true;
       high_gear_ = false;

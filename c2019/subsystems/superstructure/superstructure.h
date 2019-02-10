@@ -40,6 +40,7 @@ constexpr double kCargoGroundHeight = 0.;
 constexpr double kHandoffHeight = 0.285;
 constexpr double kSpitHeight = 0.;
 constexpr double kStowHeight = 0.;
+constexpr double kCrawlerHeight = 0.2;
 constexpr double kClimbHeight = 0.;
 constexpr double kElevatorSafeHeight = 0.3;
 constexpr double kElevatorPassThroughHeight = 0.023;
