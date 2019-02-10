@@ -51,15 +51,15 @@ TeleopBase::TeleopBase()
   // intake buttons
   ground_intake_height_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
   cargo_intake_ = gamepad_.MakeAxis(3, 0.3);
-  ground_hatch_intake_ =
-      gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_BUMPER));
+  ground_hatch_intake_ = gamepad_.MakePov(0, muan::teleop::Pov::kEast);
   // outtake buttons
   cargo_outtake_ = gamepad_.MakeAxis(2, 0.7);
+  hp_hatch_intake_ =
+      gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_BUMPER));
   hp_hatch_outtake_ =
       gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_BUMPER));
 
   // handoff
-  handoff_ = gamepad_.MakePov(0, muan::teleop::Pov::kEast);
   pop_ = gamepad_.MakePov(0, muan::teleop::Pov::kWest);
 
   // gear shifting - throttle buttons
@@ -228,10 +228,12 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_intake_goal(
           c2019::superstructure::OUTTAKE_GROUND_HATCH);
     }
-  } else if (ground_hatch_intake_->is_pressed()) {
+  } else if (ground_hatch_intake_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_intake_goal(
         c2019::superstructure::INTAKE_GROUND_HATCH);
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
+  } else if (hp_hatch_intake_->is_pressed()) {
+    superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
   } else if (hp_hatch_outtake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
@@ -239,10 +241,10 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Handoff
-  if (handoff_->is_pressed() && safety_->is_pressed()) {
+  /*if (handoff_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
     superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
-  }
+  }*/
   if (pop_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::POP);
   }

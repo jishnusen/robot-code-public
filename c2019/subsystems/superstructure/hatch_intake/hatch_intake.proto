@@ -9,6 +9,7 @@ enum State {
   INTAKING = 1;
   CARRYING = 2;
   OUTTAKING = 3;
+  PREPPING_SCORE = 4;
 }
 
 message HatchIntakeStatus {
@@ -28,6 +29,7 @@ enum Goal {
   INTAKE = 1;
   HOLD = 2;
   SCORE = 3;
+  PREP_SCORE = 4;
 }
 
 message HatchIntakeGoal {

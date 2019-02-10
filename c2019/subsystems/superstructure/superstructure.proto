@@ -22,6 +22,7 @@ enum IntakeGoal {
   OUTTAKE_CARGO = 6;
   POP = 7;
   PREP_HANDOFF = 8;
+  PREP_SCORE = 9;
 }
 
 enum ScoreGoal {
@@ -64,6 +65,7 @@ enum HatchIntakeState {
   HATCH_INTAKING = 1;
   HATCH_CARRYING = 2;
   HATCH_OUTTAKING = 3;
+  HATCH_PREPPING_SCORE = 4;
 }
 
 enum CargoIntakeState {
@@ -171,4 +173,5 @@ message SuperstructureOutput {
   required bool crawler_two_solenoid = 17;
   required double crawler_voltage = 18;
   required bool brake = 19;
+  required bool cargo_out = 20;
 }

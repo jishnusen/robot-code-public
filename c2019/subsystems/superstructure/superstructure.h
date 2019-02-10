@@ -122,6 +122,7 @@ class Superstructure {
   int counter_ = 0;
 
   bool force_backplate_ = false;
+  bool cargo_out_ = false;
 
   SuperstructureState state_ = SuperstructureState::CALIBRATING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;

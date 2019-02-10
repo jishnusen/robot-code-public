@@ -89,6 +89,8 @@ hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
     goal->set_goal(hatch_intake::INTAKE);
   } else if (intake_goal_ == OUTTAKE_HATCH) {
     goal->set_goal(hatch_intake::SCORE);
+  } else if (intake_goal_ == PREP_SCORE) {
+    goal->set_goal(hatch_intake::PREP_SCORE);
   } else {
     goal->set_goal(hatch_intake::NONE);
   }
@@ -253,6 +255,7 @@ void Superstructure::Update() {
   output->set_wrist_setpoint(wrist_output->wrist_setpoint());
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
+  output->set_cargo_out(cargo_out_);
 
   // Write those queues after Updating the controllers
   status_queue_->WriteMessage(status_);
@@ -300,32 +303,40 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case HATCH_ROCKET_FIRST:
       elevator_height_ = kHatchRocketFirstHeight;
       wrist_angle_ = kHatchForwardsAngle;
+      intake_goal_ = PREP_SCORE;
       high_gear_ = true;
       break;
     case HATCH_ROCKET_BACKWARDS:
       elevator_height_ = kHatchRocketBackwardsHeight;
       wrist_angle_ = kHatchBackwardsAngle;
       high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HATCH_ROCKET_SECOND:
       elevator_height_ = kHatchRocketSecondHeight;
       wrist_angle_ = kHatchForwardsAngle;
       high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HATCH_ROCKET_THIRD:
       elevator_height_ = kHatchRocketThirdHeight;
       wrist_angle_ = kHatchForwardsAngle;
       high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
+
       break;
     case HATCH_SHIP_FORWARDS:
       elevator_height_ = kHatchShipForwardsHeight;
       wrist_angle_ = kHatchForwardsAngle;
       high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
+
       break;
     case HATCH_SHIP_BACKWARDS:
       elevator_height_ = kHatchShipBackwardsHeight;
       wrist_angle_ = kHatchBackwardsAngle;
       high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HANDOFF:
       elevator_height_ = kHandoffHeight;
@@ -403,6 +414,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
           GoToState(INTAKING_WRIST, goal->intake_goal());
         }
       }
+      cargo_out_ = false;
       break;
     case INTAKE_CARGO:
       if (!cargo_intake_status_->has_cargo()) {
@@ -413,6 +425,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
           GoToState(INTAKING_WRIST, goal->intake_goal());
         }
       }
+      cargo_out_ = true;
       break;
     case INTAKE_GROUND_HATCH:
       GoToState(INTAKING_GROUND, goal->intake_goal());
@@ -423,6 +436,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case OUTTAKE_HATCH:
     case OUTTAKE_GROUND_HATCH:
     case OUTTAKE_CARGO:
+    case PREP_SCORE:
     case POP:
     case PREP_HANDOFF:
       GoToState(HOLDING, goal->intake_goal());
@@ -505,7 +519,8 @@ void Superstructure::GoToState(SuperstructureState desired_state,
             intake == IntakeGoal::OUTTAKE_HATCH ||
             intake == IntakeGoal::OUTTAKE_GROUND_HATCH ||
             intake == IntakeGoal::OUTTAKE_CARGO || intake == IntakeGoal::POP ||
-            intake == IntakeGoal::PREP_HANDOFF) {
+            intake == IntakeGoal::PREP_HANDOFF ||
+            intake == IntakeGoal::PREP_SCORE) {
           intake_goal_ = intake;
         } else {
           LOG(ERROR,

@@ -199,6 +199,7 @@ void SuperstructureInterface::WriteActuators() {
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
   crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
   shifter_.Set(!outputs->elevator_high_gear());
+  cargo_.Set(outputs->cargo_out());
 }
 
 }  // namespace interfaces

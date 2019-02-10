@@ -55,6 +55,7 @@ class SuperstructureInterface {
   Solenoid crawler_one_solenoid_{kCrawlerOne};
   Solenoid crawler_two_solenoid_{kCrawlerTwo};
   Solenoid shifter_{0};
+  Solenoid cargo_{6};
 
   TalonSRX elevator_master_{kElevatorMaster};
   VictorSPX elevator_slave_a_{kElevatorSlaveA};

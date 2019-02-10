@@ -18,6 +18,9 @@ void HatchIntake::SetGoal(const HatchIntakeGoalProto& goal) {
       counter_ = 0;
       state_ = (OUTTAKING);
       break;
+    case PREP_SCORE:
+      state_ = PREPPING_SCORE;
+      break;
   }
   force_backplate_ = goal->force_backplate();
 }
@@ -38,16 +41,16 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
       }
       break;
     case INTAKING:
-      flutes = false;
-      backplate = false;
+      flutes = true;
+      backplate = true;
       if (input->hatch_proxy()) {
-        backplate = true;
+        backplate = false;
         state_ = (CARRYING);
       }
       break;
     case CARRYING:
       flutes = true;
-      backplate = true;
+      backplate = false;
       break;
     case OUTTAKING:
       flutes = false;
@@ -60,12 +63,15 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
         state_ = (IDLE);
       }
       break;
+    case PREPPING_SCORE:
+      flutes = true;
+      backplate = true;
   }
   if (outputs_enabled) {
     (*output)->set_flute_solenoid(flutes);
     (*output)->set_backplate_solenoid(backplate);
     if (force_backplate_) {
-      (*output)->set_backplate_solenoid(true);
+      (*output)->set_backplate_solenoid(false);
     }
   } else {
     (*output)->set_flute_solenoid(false);
