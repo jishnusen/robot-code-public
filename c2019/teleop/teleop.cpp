@@ -323,6 +323,9 @@ void TeleopBase::SendSuperstructureMessage() {
   if (winch_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
   }
+  if (pop_->is_pressed() && safety_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::LOWER_CRAWLERS);
+  }
   if (crawl_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
   }
@@ -331,7 +334,7 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
-}
+}  // namespace teleop
 
 }  // namespace teleop
 }  // namespace c2019
