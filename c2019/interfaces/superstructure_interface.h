@@ -22,6 +22,8 @@ constexpr uint32_t kElevatorSlaveB = 10;
 constexpr uint32_t kElevatorSlaveC = 11;
 constexpr uint32_t kWrist = 12;
 constexpr uint32_t kCargoIntake = 13;
+constexpr uint32_t kCrawler = 14;
+constexpr uint32_t kWinch = 15;
 
 constexpr uint32_t kGroundSnap = 1;
 constexpr uint32_t kArrow = 3;
@@ -52,12 +54,15 @@ class SuperstructureInterface {
   Solenoid backplate_solenoid_{kBackplate};
   Solenoid crawler_one_solenoid_{kCrawlerOne};
   Solenoid crawler_two_solenoid_{kCrawlerTwo};
-  Solenoid brake_{kBrake};
+  Solenoid shifter_{0};
 
   TalonSRX elevator_master_{kElevatorMaster};
   VictorSPX elevator_slave_a_{kElevatorSlaveA};
   VictorSPX elevator_slave_b_{kElevatorSlaveB};
   VictorSPX elevator_slave_c_{kElevatorSlaveC};
+
+  VictorSPX crawler_{kCrawler};
+  VictorSPX winch_{kWinch};
 
   TalonSRX wrist_{kWrist};
   VictorSPX cargo_intake_{kCargoIntake};

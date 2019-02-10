@@ -35,6 +35,7 @@ SuperstructureInterface::SuperstructureInterface()
       output_reader_{
           QueueManager<SuperstructureOutputProto>::Fetch()->MakeReader()} {
   LoadGains();
+  wrist_.SetSelectedSensorPosition(0, 0, 100);
 }
 
 void SuperstructureInterface::ReadSensors() {
@@ -137,6 +138,10 @@ void SuperstructureInterface::SetBrakeMode(bool mode) {
   NeutralMode neutral_mode = mode ? NeutralMode::Brake : NeutralMode::Coast;
   ground_hatch_intake_.SetNeutralMode(neutral_mode);
   elevator_master_.SetNeutralMode(neutral_mode);
+  elevator_slave_a_.SetNeutralMode(neutral_mode);
+  elevator_slave_b_.SetNeutralMode(neutral_mode);
+  elevator_slave_c_.SetNeutralMode(neutral_mode);
+  wrist_.SetNeutralMode(neutral_mode);
 }
 
 void SuperstructureInterface::WriteActuators() {
@@ -162,7 +167,11 @@ void SuperstructureInterface::WriteActuators() {
         elevator_master_.Set(
             ControlMode::MotionMagic,
             outputs->elevator_setpoint() * kElevatorConversionFactor,
+<<<<<<< HEAD
             DemandType_ArbitraryFeedForward, 1. / 12.);
+=======
+            DemandType_ArbitraryFeedForward, 1.3 / 12.);
+>>>>>>> 27a408e98df61acb661fa8877dd918fb119218c1
       } else {
         elevator_master_.Set(
             ControlMode::Position,
@@ -182,6 +191,9 @@ void SuperstructureInterface::WriteActuators() {
 
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);
+  crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
+  winch_.Set(ControlMode::PercentOutput, outputs->winch_voltage() / 12.);
+  /* winch_.Set(ControlMode::PercentOutput, 1. / 12.); */
   ground_hatch_intake_.Set(ControlMode::PercentOutput,
                            outputs->hatch_roller_voltage() / 12.);
 
@@ -190,7 +202,7 @@ void SuperstructureInterface::WriteActuators() {
   backplate_solenoid_.Set(outputs->backplate_solenoid());
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
   crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
-  brake_.Set(outputs->brake());
+  shifter_.Set(!outputs->elevator_high_gear());
 }
 
 }  // namespace interfaces
