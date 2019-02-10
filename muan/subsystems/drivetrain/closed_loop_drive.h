@@ -32,6 +32,7 @@ class ClosedLoopDrive {
   void UpdateDistance(OutputProto* output, StatusProto* status);
   void UpdateLeftRightManual(OutputProto* output, StatusProto* status);
   void UpdatePathFollower(OutputProto* output, StatusProto* status);
+  void UpdateLinearAngularVelocity(OutputProto* output);
 
   DrivetrainModel model_;
   NonLinearFeedbackController controller_;
@@ -53,6 +54,8 @@ class ClosedLoopDrive {
   double left_pos_goal_;
   double right_pos_goal_;
   Eigen::Vector2d prev_left_right_;
+  double lin_vel_goal_;
+  double ang_vel_goal_;
   ControlMode control_mode_;
 };
 
