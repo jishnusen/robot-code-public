@@ -167,11 +167,7 @@ void SuperstructureInterface::WriteActuators() {
         elevator_master_.Set(
             ControlMode::MotionMagic,
             outputs->elevator_setpoint() * kElevatorConversionFactor,
-<<<<<<< HEAD
-            DemandType_ArbitraryFeedForward, 1. / 12.);
-=======
             DemandType_ArbitraryFeedForward, 1.3 / 12.);
->>>>>>> 27a408e98df61acb661fa8877dd918fb119218c1
       } else {
         elevator_master_.Set(
             ControlMode::Position,
