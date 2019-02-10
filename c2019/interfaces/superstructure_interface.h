@@ -23,7 +23,7 @@ constexpr uint32_t kElevatorSlaveC = 11;
 constexpr uint32_t kWrist = 12;
 constexpr uint32_t kCargoIntake = 13;
 constexpr uint32_t kCrawler = 14;
-constexpr uint32_t kWinch = 15; 
+constexpr uint32_t kWinch = 15;
 
 constexpr uint32_t kGroundSnap = 1;
 constexpr uint32_t kArrow = 3;
@@ -32,6 +32,7 @@ constexpr uint32_t kBackplate = 2;
 
 constexpr uint32_t kCrawlerOne = 4;
 constexpr uint32_t kCrawlerTwo = 5;
+constexpr uint32_t kBrake = 7;
 
 class SuperstructureInterface {
  public:

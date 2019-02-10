@@ -314,7 +314,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case HATCH_ROCKET_THIRD:
       elevator_height_ = kHatchRocketThirdHeight;
-      wrist_angle_ = kHatchThirdAngle;
+      wrist_angle_ = kHatchForwardsAngle;
       high_gear_ = true;
       break;
     case HATCH_SHIP_FORWARDS:
@@ -433,14 +433,13 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
 void Superstructure::RunStateMachine() {
   switch (state_) {
     case CALIBRATING:
-      /* elevator_height_ = elevator_status_->elevator_height(); */
-      /* wrist_angle_ = wrist_status_->wrist_angle(); */
-      /* if (elevator_status_->is_calibrated() &&
-       * wrist_status_->is_calibrated()) { */
-      elevator_height_ = kStowHeight;
-      wrist_angle_ = kStowAngle;
-      GoToState(HOLDING);
-      /* } */
+      elevator_height_ = elevator_status_->elevator_height();
+      wrist_angle_ = wrist_status_->wrist_angle();
+      if (elevator_status_->is_calibrated() && wrist_status_->is_calibrated()) {
+        elevator_height_ = kStowHeight;
+        wrist_angle_ = kStowAngle;
+        GoToState(HOLDING);
+      }
       break;
     case HOLDING:
       break;
@@ -452,6 +451,7 @@ void Superstructure::RunStateMachine() {
     case INTAKING_WRIST:
       if (hatch_intake_status_->has_hatch() ||
           cargo_intake_status_->has_cargo()) {
+        std::cout << "has game piece" << std::endl;
         GoToState(HOLDING);
       }
       break;
@@ -478,13 +478,12 @@ void Superstructure::GoToState(SuperstructureState desired_state,
                                IntakeGoal intake) {
   switch (state_) {
     case CALIBRATING:
-      /* if (wrist_status_->is_calibrated() &&
-       * elevator_status_->is_calibrated()) { */
-      state_ = desired_state;
-      /* } else { */
-      /*   LOG(ERROR, "Tried to go to invalid state %d while calibrating!", */
-      /*       static_cast<int>(desired_state)); */
-      /* } */
+      if (wrist_status_->is_calibrated() && elevator_status_->is_calibrated()) {
+        state_ = desired_state;
+      } else {
+        LOG(ERROR, "Tried to go to invalid state %d while calibrating!",
+            static_cast<int>(desired_state));
+      }
       break;
     case INTAKING_WRIST:
     case INTAKING_GROUND:
