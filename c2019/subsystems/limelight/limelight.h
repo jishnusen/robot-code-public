@@ -17,6 +17,8 @@ class Limelight {
  public:
   Limelight(double limelight_height, double limelight_angle,
             double object_height);
+  ~Limelight() = default;
+  void operator()();
   void Update();
 
  private:
@@ -35,6 +37,7 @@ class Limelight {
   double object_height_;
   double heading_;
   bool to_the_left_;
+  std::atomic<bool> running_;
 };
 }  // namespace limelight
 }  // namespace c2019

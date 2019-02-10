@@ -13,11 +13,13 @@ void SubsystemRunner::operator()() {
 
   running_ = true;
 
+  std::thread lime_thread(limelight_);
+  lime_thread.detach();
+
   while (running_) {
     // Subsystems go here
     interface_runner_.ReadSensors();
     drivetrain_.Update();
-    limelight_.Update();
     superstructure_.Update();
     interface_runner_.WriteActuators();
     phased_loop.SleepUntilNext();

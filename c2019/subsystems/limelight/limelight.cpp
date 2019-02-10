@@ -15,6 +15,19 @@ Limelight::Limelight(const double limelight_height,
       limelight_angle_(limelight_angle),
       object_height_(object_height) {}
 
+void Limelight::operator()() {
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(15));
+  aos::SetCurrentThreadRealtimePriority(10);
+  muan::utils::SetCurrentThreadName("Limelight");
+
+  running_ = true;
+
+  while (running_) {
+    Update();
+    phased_loop.SleepUntilNext();
+  }
+}
+
 void Limelight::Update() {
   auto inst = nt::NetworkTableInstance::GetDefault();
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight");

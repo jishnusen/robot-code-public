@@ -225,8 +225,8 @@ void TeleopBase::SendDrivetrainMessage() {
 }
       current_heading_ = drivetrain_status->estimated_heading();
      // wheel = -8*(estimated_heading_ - current_heading_); 
-	wheel = -4.2*(lime_status->horiz_angle());
-      throttle = 0.41 * (lime_status->target_dist() - distance_factor_) /
+	wheel = 0.0;//-4.2*(lime_status->horiz_angle());
+      throttle = 0.0;//0.41 * (lime_status->target_dist() - distance_factor_) /
                  (1 + lime_status->horiz_angle());
 
       if (lime_status->target_dist() < 0.6 &&
