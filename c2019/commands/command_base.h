@@ -16,6 +16,7 @@ namespace commands {
 
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
+using DrivetrainInput = muan::subsystems::drivetrain::InputProto;
 
 class CommandBase {
  public:

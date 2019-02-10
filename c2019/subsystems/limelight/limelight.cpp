@@ -32,7 +32,7 @@ void Limelight::Update() {
   std::vector<double> y_corner = table->GetEntry("tcorny").GetDoubleArray(zero);
   std::vector<double> x_corner = table->GetEntry("tcornx").GetDoubleArray(zero);
 
-  slope_ = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
+//  slope_ = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
 
   table->PutNumber("pipeline", 0);
   target_dist_ =
@@ -68,9 +68,11 @@ void Limelight::Update() {
   double difference = target_1_horizontal_angle - target_2_horizontal_angle;
   if(skew > -45){
 	heading_ = std::abs(skew/8.);
+	to_the_left_ = true;
 }
   else{
 	heading_ =((skew+90)/8.);
+	to_the_left_ = false;
 }
 
   double has_target = table->GetEntry("tv").GetDouble(0);
@@ -79,7 +81,7 @@ void Limelight::Update() {
   status->set_skew(target_skew_);
   status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
   status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
-  status->set_to_the_left(slope_ > 0);
+  status->set_to_the_left(to_the_left_);
   status->set_heading(heading_);
   status->set_has_target(has_target == 1);
   status->set_difference(difference);

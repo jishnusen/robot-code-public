@@ -34,6 +34,7 @@ class Limelight {
   double limelight_angle_;
   double object_height_;
   double heading_;
+  bool to_the_left_;
 };
 }  // namespace limelight
 }  // namespace c2019

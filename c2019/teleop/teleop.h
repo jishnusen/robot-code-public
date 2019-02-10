@@ -87,6 +87,9 @@ class TeleopBase {
   double distance_factor_;
   double last_horiz_angle_;
   bool wants_override_;
+  double tx_error_;
+  double estimated_heading_;
+  double current_heading_;
   superstructure::ScoreGoal override_goal_;
   superstructure::ScoreGoal cached_goal_;
 };

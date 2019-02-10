@@ -12,6 +12,7 @@ using muan::teleop::JoystickStatusProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
+using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
 using c2019::commands::Command;
 using c2019::limelight::LimelightStatusProto;
 using c2019::superstructure::SuperstructureGoalProto;
@@ -175,9 +176,11 @@ void TeleopBase::SendDrivetrainMessage() {
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
   SuperstructureStatusProto super_status;
-
+  DrivetrainStatus drivetrain_status;
   QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
       &super_status);
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(
+      &drivetrain_status);
 
   double throttle = -throttle_.wpilib_joystick()->GetRawAxis(1);
   double wheel = -wheel_.wpilib_joystick()->GetRawAxis(0);
@@ -190,12 +193,15 @@ void TeleopBase::SendDrivetrainMessage() {
   if (shifting_low_->was_clicked()) {
     high_gear_ = false;
   }
-
+  if(vision_->was_clicked()){
+	estimated_heading_ = (drivetrain_status->estimated_heading() - lime_status->horiz_angle());
+	std::cout << estimated_heading_ << std::endl;
+}
   if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
           &lime_status)) {
     if (vision_->is_pressed()) {
       if (super_status->elevator_goal() == 0.987) {
-        bool score_possible = lime_status->target_dist() < 1.07;
+        bool score_possible = lime_status->target_dist() < 1.07 && lime_status->has_target();
         wants_override_ = true;
         override_goal_ = score_possible ? superstructure::HATCH_ROCKET_SECOND
                                         : superstructure::LIMELIGHT_OVERRIDE;
@@ -207,19 +213,26 @@ void TeleopBase::SendDrivetrainMessage() {
     }
     if (vision_->is_pressed() && lime_status->has_target()) {
       if (vision_intake_->is_pressed()) {
-        distance_factor_ = 0.61;
+        distance_factor_ = 0.48;
       } else {
         distance_factor_ = 0.61;
       }
-      wheel = lime_status->horiz_angle() * -1 *
-              (5.0 / pow(1 + lime_status->target_dist(), 2));
+	if(lime_status->to_the_left()){
+		tx_error_ = -0.05;
+}
+	else{
+		tx_error_ = 0.0;
+}
+      current_heading_ = drivetrain_status->estimated_heading();
+     // wheel = -8*(estimated_heading_ - current_heading_); 
+	wheel = -4.2*(lime_status->horiz_angle());
       throttle = 0.41 * (lime_status->target_dist() - distance_factor_) /
                  (1 + lime_status->horiz_angle());
 
       if (lime_status->target_dist() < 0.6 &&
           lime_status->horiz_angle() > 0.05) {
         quickturn = true;
-        wheel = lime_status->horiz_angle() * 0.1;
+        wheel = -1*lime_status->horiz_angle() * 0.1;
       }
     }
   }

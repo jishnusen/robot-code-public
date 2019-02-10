@@ -86,17 +86,23 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
 
 void CommandBase::StartDriveVision() {
   LimelightStatusProto status;
-  DrivetrainStatus drive_status;
-  drivetrain_status_reader_.ReadLastMessage(&drive_status);
+  DrivetrainInput drive_input;
+  QueueManager<DrivetrainInput>::Fetch()->ReadLastMessage(&drive_input);
   if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status)) {
     LOG(WARNING, "No limelight status message provided.");
     return;
   }
-  double x = status->target_dist() * std::cos(status->horiz_angle());
-  double y = status->target_dist() * std::sin(status->horiz_angle());
-  std::cout << x << y << std::endl;
-  // y = y + (std::sin(status->heading()) * 0.8);
-  StartDrivePath(x + drive_status->estimated_x_position(), y + drive_status->estimated_y_position(), theta_offset_ + (30. * (M_PI / 180.)), 1);
+  DrivetrainGoal goal;
+
+  double radius = 0.29;
+
+  status->set_horiz_angle(-status->horiz_angle()*1.8);
+
+  auto drive = Eigen::Vector2d(-status->horiz_angle() * radius, status->horiz_angle() * radius);
+
+  goal->mutable_left_right_goal()->set_left_goal(drive_input->left_encoder() + drive(0) + status->target_dist() - 1.15); 
+  goal->mutable_left_right_goal()->set_right_goal(drive_input->right_encoder() + drive(1) + status->target_dist() - 1.05); 
+  drivetrain_goal_queue_->WriteMessage(goal);
 }
 
 bool CommandBase::IsDriveComplete() {
