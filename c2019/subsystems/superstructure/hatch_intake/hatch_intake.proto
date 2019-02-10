@@ -33,6 +33,7 @@ enum Goal {
 message HatchIntakeGoal {
   required uint64 timestamp = 1;
   required Goal goal = 2;
+  required bool force_backplate = 3;
 }
 
 message HatchIntakeInput {

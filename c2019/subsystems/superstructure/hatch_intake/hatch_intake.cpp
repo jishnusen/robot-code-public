@@ -19,6 +19,7 @@ void HatchIntake::SetGoal(const HatchIntakeGoalProto& goal) {
       state_ = (OUTTAKING);
       break;
   }
+  force_backplate_ = goal->force_backplate();
 }
 
 void HatchIntake::Update(const HatchIntakeInputProto& input,
@@ -63,6 +64,9 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
   if (outputs_enabled) {
     (*output)->set_flute_solenoid(flutes);
     (*output)->set_backplate_solenoid(backplate);
+    if (force_backplate_) {
+      (*output)->set_backplate_solenoid(true);
+    }
   } else {
     (*output)->set_flute_solenoid(false);
     (*output)->set_backplate_solenoid(false);

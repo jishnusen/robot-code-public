@@ -36,6 +36,7 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
       (wrist_status_->wrist_angle() > kWristSafeForwardsAngle &&
        wrist_status_->wrist_angle() < kWristSafeBackwardsAngle)) {
     *elevator_goal = 0.;
+    force_backplate_ = true;
     if (elevator_status_->elevator_height() > kElevatorPassThroughHeight) {
       if (wrist_status_->wrist_angle() > kWristSafeBackwardsAngle) {
         *wrist_goal = muan::utils::Cap(*wrist_goal, kWristSafeBackwardsAngle,
@@ -45,6 +46,8 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
                                        kWristSafeForwardsAngle);
       }
     }
+  } else {
+    force_backplate_ = false;
   }
 }
 
@@ -89,6 +92,7 @@ hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
   } else {
     goal->set_goal(hatch_intake::NONE);
   }
+  goal->set_force_backplate(force_backplate_);
   return goal;
 }
 
@@ -354,7 +358,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case LOWER_CRAWLERS:
       elevator_height_ = kCrawlerHeight;
-      wrist_angle = kClimbAngle;
+      wrist_angle_ = kClimbAngle;
       high_gear_ = false;
       break;
     case CRAWL:
