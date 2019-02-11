@@ -173,6 +173,7 @@ void TeleopBase::Update() {
 }
 
 void TeleopBase::SendDrivetrainMessage() {
+  bool vision = false;
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
   SuperstructureStatusProto super_status;
@@ -193,46 +194,34 @@ void TeleopBase::SendDrivetrainMessage() {
   if (shifting_low_->was_clicked()) {
     high_gear_ = false;
   }
-  if(vision_->was_clicked()){
-	estimated_heading_ = (drivetrain_status->estimated_heading() - lime_status->horiz_angle());
-	std::cout << estimated_heading_ << std::endl;
-}
   if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
           &lime_status)) {
     if (vision_->is_pressed()) {
       if (super_status->elevator_goal() == 0.987) {
-        bool score_possible = lime_status->target_dist() < 1.07 && lime_status->has_target();
+        bool score_possible = lime_status->target_dist() < 1.4 && lime_status->has_target();
         wants_override_ = true;
+	height_distance_factor_ = 0.7;
         override_goal_ = score_possible ? superstructure::HATCH_ROCKET_SECOND
                                         : superstructure::LIMELIGHT_OVERRIDE;
       } else {
         wants_override_ = false;
+	height_distance_factor_ = 0.7;
       }
     } else {
       wants_override_ = false;
+      height_distance_factor_ = 1.0;
     }
-    if (vision_->is_pressed() && lime_status->has_target()) {
-      if (vision_intake_->is_pressed()) {
-        distance_factor_ = 0.48;
-      } else {
-        distance_factor_ = 0.61;
-      }
-	if(lime_status->to_the_left()){
-		tx_error_ = -0.05;
-}
-	else{
-		tx_error_ = 0.0;
-}
-      current_heading_ = drivetrain_status->estimated_heading();
-     // wheel = -8*(estimated_heading_ - current_heading_); 
-	wheel = 0.0;//-4.2*(lime_status->horiz_angle());
-      throttle = 0.0;//0.41 * (lime_status->target_dist() - distance_factor_) /
-                 (1 + lime_status->horiz_angle());
-
-      if (lime_status->target_dist() < 0.6 &&
-          lime_status->horiz_angle() > 0.05) {
-        quickturn = true;
-        wheel = -1*lime_status->horiz_angle() * 0.1;
+    if (vision_->is_pressed()) {
+      if (vision_intake_->is_pressed() && lime_status->back_has_target()) {
+        vision = true;
+        distance_factor_ = 0.5;
+	target_dist_ = -1*lime_status->back_target_dist();
+	horiz_angle_ = lime_status->back_horiz_angle();
+      } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
+        vision = true;
+        distance_factor_ = 0.82 / 2.8;
+	target_dist_ = lime_status->target_dist();
+	horiz_angle_ = lime_status->horiz_angle();
       }
     }
   }
@@ -240,9 +229,14 @@ void TeleopBase::SendDrivetrainMessage() {
   drivetrain_goal->set_high_gear(high_gear_);
 
   // Drive controls
-  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
-  drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
-  drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
+  if (!vision) {
+	  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
+	  drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
+	  drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
+  } else {
+    drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(2.8*(height_distance_factor_*target_dist_ - distance_factor_));
+    drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(-16.0*horiz_angle_);
+  }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }
@@ -297,10 +291,10 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Handoff
-  if (handoff_->is_pressed()) {
+/*  if (handoff_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
     superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
-  }
+  }*/
   if (pop_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::POP);
   }

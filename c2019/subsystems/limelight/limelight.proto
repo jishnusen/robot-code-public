@@ -23,7 +23,9 @@ message LimelightStatus {
   optional double unfiltered_horiz_angle_2 = 16;
   optional double unfiltered_horiz_angle_3 = 17;
   optional double overall_tx = 18;
-
+  optional double back_target_dist = 20;
+  optional double back_horiz_angle = 21;
+  optional bool back_has_target = 22;
 }
 
 enum LimelightState {

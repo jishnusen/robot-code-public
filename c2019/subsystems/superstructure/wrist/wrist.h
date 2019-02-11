@@ -17,7 +17,7 @@ static constexpr double kMaxAngle = 210 * (M_PI / 180.);
 
 // Hall Calibration constants
 static constexpr double kCalibVoltage = 0;
-static constexpr double kHallEffectAngle = 1.6;
+static constexpr double kHallEffectAngle = 1.57;
 // Manual voltage control constants
 static constexpr double kHoldingVoltage =
     5;  // TODO(Apurva) find value for this

@@ -5,6 +5,7 @@
 
 #include "Eigen/Dense"
 #include "c2019/commands/queue_types.h"
+#include "c2019/subsystems/superstructure/queue_types.h"
 #include "gtest/gtest.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/webdash/queue_types.h"
@@ -37,6 +38,7 @@ class CommandBase {
                       double path_voltage = 9.0);
 
   void StartDriveVision();
+  void StartDriveVisionBackwards();
 
   bool IsDriveComplete();
   bool IsDrivetrainNear(double x, double y, double distance);
@@ -45,6 +47,10 @@ class CommandBase {
   void WaitUntilDrivetrainNear(double x, double y, double distance);
 
   void SetFieldPosition(double x, double y, double theta);
+
+  void GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal = superstructure::INTAKE_NONE);
+
+  void ScoreHatch(int num_ticks);
 
   // Set the robot-space (robot poweron position) transformation. The parameters
   // are the position of the robot (right now) in field coordinates (F).

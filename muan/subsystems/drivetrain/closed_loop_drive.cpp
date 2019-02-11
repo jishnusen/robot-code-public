@@ -58,6 +58,8 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
     lin_vel_goal_ = goal->linear_angular_velocity_goal().linear_velocity();
     ang_vel_goal_ = goal->linear_angular_velocity_goal().angular_velocity();
     control_mode_ = ControlMode::LINEAR_ANGULAR_VEL;
+    return;
+    std::cout << "has goal" << std::endl;
   }
 
   control_mode_ = ControlMode::PATH_FOLLOWING;
@@ -114,6 +116,7 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
 }
 
 void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
+  std::cout << control_mode_ << std::endl;
   if (control_mode_ == ControlMode::POINT_TURN) {
     UpdatePointTurn(output, status);
   } else if (control_mode_ == ControlMode::DISTANCE) {
@@ -161,6 +164,7 @@ void ClosedLoopDrive::UpdateLeftRightManual(OutputProto* output,
 
 void ClosedLoopDrive::UpdateLinearAngularVelocity(OutputProto* output) {
   auto left_right = model_.InverseKinematics(Eigen::Vector2d(lin_vel_goal_, ang_vel_goal_));
+  std::cout << left_right << std::endl;
   (*output)->set_output_type(VELOCITY);
   (*output)->set_left_setpoint(left_right(0));
   (*output)->set_right_setpoint(left_right(1));

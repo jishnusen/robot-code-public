@@ -52,9 +52,29 @@ void DriveStraight::operator()() {
 
   SetFieldPosition(1.8, -1.2, 0.0);
   LOG(INFO, "Running NONE auto");
-
+  GoTo(superstructure::HATCH_ROCKET_FIRST);
+  StartDrivePath(5.8,-3.8,-30 * (M_PI / 180.), 1, true);
+  WaitUntilDrivetrainNear(4.4,-2.4,0.3);
   StartDriveVision();
-  WaitUntilDriveComplete();
+  ScoreHatch(100);
+  Wait(100);
+  SetFieldPosition(5.0,-3.2,-30 * (M_PI / 180.));
+  StartDrivePath(0.6,-3.2,0,-1,true);
+  ScoreHatch(80);
+  Wait(100);
+  GoTo(superstructure::HATCH_SHIP_BACKWARDS);
+  WaitUntilDrivetrainNear(2, -3.2, 0.3);
+
+  StartDriveVisionBackwards();
+  Wait(50);
+  std::cout << "first" << std::endl;
+  GoTo(superstructure::HATCH_ROCKET_THIRD);
+  std::cout << "got here" << std::endl;
+  SetFieldPosition(0, -3.5, 0);
+  StartDrivePath(5.8,-3.8,-30 * (M_PI / 180.), 1, true);
+  WaitUntilDrivetrainNear(4.4,-2.4,0.3);
+  StartDriveVision();
+  ScoreHatch(100);
   ExitAutonomous();
 }
 

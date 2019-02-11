@@ -90,6 +90,11 @@ class TeleopBase {
   double tx_error_;
   double estimated_heading_;
   double current_heading_;
+  double cached_velocity_;
+  double target_dist_;
+  double horiz_angle_;
+  int velocity_counter_;
+  double height_distance_factor_ = 0.0;
   superstructure::ScoreGoal override_goal_;
   superstructure::ScoreGoal cached_goal_;
 };

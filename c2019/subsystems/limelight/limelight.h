@@ -20,6 +20,7 @@ class Limelight {
   ~Limelight() = default;
   void operator()();
   void Update();
+  void BackUpdate();
 
  private:
   LimelightStatusQueue* status_queue_;
@@ -37,6 +38,8 @@ class Limelight {
   double object_height_;
   double heading_;
   bool to_the_left_;
+  double back_horiz_angle_;
+  double back_target_dist_;
   std::atomic<bool> running_;
 };
 }  // namespace limelight
