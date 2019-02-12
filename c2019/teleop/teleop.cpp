@@ -253,9 +253,12 @@ void TeleopBase::SendSuperstructureMessage() {
   if (stow_->is_pressed()) {
     if (!safety_->is_pressed()) {
       superstructure_goal->set_score_goal(c2019::superstructure::STOW);
-    } else {  // safety + stow to go to climb height
+    } /*else {  // safety + stow to go to climb height
       superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
-    }
+    }*/
+  }
+  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
+    superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
   }
   if (level_1_->is_pressed()) {
     if (has_cargo_ || safety_->is_pressed()) {
@@ -270,9 +273,11 @@ void TeleopBase::SendSuperstructureMessage() {
       if (!backwards_->is_pressed()) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_FIRST);
+        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
       } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_BACKWARDS);
+        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
       }
     }
   }
@@ -283,6 +288,7 @@ void TeleopBase::SendSuperstructureMessage() {
     } else {
       superstructure_goal->set_score_goal(
           c2019::superstructure::HATCH_ROCKET_SECOND);
+      superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
     }
   }
   if (level_3_->is_pressed()) {
@@ -292,6 +298,7 @@ void TeleopBase::SendSuperstructureMessage() {
     } else {
       superstructure_goal->set_score_goal(
           c2019::superstructure::HATCH_ROCKET_THIRD);
+      superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
     }
   }
   if (ship_->is_pressed()) {
@@ -316,9 +323,9 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
-  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
+  /*if (drop_forks_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
-  }
+  }*/
   if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
   }

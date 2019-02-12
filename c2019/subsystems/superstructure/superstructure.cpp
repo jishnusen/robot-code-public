@@ -84,9 +84,11 @@ Superstructure::PopulateGroundHatchIntakeGoal() {
 
 hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
   hatch_intake::HatchIntakeGoalProto goal;
-  if (intake_goal_ == INTAKE_HATCH || intake_goal_ == PREP_HANDOFF ||
-      intake_goal_ == POP || intake_goal_ == INTAKE_GROUND_HATCH) {
+  if (intake_goal_ == INTAKE_HATCH) {
     goal->set_goal(hatch_intake::INTAKE);
+  } else if (intake_goal_ == PREP_HANDOFF || intake_goal_ == POP ||
+             intake_goal_ == INTAKE_GROUND_HATCH) {
+    goal->set_goal(hatch_intake::HANDOFF);
   } else if (intake_goal_ == OUTTAKE_HATCH) {
     goal->set_goal(hatch_intake::SCORE);
   } else if (intake_goal_ == PREP_SCORE) {
@@ -323,14 +325,12 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       wrist_angle_ = kHatchForwardsAngle;
       high_gear_ = true;
       intake_goal_ = PREP_SCORE;
-
       break;
     case HATCH_SHIP_FORWARDS:
       elevator_height_ = kHatchShipForwardsHeight;
       wrist_angle_ = kHatchForwardsAngle;
       high_gear_ = true;
       intake_goal_ = PREP_SCORE;
-
       break;
     case HATCH_SHIP_BACKWARDS:
       elevator_height_ = kHatchShipBackwardsHeight;
@@ -465,7 +465,6 @@ void Superstructure::RunStateMachine() {
     case INTAKING_WRIST:
       if (hatch_intake_status_->has_hatch() ||
           cargo_intake_status_->has_cargo()) {
-        std::cout << "has game piece" << std::endl;
         GoToState(HOLDING);
       }
       break;

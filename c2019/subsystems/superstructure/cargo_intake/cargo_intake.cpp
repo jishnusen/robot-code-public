@@ -12,12 +12,8 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
 
   if (outputs_enabled) {
     switch (state_) {
-      case HOLDING:
-        if (input->cargo_proxy()) {
-          roller_voltage = 4;
-        } else {
-          roller_voltage = 0;
-        }
+      case IDLE:
+        roller_voltage = 0;
         break;
       case INTAKING:
         roller_voltage = 12;
@@ -33,11 +29,14 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
           state_ = HOLDING;
           pickup_counter_ = 0;
         }
+      case HOLDING:
+        roller_voltage = 4;
+        break;
       case OUTTAKING:
         roller_voltage = -12;
         outtake_counter_++;
         if (outtake_counter_ > kOuttakeTicks) {
-          state_ = HOLDING;
+          state_ = IDLE;
           outtake_counter_ = 0;
         }
         break;
@@ -55,13 +54,13 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
 void CargoIntake::SetGoal(const CargoIntakeGoalProto& goal) {
   switch (goal->goal()) {
     case NONE:
-      state_ = HOLDING;
+      state_ = IDLE;
       break;
     case INTAKE:
       state_ = INTAKING;
       break;
     case STOP_INTAKE:
-      state_ = HOLDING;
+      state_ = IDLE;
       break;
     case OUTTAKE:
       outtake_counter_ = 0;

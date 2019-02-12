@@ -76,7 +76,7 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
   inputs->set_wrist_hall(
-      !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+      !canifier_.GetGeneralInput(CANifier::GeneralPin::LIMF));
   inputs->set_cargo_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P) ||
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
@@ -128,7 +128,7 @@ void SuperstructureInterface::LoadGains() {
 
   elevator_slave_a_.Follow(elevator_master_);
   elevator_slave_a_.SetInverted(elevator_inverted);
-  elevator_slave_b_.Follow(elevator_master_);
+  elevator_slave_b_.Follow(winch_);
   elevator_slave_b_.SetInverted(elevator_inverted);
   elevator_slave_c_.Follow(elevator_master_);
   elevator_slave_c_.SetInverted(elevator_inverted);
@@ -167,7 +167,7 @@ void SuperstructureInterface::WriteActuators() {
         elevator_master_.Set(
             ControlMode::MotionMagic,
             outputs->elevator_setpoint() * kElevatorConversionFactor,
-            DemandType_ArbitraryFeedForward, 1.3 / 12.);
+            DemandType_ArbitraryFeedForward, 1.4 / 12.);
       } else {
         elevator_master_.Set(
             ControlMode::Position,
@@ -191,7 +191,7 @@ void SuperstructureInterface::WriteActuators() {
   winch_.Set(ControlMode::PercentOutput, outputs->winch_voltage() / 12.);
   /* winch_.Set(ControlMode::PercentOutput, 1. / 12.); */
   ground_hatch_intake_.Set(ControlMode::PercentOutput,
-                           outputs->hatch_roller_voltage() / 12.);
+                           outputs->hatch_roller_voltage() / -12.);
 
   ground_intake_snap_.Set(outputs->snap_down());
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
