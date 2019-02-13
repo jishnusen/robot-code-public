@@ -158,21 +158,25 @@ void SuperstructureInterface::WriteActuators() {
     case TalonOutput::OPEN_LOOP:
       elevator_master_.Set(ControlMode::PercentOutput,
                            outputs->elevator_setpoint() / 12.);
+      break;
     case TalonOutput::POSITION:
       elevator_master_.Set(
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
           DemandType_ArbitraryFeedForward, 1. / 12.);
+      break;
   }
 
   switch (outputs->wrist_setpoint_type()) {
     case TalonOutput::OPEN_LOOP:
       wrist_.Set(ControlMode::PercentOutput, outputs->wrist_setpoint() / 12.);
+      break;
     case TalonOutput::POSITION:
       wrist_.Set(ControlMode::MotionMagic,
                  outputs->wrist_setpoint() * kWristConversionFactor,
                  DemandType_ArbitraryFeedForward,
                  outputs->wrist_setpoint_ff() / 12.);
+      break;
   }
 
   cargo_intake_.Set(ControlMode::PercentOutput,
