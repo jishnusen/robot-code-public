@@ -118,16 +118,14 @@ void CommandBase::StartDriveVisionBackwards() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
-  while (lime_status->back_target_dist() > 0.28 && lime_status->has_target() && IsAutonomous()) {
+  while (lime_status->back_target_dist() > 0.29 && lime_status->back_has_target() && IsAutonomous()) {
+    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
     drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(2.8*(-lime_status->back_target_dist() - 0.5));
     drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(-16.0*lime_status->back_horiz_angle());
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     loop_.SleepUntilNext();
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+    std::cout << "back tracking" << std::endl;
   }
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(0);
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(0);
-  QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }
   
 

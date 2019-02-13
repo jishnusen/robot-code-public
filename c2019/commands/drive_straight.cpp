@@ -12,6 +12,7 @@ using c2019::limelight::LimelightStatusProto;
 bool DriveStraight::IsAutonomous() {
   DriverStationProto driver_station;
   AutoGoalProto auto_goal;
+  return true;
   if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station status found.");
     return false;
@@ -56,23 +57,25 @@ void DriveStraight::operator()() {
   StartDrivePath(5.8,-3.8,-30 * (M_PI / 180.), 1, true);
   WaitUntilDrivetrainNear(4.4,-2.4,0.3);
   StartDriveVision();
-  ScoreHatch(100);
+  ScoreHatch(1);
   Wait(100);
-  SetFieldPosition(5.0,-3.2,-30 * (M_PI / 180.));
+
+  DrivetrainStatus drive_status;
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+
+  SetFieldPosition(5.0,-3.2, -30 * (M_PI / 180.));
   StartDrivePath(0.6,-3.2,0,-1,true);
-  ScoreHatch(80);
   Wait(100);
   GoTo(superstructure::HATCH_SHIP_BACKWARDS);
-  WaitUntilDrivetrainNear(2, -3.2, 0.3);
+  WaitUntilDrivetrainNear(2.6, -3.2, 0.3);
 
   StartDriveVisionBackwards();
-  Wait(50);
-  std::cout << "first" << std::endl;
+  std::cout << "going to third" << std::endl;
   GoTo(superstructure::HATCH_ROCKET_THIRD);
   std::cout << "got here" << std::endl;
-  SetFieldPosition(0, -3.5, 0);
-  StartDrivePath(5.8,-3.8,-30 * (M_PI / 180.), 1, true);
-  WaitUntilDrivetrainNear(4.4,-2.4,0.3);
+  SetFieldPosition(0, -3.8, 0);
+  StartDrivePath(5.8,-3.67, 0, 1, true);
+  WaitUntilDrivetrainNear(3.0, -3.75, 0.4);
   StartDriveVision();
   ScoreHatch(100);
   ExitAutonomous();
