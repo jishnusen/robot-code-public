@@ -7,9 +7,9 @@
 namespace c2019 {
 namespace autonomous {
 
-class DriveStraight : public c2019::autonomous::AutonomousBase {
+class HatchRocketFront : public c2019::autonomous::AutonomousBase {
  public:
-  void Drive();
+  void RightSide();
 };
 
 }  // namespace autonomous
