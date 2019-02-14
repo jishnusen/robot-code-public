@@ -51,6 +51,8 @@ class CommandBase {
   void GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal = superstructure::INTAKE_NONE);
 
   void ScoreHatch(int num_ticks);
+  
+  void WaitForElevatorAndLL();
 
   // Set the robot-space (robot poweron position) transformation. The parameters
   // are the position of the robot (right now) in field coordinates (F).
