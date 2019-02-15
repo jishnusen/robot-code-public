@@ -61,7 +61,8 @@ void DriveStraight::operator()() {
   // smooth transition to vision
   WaitUntilDrivetrainNear(4.4, -2.4, 0.3);
   StartDriveVision();
-  ScoreHatch(100); // Backplates suck
+  ScoreHatch(1); // Backplates suck
+  Wait(100);
 
   DrivetrainStatus drive_status;
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
