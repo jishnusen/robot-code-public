@@ -48,7 +48,7 @@ class TeleopBase {
   muan::teleop::Button *crawl_, *drop_forks_, *drop_crawlers_, *winch_, *brake_;
 
   // safety button
-  muan::teleop::Button *safety_;
+  muan::teleop::Button *safety_, *safety2_;
 
   // intake/outtake buttons
   muan::teleop::Button *cargo_intake_, *cargo_outtake_, *hp_hatch_intake_,

@@ -441,6 +441,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       cargo_out_ = true;
       break;
     case INTAKE_GROUND_HATCH:
+      cargo_out_ = false;
       GoToState(INTAKING_GROUND, goal->intake_goal());
       if (elevator_height_ == kHandoffHeight && wrist_angle_ == kHandoffAngle) {
         GoToState(INTAKING_TO_STOW, goal->intake_goal());
@@ -492,7 +493,8 @@ void Superstructure::RunStateMachine() {
       }
       break;
     case INTAKING_TO_STOW:
-      if (cargo_intake_status_->has_cargo()) {
+      if (cargo_intake_status_->has_cargo() ||
+          hatch_intake_status_->has_hatch()) {
         elevator_height_ = kStowHeight;
         wrist_angle_ = kStowAngle;
         GoToState(HOLDING);

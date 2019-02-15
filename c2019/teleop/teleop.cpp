@@ -36,12 +36,13 @@ TeleopBase::TeleopBase()
   /* auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} { */
   // climbing buttons
   winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
-  brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
+  // brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   drop_crawlers_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
 
   // Safety button for various functions
   safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
+  safety2_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
 
   // scoring positions
   stow_ = gamepad_.MakePov(0, muan::teleop::Pov::kNorth);
@@ -288,9 +289,11 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Handoff
-  if (handoff_->is_pressed() && safety_->is_pressed()) {
+  if (handoff_->is_pressed() &&
+      (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
-    superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
+    superstructure_goal->set_intake_goal(
+        c2019::superstructure::INTAKE_GROUND_HATCH);
   }
   if (pop_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::POP);
@@ -301,7 +304,7 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(c2019::superstructure::STOW);
   }
   if (level_1_->is_pressed()) {
-    if (!safety_->is_pressed()) {
+    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
       if (has_cargo_) {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
@@ -328,8 +331,8 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (level_2_->is_pressed()) {
-    if (!safety_->is_pressed()) {
-      if (has_cargo_ || safety_->is_pressed()) {
+    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+      if (has_cargo_) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_SECOND);
       } else {
@@ -342,8 +345,8 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (level_3_->is_pressed()) {
-    if (!safety_->is_pressed()) {
-      if (has_cargo_ || safety_->is_pressed()) {
+    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+      if (has_cargo_) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_THIRD);
       } else {
@@ -356,8 +359,8 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (ship_->is_pressed()) {
-    if (!safety_->is_pressed()) {
-      if (has_cargo_ || safety_->is_pressed()) {
+    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+      if (has_cargo_) {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
               c2019::superstructure::CARGO_SHIP_FORWARDS);
@@ -381,18 +384,22 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
-  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
+  if (drop_forks_->is_pressed() &&
+      (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
-  if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
+  if (drop_crawlers_->is_pressed() &&
+      (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
   }
-  if (winch_->is_pressed() && safety_->is_pressed()) {
+  if (winch_->is_pressed() &&
+      (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
   }
-  if (brake_->is_pressed() && safety_->is_pressed()) {
+  /*if (brake_->is_pressed() &&
+      (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
-  }
+  }*/
 
   /* if (superstructure_goal->score_goal() != superstructure::NONE) { */
   /*   cached_goal_ = superstructure_goal->score_goal(); */

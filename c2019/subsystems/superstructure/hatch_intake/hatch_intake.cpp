@@ -73,6 +73,11 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
     case HANDOFF_INTAKING:
       flutes = false;
       backplate = false;
+      if (input->hatch_proxy()) {
+        flutes = true;
+        backplate = false;
+        state_ = (CARRYING);
+      }
   }
   if (outputs_enabled) {
     (*output)->set_flute_solenoid(flutes);
