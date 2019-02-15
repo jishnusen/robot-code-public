@@ -9,12 +9,11 @@
 namespace c2019 {
 namespace commands {
 
-using c2019::limelight::LimelightStatusProto;
-using c2019::superstructure::SuperstructureGoalProto;
-using c2019::superstructure::SuperstructureStatusProto;
 using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
+using c2019::limelight::LimelightStatusProto;
+using c2019::superstructure::SuperstructureGoalProto;
 
 CommandBase::CommandBase()
     : driver_station_reader_(
@@ -85,88 +84,34 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
 
   drivetrain_goal_queue_->WriteMessage(goal);
 }
+void CommandBase::StartPointTurn(double heading) {
+  DrivetrainGoal goal;
+  goal->set_point_turn_goal(heading);
+  goal->set_high_gear(false);
+  drivetrain_goal_queue_->WriteMessage(goal);
+}
+
+void CommandBase::GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal) {
+  SuperstructureGoalProto superstructure_goal;
+
+  superstructure_goal->set_score_goal(score_goal);
+  superstructure_goal->set_intake_goal(intake_goal);
+
+  QueueManager<SuperstructureGoalProto>::Fetch()->WriteMessage(superstructure_goal);
+}
 
 void CommandBase::StartDriveVision() {
-  // run vision align stuff
-  DrivetrainGoal drivetrain_goal;
-  LimelightStatusProto lime_status;
-  SuperstructureStatusProto super_status;
-  DrivetrainStatus drivetrain_status;
-  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
-      &super_status);
-  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
-  QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-
-  while (lime_status->target_dist() > 0.62 && lime_status->has_target() &&
-         IsAutonomous()) {
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.8 * lime_status->target_dist() - 0.82);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(-16.0 * lime_status->horiz_angle());
-    QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-    loop_.SleepUntilNext();
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+  LimelightStatusProto status;
+  if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status)) {
+    LOG(WARNING, "No limelight status message provided.");
+    return;
   }
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(
-      0);
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(
-      0);
-  QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-}
-
-void CommandBase::StartDriveVisionBackwards() {
-  // run vision align stuff
-  DrivetrainGoal drivetrain_goal;
-  LimelightStatusProto lime_status;
-  SuperstructureStatusProto super_status;
-  DrivetrainStatus drivetrain_status;
-  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
-      &super_status);
-  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
-  QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-
-  while (lime_status->back_target_dist() > 0.29 &&
-         lime_status->back_has_target() && IsAutonomous()) {
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.8 * (-lime_status->back_target_dist() - 0.3));
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(-16.0 * lime_status->back_horiz_angle());
-    QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-    loop_.SleepUntilNext();
-    std::cout << "back tracking" << std::endl;
-  }
-}
-
-void CommandBase::GoTo(superstructure::ScoreGoal score_goal,
-                       superstructure::IntakeGoal intake_goal) {
-  std::cout << "moving" << std::endl;
-  SuperstructureGoalProto super_goal;
-  super_goal->set_score_goal(score_goal);
-  super_goal->set_intake_goal(intake_goal);
-
-  QueueManager<SuperstructureGoalProto>::Fetch()->WriteMessage(super_goal);
-}
-
-void CommandBase::WaitForElevatorAndLL() {
-  SuperstructureStatusProto super_status;
-  LimelightStatusProto lime_status;
-  while (super_status->elevator_height() < 1.1 || !lime_status->has_target()) {
-    Wait(1);
-    QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
-        &super_status);
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-  }
-}
-
-void CommandBase::ScoreHatch(int num_ticks) {
-  for (int i = 0; i < num_ticks && IsAutonomous(); i++) {
-    SuperstructureGoalProto super_goal;
-    super_goal->set_score_goal(superstructure::NONE);
-    super_goal->set_intake_goal(superstructure::OUTTAKE_HATCH);
-
-    QueueManager<SuperstructureGoalProto>::Fetch()->WriteMessage(super_goal);
-  }
+  double x = status->target_dist() * std::cos(status->horiz_angle());
+  double y = status->target_dist() * std::sin(status->horiz_angle());
+  double left = status->to_the_left() ? 1 : -1;
+  x = x - (std::cos(status->heading() * left)*.8);
+  y = y - (std::sin(status->heading() * left) * .8);
+  StartDrivePath(x, -y, status->heading() * left, 1);
 }
 
 bool CommandBase::IsDriveComplete() {
@@ -180,6 +125,10 @@ bool CommandBase::IsDriveComplete() {
           std::abs(status->profiled_y_goal() - goal->path_goal().y()) < 1e-1 &&
           status->profile_complete()) {
         return true;
+      }
+    } else if (goal->has_point_turn_goal()) {
+      if (std::abs(status->heading_error()) < 1e-2) {
+	return true;
       }
     }
   }
