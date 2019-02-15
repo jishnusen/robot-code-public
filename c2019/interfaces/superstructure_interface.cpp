@@ -8,7 +8,7 @@ constexpr double kElevatorConversionFactor =
 
 constexpr double kWristConversionFactor = (4096 * 2.933) / (2 * M_PI);
 
-constexpr double kElevatorP = 0.15;
+constexpr double kElevatorP = 0.12;
 constexpr double kElevatorI = 0.0;
 constexpr double kElevatorD = 4.0;
 constexpr double kElevatorF = 0.06;
@@ -35,6 +35,7 @@ SuperstructureInterface::SuperstructureInterface()
       output_reader_{
           QueueManager<SuperstructureOutputProto>::Fetch()->MakeReader()} {
   LoadGains();
+  wrist_.SetSelectedSensorPosition(0, 0, 100);
 }
 
 void SuperstructureInterface::ReadSensors() {
@@ -78,7 +79,7 @@ void SuperstructureInterface::ReadSensors() {
       !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
   inputs->set_cargo_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P));
-//      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
+  //      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
   inputs->set_hatch_intake_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR) &&
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CS));
@@ -127,7 +128,7 @@ void SuperstructureInterface::LoadGains() {
 
   elevator_slave_a_.Follow(elevator_master_);
   elevator_slave_a_.SetInverted(elevator_inverted);
-  elevator_slave_b_.Follow(elevator_master_);
+  elevator_slave_b_.Follow(winch_);
   elevator_slave_b_.SetInverted(elevator_inverted);
   elevator_slave_c_.Follow(elevator_master_);
   elevator_slave_c_.SetInverted(elevator_inverted);
@@ -137,6 +138,9 @@ void SuperstructureInterface::SetBrakeMode(bool mode) {
   NeutralMode neutral_mode = mode ? NeutralMode::Brake : NeutralMode::Coast;
   ground_hatch_intake_.SetNeutralMode(neutral_mode);
   elevator_master_.SetNeutralMode(neutral_mode);
+  elevator_slave_a_.SetNeutralMode(neutral_mode);
+  elevator_slave_b_.SetNeutralMode(neutral_mode);
+  elevator_slave_c_.SetNeutralMode(neutral_mode);
   wrist_.SetNeutralMode(neutral_mode);
 }
 
@@ -160,10 +164,16 @@ void SuperstructureInterface::WriteActuators() {
                            outputs->elevator_setpoint() / 12.);
       break;
     case TalonOutput::POSITION:
-      elevator_master_.Set(
-          ControlMode::MotionMagic,
-          outputs->elevator_setpoint() * kElevatorConversionFactor,
-          DemandType_ArbitraryFeedForward, 1. / 12.);
+      if (outputs->elevator_high_gear()) {
+        elevator_master_.Set(
+            ControlMode::MotionMagic,
+            outputs->elevator_setpoint() * kElevatorConversionFactor,
+            DemandType_ArbitraryFeedForward, 1.3 / 12.);
+      } else {
+        elevator_master_.Set(
+            ControlMode::Position,
+            outputs->elevator_setpoint() * kElevatorConversionFactor);
+      }
       break;
   }
 
@@ -181,14 +191,19 @@ void SuperstructureInterface::WriteActuators() {
 
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);
+  crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
+  winch_.Set(ControlMode::PercentOutput, outputs->winch_voltage() / 12.);
+  /* winch_.Set(ControlMode::PercentOutput, 1. / 12.); */
   ground_hatch_intake_.Set(ControlMode::PercentOutput,
-                           outputs->hatch_roller_voltage() / 12.);
+                           outputs->hatch_roller_voltage() / -12.);
 
   ground_intake_snap_.Set(outputs->snap_down());
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
   backplate_solenoid_.Set(outputs->backplate_solenoid());
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
-  crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
+  // crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
+  shifter_.Set(!outputs->elevator_high_gear());
+  cargo_.Set(outputs->cargo_out());
 }
 
 }  // namespace interfaces

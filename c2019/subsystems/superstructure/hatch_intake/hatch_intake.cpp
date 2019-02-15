@@ -9,23 +9,30 @@ void HatchIntake::SetGoal(const HatchIntakeGoalProto& goal) {
     case NONE:
       break;
     case INTAKE:
-      state_ = (INTAKING);
+      state_ = INTAKING;
       break;
     case HOLD:
-      state_ = (CARRYING);
+      state_ = CARRYING;
       break;
     case SCORE:
       counter_ = 0;
-      state_ = (OUTTAKING);
+      state_ = OUTTAKING;
+      break;
+    case PREP_SCORE:
+      state_ = PREPPING_SCORE;
+      break;
+    case HANDOFF:
+      state_ = HANDOFF_INTAKING;
       break;
   }
+  force_backplate_ = goal->force_backplate();
 }
 
 void HatchIntake::Update(const HatchIntakeInputProto& input,
                          HatchIntakeOutputProto* output,
                          HatchIntakeStatusProto* status, bool outputs_enabled) {
-  bool backplate = false;
-  bool flutes = false;
+  bool backplate = false;  // not out
+  bool flutes = false;     // not out
 
   switch (state_) {
     case IDLE:
@@ -37,16 +44,16 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
       }
       break;
     case INTAKING:
-      flutes = false;
-      backplate = false;
+      flutes = true;
+      backplate = true;
       if (input->hatch_proxy()) {
-        backplate = true;
+        backplate = false;
         state_ = (CARRYING);
       }
       break;
     case CARRYING:
       flutes = true;
-      backplate = true;
+      backplate = false;
       break;
     case OUTTAKING:
       flutes = false;
@@ -59,10 +66,20 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
         state_ = (IDLE);
       }
       break;
+    case PREPPING_SCORE:
+      flutes = true;
+      backplate = true;
+      break;
+    case HANDOFF_INTAKING:
+      flutes = false;
+      backplate = false;
   }
   if (outputs_enabled) {
     (*output)->set_flute_solenoid(flutes);
     (*output)->set_backplate_solenoid(backplate);
+    if (force_backplate_) {
+      (*output)->set_backplate_solenoid(false);
+    }
   } else {
     (*output)->set_flute_solenoid(false);
     (*output)->set_backplate_solenoid(false);

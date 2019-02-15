@@ -10,7 +10,7 @@ namespace c2019 {
 namespace elevator {
 
 // Height constraints
-constexpr double kMinHeight = 0.;
+constexpr double kMinHeight = 0;
 constexpr double kMaxHeight = 1.793;
 constexpr double kSecondStageHeight = 1.;
 

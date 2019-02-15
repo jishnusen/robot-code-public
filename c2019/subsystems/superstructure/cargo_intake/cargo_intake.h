@@ -20,8 +20,8 @@ class CargoIntake {
   void SetGoal(const CargoIntakeGoalProto& goal);
 
  private:
-  State state_ = HOLDING;
-  State prev_state_ = HOLDING;
+  State state_ = IDLE;
+  State prev_state_ = IDLE;
   double pickup_counter_ = 0;
   double outtake_counter_ = 0;
 };

@@ -39,10 +39,10 @@ void Wrist::Update(const WristInputProto& input, WristOutputProto* output,
     if (is_calibrated()) {
       (*output)->set_output_type(POSITION);
       (*output)->set_wrist_setpoint(goal_ - hall_calibration_.offset());
-       if (calibrated_encoder <= 1e-2 && goal_ < 1e-2) {
-         (*output)->set_output_type(OPEN_LOOP);
-         (*output)->set_wrist_setpoint(0); 
-       } 
+      if (calibrated_encoder <= goal_ + 1e-2 && goal_ < 1e-2) {
+        (*output)->set_output_type(OPEN_LOOP);
+        (*output)->set_wrist_setpoint(0);
+      }
     } else {
       (*output)->set_output_type(OPEN_LOOP);
       (*output)->set_wrist_setpoint(0);
