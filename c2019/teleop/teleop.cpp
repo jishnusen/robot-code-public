@@ -1,6 +1,7 @@
 #include "c2019/teleop/teleop.h"
-#include "c2019/commands/drive_straight.h"
-#include "c2019/commands/test_auto.h"
+/* #include "c2019/commands/drive_straight.h" */
+/* #include "c2019/commands/test_auto.h" */
+#include "c2019/subsystems/limelight/queue_types.h"
 #include "muan/logging/logger.h"
 
 namespace c2019 {
@@ -11,12 +12,14 @@ using muan::teleop::JoystickStatusProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
-using c2019::commands::Command;
+using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
+/* using c2019::commands::Command; */
+using c2019::limelight::LimelightStatusProto;
 using c2019::superstructure::SuperstructureGoalProto;
 using c2019::superstructure::SuperstructureStatusProto;
 
-using commands::AutoGoalProto;
-using commands::AutoStatusProto;
+/* using commands::AutoGoalProto; */
+/* using commands::AutoStatusProto; */
 
 TeleopBase::TeleopBase()
     : superstructure_goal_queue_{QueueManager<
@@ -27,9 +30,10 @@ TeleopBase::TeleopBase()
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
-      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")},
-      auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
-      auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
+      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")} {
+  /* auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
+   */
+  /* auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} { */
   // climbing buttons
   winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
@@ -70,8 +74,10 @@ TeleopBase::TeleopBase()
   // vision buttons?
   // TODO(jishnu) change these buttons to whatever Nathan wants
   exit_auto_ = throttle_.MakeButton(6);
-  test_auto_ = throttle_.MakeButton(7);
-  drive_straight_ = throttle_.MakeButton(8);
+  test_auto_ = throttle_.MakeButton(8);
+  vision_intake_ = throttle_.MakeButton(2);
+  drive_straight_ = throttle_.MakeButton(7);
+  vision_ = throttle_.MakeButton(1);
 }
 
 void TeleopBase::operator()() {
@@ -94,10 +100,10 @@ void TeleopBase::operator()() {
 void TeleopBase::Stop() { running_ = false; }
 
 void TeleopBase::Update() {
-  AutoStatusProto auto_status;
-  AutoGoalProto auto_goal;
+  /* AutoStatusProto auto_status; */
+  /* AutoGoalProto auto_goal; */
 
-  auto_status_reader_.ReadLastMessage(&auto_status);
+  /* auto_status_reader_.ReadLastMessage(&auto_status); */
 
   SuperstructureStatusProto superstructure_status;
   QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
@@ -107,7 +113,7 @@ void TeleopBase::Update() {
   has_hp_hatch_ = superstructure_status->has_hp_hatch();
   has_ground_hatch_ = superstructure_status->has_ground_hatch();
 
-  if (RobotController::IsSysActive() && !auto_status->running_command()) {
+  if (DriverStation::GetInstance().IsOperatorControl()) {
     SendDrivetrainMessage();
     SendSuperstructureMessage();
   }
@@ -130,41 +136,47 @@ void TeleopBase::Update() {
   } else {
     // Set rumble off
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
-  }
+  } /*
+   if (exit_auto_->was_clicked()) {
+     auto_goal->set_run_command(false);
+     auto_goal_queue_->WriteMessage(auto_goal);
+   } else if (!auto_status->running_command()) {
+     if (test_auto_->was_clicked()) {
+       auto_goal->set_run_command(true);
+       auto_goal->set_command(Command::TEST_AUTO);
+     } else if (drive_straight_->was_clicked()) {
+       auto_goal->set_run_command(true);
+       auto_goal->set_command(Command::DRIVE_STRAIGHT);
+     } else {
+       auto_goal->set_run_command(false);
+       auto_goal->set_command(Command::NONE);
+     }
 
-  if (exit_auto_->was_clicked()) {
-    auto_goal->set_run_command(false);
-    auto_goal_queue_->WriteMessage(auto_goal);
-  } else if (!auto_status->running_command()) {
-    if (test_auto_->was_clicked()) {
-      auto_goal->set_run_command(true);
-      auto_goal->set_command(Command::TEST_AUTO);
-    } else if (drive_straight_->was_clicked()) {
-      auto_goal->set_run_command(true);
-      auto_goal->set_command(Command::DRIVE_STRAIGHT);
-    } else {
-      auto_goal->set_run_command(false);
-      auto_goal->set_command(Command::NONE);
-    }
+     auto_goal_queue_->WriteMessage(auto_goal);
 
-    auto_goal_queue_->WriteMessage(auto_goal);
-
-    if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
-      commands::DriveStraight drive_straight_command;
-      std::thread drive_straight_thread(drive_straight_command);
-      drive_straight_thread.detach();
-    } else if (auto_goal->command() == Command::TEST_AUTO) {
-      commands::TestAuto test_auto_command;
-      std::thread test_auto_thread(test_auto_command);
-      test_auto_thread.detach();
-    }
-  }
+     if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
+       commands::DriveStraight drive_straight_command;
+       std::thread drive_straight_thread(drive_straight_command);
+       drive_straight_thread.detach();
+     } else if (auto_goal->command() == Command::TEST_AUTO) {
+       commands::TestAuto test_auto_command;
+       std::thread test_auto_thread(test_auto_command);
+       test_auto_thread.detach();
+     }
+   }*/
 
   ds_sender_.Send();
 }
 
 void TeleopBase::SendDrivetrainMessage() {
+  bool vision = false;
   DrivetrainGoal drivetrain_goal;
+  LimelightStatusProto lime_status;
+  SuperstructureStatusProto super_status;
+  DrivetrainStatus drivetrain_status;
+  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
+      &super_status);
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
 
   double throttle = -throttle_.wpilib_joystick()->GetRawAxis(1);
   double wheel = -wheel_.wpilib_joystick()->GetRawAxis(0);
@@ -177,13 +189,53 @@ void TeleopBase::SendDrivetrainMessage() {
   if (shifting_low_->was_clicked()) {
     high_gear_ = false;
   }
+  if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
+          &lime_status)) {
+    if (vision_->is_pressed()) {
+      if (super_status->elevator_goal() == 0.987) {
+        bool score_possible =
+            lime_status->target_dist() < 1.4 && lime_status->has_target();
+        wants_override_ = true;
+        height_distance_factor_ = 0.7;
+        override_goal_ = score_possible ? superstructure::HATCH_ROCKET_SECOND
+                                        : superstructure::LIMELIGHT_OVERRIDE;
+      } else {
+        wants_override_ = false;
+        height_distance_factor_ = 0.7;
+      }
+    } else {
+      wants_override_ = false;
+      height_distance_factor_ = 1.0;
+    }
+    if (vision_->is_pressed()) {
+      if (vision_intake_->is_pressed() && lime_status->back_has_target()) {
+        vision = true;
+        distance_factor_ = 0.5;
+        target_dist_ = -1 * lime_status->back_target_dist();
+        horiz_angle_ = lime_status->back_horiz_angle();
+      } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
+        vision = true;
+        distance_factor_ = 0.82 / 2.8;
+        target_dist_ = lime_status->target_dist();
+        horiz_angle_ = lime_status->horiz_angle();
+      }
+    }
+  }
 
   drivetrain_goal->set_high_gear(high_gear_);
 
   // Drive controls
-  drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
-  drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
-  drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
+  if (!vision) {
+    drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
+    drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
+    drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
+  } else {
+    drivetrain_goal->mutable_linear_angular_velocity_goal()
+        ->set_linear_velocity(
+            2.8 * (height_distance_factor_ * target_dist_ - distance_factor_));
+    drivetrain_goal->mutable_linear_angular_velocity_goal()
+        ->set_angular_velocity(-16.0 * horiz_angle_);
+  }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }
@@ -342,6 +394,12 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
   }
 
+  /* if (superstructure_goal->score_goal() != superstructure::NONE) { */
+  /*   cached_goal_ = superstructure_goal->score_goal(); */
+  /* } */
+  if (wants_override_) {
+    superstructure_goal->set_score_goal(override_goal_);
+  }
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }  // namespace teleop
 

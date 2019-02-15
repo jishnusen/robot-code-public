@@ -17,7 +17,7 @@ constexpr double kForceStiction = 32.65;
 constexpr double kForceFriction = 20;
 constexpr double kAngularDrag = -12;
 
-constexpr double kRobotRadius = 0.2875;
+constexpr double kRobotRadius = 0.3489513;
 constexpr double kWheelRadius = 4.0 * 0.0254 / 2.0;
 
 constexpr double kHighGearRatio = (12.0 / 50.0) * (18.0 / 46.0) * (50.0 / 34.0);
@@ -66,7 +66,7 @@ muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
 
       .max_velocity = 3.4,
       .max_acceleration = 6.0,
-      .max_centripetal_acceleration = M_PI / 2.0,
+      .max_centripetal_acceleration = 8,
 
       .high_gear_properties = high_gear,
       .low_gear_properties = low_gear,

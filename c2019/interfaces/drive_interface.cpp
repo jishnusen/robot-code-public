@@ -85,10 +85,10 @@ DrivetrainInterface::DrivetrainInterface()
   left_master_.ConfigVoltageCompSaturation(12.0, 100);
   left_master_.ConfigVoltageMeasurementFilter(32, 100);
 
-  left_master_.SetSelectedSensorPosition(0, kPositionSlot, kSetupTimeout);
-  right_master_.SetSelectedSensorPosition(0, kPositionSlot, kSetupTimeout);
-  left_master_.SetSelectedSensorPosition(0, kVelocitySlot, kSetupTimeout);
-  right_master_.SetSelectedSensorPosition(0, kVelocitySlot, kSetupTimeout);
+  left_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
+  right_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
+  left_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
+  right_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
 
   left_master_.SetSensorPhase(true);
 

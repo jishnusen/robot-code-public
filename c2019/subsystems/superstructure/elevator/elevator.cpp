@@ -67,7 +67,6 @@ void Elevator::Update(const ElevatorInputProto& input,
     (*output)->set_elevator_setpoint(0.);
     (*output)->set_elevator_ff(0.);
     (*output)->set_high_gear(false);
-
     (*output)->set_crawler_one_solenoid(false);
     (*output)->set_crawler_two_solenoid(false);
     (*output)->set_crawler_voltage(0);

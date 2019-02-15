@@ -1,10 +1,9 @@
-#ifndef C2019_COMMANDS_COMMAND_BASE_H_
-#define C2019_COMMANDS_COMMAND_BASE_H_
+#ifndef C2019_AUTONOMOUS_AUTONOMOUS_BASE_H_
+#define C2019_AUTONOMOUS_AUTONOMOUS_BASE_H_
 
 #include <string>
 
 #include "Eigen/Dense"
-#include "c2019/commands/queue_types.h"
 #include "c2019/subsystems/superstructure/queue_types.h"
 #include "gtest/gtest.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
@@ -13,15 +12,15 @@
 #include "third_party/aos/common/util/phased_loop.h"
 
 namespace c2019 {
-namespace commands {
+namespace autonomous {
 
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
 using DrivetrainInput = muan::subsystems::drivetrain::InputProto;
 
-class CommandBase {
+class AutonomousBase {
  public:
-  CommandBase();
+  AutonomousBase();
 
  protected:
   FRIEND_TEST(C2019AutonomousTest, PathDriveTransformsZeroInit);
@@ -48,11 +47,14 @@ class CommandBase {
 
   void SetFieldPosition(double x, double y, double theta);
 
-  void GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal = superstructure::INTAKE_NONE);
+  void GoTo(
+      superstructure::ScoreGoal score_goal,
+      superstructure::IntakeGoal intake_goal = superstructure::INTAKE_NONE);
 
   void ScoreHatch(int num_ticks);
-  
+
   void WaitForElevatorAndLL();
+  void WaitForBackLL();
 
   // Set the robot-space (robot poweron position) transformation. The parameters
   // are the position of the robot (right now) in field coordinates (F).
@@ -63,8 +65,7 @@ class CommandBase {
   muan::subsystems::drivetrain::GoalQueue* drivetrain_goal_queue_;
   muan::subsystems::drivetrain::StatusQueue::QueueReader
       drivetrain_status_reader_;
-  c2019::commands::AutoStatusQueue* auto_status_queue_;
-  c2019::commands::AutoGoalQueue::QueueReader auto_goal_reader_;
+
   Eigen::Transform<double, 2, Eigen::AffineCompact> transform_f0_;
   double theta_offset_ = 0.0;
 
@@ -74,7 +75,7 @@ class CommandBase {
   aos::time::PhasedLoop loop_{std::chrono::milliseconds(10)};
 };
 
-}  // namespace commands
+}  // namespace autonomous
 }  // namespace c2019
 
-#endif  // C2019_COMMANDS_COMMAND_BASE_H_
+#endif  // C2019_AUTONOMOUS_AUTONOMOUS_BASE_H_

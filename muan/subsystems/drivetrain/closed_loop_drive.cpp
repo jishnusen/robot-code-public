@@ -54,6 +54,13 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
     return;
   }
 
+  if (goal->has_linear_angular_velocity_goal()) {
+    lin_vel_goal_ = goal->linear_angular_velocity_goal().linear_velocity();
+    ang_vel_goal_ = goal->linear_angular_velocity_goal().angular_velocity();
+    control_mode_ = ControlMode::LINEAR_ANGULAR_VEL;
+    return;
+  }
+
   control_mode_ = ControlMode::PATH_FOLLOWING;
   const auto path_goal = goal->path_goal();
   const Pose goal_pose{
@@ -116,6 +123,8 @@ void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
     UpdateLeftRightManual(output, status);
   } else if (control_mode_ == ControlMode::PATH_FOLLOWING) {
     UpdatePathFollower(output, status);
+  } else if (control_mode_ == ControlMode::LINEAR_ANGULAR_VEL) {
+    UpdateLinearAngularVelocity(output);
   }
 }
 
@@ -149,6 +158,13 @@ void ClosedLoopDrive::UpdateLeftRightManual(OutputProto* output,
   (*output)->set_output_type(POSITION);
   (*output)->set_left_setpoint(left_pos_goal_);
   (*output)->set_right_setpoint(right_pos_goal_);
+}
+
+void ClosedLoopDrive::UpdateLinearAngularVelocity(OutputProto* output) {
+  auto left_right = model_.InverseKinematics(Eigen::Vector2d(lin_vel_goal_, ang_vel_goal_));
+  (*output)->set_output_type(VELOCITY);
+  (*output)->set_left_setpoint(left_right(0));
+  (*output)->set_right_setpoint(left_right(1));
 }
 
 void ClosedLoopDrive::UpdatePathFollower(OutputProto* output,

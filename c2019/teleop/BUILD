@@ -8,9 +8,10 @@ cc_library(
     hdrs = ["teleop.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//c2019/commands:commands",
+        # "//c2019/commands:commands",
         "//c2019/subsystems/superstructure:superstructure",
         "//c2019/subsystems/superstructure:superstructure_queues",
+ 	    "//c2019/subsystems/limelight:limelight_queues",
         "//muan/logging:logger",
         "//muan/queues:queue_manager",
         "//muan/subsystems/drivetrain:drivetrain_queues",
