@@ -51,8 +51,8 @@ class TeleopBase {
   muan::teleop::Button *safety_;
 
   // intake/outtake buttons
-  muan::teleop::Button *cargo_intake_, *cargo_outtake_, *ground_hatch_intake_,
-      *hp_hatch_intake_, *hp_hatch_outtake_;
+  muan::teleop::Button *cargo_intake_, *cargo_outtake_, *hp_hatch_intake_,
+      *hp_hatch_outtake_;
   muan::teleop::Button *ground_intake_height_;
   // scoring positions
   muan::teleop::Button *level_1_, *level_2_, *level_3_, *ship_;

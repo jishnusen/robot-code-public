@@ -31,11 +31,10 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // climbing buttons
-  winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
-  crawl_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
+  winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
-  drop_forks_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
-  drop_crawlers_ = gamepad_.MakeAxisRange(75, 105, 0, 1, 0.8);
+  drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
+  drop_crawlers_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
 
   // Safety button for various functions
   safety_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::RIGHT_CLICK_IN));
@@ -51,7 +50,6 @@ TeleopBase::TeleopBase()
   // intake buttons
   ground_intake_height_ = gamepad_.MakePov(0, muan::teleop::Pov::kSouth);
   cargo_intake_ = gamepad_.MakeAxis(3, 0.3);
-  ground_hatch_intake_ = gamepad_.MakePov(0, muan::teleop::Pov::kEast);
   // outtake buttons
   cargo_outtake_ = gamepad_.MakeAxis(2, 0.7);
   hp_hatch_intake_ =
@@ -61,6 +59,7 @@ TeleopBase::TeleopBase()
 
   // handoff
   pop_ = gamepad_.MakePov(0, muan::teleop::Pov::kWest);
+  handoff_ = gamepad_.MakePov(0, muan::teleop::Pov::kEast);
 
   // gear shifting - throttle buttons
   shifting_low_ = throttle_.MakeButton(4);
@@ -228,10 +227,6 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_intake_goal(
           c2019::superstructure::OUTTAKE_GROUND_HATCH);
     }
-  } else if (ground_hatch_intake_->is_pressed() && safety_->is_pressed()) {
-    superstructure_goal->set_intake_goal(
-        c2019::superstructure::INTAKE_GROUND_HATCH);
-    superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
   } else if (hp_hatch_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
   } else if (hp_hatch_outtake_->is_pressed()) {
@@ -241,102 +236,107 @@ void TeleopBase::SendSuperstructureMessage() {
   }
 
   // Handoff
-  /*if (handoff_->is_pressed() && safety_->is_pressed()) {
+  if (handoff_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
     superstructure_goal->set_intake_goal(c2019::superstructure::PREP_HANDOFF);
-  }*/
+  }
   if (pop_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::POP);
   }
 
   // Scoring positions - auto detects game piece
   if (stow_->is_pressed()) {
-    if (!safety_->is_pressed()) {
-      superstructure_goal->set_score_goal(c2019::superstructure::STOW);
-    } /*else {  // safety + stow to go to climb height
-      superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
-    }*/
-  }
-  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
+    superstructure_goal->set_score_goal(c2019::superstructure::STOW);
   }
   if (level_1_->is_pressed()) {
-    if (has_cargo_ || safety_->is_pressed()) {
-      if (!backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_ROCKET_FIRST);
+    if (!safety_->is_pressed()) {
+      if (has_cargo_) {
+        if (!backwards_->is_pressed()) {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::CARGO_ROCKET_FIRST);
+        } else {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::CARGO_ROCKET_BACKWARDS);
+        }
       } else {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_ROCKET_BACKWARDS);
+        if (!backwards_->is_pressed()) {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::HATCH_ROCKET_FIRST);
+          superstructure_goal->set_intake_goal(
+              c2019::superstructure::PREP_SCORE);
+        } else {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::HATCH_ROCKET_BACKWARDS);
+          superstructure_goal->set_intake_goal(
+              c2019::superstructure::PREP_SCORE);
+        }
       }
     } else {
-      if (!backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_ROCKET_FIRST);
-        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
-      } else {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_ROCKET_BACKWARDS);
-        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
-      }
+      superstructure_goal->set_score_goal(c2019::superstructure::KISS);
     }
   }
   if (level_2_->is_pressed()) {
-    if (has_cargo_ || safety_->is_pressed()) {
-      superstructure_goal->set_score_goal(
-          c2019::superstructure::CARGO_ROCKET_SECOND);
+    if (!safety_->is_pressed()) {
+      if (has_cargo_ || safety_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_ROCKET_SECOND);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_SECOND);
+        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
+      }
     } else {
-      superstructure_goal->set_score_goal(
-          c2019::superstructure::HATCH_ROCKET_SECOND);
-      superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
+      superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
     }
   }
   if (level_3_->is_pressed()) {
-    if (has_cargo_ || safety_->is_pressed()) {
-      superstructure_goal->set_score_goal(
-          c2019::superstructure::CARGO_ROCKET_THIRD);
+    if (!safety_->is_pressed()) {
+      if (has_cargo_ || safety_->is_pressed()) {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::CARGO_ROCKET_THIRD);
+      } else {
+        superstructure_goal->set_score_goal(
+            c2019::superstructure::HATCH_ROCKET_THIRD);
+        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
+      }
     } else {
-      superstructure_goal->set_score_goal(
-          c2019::superstructure::HATCH_ROCKET_THIRD);
-      superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
+      superstructure_goal->set_score_goal(c2019::superstructure::LAND);
     }
   }
   if (ship_->is_pressed()) {
-    if (has_cargo_ || safety_->is_pressed()) {
-      if (!backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_SHIP_FORWARDS);
+    if (!safety_->is_pressed()) {
+      if (has_cargo_ || safety_->is_pressed()) {
+        if (!backwards_->is_pressed()) {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::CARGO_SHIP_FORWARDS);
+        } else {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::CARGO_SHIP_BACKWARDS);
+        }
       } else {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::CARGO_SHIP_BACKWARDS);
+        if (!backwards_->is_pressed()) {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::HATCH_SHIP_FORWARDS);
+        } else {
+          superstructure_goal->set_score_goal(
+              c2019::superstructure::HATCH_SHIP_BACKWARDS);
+        }
       }
     } else {
-      if (!backwards_->is_pressed()) {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_SHIP_FORWARDS);
-      } else {
-        superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_SHIP_BACKWARDS);
-      }
+      superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
     }
   }
 
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
-  /*if (drop_forks_->is_pressed() && safety_->is_pressed()) {
+  if (drop_forks_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
-  }*/
+  }
   if (drop_crawlers_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
   }
   if (winch_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
-  }
-  if (pop_->is_pressed() && safety_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::LOWER_CRAWLERS);
-  }
-  if (crawl_->is_pressed()) {
-    superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
   }
   if (brake_->is_pressed() && safety_->is_pressed()) {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);

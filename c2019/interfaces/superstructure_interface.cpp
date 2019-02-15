@@ -8,7 +8,7 @@ constexpr double kElevatorConversionFactor =
 
 constexpr double kWristConversionFactor = (4096 * 2.933) / (2 * M_PI);
 
-constexpr double kElevatorP = 0.15;
+constexpr double kElevatorP = 0.12;
 constexpr double kElevatorI = 0.0;
 constexpr double kElevatorD = 4.0;
 constexpr double kElevatorF = 0.06;
@@ -76,7 +76,7 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
   inputs->set_wrist_hall(
-      !canifier_.GetGeneralInput(CANifier::GeneralPin::LIMF));
+      !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
   inputs->set_cargo_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P) ||
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
@@ -162,27 +162,31 @@ void SuperstructureInterface::WriteActuators() {
     case TalonOutput::OPEN_LOOP:
       elevator_master_.Set(ControlMode::PercentOutput,
                            outputs->elevator_setpoint() / 12.);
+      break;
     case TalonOutput::POSITION:
       if (outputs->elevator_high_gear()) {
         elevator_master_.Set(
             ControlMode::MotionMagic,
             outputs->elevator_setpoint() * kElevatorConversionFactor,
-            DemandType_ArbitraryFeedForward, 1.4 / 12.);
+            DemandType_ArbitraryFeedForward, 1.3 / 12.);
       } else {
         elevator_master_.Set(
             ControlMode::Position,
             outputs->elevator_setpoint() * kElevatorConversionFactor);
       }
+      break;
   }
 
   switch (outputs->wrist_setpoint_type()) {
     case TalonOutput::OPEN_LOOP:
       wrist_.Set(ControlMode::PercentOutput, outputs->wrist_setpoint() / 12.);
+      break;
     case TalonOutput::POSITION:
       wrist_.Set(ControlMode::MotionMagic,
                  outputs->wrist_setpoint() * kWristConversionFactor,
                  DemandType_ArbitraryFeedForward,
                  outputs->wrist_setpoint_ff() / 12.);
+      break;
   }
 
   cargo_intake_.Set(ControlMode::PercentOutput,
@@ -197,7 +201,7 @@ void SuperstructureInterface::WriteActuators() {
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
   backplate_solenoid_.Set(outputs->backplate_solenoid());
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
-  crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
+  // crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
   shifter_.Set(!outputs->elevator_high_gear());
   cargo_.Set(outputs->cargo_out());
 }

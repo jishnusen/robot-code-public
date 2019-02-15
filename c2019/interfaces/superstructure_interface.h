@@ -53,7 +53,7 @@ class SuperstructureInterface {
   Solenoid arrow_solenoid_{kArrow};
   Solenoid backplate_solenoid_{kBackplate};
   Solenoid crawler_one_solenoid_{kCrawlerOne};
-  Solenoid crawler_two_solenoid_{kCrawlerTwo};
+  // Solenoid crawler_two_solenoid_{kCrawlerTwo};
   Solenoid shifter_{kShifter};
   Solenoid cargo_{kCargo};
 

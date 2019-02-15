@@ -31,8 +31,8 @@ void HatchIntake::SetGoal(const HatchIntakeGoalProto& goal) {
 void HatchIntake::Update(const HatchIntakeInputProto& input,
                          HatchIntakeOutputProto* output,
                          HatchIntakeStatusProto* status, bool outputs_enabled) {
-  bool backplate = false;
-  bool flutes = false;
+  bool backplate = false;  // not out
+  bool flutes = false;     // not out
 
   switch (state_) {
     case IDLE:

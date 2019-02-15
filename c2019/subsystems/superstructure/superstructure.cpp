@@ -70,7 +70,7 @@ wrist::WristGoalProto Superstructure::PopulateWristGoal() {
 ground_hatch_intake::GroundHatchIntakeGoalProto
 Superstructure::PopulateGroundHatchIntakeGoal() {
   ground_hatch_intake::GroundHatchIntakeGoalProto goal;
-  if (intake_goal_ == INTAKE_GROUND_HATCH) {
+  if (intake_goal_ == INTAKE_GROUND_HATCH || intake_goal_ == PREP_HANDOFF) {
     goal->set_goal(ground_hatch_intake::REQUEST_HATCH);
   } else if (intake_goal_ == OUTTAKE_GROUND_HATCH) {
     goal->set_goal(ground_hatch_intake::EJECT);
@@ -361,16 +361,22 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       crawler_down_ = true;
       brake_ = false;
       break;
+    case LAND:
+      elevator_height_ = kLandHeight;
+      wrist_angle_ = kClimbAngle;
+      break;
     case DROP_FORKS:
       buddy_ = true;
       break;
     case DROP_CRAWLERS:
-      crawler_down_ = true;
+      if (status_->elevator_height() > kHatchRocketThirdHeight - 3e-2) {
+        crawler_down_ = true;
+      }
       break;
-    case LOWER_CRAWLERS:
-      elevator_height_ = kCrawlerHeight;
-      wrist_angle_ = kClimbAngle;
-      high_gear_ = false;
+    case KISS:
+      elevator_height_ = kKissHeight;
+      wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
       break;
     case CRAWL:
       crawling_ = true;
@@ -389,6 +395,13 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case WINCH:
       buddy_ = true;
       should_climb_ = true;
+      break;
+    case LIMELIGHT_OVERRIDE:
+      if (elevator_height_ == kHatchRocketSecondHeight) {
+        wrist_angle_ = 1.0;
+      } else {
+        wrist_angle_ = kHatchForwardsAngle;
+      }
       break;
   }
 
@@ -434,11 +447,21 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       }
       break;
     case OUTTAKE_HATCH:
+      cargo_out_ = false;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case OUTTAKE_GROUND_HATCH:
     case OUTTAKE_CARGO:
     case PREP_SCORE:
+      cargo_out_ = false;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case POP:
+      cargo_out_ = false;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case PREP_HANDOFF:
+      cargo_out_ = false;
       GoToState(HOLDING, goal->intake_goal());
       break;
   }

@@ -45,11 +45,13 @@ enum ScoreGoal {
   CLIMB = 17;
   DROP_FORKS = 18;
   DROP_CRAWLERS = 19;
-  LOWER_CRAWLERS = 20;
+  KISS = 20;
   CRAWL = 21;
   CRAWL_BRAKED = 22;
   BRAKE = 23;
   WINCH = 24;
+  LIMELIGHT_OVERRIDE = 25;
+  LAND = 26;
 }
 
 enum GroundHatchIntakeState {
