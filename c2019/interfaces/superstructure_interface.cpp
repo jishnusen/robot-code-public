@@ -128,7 +128,7 @@ void SuperstructureInterface::LoadGains() {
   elevator_slave_a_.Follow(elevator_master_);
   elevator_slave_a_.SetInverted(elevator_inverted);
   elevator_slave_b_.Follow(winch_);
-  elevator_slave_b_.SetInverted(elevator_inverted);
+  elevator_slave_b_.SetInverted(true);
   elevator_slave_c_.Follow(elevator_master_);
   elevator_slave_c_.SetInverted(elevator_inverted);
 }
@@ -167,7 +167,7 @@ void SuperstructureInterface::WriteActuators() {
         elevator_master_.Set(
             ControlMode::MotionMagic,
             outputs->elevator_setpoint() * kElevatorConversionFactor,
-            DemandType_ArbitraryFeedForward, 1.3 / 12.);
+            DemandType_ArbitraryFeedForward, 0 / 12.);  // CHANGE THIS BACK
       } else {
         elevator_master_.Set(
             ControlMode::Position,
@@ -191,7 +191,7 @@ void SuperstructureInterface::WriteActuators() {
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);
   crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
-  winch_.Set(ControlMode::PercentOutput, outputs->winch_voltage() / 12.);
+  winch_.Set(ControlMode::PercentOutput, outputs->winch_voltage() / -12.);
   /* winch_.Set(ControlMode::PercentOutput, 1. / 12.); */
   ground_hatch_intake_.Set(ControlMode::PercentOutput,
                            outputs->hatch_roller_voltage() / -12.);
@@ -201,7 +201,7 @@ void SuperstructureInterface::WriteActuators() {
   backplate_solenoid_.Set(outputs->backplate_solenoid());
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
   // crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
-  // shifter_.Set(!outputs->elevator_high_gear());
+  shifter_.Set(!outputs->elevator_high_gear());
   cargo_.Set(outputs->cargo_out());
 }
 

@@ -93,6 +93,8 @@ hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
     goal->set_goal(hatch_intake::SCORE);
   } else if (intake_goal_ == PREP_SCORE) {
     goal->set_goal(hatch_intake::PREP_SCORE);
+  } else if (intake_goal_ == INTAKE_CARGO) {
+    goal->set_goal(hatch_intake::HOLD)
   } else {
     goal->set_goal(hatch_intake::NONE);
   }
@@ -356,8 +358,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case CLIMB:
       elevator_height_ = kClimbHeight;
       wrist_angle_ = kClimbAngle;
-      buddy_ = false;
-      high_gear_ = false;
+      high_gear_ = !buddy_;
       crawler_down_ = true;
       brake_ = false;
       break;
@@ -369,9 +370,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       buddy_ = true;
       break;
     case DROP_CRAWLERS:
-      if (status_->elevator_height() > kHatchRocketThirdHeight - 3e-2) {
-        crawler_down_ = true;
-      }
+      crawler_down_ = true;
       break;
     case KISS:
       elevator_height_ = kKissHeight;
@@ -380,12 +379,12 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case CRAWL:
       crawling_ = true;
-      high_gear_ = false;
+      high_gear_ = !buddy_;
       crawler_down_ = true;
       break;
     case CRAWL_BRAKED:
       crawling_ = true;
-      high_gear_ = false;
+      high_gear_ = !buddy_;
       crawler_down_ = true;
       brake_ = true;
       break;
