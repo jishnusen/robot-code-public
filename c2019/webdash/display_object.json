@@ -10,7 +10,7 @@
             "name": "Link to Data Stream",
             "type": "link",
             "source": "\\data.html",
-            "coordinates": [2, 2],
+            "coordinates": [3, 3],
             "should-title": false
         },
         {
@@ -84,7 +84,7 @@
             "type": "boolean",
             "source": ["drivetrain_input", "rightEncoder"],
             "condition": "source != 0",
-            "coordinates": [3, 2],
+            "coordinates": [2, 3],
             "should-title": true,
             "colors": {
               "if_true": "#00ff00",
