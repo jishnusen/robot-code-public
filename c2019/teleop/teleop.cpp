@@ -334,13 +334,23 @@ void TeleopBase::SendSuperstructureMessage() {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
               c2019::superstructure::HATCH_ROCKET_FIRST);
-          superstructure_goal->set_intake_goal(
-              c2019::superstructure::PREP_SCORE);
+          if (has_hp_hatch_) {
+            superstructure_goal->set_intake_goal(
+                c2019::superstructure::PREP_SCORE);
+          } else {
+            superstructure_goal->set_intake_goal(
+                c2019::superstructure::INTAKE_HATCH);
+          }
         } else {
           superstructure_goal->set_score_goal(
               c2019::superstructure::HATCH_ROCKET_BACKWARDS);
-          superstructure_goal->set_intake_goal(
-              c2019::superstructure::PREP_SCORE);
+          if (has_hp_hatch_) {
+            superstructure_goal->set_intake_goal(
+                c2019::superstructure::PREP_SCORE);
+          } else {
+            superstructure_goal->set_intake_goal(
+                c2019::superstructure::INTAKE_HATCH);
+          }
         }
       }
     } else {
@@ -355,7 +365,10 @@ void TeleopBase::SendSuperstructureMessage() {
       } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_SECOND);
-        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
+        if (has_hp_hatch_) {
+          superstructure_goal->set_intake_goal(
+              c2019::superstructure::PREP_SCORE);
+        }
       }
     } else {
       superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
@@ -369,7 +382,10 @@ void TeleopBase::SendSuperstructureMessage() {
       } else {
         superstructure_goal->set_score_goal(
             c2019::superstructure::HATCH_ROCKET_THIRD);
-        superstructure_goal->set_intake_goal(c2019::superstructure::PREP_SCORE);
+        if (has_hp_hatch_) {
+          superstructure_goal->set_intake_goal(
+              c2019::superstructure::PREP_SCORE);
+        }
       }
     } else {
       superstructure_goal->set_score_goal(c2019::superstructure::LAND);
@@ -392,6 +408,13 @@ void TeleopBase::SendSuperstructureMessage() {
         } else {
           superstructure_goal->set_score_goal(
               c2019::superstructure::HATCH_SHIP_BACKWARDS);
+        }
+        if (has_hp_hatch_) {
+          superstructure_goal->set_intake_goal(
+              c2019::superstructure::PREP_SCORE);
+        } else {
+          superstructure_goal->set_intake_goal(
+              c2019::superstructure::INTAKE_HATCH);
         }
       }
     } else {

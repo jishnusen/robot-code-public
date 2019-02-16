@@ -409,7 +409,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case LIMELIGHT_OVERRIDE:
       if (elevator_height_ == kHatchRocketSecondHeight) {
-        wrist_angle_ = 1.0;
+        wrist_angle_ = 0.6;
       } else {
         wrist_angle_ = kHatchForwardsAngle;
       }
