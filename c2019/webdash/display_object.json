@@ -23,7 +23,7 @@
             "name": "Elevator Calibrated",
             "type": "boolean",
             "condition": "source",
-            "source": ["superstructure_status", "elevator_is_calibrated"],
+            "source": ["superstructure_status", "elevatorIsCalibrated"],
             "coordinates": [0, 1],
             "should-title": true,
             "colors": {
@@ -35,7 +35,7 @@
             "name": "Wrist Calibrated",
             "type": "boolean",
             "condition": "source",
-            "source": ["superstructure_status", "wrist_is_calibrated"],
+            "source": ["superstructure_status", "wristIsCalibrated"],
             "coordinates": [0,2],
             "should-title": true,
             "colors": {
