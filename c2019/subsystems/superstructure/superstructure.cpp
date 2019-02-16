@@ -36,6 +36,7 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
       (wrist_status_->wrist_angle() > kWristSafeForwardsAngle &&
        wrist_status_->wrist_angle() < kWristSafeBackwardsAngle)) {
     *elevator_goal = 0.;
+    force_backplate_ = true;
     if (elevator_status_->elevator_height() > kElevatorPassThroughHeight) {
       if (wrist_status_->wrist_angle() > kWristSafeBackwardsAngle) {
         *wrist_goal = muan::utils::Cap(*wrist_goal, kWristSafeBackwardsAngle,
@@ -45,6 +46,8 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
                                        kWristSafeForwardsAngle);
       }
     }
+  } else {
+    force_backplate_ = false;
   }
 }
 
@@ -67,7 +70,7 @@ wrist::WristGoalProto Superstructure::PopulateWristGoal() {
 ground_hatch_intake::GroundHatchIntakeGoalProto
 Superstructure::PopulateGroundHatchIntakeGoal() {
   ground_hatch_intake::GroundHatchIntakeGoalProto goal;
-  if (intake_goal_ == INTAKE_GROUND_HATCH) {
+  if (intake_goal_ == INTAKE_GROUND_HATCH || intake_goal_ == PREP_HANDOFF) {
     goal->set_goal(ground_hatch_intake::REQUEST_HATCH);
   } else if (intake_goal_ == OUTTAKE_GROUND_HATCH) {
     goal->set_goal(ground_hatch_intake::EJECT);
@@ -81,14 +84,19 @@ Superstructure::PopulateGroundHatchIntakeGoal() {
 
 hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
   hatch_intake::HatchIntakeGoalProto goal;
-  if (intake_goal_ == INTAKE_HATCH || intake_goal_ == PREP_HANDOFF ||
-      intake_goal_ == POP || intake_goal_ == INTAKE_GROUND_HATCH) {
+  if (intake_goal_ == INTAKE_HATCH) {
     goal->set_goal(hatch_intake::INTAKE);
+  } else if (intake_goal_ == PREP_HANDOFF || intake_goal_ == POP ||
+             intake_goal_ == INTAKE_GROUND_HATCH) {
+    goal->set_goal(hatch_intake::HANDOFF);
   } else if (intake_goal_ == OUTTAKE_HATCH) {
     goal->set_goal(hatch_intake::SCORE);
+  } else if (intake_goal_ == PREP_SCORE) {
+    goal->set_goal(hatch_intake::PREP_SCORE);
   } else {
     goal->set_goal(hatch_intake::NONE);
   }
+  goal->set_force_backplate(force_backplate_);
   return goal;
 }
 
@@ -187,6 +195,8 @@ void Superstructure::Update() {
   elevator_.Update(elevator_input, &elevator_output, &elevator_status_,
                    driver_station->is_sys_active());
 
+  status_->set_braked(elevator_status_->braked());
+
   wrist_.SetGoal(wrist_goal);
   wrist_.Update(wrist_input, &wrist_output, &wrist_status_,
                 driver_station->is_sys_active());
@@ -247,6 +257,7 @@ void Superstructure::Update() {
   output->set_wrist_setpoint(wrist_output->wrist_setpoint());
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
+  output->set_cargo_out(cargo_out_);
 
   // Write those queues after Updating the controllers
   status_queue_->WriteMessage(status_);
@@ -256,83 +267,117 @@ void Superstructure::Update() {
 void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   // These set the member variable goals before they are constrained
   // They are set based on the score goal enumerator
+  should_climb_ = false;
+  crawling_ = false;
   switch (goal->score_goal()) {
     case NONE:
       break;
     case CARGO_ROCKET_FIRST:
       elevator_height_ = kCargoRocketFirstHeight;
       wrist_angle_ = kCargoRocketFirstAngle;
+      high_gear_ = true;
       break;
     case CARGO_ROCKET_BACKWARDS:
       elevator_height_ = kCargoRocketBackwardsHeight;
       wrist_angle_ = kCargoRocketBackwardsAngle;
+      high_gear_ = true;
       break;
     case CARGO_ROCKET_SECOND:
       elevator_height_ = kCargoRocketSecondHeight;
       wrist_angle_ = kCargoRocketSecondAngle;
+      high_gear_ = true;
       break;
     case CARGO_ROCKET_THIRD:
       elevator_height_ = kCargoRocketThirdHeight;
       wrist_angle_ = kCargoRocketThirdAngle;
+      high_gear_ = true;
       break;
     case CARGO_SHIP_FORWARDS:
       elevator_height_ = kCargoShipForwardsHeight;
       wrist_angle_ = kCargoShipForwardsAngle;
+      high_gear_ = true;
       break;
     case CARGO_SHIP_BACKWARDS:
       elevator_height_ = kCargoShipBackwardsHeight;
       wrist_angle_ = kCargoShipBackwardsAngle;
+      high_gear_ = true;
       break;
     case HATCH_ROCKET_FIRST:
       elevator_height_ = kHatchRocketFirstHeight;
       wrist_angle_ = kHatchForwardsAngle;
+      intake_goal_ = PREP_SCORE;
+      high_gear_ = true;
       break;
     case HATCH_ROCKET_BACKWARDS:
       elevator_height_ = kHatchRocketBackwardsHeight;
       wrist_angle_ = kHatchBackwardsAngle;
+      high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HATCH_ROCKET_SECOND:
       elevator_height_ = kHatchRocketSecondHeight;
       wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HATCH_ROCKET_THIRD:
       elevator_height_ = kHatchRocketThirdHeight;
-      wrist_angle_ = kHatchThirdAngle;
+      wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HATCH_SHIP_FORWARDS:
       elevator_height_ = kHatchShipForwardsHeight;
       wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HATCH_SHIP_BACKWARDS:
       elevator_height_ = kHatchShipBackwardsHeight;
       wrist_angle_ = kHatchBackwardsAngle;
+      high_gear_ = true;
+      intake_goal_ = PREP_SCORE;
       break;
     case HANDOFF:
       elevator_height_ = kHandoffHeight;
       wrist_angle_ = kHandoffAngle;
+      high_gear_ = true;
       break;
     case STOW:
       elevator_height_ = kStowHeight;
       wrist_angle_ = kStowAngle;
+      high_gear_ = true;
       break;
     case CARGO_GROUND:
       elevator_height_ = kCargoGroundHeight;
       wrist_angle_ = kCargoGroundAngle;
+      high_gear_ = true;
+      break;
     case CLIMB:
       elevator_height_ = kClimbHeight;
       wrist_angle_ = kClimbAngle;
-      should_climb_ = true;
       buddy_ = false;
       high_gear_ = false;
       crawler_down_ = true;
       brake_ = false;
       break;
+    case LAND:
+      elevator_height_ = kLandHeight;
+      wrist_angle_ = kClimbAngle;
+      break;
     case DROP_FORKS:
       buddy_ = true;
-      should_climb_ = false;
       break;
     case DROP_CRAWLERS:
-      crawler_down_ = true;
+      if (status_->elevator_height() > kHatchRocketThirdHeight - 3e-2) {
+        crawler_down_ = true;
+      }
+      break;
+    case KISS:
+      elevator_height_ = kKissHeight;
+      wrist_angle_ = kHatchForwardsAngle;
+      high_gear_ = true;
+      break;
     case CRAWL:
       crawling_ = true;
       high_gear_ = false;
@@ -353,7 +398,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case LIMELIGHT_OVERRIDE:
       if (elevator_height_ == kHatchRocketSecondHeight) {
-	wrist_angle_ = 1.0;
+        wrist_angle_ = 1.0;
       } else {
         wrist_angle_ = kHatchForwardsAngle;
       }
@@ -382,6 +427,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
           GoToState(INTAKING_WRIST, goal->intake_goal());
         }
       }
+      cargo_out_ = false;
       break;
     case INTAKE_CARGO:
       if (!cargo_intake_status_->has_cargo()) {
@@ -392,18 +438,31 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
           GoToState(INTAKING_WRIST, goal->intake_goal());
         }
       }
+      cargo_out_ = true;
       break;
     case INTAKE_GROUND_HATCH:
+      cargo_out_ = false;
       GoToState(INTAKING_GROUND, goal->intake_goal());
       if (elevator_height_ == kHandoffHeight && wrist_angle_ == kHandoffAngle) {
         GoToState(INTAKING_TO_STOW, goal->intake_goal());
       }
       break;
     case OUTTAKE_HATCH:
+      cargo_out_ = false;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case OUTTAKE_GROUND_HATCH:
     case OUTTAKE_CARGO:
+    case PREP_SCORE:
+      cargo_out_ = false;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case POP:
+      cargo_out_ = false;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case PREP_HANDOFF:
+      cargo_out_ = false;
       GoToState(HOLDING, goal->intake_goal());
       break;
   }
@@ -434,7 +493,8 @@ void Superstructure::RunStateMachine() {
       }
       break;
     case INTAKING_TO_STOW:
-      if (cargo_intake_status_->has_cargo()) {
+      if (cargo_intake_status_->has_cargo() ||
+          hatch_intake_status_->has_hatch()) {
         elevator_height_ = kStowHeight;
         wrist_angle_ = kStowAngle;
         GoToState(HOLDING);
@@ -483,7 +543,8 @@ void Superstructure::GoToState(SuperstructureState desired_state,
             intake == IntakeGoal::OUTTAKE_HATCH ||
             intake == IntakeGoal::OUTTAKE_GROUND_HATCH ||
             intake == IntakeGoal::OUTTAKE_CARGO || intake == IntakeGoal::POP ||
-            intake == IntakeGoal::PREP_HANDOFF) {
+            intake == IntakeGoal::PREP_HANDOFF ||
+            intake == IntakeGoal::PREP_SCORE) {
           intake_goal_ = intake;
         } else {
           LOG(ERROR,

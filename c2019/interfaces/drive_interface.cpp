@@ -23,7 +23,7 @@ constexpr double kHighGearPositionF = .15;
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
-constexpr double kHighGearVelocityF = 0;
+constexpr double kHighGearVelocityF = 0.1;
 
 constexpr double kIZone = 0;
 
@@ -132,6 +132,12 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_gyro(-(pigeon_.GetFusedHeading() - pigeon_offset_) * M_PI /
                     180.);
 
+  sensors->set_left_current(left_master_.GetOutputCurrent());
+  sensors->set_right_current(right_master_.GetOutputCurrent());
+
+  sensors->set_left_voltage(left_master_.GetMotorOutputVoltage());
+  sensors->set_right_voltage(right_master_.GetMotorOutputVoltage());
+
   input_queue_->WriteMessage(sensors);
 }
 
@@ -172,13 +178,13 @@ void DrivetrainInterface::WriteActuators() {
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1);
-      /* DemandType_ArbitraryFeedForward, */
-      /* outputs->left_setpoint_ff() / 12.); */
+                       /* DemandType_ArbitraryFeedForward, */
+                       /* outputs->left_setpoint_ff() / 12.); */
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
-      /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
-       */
+          /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.); */
+
       break;
   }
 

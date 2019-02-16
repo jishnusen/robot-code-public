@@ -17,7 +17,7 @@ namespace teleop {
 
 // TODO(Hanson) tune these with Nathan
 constexpr double kGodmodeButtonThreshold = .25;
-constexpr double kGodmodeElevatorMultiplier = 3;
+constexpr double kGodmodeElevatorMultiplier = 4;
 constexpr double kGodmodeWristMultiplier = 10;
 
 class TeleopBase {
@@ -45,22 +45,22 @@ class TeleopBase {
   void SendSuperstructureMessage();
 
   // climbing buttons
-  muan::teleop::Button *climb_, *crawl_, *drop_forks_, *drop_crawlers_, *brake_;
+  muan::teleop::Button *crawl_, *drop_forks_, *drop_crawlers_, *winch_, *brake_;
 
   // safety button
-  muan::teleop::Button *safety_, *switch_;
+  muan::teleop::Button *safety_, *safety2_;
 
   // intake/outtake buttons
-  muan::teleop::Button *cargo_intake_, *cargo_outtake_, *ground_hatch_intake_,
-      *hp_hatch_outtake_, *pop_;
+  muan::teleop::Button *cargo_intake_, *cargo_outtake_, *hp_hatch_intake_,
+      *hp_hatch_outtake_;
   muan::teleop::Button *ground_intake_height_;
   // scoring positions
   muan::teleop::Button *level_1_, *level_2_, *level_3_, *ship_;
   muan::teleop::Button *stow_;
-  // scoring modes
-  muan::teleop::Button *forwards_, *backwards_;
-  // handoff
-  muan::teleop::Button *handoff_;
+  // backwards scoring mode
+  muan::teleop::Button *backwards_;
+  // handoff and pop goals
+  muan::teleop::Button *handoff_, *pop_;
 
   int kRumbleTicks = 25;
   int rumble_ticks_left_;
@@ -83,7 +83,7 @@ class TeleopBase {
   muan::teleop::Button *test_auto_, *drive_straight_, *vision_, *vision_intake_;
 
   bool high_gear_;
-  bool running_command_;
+  /* bool running_command_; */
   double distance_factor_;
   double last_horiz_angle_;
   bool wants_override_;

@@ -27,39 +27,40 @@ constexpr double kHatchShipBackwardsHeight = 0.2;
 constexpr double kHatchRocketFirstHeight = .117;
 constexpr double kHatchRocketBackwardsHeight = 0.;
 constexpr double kHatchRocketSecondHeight = 0.987;
-constexpr double kHatchRocketThirdHeight = 1.793;
+constexpr double kHatchRocketThirdHeight = 1.74;
 constexpr double kHatchLoadingStationHeight = 0.117;
 constexpr double kHatchGroundHeight = 0.;
 constexpr double kCargoShipForwardsHeight = 1.173;
-constexpr double kCargoShipBackwardsHeight = 0.194;
+constexpr double kCargoShipBackwardsHeight = 0.643;
 constexpr double kCargoRocketFirstHeight = 0.089;
 constexpr double kCargoRocketBackwardsHeight = 0.116;
 constexpr double kCargoRocketSecondHeight = 0.938;
 constexpr double kCargoRocketThirdHeight = 1.768;
 constexpr double kCargoGroundHeight = 0.;
-constexpr double kHandoffHeight = 0.285;
+constexpr double kHandoffHeight = 0.257;
 constexpr double kSpitHeight = 0.;
 constexpr double kStowHeight = 0.;
+constexpr double kKissHeight = 1.43;
 constexpr double kClimbHeight = 0.;
-constexpr double kElevatorSafeHeight = 0.3;
+constexpr double kLandHeight = 0.;
+constexpr double kElevatorSafeHeight = 0.71;
 constexpr double kElevatorPassThroughHeight = 0.023;
 constexpr double kElevatorHandoffTolerance = 2e-3;
 constexpr double kElevatorWristHorizHeight = 0.05;
 
 // wrist constants
 constexpr double kHatchForwardsAngle = 0.0;
-constexpr double kHatchThirdAngle = 0.0;
 constexpr double kHatchBackwardsAngle = 3.05;
 constexpr double kCargoRocketFirstAngle = .87;
 constexpr double kCargoRocketSecondAngle = .87;
 constexpr double kCargoRocketThirdAngle = .87;
 constexpr double kCargoRocketBackwardsAngle = M_PI;
 constexpr double kCargoShipForwardsAngle = 0.0;
-constexpr double kCargoShipBackwardsAngle = 2.72;
+constexpr double kCargoShipBackwardsAngle = 3.23;
 constexpr double kCargoGroundAngle = 0.0;
-constexpr double kHandoffAngle = 3.52;
+constexpr double kHandoffAngle = 3.414;
 constexpr double kStowAngle = 1.2;
-constexpr double kClimbAngle = 0.0;
+constexpr double kClimbAngle = 0.3;
 constexpr double kWristSafeForwardsAngle = 1.3;
 constexpr double kWristSafeBackwardsAngle = 2.65;
 constexpr double kWristHandoffTolerance = 3. * (M_PI / 180.);
@@ -120,6 +121,9 @@ class Superstructure {
   bool buddy_ = false;
 
   int counter_ = 0;
+
+  bool force_backplate_ = false;
+  bool cargo_out_ = false;
 
   SuperstructureState state_ = SuperstructureState::CALIBRATING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;

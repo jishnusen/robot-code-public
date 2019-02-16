@@ -57,25 +57,26 @@ void DriveStraight::operator()() {
   // Move to 1st level height & socre hatch L1 rocket
 
   StartDrivePath(5.8, -3.8, -27 * (M_PI / 180.), 1, true);
+  Wait(100);
+  GoTo(superstructure::HATCH_ROCKET_THIRD, superstructure::PREP_SCORE);
   // Wann get reasonably close to rocket before starting vision, also enables
   // smooth transition to vision
   WaitUntilDrivetrainNear(4.1, -2.2, 0.3);
-  GoTo(superstructure::HATCH_ROCKET_FIRST);
-  // WaitForElevatorAndLL();
+  WaitForElevatorAndLL();
   StartDriveVision();
-  ScoreHatch(100);  // Backplates suck
-  Wait(150);
+  ScoreHatch(50);  // Backplates suck
+  Wait(50);
 
   DrivetrainStatus drive_status;
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   // Update field position to account for yeeting self off L1 HAB
-  SetFieldPosition(5.0, -3.2, -30 * (M_PI / 180.));
+  SetFieldPosition(5.0, -3.2, drive_status->estimated_heading());
   // Begin reverse path to loading station
-  StartDrivePath(0.6, -2.7, 0, -1, true);
+  StartDrivePath(0.6, -3.1, 0, -1, true);
   Wait(20);
   GoTo(superstructure::HATCH_SHIP_BACKWARDS);
-  Wait(50);
-  WaitUntilDrivetrainNear(2.6, -2.8, 0.3);
+  WaitUntilDrivetrainNear(2.6, -3.1, 0.3);
+  /* WaitForBackLL(); */
 
   // Activate vision once dt is reasonably near loading station
   StartDriveVisionBackwards();
@@ -87,6 +88,7 @@ void DriveStraight::operator()() {
   SetFieldPosition(0, -3.4, drive_status->estimated_heading());
 
   StartDrivePath(7.0, -3.2, -135 * (M_PI / 180.), 1, true);
+  GoTo(superstructure::HATCH_ROCKET_FIRST);
   Wait(100);
   WaitUntilDrivetrainNear(5.7, -2.0, 0.4);
   GoTo(superstructure::HATCH_ROCKET_FIRST);

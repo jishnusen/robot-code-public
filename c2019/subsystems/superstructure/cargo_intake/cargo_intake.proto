@@ -12,10 +12,11 @@ enum Goal {
 }
 
 enum State {
-  HOLDING = 0;
+  IDLE = 0;
   INTAKING = 1;
   PICKING_UP = 2;
-  OUTTAKING = 3;
+  HOLDING = 3;
+  OUTTAKING = 4;
 }
 
 message CargoIntakeGoal{

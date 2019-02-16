@@ -21,6 +21,7 @@ class HatchIntake {
   State state_ = IDLE;
   HatchIntakeGoalProto goal_;
   int counter_ = 0;
+  bool force_backplate_ = false;
 };
 
 }  // namespace hatch_intake
