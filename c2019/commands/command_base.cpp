@@ -97,10 +97,10 @@ void CommandBase::StartDriveVision() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
-  while (lime_status->target_dist() > 0.62 && lime_status->has_target() &&
+  while (lime_status->target_dist() > 0.59 && lime_status->has_target() &&
          IsAutonomous()) {
     drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.8 * lime_status->target_dist() - 0.82);
+        ->set_linear_velocity(2.8 * lime_status->target_dist() - 0.68);
     drivetrain_goal->mutable_linear_angular_velocity_goal()
         ->set_angular_velocity(-16.0 * lime_status->horiz_angle());
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -125,13 +125,13 @@ void CommandBase::StartDriveVisionBackwards() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
-  while (lime_status->back_target_dist() > 0.29 &&
+  while (lime_status->back_target_dist() > 0.28 &&
          lime_status->back_has_target() && IsAutonomous()) {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
     drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.8 * (-lime_status->back_target_dist() - 0.3));
+        ->set_linear_velocity(2.8 * (-lime_status->back_target_dist() - 0.33));
     drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(-16.0 * lime_status->back_horiz_angle());
+        ->set_angular_velocity(-18.0 * lime_status->back_horiz_angle());
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     loop_.SleepUntilNext();
     std::cout << "back tracking" << std::endl;
@@ -198,9 +198,10 @@ bool CommandBase::IsDrivetrainNear(double x, double y, double distance) {
 
   if (drivetrain_status_reader_.ReadLastMessage(&status)) {
     Eigen::Vector2d field_position =
-        transform_f0_ * (Eigen::Vector2d() << status->profiled_x_goal(),
-                         status->profiled_y_goal())
-                            .finished();
+        transform_f0_ *
+        (Eigen::Vector2d() << status->profiled_x_goal(),
+         status->profiled_y_goal())
+            .finished();
     if ((field_position(0) - x) * (field_position(0) - x) +
             (field_position(1) - y) * (field_position(1) - y) <
         distance * distance) {
