@@ -93,6 +93,8 @@ hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
     goal->set_goal(hatch_intake::SCORE);
   } else if (intake_goal_ == PREP_SCORE) {
     goal->set_goal(hatch_intake::PREP_SCORE);
+  } else if (intake_goal_ == INTAKE_CARGO) {
+    goal->set_goal(hatch_intake::HOLD);
   } else {
     goal->set_goal(hatch_intake::NONE);
   }
@@ -258,6 +260,15 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
+  output->set_elevator_setpoint_ff(climbing_ ? -2.3 : 1.3);
+
+  if (request_crawl_) {
+    if (elevator_status_->elevator_height() < 0.05) {
+      output->set_crawler_voltage(12.);
+    }
+  } else {
+    output->set_crawler_voltage(0.);
+  }
 
   // Write those queues after Updating the controllers
   status_queue_->WriteMessage(status_);
@@ -356,22 +367,22 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case CLIMB:
       elevator_height_ = kClimbHeight;
       wrist_angle_ = kClimbAngle;
-      buddy_ = false;
-      high_gear_ = false;
+      high_gear_ = !buddy_;
       crawler_down_ = true;
       brake_ = false;
+      climbing_ = true;
+      request_crawl_ = true;
       break;
     case LAND:
       elevator_height_ = kLandHeight;
       wrist_angle_ = kClimbAngle;
+      request_crawl_ = false;
       break;
     case DROP_FORKS:
       buddy_ = true;
       break;
     case DROP_CRAWLERS:
-      if (status_->elevator_height() > kHatchRocketThirdHeight - 3e-2) {
-        crawler_down_ = true;
-      }
+      crawler_down_ = true;
       break;
     case KISS:
       elevator_height_ = kKissHeight;
@@ -380,12 +391,12 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case CRAWL:
       crawling_ = true;
-      high_gear_ = false;
+      high_gear_ = !buddy_;
       crawler_down_ = true;
       break;
     case CRAWL_BRAKED:
       crawling_ = true;
-      high_gear_ = false;
+      high_gear_ = !buddy_;
       crawler_down_ = true;
       brake_ = true;
       break;
@@ -453,6 +464,9 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case OUTTAKE_GROUND_HATCH:
     case OUTTAKE_CARGO:
+      cargo_out_ = true;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case PREP_SCORE:
       cargo_out_ = false;
       GoToState(HOLDING, goal->intake_goal());

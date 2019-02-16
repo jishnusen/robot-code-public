@@ -176,4 +176,5 @@ message SuperstructureOutput {
   required double crawler_voltage = 18;
   required bool brake = 19;
   required bool cargo_out = 20;
+  required bool climbing = 21;
 }

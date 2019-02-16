@@ -40,9 +40,9 @@ constexpr double kCargoGroundHeight = 0.;
 constexpr double kHandoffHeight = 0.257;
 constexpr double kSpitHeight = 0.;
 constexpr double kStowHeight = 0.;
-constexpr double kKissHeight = 1.43;
+constexpr double kKissHeight = 1.498;
 constexpr double kClimbHeight = 0.;
-constexpr double kLandHeight = 0.;
+constexpr double kLandHeight = 0.312;
 constexpr double kElevatorSafeHeight = 0.71;
 constexpr double kElevatorPassThroughHeight = 0.023;
 constexpr double kElevatorHandoffTolerance = 2e-3;
@@ -124,6 +124,8 @@ class Superstructure {
 
   bool force_backplate_ = false;
   bool cargo_out_ = false;
+  bool climbing_ = false;
+  bool request_crawl_ = false;
 
   SuperstructureState state_ = SuperstructureState::CALIBRATING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
