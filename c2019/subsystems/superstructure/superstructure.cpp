@@ -94,7 +94,7 @@ hatch_intake::HatchIntakeGoalProto Superstructure::PopulateHatchIntakeGoal() {
   } else if (intake_goal_ == PREP_SCORE) {
     goal->set_goal(hatch_intake::PREP_SCORE);
   } else if (intake_goal_ == INTAKE_CARGO) {
-    goal->set_goal(hatch_intake::HOLD)
+    goal->set_goal(hatch_intake::HOLD);
   } else {
     goal->set_goal(hatch_intake::NONE);
   }
