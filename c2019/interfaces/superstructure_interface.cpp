@@ -65,7 +65,8 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed()) {
+  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
+      !zeroed_) {
     zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }

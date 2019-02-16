@@ -452,6 +452,9 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case OUTTAKE_GROUND_HATCH:
     case OUTTAKE_CARGO:
+      cargo_out_ = true;
+      GoToState(HOLDING, goal->intake_goal());
+      break;
     case PREP_SCORE:
       cargo_out_ = false;
       GoToState(HOLDING, goal->intake_goal());
