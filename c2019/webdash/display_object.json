@@ -28,7 +28,7 @@
             "should-title": true,
             "colors": {
               "if_true": "#00ff00",
-              "if_false": "#ff0000
+              "if_false": "#ff0000"
             }
         },
         {
@@ -40,7 +40,7 @@
             "should-title": true,
             "colors": {
               "if_true": "#00ff00",
-              "if_false": "#ff0000
+              "if_false": "#ff0000"
             }
         },
         {
