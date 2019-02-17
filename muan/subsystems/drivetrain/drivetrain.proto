@@ -16,7 +16,10 @@ message DrivetrainInput {
   required double left_voltage = 6;
   required double right_voltage = 7;
 
-  required double gyro = 8;
+  required double left_current = 8;
+  required double right_current = 9;
+
+  required double gyro = 10;
 }
 
 enum TalonOutput {

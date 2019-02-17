@@ -3,6 +3,9 @@
 /* #include "c2019/commands/test_auto.h" */
 #include "c2019/subsystems/limelight/queue_types.h"
 #include "muan/logging/logger.h"
+#include "networktables/NetworkTable.h"
+#include "networktables/NetworkTableEntry.h"
+#include "networktables/NetworkTableInstance.h"
 
 namespace c2019 {
 namespace teleop {
@@ -30,11 +33,17 @@ TeleopBase::TeleopBase()
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
+<<<<<<< HEAD
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")} {
   /* auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
    */
   /* auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} { */
   // climbing buttons
+=======
+      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")},
+      auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
+      auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
+>>>>>>> 4183560ef973508b02bc1d336524fbef0097444c
   winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   // brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
@@ -114,9 +123,20 @@ void TeleopBase::Update() {
   has_hp_hatch_ = superstructure_status->has_hp_hatch();
   has_ground_hatch_ = superstructure_status->has_ground_hatch();
 
-  if (DriverStation::GetInstance().IsOperatorControl()) {
-    SendDrivetrainMessage();
-    SendSuperstructureMessage();
+  nt::NetworkTableInstance inst = nt::NetworkTableInstance::GetDefault();
+  std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
+  std::shared_ptr<nt::NetworkTable> back_table =
+      inst.GetTable("limelight-back");
+  if (RobotController::IsSysActive()) {
+    if (!auto_status->running_command()) {
+      SendDrivetrainMessage();
+      SendSuperstructureMessage();
+    }
+    table->PutNumber("ledMode", 0);
+    back_table->PutNumber("ledMode", 0);
+  } else {
+    table->PutNumber("ledMode", 1);
+    back_table->PutNumber("ledMode", 1);
   }
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
@@ -134,6 +154,8 @@ void TeleopBase::Update() {
     // Set rumble on
     rumble_ticks_left_--;
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 1.0);
+    /* table->PutNumber("ledMode", 2); */
+    /* back_table->PutNumber("ledMode", 2); */
   } else {
     // Set rumble off
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
@@ -280,9 +302,11 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_intake_goal(
           c2019::superstructure::OUTTAKE_GROUND_HATCH);
     }
-  } else if (hp_hatch_intake_->is_pressed()) {
+  } else if (hp_hatch_intake_->is_pressed() &&
+             !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
-  } else if (hp_hatch_outtake_->is_pressed()) {
+  } else if (hp_hatch_outtake_->is_pressed() &&
+             !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
@@ -418,6 +442,14 @@ void TeleopBase::SendSuperstructureMessage() {
   if (winch_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
+  }
+  if (safety_->is_pressed() && safety2_->is_pressed()) {
+    if (hp_hatch_intake_->is_pressed()) {
+      superstructure_goal->set_manual_left_winch(true);
+    }
+    if (hp_hatch_outtake_->is_pressed()) {
+      superstructure_goal->set_manual_right_winch(true);
+    }
   }
   /*if (brake_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {

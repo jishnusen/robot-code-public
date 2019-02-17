@@ -34,7 +34,7 @@ class AutonomousBase {
                       int force_direction = 0, bool gear = true,
                       double extra_distance_initial = 0,
                       double extra_distance_final = 0,
-                      double path_voltage = 9.0);
+                      double path_voltage = 12.0);
 
   void StartDriveVision();
   void StartDriveVisionBackwards();

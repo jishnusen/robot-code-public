@@ -65,8 +65,7 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
-      !zeroed_) {
+  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed()) {
     zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
@@ -128,7 +127,7 @@ void SuperstructureInterface::LoadGains() {
 
   elevator_slave_a_.Follow(elevator_master_);
   elevator_slave_a_.SetInverted(elevator_inverted);
-  elevator_slave_b_.Follow(winch_);
+  /* elevator_slave_b_.Follow(winch_); */
   elevator_slave_b_.SetInverted(true);
   elevator_slave_c_.Follow(elevator_master_);
   elevator_slave_c_.SetInverted(elevator_inverted);
@@ -142,6 +141,7 @@ void SuperstructureInterface::SetBrakeMode(bool mode) {
   elevator_slave_b_.SetNeutralMode(neutral_mode);
   elevator_slave_c_.SetNeutralMode(neutral_mode);
   wrist_.SetNeutralMode(neutral_mode);
+  winch_.SetNeutralMode(neutral_mode);
 }
 
 void SuperstructureInterface::WriteActuators() {
@@ -164,16 +164,11 @@ void SuperstructureInterface::WriteActuators() {
                            outputs->elevator_setpoint() / 12.);
       break;
     case TalonOutput::POSITION:
-      if (outputs->elevator_high_gear()) {
-        elevator_master_.Set(
-            ControlMode::MotionMagic,
-            outputs->elevator_setpoint() * kElevatorConversionFactor,
-            DemandType_ArbitraryFeedForward, 0 / 12.);  // CHANGE THIS BACK
-      } else {
-        elevator_master_.Set(
-            ControlMode::Position,
-            outputs->elevator_setpoint() * kElevatorConversionFactor);
-      }
+      elevator_master_.Set(
+          ControlMode::MotionMagic,
+          outputs->elevator_setpoint() * kElevatorConversionFactor,
+          DemandType_ArbitraryFeedForward,
+          outputs->elevator_setpoint_ff() / 12.);
       break;
   }
 
@@ -192,7 +187,9 @@ void SuperstructureInterface::WriteActuators() {
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);
   crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
-  winch_.Set(ControlMode::PercentOutput, outputs->winch_voltage() / -12.);
+  winch_.Set(ControlMode::PercentOutput, -outputs->left_winch_voltage() / 12.);
+  elevator_slave_b_.Set(ControlMode::PercentOutput,
+                        -outputs->right_winch_voltage() / 12.);
   /* winch_.Set(ControlMode::PercentOutput, 1. / 12.); */
   ground_hatch_intake_.Set(ControlMode::PercentOutput,
                            outputs->hatch_roller_voltage() / -12.);

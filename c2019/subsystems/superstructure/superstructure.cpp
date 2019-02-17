@@ -246,7 +246,8 @@ void Superstructure::Update() {
   output->set_hatch_roller_voltage(
       ground_hatch_intake_output->roller_voltage());
   output->set_snap_down(ground_hatch_intake_output->snap_down());
-  output->set_winch_voltage(winch_output->winch_voltage());
+  output->set_left_winch_voltage(winch_output->winch_voltage());
+  output->set_right_winch_voltage(winch_output->winch_voltage());
   output->set_drop_forks(winch_output->drop_forks());
   output->set_elevator_high_gear(elevator_output->high_gear());
   output->set_crawler_one_solenoid(elevator_output->crawler_one_solenoid());
@@ -260,6 +261,25 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
+  output->set_elevator_setpoint_ff(climbing_ ? -3. : 1.3);
+
+  if (request_crawl_) {
+    if (elevator_status_->elevator_height() < 0.05) {
+      output->set_crawler_voltage(12.);
+    } else {
+      output->set_crawler_voltage(2.);
+    }
+  } else {
+    output->set_crawler_voltage(0.);
+  }
+
+  if (goal->manual_left_winch()) {
+    output->set_left_winch_voltage(12.);
+  }
+
+  if (goal->manual_right_winch()) {
+    output->set_right_winch_voltage(12.);
+  }
 
   // Write those queues after Updating the controllers
   status_queue_->WriteMessage(status_);
@@ -361,6 +381,14 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       high_gear_ = !buddy_;
       crawler_down_ = true;
       brake_ = false;
+      climbing_ = true;
+      request_crawl_ = true;
+      break;
+    case LAND:
+      elevator_height_ = kLandHeight;
+      wrist_angle_ = kClimbAngle;
+      request_crawl_ = false;
+      crawler_down_ = false;
       break;
     case LAND:
       elevator_height_ = kLandHeight;
@@ -397,7 +425,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case LIMELIGHT_OVERRIDE:
       if (elevator_height_ == kHatchRocketSecondHeight) {
-        wrist_angle_ = 1.0;
+        wrist_angle_ = 0.6;
       } else {
         wrist_angle_ = kHatchForwardsAngle;
       }
