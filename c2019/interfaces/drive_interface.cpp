@@ -188,7 +188,7 @@ void DrivetrainInterface::WriteActuators() {
       break;
   }
 
-  shifter_.Set(false);
+  /* shifter_.Set(false); */
 }
 
 }  // namespace interfaces

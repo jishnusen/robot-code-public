@@ -297,9 +297,9 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_intake_goal(
           c2019::superstructure::OUTTAKE_GROUND_HATCH);
     }
-  } else if (hp_hatch_intake_->is_pressed()) {
+  } else if (hp_hatch_intake_->is_pressed() && !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
-  } else if (hp_hatch_outtake_->is_pressed()) {
+  } else if (hp_hatch_outtake_->is_pressed() && !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
@@ -435,6 +435,15 @@ void TeleopBase::SendSuperstructureMessage() {
   if (winch_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
+  }
+  
+  if  (safety_->is_pressed() && safety2_->is_pressed()) {
+    if (hp_hatch_intake_->is_pressed()) {
+      superstructure_goal->set_manual_left_winch(true);
+    }
+    if (hp_hatch_outtake_->is_pressed()) {
+      superstructure_goal->set_manual_right_winch(true);
+    }
   }
   /*if (brake_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {

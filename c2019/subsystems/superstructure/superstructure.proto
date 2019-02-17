@@ -148,6 +148,8 @@ message SuperstructureGoal {
   required double elevator_god_mode_goal = 4;
   required double wrist_god_mode_goal = 5;
   required bool elevator_brake = 6;
+  required bool manual_left_winch = 22;
+  required bool manual_right_winch = 23;
 }
 
 enum TalonOutput {
@@ -168,13 +170,14 @@ message SuperstructureOutput {
   required double cargo_roller_voltage = 10;
   required double hatch_roller_voltage = 11;
   required bool snap_down = 12;
-  required double winch_voltage = 13;
-  required bool drop_forks = 14;
-  required bool elevator_high_gear = 15;
-  required bool crawler_one_solenoid = 16;
-  required bool crawler_two_solenoid = 17;
-  required double crawler_voltage = 18;
-  required bool brake = 19;
-  required bool cargo_out = 20;
-  required bool climbing = 21;
+  required double left_winch_voltage = 13;
+  required double right_winch_voltage = 14;
+  required bool drop_forks = 15;
+  required bool elevator_high_gear = 16;
+  required bool crawler_one_solenoid = 17;
+  required bool crawler_two_solenoid = 18;
+  required double crawler_voltage = 19;
+  required bool brake = 20;
+  required bool cargo_out = 21;
+  required bool climbing = 22;
 }
