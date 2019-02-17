@@ -3,7 +3,7 @@
 
 #include <atomic>
 #include "WPILib.h"
-/* #include "c2019/commands/queue_types.h" */
+#include "c2019/commands/queue_types.h"
 #include "c2019/subsystems/superstructure/queue_types.h"
 #include "c2019/subsystems/superstructure/superstructure.h"
 #include "muan/queues/queue_manager.h"
@@ -75,8 +75,8 @@ class TeleopBase {
   bool had_ground_hatch_ = false;
 
   // vision buttons
-  /* commands::AutoStatusQueue::QueueReader auto_status_reader_; */
-  /* commands::AutoGoalQueue *auto_goal_queue_; */
+  commands::AutoStatusQueue::QueueReader auto_status_reader_;
+  commands::AutoGoalQueue *auto_goal_queue_;
 
   muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_,
       *exit_auto_;

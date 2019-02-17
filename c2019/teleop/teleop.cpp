@@ -1,6 +1,6 @@
 #include "c2019/teleop/teleop.h"
-/* #include "c2019/commands/drive_straight.h" */
-/* #include "c2019/commands/test_auto.h" */
+#include "c2019/commands/drive_straight.h"
+#include "c2019/commands/test_auto.h"
 #include "c2019/subsystems/limelight/queue_types.h"
 #include "muan/logging/logger.h"
 #include "networktables/NetworkTable.h"
@@ -16,13 +16,13 @@ using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
-/* using c2019::commands::Command; */
+using c2019::commands::Command;
 using c2019::limelight::LimelightStatusProto;
 using c2019::superstructure::SuperstructureGoalProto;
 using c2019::superstructure::SuperstructureStatusProto;
 
-/* using commands::AutoGoalProto; */
-/* using commands::AutoStatusProto; */
+using commands::AutoGoalProto;
+using commands::AutoStatusProto;
 
 TeleopBase::TeleopBase()
     : superstructure_goal_queue_{QueueManager<
@@ -33,17 +33,9 @@ TeleopBase::TeleopBase()
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
       wheel_{0, QueueManager<JoystickStatusProto>::Fetch("wheel")},
-<<<<<<< HEAD
-      gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")} {
-  /* auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
-   */
-  /* auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} { */
-  // climbing buttons
-=======
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")},
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
->>>>>>> 4183560ef973508b02bc1d336524fbef0097444c
   winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
   // brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
@@ -110,10 +102,10 @@ void TeleopBase::operator()() {
 void TeleopBase::Stop() { running_ = false; }
 
 void TeleopBase::Update() {
-  /* AutoStatusProto auto_status; */
-  /* AutoGoalProto auto_goal; */
+  AutoStatusProto auto_status;
+  AutoGoalProto auto_goal;
 
-  /* auto_status_reader_.ReadLastMessage(&auto_status); */
+  auto_status_reader_.ReadLastMessage(&auto_status);
 
   SuperstructureStatusProto superstructure_status;
   QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
@@ -159,34 +151,37 @@ void TeleopBase::Update() {
   } else {
     // Set rumble off
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
-  } /*
-   if (exit_auto_->was_clicked()) {
-     auto_goal->set_run_command(false);
-     auto_goal_queue_->WriteMessage(auto_goal);
-   } else if (!auto_status->running_command()) {
-     if (test_auto_->was_clicked()) {
-       auto_goal->set_run_command(true);
-       auto_goal->set_command(Command::TEST_AUTO);
-     } else if (drive_straight_->was_clicked()) {
-       auto_goal->set_run_command(true);
-       auto_goal->set_command(Command::DRIVE_STRAIGHT);
-     } else {
-       auto_goal->set_run_command(false);
-       auto_goal->set_command(Command::NONE);
-     }
+  }
 
-     auto_goal_queue_->WriteMessage(auto_goal);
+  if (exit_auto_->was_clicked()) {
+    auto_goal->set_run_command(false);
+    auto_goal_queue_->WriteMessage(auto_goal);
+  } else if (!auto_status->running_command()) {
+    if (test_auto_->was_clicked()) {
+      auto_goal->set_run_command(true);
+      auto_goal->set_command(Command::TEST_AUTO);
+    } else if (drive_straight_->was_clicked()) {
+      auto_goal->set_run_command(true);
+      auto_goal->set_command(Command::DRIVE_STRAIGHT);
+    } else {
+      auto_goal->set_run_command(false);
+      auto_goal->set_command(Command::NONE);
+    }
 
-     if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
-       commands::DriveStraight drive_straight_command;
-       std::thread drive_straight_thread(drive_straight_command);
-       drive_straight_thread.detach();
-     } else if (auto_goal->command() == Command::TEST_AUTO) {
-       commands::TestAuto test_auto_command;
-       std::thread test_auto_thread(test_auto_command);
-       test_auto_thread.detach();
-     }
-   }*/
+    auto_goal_queue_->WriteMessage(auto_goal);
+
+    // TODO(jishnu) add actual commands
+    // NOTE: not using a switch here due to cross-initialization of the threads
+    if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
+      commands::DriveStraight drive_straight_command;
+      std::thread drive_straight_thread(drive_straight_command);
+      drive_straight_thread.detach();
+    } else if (auto_goal->command() == Command::TEST_AUTO) {
+      commands::TestAuto test_auto_command;
+      std::thread test_auto_thread(test_auto_command);
+      test_auto_thread.detach();
+    }
+  }
 
   ds_sender_.Send();
 }
@@ -302,11 +297,9 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_intake_goal(
           c2019::superstructure::OUTTAKE_GROUND_HATCH);
     }
-  } else if (hp_hatch_intake_->is_pressed() &&
-             !(safety_->is_pressed() && safety2_->is_pressed())) {
+  } else if (hp_hatch_intake_->is_pressed() && !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
-  } else if (hp_hatch_outtake_->is_pressed() &&
-             !(safety_->is_pressed() && safety2_->is_pressed())) {
+  } else if (hp_hatch_outtake_->is_pressed() && !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
@@ -443,7 +436,8 @@ void TeleopBase::SendSuperstructureMessage() {
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
   }
-  if (safety_->is_pressed() && safety2_->is_pressed()) {
+  
+  if  (safety_->is_pressed() && safety2_->is_pressed()) {
     if (hp_hatch_intake_->is_pressed()) {
       superstructure_goal->set_manual_left_winch(true);
     }
@@ -463,7 +457,7 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(override_goal_);
   }
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
-}  // namespace teleop
+}
 
 }  // namespace teleop
 }  // namespace c2019

@@ -167,8 +167,7 @@ void SuperstructureInterface::WriteActuators() {
       elevator_master_.Set(
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
-          DemandType_ArbitraryFeedForward,
-          outputs->elevator_setpoint_ff() / 12.);
+          DemandType_ArbitraryFeedForward, outputs->elevator_setpoint_ff() / 12.);
       break;
   }
 
@@ -188,8 +187,7 @@ void SuperstructureInterface::WriteActuators() {
                     -outputs->cargo_roller_voltage() / 12.);
   crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
   winch_.Set(ControlMode::PercentOutput, -outputs->left_winch_voltage() / 12.);
-  elevator_slave_b_.Set(ControlMode::PercentOutput,
-                        -outputs->right_winch_voltage() / 12.);
+  elevator_slave_b_.Set(ControlMode::PercentOutput, -outputs->right_winch_voltage() / 12.);
   /* winch_.Set(ControlMode::PercentOutput, 1. / 12.); */
   ground_hatch_intake_.Set(ControlMode::PercentOutput,
                            outputs->hatch_roller_voltage() / -12.);
@@ -200,6 +198,8 @@ void SuperstructureInterface::WriteActuators() {
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
   // crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
   shifter_.Set(!outputs->elevator_high_gear());
+  /* shifter_.Set(true); */
+  std::cout << shifter_.Get() << std::endl;
   cargo_.Set(outputs->cargo_out());
 }
 

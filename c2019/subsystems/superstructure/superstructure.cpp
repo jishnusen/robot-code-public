@@ -390,10 +390,6 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       request_crawl_ = false;
       crawler_down_ = false;
       break;
-    case LAND:
-      elevator_height_ = kLandHeight;
-      wrist_angle_ = kClimbAngle;
-      break;
     case DROP_FORKS:
       buddy_ = true;
       break;

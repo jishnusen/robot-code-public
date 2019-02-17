@@ -124,7 +124,6 @@ class Superstructure {
 
   bool force_backplate_ = false;
   bool cargo_out_ = false;
-
   bool climbing_ = false;
   bool request_crawl_ = false;
 

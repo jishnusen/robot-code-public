@@ -2,7 +2,6 @@
 #include <WPILib.h>
 #include "hal/HAL.h"
 #include "c2019/subsystems/subsystem_runner.h"
-#include "c2019/autonomous/autonomous_runner.h"
 #include "c2019/webdash/webdash_setup.h"
 #include "gflags/gflags.h"
 #include "muan/queues/queue_manager.h"
@@ -20,14 +19,10 @@ class WpilibRobot : public IterativeRobot {
 
     std::thread teleop_thread(std::ref(main_));
     teleop_thread.detach();
-
-    std::thread autonomous_thread(std::ref(autonomous_runner_));
-    autonomous_thread.detach();
   }
 
  private:
   c2019::subsystems::SubsystemRunner subsystem_runner_;
-  c2019::autonomous::AutonomousRunner autonomous_runner_;
   c2019::teleop::TeleopBase main_;
 };
 

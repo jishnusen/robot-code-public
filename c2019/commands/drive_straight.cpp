@@ -64,7 +64,6 @@ void DriveStraight::operator()() {
   WaitUntilDrivetrainNear(4.1, -2.2, 0.3);
   WaitForElevatorAndLL();
   StartDriveVision();
-
   ScoreHatch(50);  // Backplates suck
   Wait(50);
 
