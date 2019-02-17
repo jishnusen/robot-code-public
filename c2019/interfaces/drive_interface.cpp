@@ -23,7 +23,7 @@ constexpr double kHighGearPositionF = .15;
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
-constexpr double kHighGearVelocityF = 0.1;
+constexpr double kHighGearVelocityF = 0.15;
 
 constexpr double kIZone = 0;
 
@@ -160,11 +160,15 @@ void DrivetrainInterface::WriteActuators() {
 
   switch (outputs->output_type()) {
     case TalonOutput::OPEN_LOOP:
+      compressor_.Start();
+
       SetBrakeMode(false);
       left_master_.Set(ControlMode::PercentOutput, outputs->left_setpoint());
       right_master_.Set(ControlMode::PercentOutput, outputs->right_setpoint());
       break;
     case TalonOutput::POSITION:
+      compressor_.Stop();
+
       left_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kPositionSlot, 0);
       left_master_.Set(ControlMode::Position,
@@ -173,22 +177,24 @@ void DrivetrainInterface::WriteActuators() {
                         outputs->right_setpoint() * kDriveConversionFactor);
       break;
     case TalonOutput::VELOCITY:
+      compressor_.Stop();
       SetBrakeMode(true);
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1);
-                       /* DemandType_ArbitraryFeedForward, */
-                       /* outputs->left_setpoint_ff() / 12.); */
+      /* DemandType_ArbitraryFeedForward, */
+      /* outputs->left_setpoint_ff() / 12.); */
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
-          /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.); */
+      /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
+       */
 
       break;
   }
 
-  shifter_.Set(false);
+  // shifter_.Set(false);
 }
 
 }  // namespace interfaces

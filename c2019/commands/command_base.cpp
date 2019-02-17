@@ -105,7 +105,7 @@ void CommandBase::StartDriveVision() {
   while (lime_status->target_dist() > 0.63 && lime_status->has_target() &&
          IsAutonomous()) {
     drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.8 * lime_status->target_dist() - 0.68);
+        ->set_linear_velocity(2.2 * lime_status->target_dist() - 0.76);
     drivetrain_goal->mutable_linear_angular_velocity_goal()
         ->set_angular_velocity(-16.0 * lime_status->horiz_angle());
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -134,7 +134,7 @@ void CommandBase::StartDriveVisionBackwards() {
          lime_status->back_has_target() && IsAutonomous()) {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
     drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.8 * (-lime_status->back_target_dist() - 0.33));
+        ->set_linear_velocity(2.4 * (-lime_status->back_target_dist() - 0.1));
     drivetrain_goal->mutable_linear_angular_velocity_goal()
         ->set_angular_velocity(-18.0 * lime_status->back_horiz_angle());
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -156,7 +156,7 @@ void CommandBase::GoTo(superstructure::ScoreGoal score_goal,
 void CommandBase::WaitForElevatorAndLL() {
   SuperstructureStatusProto super_status;
   LimelightStatusProto lime_status;
-  while (super_status->elevator_height() < 1.1 || !lime_status->has_target()) {
+  while (!lime_status->has_target() && super_status->elevator_height() > 1.4) {
     Wait(1);
     QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
         &super_status);
