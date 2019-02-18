@@ -26,11 +26,10 @@ constexpr uint32_t kCrawler = 14;
 constexpr uint32_t kWinch = 15;
 
 constexpr uint32_t kShifter = 0;
-constexpr uint32_t kGroundSnap = 1;
 constexpr uint32_t kBackplate = 2;
 constexpr uint32_t kArrow = 3;
 constexpr uint32_t kCrawlerOne = 4;
-constexpr uint32_t kCrawlerTwo = 5;
+constexpr uint32_t kForkDrop = 5;
 constexpr uint32_t kCargo = 6;
 constexpr uint32_t kBrake = 7;
 
@@ -47,13 +46,12 @@ class SuperstructureInterface {
   SuperstructureInputQueue* input_queue_;
   SuperstructureOutputQueue::QueueReader output_reader_;
 
-  VictorSPX winch_2_{kWinchTwo};
+  VictorSPX winch_two_{kWinchTwo};
   PowerDistributionPanel pdp_{0};
-  Solenoid ground_intake_snap_{kGroundSnap};
   Solenoid arrow_solenoid_{kArrow};
   Solenoid backplate_solenoid_{kBackplate};
   Solenoid crawler_one_solenoid_{kCrawlerOne};
-  // Solenoid crawler_two_solenoid_{kCrawlerTwo};
+  Solenoid fork_drop_{kForkDrop};
   Solenoid shifter_{kShifter};
   Solenoid cargo_{kCargo};
 

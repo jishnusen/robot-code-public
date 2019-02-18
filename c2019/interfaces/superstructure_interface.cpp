@@ -70,6 +70,8 @@ void SuperstructureInterface::ReadSensors() {
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
 
+  inputs->set_elevator_hall(elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
+
   inputs->set_elevator_zeroed(zeroed_);
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
@@ -127,15 +129,17 @@ void SuperstructureInterface::LoadGains() {
 
   elevator_slave_a_.Follow(elevator_master_);
   elevator_slave_a_.SetInverted(elevator_inverted);
-  elevator_slave_b_.Follow(winch_);
-  elevator_slave_b_.SetInverted(true);
+  elevator_slave_b_.Follow(elevator_master_);
+  elevator_slave_b_.SetInverted(elevator_inverted);
   elevator_slave_c_.Follow(elevator_master_);
   elevator_slave_c_.SetInverted(elevator_inverted);
+
+  winch_two_.SetInverted(true);
 }
 
 void SuperstructureInterface::SetBrakeMode(bool mode) {
   NeutralMode neutral_mode = mode ? NeutralMode::Brake : NeutralMode::Coast;
-  ground_hatch_intake_.SetNeutralMode(neutral_mode);
+  winch_two_.SetNeutralMode(neutral_mode);
   elevator_master_.SetNeutralMode(neutral_mode);
   elevator_slave_a_.SetNeutralMode(neutral_mode);
   elevator_slave_b_.SetNeutralMode(neutral_mode);
@@ -151,7 +155,20 @@ void SuperstructureInterface::WriteActuators() {
   QueueManager<muan::wpilib::DriverStationProto>::Fetch()->ReadLastMessage(&ds);
 
   if (!output_reader_.ReadLastMessage(&outputs)) {
-    ground_hatch_intake_.Set(ControlMode::PercentOutput, 0);
+    elevator_master_.Set(ControlMode::PercentOutput, 0);
+    wrist_.Set(ControlMode::PercentOutput, 0);
+
+    cargo_intake_.Set(ControlMode::PercentOutput, 0);
+    crawler_.Set(ControlMode::PercentOutput, 0);
+    winch_.Set(ControlMode::PercentOutput, 0);
+    winch_two_.Set(ControlMode::PercentOutput, 0);
+
+    arrow_solenoid_.Set(false);
+    backplate_solenoid_.Set(false);
+    crawler_one_solenoid_.Set(false);
+    shifter_.Set(false);
+    fork_drop_.Set(false);
+    cargo_.Set(false);
     SetBrakeMode(false);
     return;
   }
@@ -187,17 +204,15 @@ void SuperstructureInterface::WriteActuators() {
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);
   crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
-  winch_.Set(ControlMode::PercentOutput, -outputs->winch_voltage() / 12.);
-  /* winch_.Set(ControlMode::PercentOutput, 1. / 12.); */
-  ground_hatch_intake_.Set(ControlMode::PercentOutput,
-                           outputs->hatch_roller_voltage() / -12.);
+  winch_.Set(ControlMode::PercentOutput, -outputs->left_winch_voltage() / 12.);
+  winch_two_.Set(ControlMode::PercentOutput,
+                           -outputs->right_winch_voltage() / 12.);
 
-  ground_intake_snap_.Set(outputs->snap_down());
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
   backplate_solenoid_.Set(outputs->backplate_solenoid());
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
-  // crawler_two_solenoid_.Set(outputs->crawler_two_solenoid());
   shifter_.Set(!outputs->elevator_high_gear());
+  fork_drop_.Set(outputs->drop_forks());
   cargo_.Set(outputs->cargo_out());
 }
 

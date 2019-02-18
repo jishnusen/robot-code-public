@@ -8,7 +8,7 @@
 namespace c2019 {
 namespace hatch_intake {
 
-constexpr int kScoreTicks = 5;
+constexpr int kScoreTicks = 10;
 
 class HatchIntake {
  public:
