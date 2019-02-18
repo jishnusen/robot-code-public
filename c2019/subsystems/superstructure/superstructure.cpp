@@ -261,10 +261,10 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
-  output->set_elevator_setpoint_ff(climbing_ ? -3. : 1.3);
+  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.5);
 
   if (request_crawl_) {
-    if (elevator_status_->elevator_height() < 0.05) {
+    if (elevator_status_->elevator_height() < 0.08) {
       output->set_crawler_voltage(12.);
     } else {
       output->set_crawler_voltage(2.);
@@ -394,7 +394,11 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       buddy_ = true;
       break;
     case DROP_CRAWLERS:
-      crawler_down_ = true;
+      elevator_height_ = kHatchRocketThirdHeight;
+      wrist_angle_ = kHatchForwardsAngle;
+      if (status_->elevator_height() > kHatchRocketThirdHeight - 5e-3) {
+        crawler_down_ = true;
+      }
       break;
     case KISS:
       elevator_height_ = kKissHeight;
@@ -519,8 +523,7 @@ void Superstructure::RunStateMachine() {
       }
       break;
     case INTAKING_TO_STOW:
-      if (cargo_intake_status_->has_cargo() ||
-          hatch_intake_status_->has_hatch()) {
+      if (cargo_intake_status_->has_cargo()) {
         elevator_height_ = kStowHeight;
         wrist_angle_ = kStowAngle;
         GoToState(HOLDING);
