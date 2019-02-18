@@ -48,10 +48,12 @@ class CommandBase {
 
   void SetFieldPosition(double x, double y, double theta);
 
-  void GoTo(superstructure::ScoreGoal score_goal, superstructure::IntakeGoal intake_goal = superstructure::INTAKE_NONE);
+  void GoTo(
+      superstructure::ScoreGoal score_goal,
+      superstructure::IntakeGoal intake_goal = superstructure::INTAKE_NONE);
 
   void ScoreHatch(int num_ticks);
-  
+
   void WaitForElevatorAndLL();
   void WaitForBackLL();
 

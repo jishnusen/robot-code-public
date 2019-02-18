@@ -97,7 +97,7 @@ void CommandBase::StartDriveVision() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
-  while (!lime_status->has_target()) {
+  while (!lime_status->has_target() && IsAutonomous()) {
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
@@ -156,7 +156,8 @@ void CommandBase::GoTo(superstructure::ScoreGoal score_goal,
 void CommandBase::WaitForElevatorAndLL() {
   SuperstructureStatusProto super_status;
   LimelightStatusProto lime_status;
-  while (!lime_status->has_target() && super_status->elevator_height() > 1.4) {
+  while (!lime_status->has_target() && super_status->elevator_height() > 1.4 &&
+         IsAutonomous()) {
     Wait(1);
     QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
         &super_status);
@@ -166,7 +167,7 @@ void CommandBase::WaitForElevatorAndLL() {
 
 void CommandBase::WaitForBackLL() {
   LimelightStatusProto lime_status;
-  while (!lime_status->back_has_target()) {
+  while (!lime_status->back_has_target() && IsAutonomous()) {
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }

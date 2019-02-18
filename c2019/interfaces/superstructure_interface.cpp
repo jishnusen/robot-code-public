@@ -77,8 +77,8 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_wrist_hall(
       !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
   inputs->set_cargo_proxy(
-      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P));
-  //      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P) ||
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
   inputs->set_hatch_intake_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR) &&
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CS));
@@ -167,7 +167,8 @@ void SuperstructureInterface::WriteActuators() {
       elevator_master_.Set(
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
-          DemandType_ArbitraryFeedForward, outputs->elevator_setpoint_ff() / 12.);
+          DemandType_ArbitraryFeedForward,
+          outputs->elevator_setpoint_ff() / 12.);
       break;
   }
 

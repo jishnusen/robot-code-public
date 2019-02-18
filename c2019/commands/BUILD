@@ -43,6 +43,7 @@ cc_library(
         "//muan/wpilib:wpilib_queues",
         "//c2019/subsystems/limelight:limelight_queues",
         "//c2019/subsystems/superstructure:superstructure_queues",
+        "//c2019/subsystems/superstructure/cargo_intake:cargo_intake_queues",
     ],
 )
 

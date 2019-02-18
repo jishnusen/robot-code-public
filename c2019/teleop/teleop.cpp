@@ -120,7 +120,7 @@ void TeleopBase::Update() {
   std::shared_ptr<nt::NetworkTable> back_table =
       inst.GetTable("limelight-back");
   if (RobotController::IsSysActive()) {
-    if (!auto_status->running_command()) {
+    if (DriverStation::GetInstance().IsOperatorControl()) {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }
@@ -238,6 +238,11 @@ void TeleopBase::SendDrivetrainMessage() {
         horiz_angle_ = lime_status->horiz_angle();
       }
     }
+  }
+
+  if (super_status->elevator_height() < 1.3 &&
+      super_status->elevator_goal() > 1.5) {
+    vision = false;
   }
 
   drivetrain_goal->set_high_gear(high_gear_);

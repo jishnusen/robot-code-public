@@ -35,7 +35,7 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
         }
       case HOLDING:
         if (input->cargo_proxy()) {
-          roller_voltage = 4;
+          roller_voltage = 3.3;
         } else {
           roller_voltage = 0;
         }
