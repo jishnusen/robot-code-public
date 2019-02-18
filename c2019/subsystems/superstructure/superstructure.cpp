@@ -507,8 +507,7 @@ void Superstructure::RunStateMachine() {
       }
       break;
     case INTAKING_TO_STOW:
-      if (cargo_intake_status_->has_cargo() ||
-          hatch_intake_status_->has_hatch()) {
+      if (cargo_intake_status_->has_cargo()) {
         elevator_height_ = kStowHeight;
         wrist_angle_ = kStowAngle;
         GoToState(HOLDING);
