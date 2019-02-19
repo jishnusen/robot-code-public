@@ -120,7 +120,7 @@ void TeleopBase::Update() {
   std::shared_ptr<nt::NetworkTable> back_table =
       inst.GetTable("limelight-back");
   if (RobotController::IsSysActive()) {
-    if (!auto_status->running_command()) {
+    if (DriverStation::GetInstance().IsOperatorControl()) {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }
@@ -212,7 +212,7 @@ void TeleopBase::SendDrivetrainMessage() {
     if (vision_->is_pressed()) {
       if (super_status->elevator_goal() == 0.987) {
         bool score_possible =
-            lime_status->target_dist() < 1.4 && lime_status->has_target();
+            lime_status->target_dist() < 1.7 && lime_status->has_target();
         wants_override_ = true;
         height_distance_factor_ = 0.7;
         override_goal_ = score_possible ? superstructure::HATCH_ROCKET_SECOND
@@ -228,7 +228,7 @@ void TeleopBase::SendDrivetrainMessage() {
     if (vision_->is_pressed()) {
       if (vision_intake_->is_pressed() && lime_status->back_has_target()) {
         vision = true;
-        distance_factor_ = 0.5;
+        distance_factor_ = 0.1;
         target_dist_ = -1 * lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
       } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
@@ -238,6 +238,11 @@ void TeleopBase::SendDrivetrainMessage() {
         horiz_angle_ = lime_status->horiz_angle();
       }
     }
+  }
+
+  if (super_status->elevator_height() < 1.3 &&
+      super_status->elevator_goal() > 1.5) {
+    vision = false;
   }
 
   drivetrain_goal->set_high_gear(high_gear_);

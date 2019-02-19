@@ -3,9 +3,7 @@
 #include <vector>
 
 #include "c2019/autonomous/autonomous_runner.h"
-#include "c2019/autonomous/drive_straight.h"
-#include "c2019/autonomous/none.h"
-#include "c2019/autonomous/test_auto.h"
+#include "c2019/commands/drive_straight.h"
 
 namespace c2019 {
 namespace autonomous {
@@ -38,9 +36,9 @@ void AutonomousRunner::operator()() {
     loop_.SleepUntilNext();
   }
 
-  std::cout << "running drive straight" << std::endl;
-  DriveStraight drive_auto;
-  drive_auto.Drive();
+  commands::DriveStraight drive_straight_command;
+  std::thread drive_straight_thread(drive_straight_command);
+  drive_straight_thread.detach();
 }
 
 std::string AutonomousRunner::AutoMode() {

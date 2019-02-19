@@ -15,7 +15,7 @@ using superstructure::SuperstructureInputQueue;
 using superstructure::SuperstructureOutputProto;
 using superstructure::SuperstructureOutputQueue;
 
-constexpr uint32_t kGroundHatchIntake = 7;
+constexpr uint32_t kWinchTwo = 7;
 constexpr uint32_t kElevatorMaster = 8;
 constexpr uint32_t kElevatorSlaveA = 9;
 constexpr uint32_t kElevatorSlaveB = 10;
@@ -26,7 +26,6 @@ constexpr uint32_t kCrawler = 14;
 constexpr uint32_t kWinch = 15;
 
 constexpr uint32_t kShifter = 0;
-constexpr uint32_t kGroundSnap = 1;
 constexpr uint32_t kBackplate = 2;
 constexpr uint32_t kArrow = 3;
 constexpr uint32_t kCrawlerOne = 4;
@@ -47,9 +46,8 @@ class SuperstructureInterface {
   SuperstructureInputQueue* input_queue_;
   SuperstructureOutputQueue::QueueReader output_reader_;
 
-  VictorSPX ground_hatch_intake_{kGroundHatchIntake};
+  VictorSPX winch_two_{kWinchTwo};
   PowerDistributionPanel pdp_{0};
-  Solenoid ground_intake_snap_{kGroundSnap};
   Solenoid arrow_solenoid_{kArrow};
   Solenoid backplate_solenoid_{kBackplate};
   Solenoid crawler_one_solenoid_{kCrawlerOne};
