@@ -34,7 +34,7 @@ void Elevator::Update(const ElevatorInputProto& input,
     if (braked != muan::DiskBrake::LOCKED) {
       (*output)->set_elevator_output_type(POSITION);
       (*output)->set_elevator_setpoint(height_goal_);
-      if (height_goal_ < 1e-6 && input->elevator_encoder() < 1e-3) {
+      if (height_goal_ < 1e-6 && input->elevator_encoder() < 1e-2) {
         (*output)->set_elevator_output_type(OPEN_LOOP);
         (*output)->set_elevator_setpoint(0.);
       }

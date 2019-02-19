@@ -261,7 +261,7 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
-  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.5);
+  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.2);
 
   if (request_crawl_) {
     if (elevator_status_->elevator_height() < 0.08) {
@@ -424,11 +424,8 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       should_climb_ = true;
       break;
     case LIMELIGHT_OVERRIDE:
-      if (elevator_height_ == kHatchRocketSecondHeight) {
-        wrist_angle_ = 0.6;
-      } else {
-        wrist_angle_ = kHatchForwardsAngle;
-      }
+      wrist_angle_ = 0.6;
+      elevator_height_ = kHatchRocketSecondHeight;
       break;
   }
 

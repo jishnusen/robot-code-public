@@ -97,6 +97,8 @@ void DriveStraight::operator()() {
   StartDriveVision();
   ScoreHatch(100);
   Wait(50);
+  ExitAutonomous();  // bye
+  return;
   // Reset field position (again)
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   SetFieldPosition(6.6, -3.48, drive_status->estimated_heading() +

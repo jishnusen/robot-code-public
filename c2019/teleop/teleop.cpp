@@ -212,7 +212,7 @@ void TeleopBase::SendDrivetrainMessage() {
     if (vision_->is_pressed()) {
       if (super_status->elevator_goal() == 0.987) {
         bool score_possible =
-            lime_status->target_dist() < 1.7 && lime_status->has_target();
+            lime_status->target_dist() < 1.9 && lime_status->has_target();
         wants_override_ = true;
         height_distance_factor_ = 0.7;
         override_goal_ = score_possible ? superstructure::HATCH_ROCKET_SECOND
@@ -233,7 +233,7 @@ void TeleopBase::SendDrivetrainMessage() {
         horiz_angle_ = lime_status->back_horiz_angle();
       } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
         vision = true;
-        distance_factor_ = 0.82 / 2.8;
+        distance_factor_ = 0.95 / 2.8;
         target_dist_ = lime_status->target_dist();
         horiz_angle_ = lime_status->horiz_angle();
       }
@@ -255,7 +255,7 @@ void TeleopBase::SendDrivetrainMessage() {
   } else {
     drivetrain_goal->mutable_linear_angular_velocity_goal()
         ->set_linear_velocity(
-            2.8 * (height_distance_factor_ * target_dist_ - distance_factor_));
+            2.0 * (height_distance_factor_ * target_dist_ - distance_factor_));
     drivetrain_goal->mutable_linear_angular_velocity_goal()
         ->set_angular_velocity(-16.0 * horiz_angle_);
   }
@@ -371,7 +371,7 @@ void TeleopBase::SendSuperstructureMessage() {
             c2019::superstructure::CARGO_ROCKET_SECOND);
       } else {
         superstructure_goal->set_score_goal(
-            c2019::superstructure::HATCH_ROCKET_SECOND);
+            c2019::superstructure::LIMELIGHT_OVERRIDE);
         if (has_hp_hatch_) {
           superstructure_goal->set_intake_goal(
               c2019::superstructure::PREP_SCORE);
