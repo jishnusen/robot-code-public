@@ -23,7 +23,7 @@ constexpr double kHighGearPositionF = .15;
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
-constexpr double kHighGearVelocityF = 0.15;
+constexpr double kHighGearVelocityF = 0.12;
 
 constexpr double kIZone = 0;
 
