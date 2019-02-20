@@ -1,6 +1,7 @@
 #include "c2019/subsystems/superstructure/winch/winch.h"
 
 namespace c2019 {
+
 namespace winch {
 
 using muan::queues::QueueManager;
@@ -18,7 +19,7 @@ void Winch::Update(const WinchInputProto& input, WinchOutputProto* output,
                    WinchStatusProto* status, bool outputs_enabled) {
   if (outputs_enabled) {
     drop_forks_ = climb_type_ == BUDDY;  // drop forks for buddy climb
-    winch_voltage_ = (winch_ && drop_forks_) ? 12. : 0.;
+    winch_voltage_ = winch_ && drop_forks_ ? 12. : 0.;
   } else {
     drop_forks_ = false;  // forks don't drop for solo climb
     winch_voltage_ = 0;
@@ -33,4 +34,5 @@ void Winch::Update(const WinchInputProto& input, WinchOutputProto* output,
 }
 
 }  // namespace winch
+
 }  // namespace c2019

@@ -16,7 +16,10 @@ message DrivetrainInput {
   required double left_voltage = 6;
   required double right_voltage = 7;
 
-  required double gyro = 8;
+  required double left_current = 8;
+  required double right_current = 9;
+
+  required double gyro = 10;
 }
 
 enum TalonOutput {
@@ -44,6 +47,7 @@ enum ControlMode {
     POINT_TURN = 1;
     DISTANCE = 2;
     LEFT_RIGHT = 3;
+    LINEAR_ANGULAR_VEL = 4;
 }
 
 message DrivetrainStatus {
@@ -114,6 +118,11 @@ message DrivetrainGoal {
     required double right_goal = 2;
   }
 
+  message LinearAngularVelocityGoal {
+    required double linear_velocity = 1;
+    required double angular_velocity = 2;
+  }
+
   required bool high_gear = 2;
 
   oneof goal {
@@ -122,5 +131,6 @@ message DrivetrainGoal {
     double point_turn_goal = 5;
     double distance_goal = 6;
     LeftRightGoal left_right_goal = 7;
+    LinearAngularVelocityGoal linear_angular_velocity_goal = 8;
   }
 }

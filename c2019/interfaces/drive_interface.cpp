@@ -23,7 +23,7 @@ constexpr double kHighGearPositionF = .15;
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
-constexpr double kHighGearVelocityF = 0;
+constexpr double kHighGearVelocityF = 0.12;
 
 constexpr double kIZone = 0;
 
@@ -69,7 +69,7 @@ void DrivetrainInterface::SetBrakeMode(bool mode) {
 DrivetrainInterface::DrivetrainInterface()
     : input_queue_{QueueManager<InputProto>::Fetch()},
       output_reader_{QueueManager<OutputProto>::Fetch()->MakeReader()},
-      pigeon_{&right_slave_a_},
+      pigeon_{&left_slave_a_},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
   left_master_.ConfigSelectedFeedbackSensor(
@@ -85,10 +85,10 @@ DrivetrainInterface::DrivetrainInterface()
   left_master_.ConfigVoltageCompSaturation(12.0, 100);
   left_master_.ConfigVoltageMeasurementFilter(32, 100);
 
-  left_master_.SetSelectedSensorPosition(0, kPositionSlot, kSetupTimeout);
-  right_master_.SetSelectedSensorPosition(0, kPositionSlot, kSetupTimeout);
-  left_master_.SetSelectedSensorPosition(0, kVelocitySlot, kSetupTimeout);
-  right_master_.SetSelectedSensorPosition(0, kVelocitySlot, kSetupTimeout);
+  left_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
+  right_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
+  left_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
+  right_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
 
   left_master_.SetSensorPhase(true);
 
@@ -101,10 +101,15 @@ DrivetrainInterface::DrivetrainInterface()
   right_slave_a_.Follow(right_master_);
   right_slave_b_.Follow(right_master_);
 
-  right_master_.SetInverted(true);
-  right_master_.SetSensorPhase(true);
-  right_slave_a_.SetInverted(true);
-  right_slave_b_.SetInverted(true);
+  right_master_.SetInverted(false);
+  right_master_.SetSensorPhase(false);
+  right_slave_a_.SetInverted(false);
+  right_slave_b_.SetInverted(false);
+
+  left_master_.SetInverted(true);
+  left_master_.SetSensorPhase(false);
+  left_slave_a_.SetInverted(true);
+  left_slave_b_.SetInverted(true);
 
   LoadGains();
   SetBrakeMode(false);
@@ -127,12 +132,20 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_gyro(-(pigeon_.GetFusedHeading() - pigeon_offset_) * M_PI /
                     180.);
 
+  sensors->set_left_current(left_master_.GetOutputCurrent());
+  sensors->set_right_current(right_master_.GetOutputCurrent());
+
+  sensors->set_left_voltage(left_master_.GetMotorOutputVoltage());
+  sensors->set_right_voltage(right_master_.GetMotorOutputVoltage());
+
   input_queue_->WriteMessage(sensors);
 }
 
 void DrivetrainInterface::WriteActuators() {
   OutputProto outputs;
   muan::wpilib::DriverStationProto ds;
+
+  QueueManager<muan::wpilib::DriverStationProto>::Fetch()->ReadLastMessage(&ds);
 
   if (!output_reader_.ReadLastMessage(&outputs)) {
     left_master_.Set(ControlMode::PercentOutput, 0);
@@ -147,32 +160,41 @@ void DrivetrainInterface::WriteActuators() {
 
   switch (outputs->output_type()) {
     case TalonOutput::OPEN_LOOP:
+      compressor_.Start();
+
       SetBrakeMode(false);
       left_master_.Set(ControlMode::PercentOutput, outputs->left_setpoint());
       right_master_.Set(ControlMode::PercentOutput, outputs->right_setpoint());
       break;
     case TalonOutput::POSITION:
+      compressor_.Stop();
+
       left_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kPositionSlot, 0);
-      left_master_.Set(ControlMode::Position, outputs->left_setpoint() * kDriveConversionFactor);
-      right_master_.Set(ControlMode::Position, outputs->right_setpoint() * kDriveConversionFactor);
+      left_master_.Set(ControlMode::Position,
+                       outputs->left_setpoint() * kDriveConversionFactor);
+      right_master_.Set(ControlMode::Position,
+                        outputs->right_setpoint() * kDriveConversionFactor);
       break;
     case TalonOutput::VELOCITY:
+      compressor_.Stop();
       SetBrakeMode(true);
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1);
-                       /* DemandType_ArbitraryFeedForward, */
-                       /* outputs->left_setpoint_ff() / 12.); */
+      /* DemandType_ArbitraryFeedForward, */
+      /* outputs->left_setpoint_ff() / 12.); */
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
-          /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.); */
+      /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
+       */
+
       break;
   }
 
-  shifter_.Set(outputs->high_gear());
+  // shifter_.Set(false);
 }
 
 }  // namespace interfaces

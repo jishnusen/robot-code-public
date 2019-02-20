@@ -72,7 +72,7 @@ void Drivetrain::Update() {
   if (goal_reader_.ReadLastMessage(&goal)) {
     bool in_closed_loop =
         (goal->has_path_goal() || goal->has_point_turn_goal() ||
-         goal->has_distance_goal() || goal->has_left_right_goal()) &&
+         goal->has_distance_goal() || goal->has_left_right_goal() || goal->has_linear_angular_velocity_goal()) &&
         driver_station->is_sys_active();
     if (in_closed_loop) {
       closed_loop_.SetGoal(goal);
