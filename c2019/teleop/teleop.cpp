@@ -315,9 +315,9 @@ void TeleopBase::SendSuperstructureMessage() {
   // Handoff
   if (handoff_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {
-    superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
+    /* superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
     superstructure_goal->set_intake_goal(
-        c2019::superstructure::INTAKE_GROUND_HATCH);
+        c2019::superstructure::INTAKE_GROUND_HATCH);*/
   }
   if (pop_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::POP);

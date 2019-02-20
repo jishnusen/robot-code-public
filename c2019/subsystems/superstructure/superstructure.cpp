@@ -396,7 +396,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case DROP_CRAWLERS:
       elevator_height_ = kHatchRocketThirdHeight;
       wrist_angle_ = kHatchForwardsAngle;
-      if (status_->elevator_height() > kHatchRocketThirdHeight - 5e-3) {
+      if (status_->elevator_height() > kHatchRocketThirdHeight - .1) {
         crawler_down_ = true;
       }
       break;
