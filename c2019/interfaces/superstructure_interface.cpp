@@ -65,19 +65,26 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed()) {
-    zeroed_ = true;
+  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && !elevator_zeroed_) {
+    elevator_zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
 
   inputs->set_elevator_hall(elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
 
-  inputs->set_elevator_zeroed(zeroed_);
+  inputs->set_elevator_zeroed(elevator_zeroed_);
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
-  inputs->set_wrist_hall(
-      !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+  inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
+
+  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && !wrist_zeroed_) {
+    wrist_zeroed_ = true;
+    wrist_.SetSelectedSensorPosition(0, 0, 100);
+  }
+
+  inputs->set_wrist_zeroed(wrist_zeroed_);
+
   inputs->set_cargo_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P) ||
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
@@ -100,6 +107,11 @@ void SuperstructureInterface::LoadGains() {
   wrist_.Config_kD(0, kWristD, 100);
   wrist_.Config_kF(0, kWristF, 100);
   wrist_.Config_IntegralZone(0, kWristIZone, 100);
+
+  wrist_.ConfigReverseLimitSwitchSource(
+      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
+  wrist_.ConfigForwardLimitSwitchSource(
+      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
 
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);

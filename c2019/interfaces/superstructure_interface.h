@@ -68,7 +68,8 @@ class SuperstructureInterface {
 
   CANifier canifier_{0};
 
-  bool zeroed_ = false;
+  bool elevator_zeroed_ = false;
+  bool wrist_zeroed_ = false;
 };
 
 }  // namespace interfaces

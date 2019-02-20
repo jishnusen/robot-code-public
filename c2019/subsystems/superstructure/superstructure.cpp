@@ -181,7 +181,7 @@ void Superstructure::Update() {
   elevator_input->set_elevator_encoder(input->elevator_encoder());
   elevator_input->set_zeroed(input->elevator_zeroed());
   wrist_input->set_wrist_encoder(input->wrist_encoder());
-  wrist_input->set_wrist_hall(input->wrist_hall());
+  wrist_input->set_wrist_zeroed(input->wrist_zeroed());
 
   auto elevator_goal = PopulateElevatorGoal();
   elevator_goal->set_height(capped_elevator_height);
