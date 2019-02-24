@@ -260,8 +260,8 @@ void TeleopBase::SendDrivetrainMessage() {
     /*         2.0 * (height_distance_factor_ * target_dist_ - distance_factor_)); */
     /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
     /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
-    drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_ * 1.667);
-    drivetrain_goal->mutable_arc_goal()->set_linear(distance_factor_ * 2 * (target_dist_ - y_int));
+    drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
+    drivetrain_goal->mutable_arc_goal()->set_linear(distance_factor_ * 1 * (target_dist_ - y_int));
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);

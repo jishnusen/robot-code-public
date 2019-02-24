@@ -41,23 +41,23 @@ SuperstructureInterface::SuperstructureInterface()
 void SuperstructureInterface::ReadSensors() {
   SuperstructureInputProto inputs;
 
-  inputs->set_hatch_ground_current(pdp_.GetCurrent(kGroundPDPSlot));
-  inputs->set_cargo_current(pdp_.GetCurrent(kCargoPDPSlot));
-  inputs->set_current_1(pdp_.GetCurrent(1));
-  inputs->set_current_2(pdp_.GetCurrent(2));
-  inputs->set_current_3(pdp_.GetCurrent(3));
-  inputs->set_current_4(pdp_.GetCurrent(4));
-  inputs->set_current_5(pdp_.GetCurrent(5));
-  inputs->set_current_6(pdp_.GetCurrent(6));
-  inputs->set_current_7(pdp_.GetCurrent(7));
-  inputs->set_current_8(pdp_.GetCurrent(8));
-  inputs->set_current_9(pdp_.GetCurrent(9));
-  inputs->set_current_10(pdp_.GetCurrent(10));
-  inputs->set_current_11(pdp_.GetCurrent(11));
-  inputs->set_current_12(pdp_.GetCurrent(12));
-  inputs->set_current_13(pdp_.GetCurrent(13));
-  inputs->set_current_14(pdp_.GetCurrent(14));
-  inputs->set_current_15(pdp_.GetCurrent(15));
+  /* inputs->set_hatch_ground_current(pdp_.GetCurrent(kGroundPDPSlot)); */
+  /* inputs->set_cargo_current(pdp_.GetCurrent(kCargoPDPSlot)); */
+  /* inputs->set_current_1(pdp_.GetCurrent(1)); */
+  /* inputs->set_current_2(pdp_.GetCurrent(2)); */
+  /* inputs->set_current_3(pdp_.GetCurrent(3)); */
+  /* inputs->set_current_4(pdp_.GetCurrent(4)); */
+  /* inputs->set_current_5(pdp_.GetCurrent(5)); */
+  /* inputs->set_current_6(pdp_.GetCurrent(6)); */
+  /* inputs->set_current_7(pdp_.GetCurrent(7)); */
+  /* inputs->set_current_8(pdp_.GetCurrent(8)); */
+  /* inputs->set_current_9(pdp_.GetCurrent(9)); */
+  /* inputs->set_current_10(pdp_.GetCurrent(10)); */
+  /* inputs->set_current_11(pdp_.GetCurrent(11)); */
+  /* inputs->set_current_12(pdp_.GetCurrent(12)); */
+  /* inputs->set_current_13(pdp_.GetCurrent(13)); */
+  /* inputs->set_current_14(pdp_.GetCurrent(14)); */
+  /* inputs->set_current_15(pdp_.GetCurrent(15)); */
   inputs->set_wrist_current(wrist_.GetOutputCurrent());
   inputs->set_elevator_current(elevator_master_.GetOutputCurrent());
   inputs->set_wrist_voltage(wrist_.GetMotorOutputVoltage());

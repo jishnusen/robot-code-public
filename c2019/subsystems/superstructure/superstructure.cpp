@@ -509,7 +509,7 @@ void Superstructure::RunStateMachine() {
       wrist_angle_ = wrist_status_->wrist_angle();
       if (elevator_status_->is_calibrated() && wrist_status_->is_calibrated()) {
         elevator_height_ = kStowHeight;
-        wrist_angle_ = kStowAngle;
+        wrist_angle_ = 0;
         GoToState(HOLDING);
       }
       break;

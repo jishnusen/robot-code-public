@@ -47,7 +47,7 @@ class SuperstructureInterface {
   SuperstructureOutputQueue::QueueReader output_reader_;
 
   VictorSPX winch_two_{kWinchTwo};
-  PowerDistributionPanel pdp_{0};
+  /* PowerDistributionPanel pdp_{0}; */
   Solenoid arrow_solenoid_{kArrow};
   Solenoid backplate_solenoid_{kBackplate};
   Solenoid crawler_one_solenoid_{kCrawlerOne};

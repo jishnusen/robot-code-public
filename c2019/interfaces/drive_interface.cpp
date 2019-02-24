@@ -19,7 +19,7 @@ constexpr int kSetupTimeout = 100;
 constexpr double kHighGearPositionP = 0.6;
 constexpr double kHighGearPositionI = 0;
 constexpr double kHighGearPositionD = 6.;
-constexpr double kHighGearPositionF = .12;
+constexpr double kHighGearPositionF = .09;
 
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
@@ -29,7 +29,7 @@ constexpr double kHighGearVelocityF = 0.12;
 constexpr double kTurningP = 2.0;
 constexpr double kTurningI = 0.0;
 constexpr double kTurningD = 4.0;
-constexpr double kTurningF = 0.0;
+constexpr double kTurningF = 0.1;
 
 constexpr double kIZone = 0;
 
@@ -161,6 +161,8 @@ DrivetrainInterface::DrivetrainInterface()
   SetBrakeMode(false);
 
   pigeon_offset_ = pigeon_.GetFusedHeading();
+
+  right_master_.ConfigAllowableClosedloopError(kTurningSlot, 0, 100);
 }
 
 void DrivetrainInterface::ReadSensors() {
@@ -216,23 +218,23 @@ void DrivetrainInterface::WriteActuators() {
       break;
     case TalonOutput::POSITION:
       compressor_.Stop();
-      right_master_.SelectProfileSlot(kVelocitySlot, 0);
+      right_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kTurningSlot, 1);
       right_master_.Set(ControlMode::Velocity, outputs->arc_vel() * kDriveConversionFactor * 0.1, DemandType_AuxPID, right_master_.GetSelectedSensorPosition(1) + outputs->yaw() * (3600. / (2. * M_PI)));
       left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
     case TalonOutput::VELOCITY:
-      /* compressor_.Stop(); */
-      /* SetBrakeMode(true); */
-      /* left_master_.SelectProfileSlot(kVelocitySlot, 0); */
-      /* right_master_.SelectProfileSlot(kVelocitySlot, 0); */
-      /* left_master_.Set(ControlMode::Velocity, */
-      /*                  outputs->left_setpoint() * kDriveConversionFactor * 0.1); */
+      compressor_.Stop();
+      SetBrakeMode(true);
+      left_master_.SelectProfileSlot(kVelocitySlot, 0);
+      right_master_.SelectProfileSlot(kVelocitySlot, 0);
+      left_master_.Set(ControlMode::Velocity,
+                       outputs->left_setpoint() * kDriveConversionFactor * 0.1);
       /* DemandType_ArbitraryFeedForward, */
       /* outputs->left_setpoint_ff() / 12.); */
-      /* right_master_.Set( */
-      /*     ControlMode::Velocity, */
-      /*     outputs->right_setpoint() * kDriveConversionFactor * 0.1); */
+      right_master_.Set(
+          ControlMode::Velocity,
+          outputs->right_setpoint() * kDriveConversionFactor * 0.1);
       /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
        */
 

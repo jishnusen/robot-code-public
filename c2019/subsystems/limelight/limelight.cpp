@@ -99,7 +99,7 @@ void Limelight::Update() {
   status->set_heading(heading_);
   status->set_has_target(has_target == 1);
   status->set_difference(difference);
-  status->set_horiz_angle(std::copysign(std::abs(horiz_angle_), horiz_angle_));
+  status->set_horiz_angle(horiz_angle_ * 1.667 * (0.42 / 0.58));
   status->set_overall_tx(target_horizontal_angle / (59.6 * 0.5));
   status->set_unfiltered_horiz_angle_1(target_1_horizontal_angle);
   status->set_unfiltered_horiz_angle_2(target_2_horizontal_angle);
