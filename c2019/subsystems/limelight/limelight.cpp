@@ -16,7 +16,7 @@ Limelight::Limelight(const double limelight_height,
       object_height_(object_height) {}
 
 void Limelight::operator()() {
-  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(15));
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
   aos::SetCurrentThreadRealtimePriority(10);
   muan::utils::SetCurrentThreadName("Limelight");
 
@@ -116,8 +116,6 @@ void Limelight::Update() {
   status->set_back_horiz_angle(back_horiz_angle_);
   status->set_back_target_dist(back_distance / 2.2);
   status->set_back_has_target(static_cast<bool>(back_table->GetEntry("tv").GetDouble(0)));
-  status_queue_->WriteMessage(status);
-
   status_queue_->WriteMessage(status);
 }
 

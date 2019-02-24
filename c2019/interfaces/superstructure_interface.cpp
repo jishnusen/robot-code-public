@@ -35,7 +35,7 @@ SuperstructureInterface::SuperstructureInterface()
       output_reader_{
           QueueManager<SuperstructureOutputProto>::Fetch()->MakeReader()} {
   LoadGains();
-  wrist_.SetSelectedSensorPosition(0, 0, 100);
+  /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
 }
 
 void SuperstructureInterface::ReadSensors() {
@@ -76,7 +76,13 @@ void SuperstructureInterface::ReadSensors() {
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
+  /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P)); */
   inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
+
+  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) && !wrist_zeroed_) { */
+  /*   wrist_zeroed_ = true; */
+  /*   wrist_.SetSelectedSensorPosition(0, 0, 100); */
+  /* } */
 
   if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && !wrist_zeroed_) {
     wrist_zeroed_ = true;
@@ -115,11 +121,11 @@ void SuperstructureInterface::LoadGains() {
 
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
-  elevator_master_.SetSelectedSensorPosition(0, 0, 100);
+  /* elevator_master_.SetSelectedSensorPosition(0, 0, 100); */
 
   wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
                                       0, 100);
-  wrist_.SetSelectedSensorPosition(0, 0, 100);
+  /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
 
   const bool elevator_inverted = false;
 

@@ -57,12 +57,11 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
       break;
     case OUTTAKING:
       flutes = false;
-      backplate = true;
+      backplate = counter_ < 10;
       counter_++;
       if (counter_ > kScoreTicks) {
         counter_ = 0;
         flutes = false;
-        backplate = false;
         state_ = (IDLE);
       }
       break;

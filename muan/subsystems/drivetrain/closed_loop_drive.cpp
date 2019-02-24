@@ -28,9 +28,19 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
       point_turn_goal_ = goal->point_turn_goal();
       prev_heading_ = *integrated_heading_;
       prev_left_right_ = *left_right_position_;
+      distance_goal_ = 0;
     }
     control_mode_ = ControlMode::POINT_TURN;
     high_gear_ = false;
+    return;
+  }
+
+  if (goal->has_arc_goal()) {
+    point_turn_goal_ = goal->arc_goal().angular();
+    prev_heading_ = *integrated_heading_;
+    prev_left_right_ = *left_right_position_;
+    distance_goal_ = goal->arc_goal().linear();
+    control_mode_ = ControlMode::POINT_TURN;
     return;
   }
 
@@ -131,7 +141,7 @@ void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
 void ClosedLoopDrive::UpdatePointTurn(OutputProto* output,
                                       StatusProto* status) {
   Eigen::Vector2d delta = model_.InverseKinematics(
-      Eigen::Vector2d(0, point_turn_goal_ - prev_heading_));
+      Eigen::Vector2d(distance_goal_, point_turn_goal_));
 
   (*status)->set_heading_error(point_turn_goal_ - *integrated_heading_);
   (*status)->set_closed_loop_control_mode(control_mode_);
@@ -139,6 +149,8 @@ void ClosedLoopDrive::UpdatePointTurn(OutputProto* output,
   (*output)->set_output_type(POSITION);
   (*output)->set_left_setpoint(delta(0) + prev_left_right_(0));
   (*output)->set_right_setpoint(delta(1) + prev_left_right_(1));
+  (*output)->set_yaw(point_turn_goal_);
+  (*output)->set_arc_vel(distance_goal_);
 }
 
 void ClosedLoopDrive::UpdateDistance(OutputProto* output, StatusProto* status) {

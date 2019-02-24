@@ -55,12 +55,12 @@ void DriveStraight::operator()() {
   LOG(INFO, "Running NONE auto");
   // Move to 1st level height & socre hatch L1 rocket
 
-  StartDrivePath(6.0, -3.7, -20 * (M_PI / 180.), 1, true);
+  StartDrivePath(6.0, -3.7, -15 * (M_PI / 180.), 1, true);
   Wait(100);
   GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
   // Wann get reasonably close to rocket before starting vision, also enables
   // smooth transition to vision
-  WaitUntilDrivetrainNear(4.3, -2.4, 0.3);
+  WaitUntilDrivetrainNear(4.3, -2.4, 0.6);
   // WaitForElevatorAndLL();
   StartDriveVision();
   ScoreHatch(50);  // Backplates suck

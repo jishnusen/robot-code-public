@@ -188,6 +188,7 @@ void TeleopBase::Update() {
 
 void TeleopBase::SendDrivetrainMessage() {
   bool vision = false;
+  double y_int = 0;
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
   SuperstructureStatusProto super_status;
@@ -228,14 +229,16 @@ void TeleopBase::SendDrivetrainMessage() {
     if (vision_->is_pressed()) {
       if (vision_intake_->is_pressed() && lime_status->back_has_target()) {
         vision = true;
-        distance_factor_ = 0.1;
-        target_dist_ = -1 * lime_status->back_target_dist();
+        distance_factor_ = -1;
+        target_dist_ = lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
+        y_int = 0.;
       } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
         vision = true;
-        distance_factor_ = 0.95 / 2.8;
+        distance_factor_ = 1;
         target_dist_ = lime_status->target_dist();
         horiz_angle_ = lime_status->horiz_angle();
+        y_int = 0.5;
       }
     }
   }
@@ -247,17 +250,18 @@ void TeleopBase::SendDrivetrainMessage() {
 
   drivetrain_goal->set_high_gear(high_gear_);
 
-  // Drive controls
   if (!vision) {
     drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
     drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
     drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
   } else {
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(
-            2.0 * (height_distance_factor_ * target_dist_ - distance_factor_));
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(-16.0 * horiz_angle_);
+    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
+    /*     ->set_linear_velocity( */
+    /*         2.0 * (height_distance_factor_ * target_dist_ - distance_factor_)); */
+    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
+    /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
+    drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_ * 1.667);
+    drivetrain_goal->mutable_arc_goal()->set_linear(distance_factor_ * 2 * (target_dist_ - y_int));
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -371,7 +375,7 @@ void TeleopBase::SendSuperstructureMessage() {
             c2019::superstructure::CARGO_ROCKET_SECOND);
       } else {
         superstructure_goal->set_score_goal(
-            c2019::superstructure::LIMELIGHT_OVERRIDE);
+            c2019::superstructure::HATCH_ROCKET_SECOND);
         if (has_hp_hatch_) {
           superstructure_goal->set_intake_goal(
               c2019::superstructure::PREP_SCORE);
