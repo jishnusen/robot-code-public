@@ -97,6 +97,7 @@ class TeleopBase {
   double height_distance_factor_ = 0.0;
   superstructure::ScoreGoal override_goal_;
   superstructure::ScoreGoal cached_goal_;
+  bool this_run_off_;
 };
 
 }  // namespace teleop

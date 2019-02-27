@@ -232,15 +232,29 @@ void TeleopBase::SendDrivetrainMessage() {
         distance_factor_ = -1;
         target_dist_ = lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
-        y_int = 0.;
+        y_int = -0.3;
       } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
         vision = true;
         distance_factor_ = 1;
         target_dist_ = lime_status->target_dist();
         horiz_angle_ = lime_status->horiz_angle();
+        double skew = lime_status->skew();
+        if (lime_status->skew() > -45) {
+          skew = std::abs(lime_status->skew());
+        } else {
+          skew += 90;
+        }
+        if (skew > 9.0 || this_run_off_) {
+          horiz_angle_ = std::copysign(std::abs(horiz_angle_) + 0.025, horiz_angle_);
+          this_run_off_ = true;
+        }
         y_int = 0.5;
       }
     }
+  }
+
+  if (vision_->was_released()) {
+    this_run_off_ = false;
   }
 
   if (super_status->elevator_height() < 1.3 &&
@@ -261,7 +275,7 @@ void TeleopBase::SendDrivetrainMessage() {
     /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
     /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
-    drivetrain_goal->mutable_arc_goal()->set_linear(distance_factor_ * 1 * (target_dist_ - y_int));
+    drivetrain_goal->mutable_arc_goal()->set_linear(distance_factor_ * 2 * (target_dist_ - y_int));
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);

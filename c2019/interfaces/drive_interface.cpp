@@ -26,10 +26,10 @@ constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
 constexpr double kHighGearVelocityF = 0.12;
 
-constexpr double kTurningP = 2.0;
+constexpr double kTurningP = 3.0;
 constexpr double kTurningI = 0.0;
-constexpr double kTurningD = 4.0;
-constexpr double kTurningF = 0.1;
+constexpr double kTurningD = 50.0;
+constexpr double kTurningF = 0.0;
 
 constexpr double kIZone = 0;
 

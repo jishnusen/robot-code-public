@@ -92,7 +92,7 @@ void Limelight::Update() {
   double has_target = table->GetEntry("tv").GetDouble(0);
   LimelightStatusProto status;
   status->set_target_dist(distance / 2.2);
-  status->set_skew(target_skew_);
+  status->set_skew(skew);
   status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
   status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
   status->set_to_the_left(to_the_left_);
