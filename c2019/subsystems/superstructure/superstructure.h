@@ -116,6 +116,8 @@ class Superstructure {
   bool high_gear_ = true;
   bool crawler_down_ = false;
   bool brake_ = false;
+  bool request_climb_ = false;
+  bool request_crawlers_ = false;
 
   bool should_climb_ = false;
   bool buddy_ = false;

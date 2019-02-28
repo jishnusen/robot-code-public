@@ -36,7 +36,9 @@ TeleopBase::TeleopBase()
       gamepad_{2, QueueManager<JoystickStatusProto>::Fetch("gamepad")},
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
-  winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
+  // winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
+  winch_left_ = throttle_.MakeButton(7);
+  winch_right_ = throttle_.MakeButton(10);
   // brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   drop_crawlers_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
@@ -435,19 +437,17 @@ void TeleopBase::SendSuperstructureMessage() {
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
-  if (winch_->is_pressed() &&
+  /*if (winch_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
+  */
+  if (winch_left_->is_pressed()) {
+    superstructure_goal->set_manual_left_winch(true);
+  }
+  if (winch_right_->is_pressed()) {
+    superstructure_goal->set_manual_right_winch(true);
   }
 
-  if (safety_->is_pressed() && safety2_->is_pressed()) {
-    if (hp_hatch_intake_->is_pressed()) {
-      superstructure_goal->set_manual_left_winch(true);
-    }
-    if (hp_hatch_outtake_->is_pressed()) {
-      superstructure_goal->set_manual_right_winch(true);
-    }
-  }
   /*if (brake_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::BRAKE);
