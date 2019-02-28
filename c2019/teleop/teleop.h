@@ -98,6 +98,8 @@ class TeleopBase {
   superstructure::ScoreGoal override_goal_;
   superstructure::ScoreGoal cached_goal_;
   bool this_run_off_;
+  int flash_ticks_left_ = 0;
+  bool flash_ = false;
 };
 
 }  // namespace teleop

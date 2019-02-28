@@ -119,22 +119,45 @@ void TeleopBase::Update() {
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
   std::shared_ptr<nt::NetworkTable> back_table =
       inst.GetTable("limelight-back");
+  std::shared_ptr<nt::NetworkTable> expensive_table =
+      inst.GetTable("limelight-pricey");
+
   if (RobotController::IsSysActive()) {
     if (DriverStation::GetInstance().IsOperatorControl()) {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }
-    table->PutNumber("ledMode", 0);
-    back_table->PutNumber("ledMode", 0);
+    if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
+      table->PutNumber("ledMode", flash_ ? 2 : 0);
+      expensive_table->PutNumber("ledMode", flash_ ? 2 : 0);
+      back_table->PutNumber("ledMode", flash_ ? 2 : 1);
+    } else {
+      table->PutNumber("ledMode", flash_ ? 2 : 1);
+      expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
+      back_table->PutNumber("ledMode", flash_ ? 2 : 0);
+    }
   } else {
-    table->PutNumber("ledMode", 1);
-    back_table->PutNumber("ledMode", 1);
+    table->PutNumber("ledMode", flash_ ? 2 : 1);
+    back_table->PutNumber("ledMode", flash_ ? 2: 1);
+    expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
   }
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
     rumble_ticks_left_ = kRumbleTicks;
   }
+
+  if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_)) {
+    flash_ticks_left_ = 0;
+  }
+  
+  if (flash_ticks_left_ < 50) {
+    flash_ = true;
+    flash_ticks_left_++;
+  } else {
+    flash_ = false;
+  }
+
   had_cargo_ = has_cargo_;
   had_hp_hatch_ = has_hp_hatch_;
   had_ground_hatch_ = has_ground_hatch_;

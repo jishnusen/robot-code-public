@@ -22,6 +22,7 @@ class HatchIntake {
   HatchIntakeGoalProto goal_;
   int counter_ = 0;
   bool force_backplate_ = false;
+  bool has_hatch_ = false;
 };
 
 }  // namespace hatch_intake

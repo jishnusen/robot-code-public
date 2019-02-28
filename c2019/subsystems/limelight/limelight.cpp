@@ -1,9 +1,11 @@
 #include "c2019/subsystems/limelight/limelight.h"
+#include "c2019/subsystems/superstructure/queue_types.h"
 #include <algorithm>
 #include <memory>
 #include <vector>
 
 using muan::queues::QueueManager;
+using c2019::superstructure::SuperstructureStatusProto;
 
 namespace c2019 {
 namespace limelight {
@@ -30,8 +32,12 @@ void Limelight::operator()() {
 }
 
 void Limelight::Update() {
+  SuperstructureStatusProto super_status;
+  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
+      &super_status);
   auto inst = nt::NetworkTableInstance::GetDefault();
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
+  std::shared_ptr<nt::NetworkTable> expensive_table = inst.GetTable("limelight-pricey");
   double target_vertical_angle = table->GetEntry("ty").GetDouble(0);
   double skew = table->GetEntry("ts").GetDouble(0);
   double target_horizontal_angle = table->GetEntry("tx").GetDouble(0);
@@ -58,6 +64,9 @@ void Limelight::Update() {
   double distance =
       2.497 * pow(target_dist_, 2) - 0.0397 * target_dist_ + 0.2124;
 
+  if (super_status->elevator_height() > 1.0) {
+    target_horizontal_angle = expensive_table->GetEntry("tx").GetDouble(-1000);
+  }
   horiz_angle_ = (target_horizontal_angle * (M_PI / 180.));
 
   double overall_tx = target_horizontal_angle / (59.6 * 0.5); // normalized tx

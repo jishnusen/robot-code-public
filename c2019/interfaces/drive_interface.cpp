@@ -26,9 +26,9 @@ constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
 constexpr double kHighGearVelocityF = 0.12;
 
-constexpr double kTurningP = 3.0;
+constexpr double kTurningP = 2.0;
 constexpr double kTurningI = 0.0;
-constexpr double kTurningD = 50.0;
+constexpr double kTurningD = 4.0;
 constexpr double kTurningF = 0.0;
 
 constexpr double kIZone = 0;
@@ -107,13 +107,13 @@ DrivetrainInterface::DrivetrainInterface()
 
   pigeon_.SetYaw(0, 100);
 
-  right_master_.ConfigRemoteFeedbackFilter(left_master_.GetDeviceID(), RemoteSensorSource::RemoteSensorSource_TalonSRX_SelectedSensor, 0, 100);
+  /* right_master_.ConfigRemoteFeedbackFilter(left_master_.GetDeviceID(), RemoteSensorSource::RemoteSensorSource_TalonSRX_SelectedSensor, 0, 100); */
   right_master_.ConfigRemoteFeedbackFilter(left_slave_a_.GetDeviceID(), RemoteSensorSource::RemoteSensorSource_GadgeteerPigeon_Yaw, 1, 100);
 
-  right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum0, FeedbackDevice::RemoteSensor0, 100);
-  right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum1, FeedbackDevice::CTRE_MagEncoder_Relative, 100);
-  right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::SensorSum, 0, 100);
-  right_master_.ConfigSelectedFeedbackCoefficient(0.5, 0, 100);
+  /* right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum0, FeedbackDevice::RemoteSensor0, 100); */
+  /* right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum1, FeedbackDevice::CTRE_MagEncoder_Relative, 100); */
+  /* right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::SensorSum, 0, 100); */
+  /* right_master_.ConfigSelectedFeedbackCoefficient(0.5, 0, 100); */
   right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::RemoteSensor1, 1, 100);
   right_master_.ConfigSelectedFeedbackCoefficient((3600. / 8192.), 1, 100);
 
@@ -206,8 +206,6 @@ void DrivetrainInterface::WriteActuators() {
     SetBrakeMode(false);
   }
 
-  std::cout << right_master_.GetSelectedSensorPosition(1) << "\t" << right_master_.GetClosedLoopError(1) << std::endl;
-
   switch (outputs->output_type()) {
     case TalonOutput::OPEN_LOOP:
       compressor_.Start();
@@ -220,7 +218,7 @@ void DrivetrainInterface::WriteActuators() {
       compressor_.Stop();
       right_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kTurningSlot, 1);
-      right_master_.Set(ControlMode::Velocity, outputs->arc_vel() * kDriveConversionFactor * 0.1, DemandType_AuxPID, right_master_.GetSelectedSensorPosition(1) + outputs->yaw() * (3600. / (2. * M_PI)));
+      right_master_.Set(ControlMode::PercentOutput, std::copysign(4.0 / 12.0, outputs->arc_vel()), DemandType_AuxPID, right_master_.GetSelectedSensorPosition(1) + outputs->yaw() * (3600. / (2. * M_PI)));
       left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
     case TalonOutput::VELOCITY:
