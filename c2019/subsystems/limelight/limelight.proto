@@ -26,6 +26,9 @@ message LimelightStatus {
   optional double back_target_dist = 20;
   optional double back_horiz_angle = 21;
   optional bool back_has_target = 22;
+  optional bool pricey_has_target = 23;
+  optional double pricey_horiz_angle = 24;
+  optional double pricey_target_dist = 25;
 }
 
 enum LimelightState {

@@ -140,6 +140,7 @@ message SuperstructureInput {
   required double elevator_voltage = 27;
   required bool cargo_proxy = 28;
   required bool elevator_hall = 29;
+  required bool wrist_zeroed = 30;
 }
 
 message SuperstructureGoal {

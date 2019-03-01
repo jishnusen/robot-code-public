@@ -49,6 +49,13 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
   } else {
     force_backplate_ = false;
   }
+
+  if ((*wrist_goal > kWristSafeBackwardsAngle &&
+       wrist_status_->wrist_angle() < kWristSafeBackwardsAngle) ||
+      (*wrist_goal < kWristSafeForwardsAngle &&
+       wrist_status_->wrist_angle() > kWristSafeForwardsAngle)) {
+    force_backplate_ = true;
+  }
 }
 
 elevator::ElevatorGoalProto Superstructure::PopulateElevatorGoal() {
@@ -181,7 +188,7 @@ void Superstructure::Update() {
   elevator_input->set_elevator_encoder(input->elevator_encoder());
   elevator_input->set_zeroed(input->elevator_zeroed());
   wrist_input->set_wrist_encoder(input->wrist_encoder());
-  wrist_input->set_wrist_hall(input->wrist_hall());
+  wrist_input->set_wrist_zeroed(input->wrist_zeroed());
 
   auto elevator_goal = PopulateElevatorGoal();
   elevator_goal->set_height(capped_elevator_height);
@@ -261,7 +268,7 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
-  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.2);
+  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.3);
 
   if (request_crawl_) {
     if (elevator_status_->elevator_height() < 0.08) {
@@ -442,7 +449,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       should_climb_ = true;
       break;
     case LIMELIGHT_OVERRIDE:
-      wrist_angle_ = 0.6;
+      wrist_angle_ = 0.1;
       elevator_height_ = kHatchRocketSecondHeight;
       break;
   }
@@ -520,7 +527,7 @@ void Superstructure::RunStateMachine() {
       wrist_angle_ = wrist_status_->wrist_angle();
       if (elevator_status_->is_calibrated() && wrist_status_->is_calibrated()) {
         elevator_height_ = kStowHeight;
-        wrist_angle_ = kStowAngle;
+        wrist_angle_ = 0;
         GoToState(HOLDING);
       }
       break;

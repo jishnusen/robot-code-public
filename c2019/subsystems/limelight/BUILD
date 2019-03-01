@@ -28,6 +28,7 @@ cc_library(
         "//muan/queues:queue_manager",
         "//muan/wpilib:wpilib_queues",
         "//third_party/wpilibsuite:ntcore",
+        "//c2019/subsystems/superstructure:superstructure_queues",
     ],
 )
 

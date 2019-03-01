@@ -11,19 +11,25 @@ constexpr double kDriveConversionFactor = 4096 / (2. * M_PI * kWheelRadius);
 
 constexpr uint32_t kShifter = 0;
 
-constexpr int kPositionSlot = 1;
 constexpr int kVelocitySlot = 0;
+constexpr int kPositionSlot = 1;
+constexpr int kTurningSlot = 2;
 constexpr int kSetupTimeout = 100;
 
-constexpr double kHighGearPositionP = 1.2;
+constexpr double kHighGearPositionP = 0.6;
 constexpr double kHighGearPositionI = 0;
 constexpr double kHighGearPositionD = 6.;
-constexpr double kHighGearPositionF = .15;
+constexpr double kHighGearPositionF = .09;
 
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
 constexpr double kHighGearVelocityF = 0.12;
+
+constexpr double kTurningP = 2.0;
+constexpr double kTurningI = 0.0;
+constexpr double kTurningD = 4.0;
+constexpr double kTurningF = 0.0;
 
 constexpr double kIZone = 0;
 
@@ -53,6 +59,24 @@ void DrivetrainInterface::LoadGains() {
   right_master_.Config_kD(kVelocitySlot, kHighGearVelocityD, kSetupTimeout);
   right_master_.Config_kF(kVelocitySlot, kHighGearVelocityF, kSetupTimeout);
   right_master_.Config_IntegralZone(kVelocitySlot, kIZone, kSetupTimeout);
+
+  left_master_.Config_kP(kTurningSlot, kTurningP, kSetupTimeout);
+  left_master_.Config_kI(kTurningSlot, kTurningI, kSetupTimeout);
+  left_master_.Config_kD(kTurningSlot, kTurningD, kSetupTimeout);
+  left_master_.Config_kF(kTurningSlot, kTurningF, kSetupTimeout);
+  left_master_.Config_IntegralZone(kTurningSlot, kIZone, kSetupTimeout);
+
+  right_master_.Config_kP(kTurningSlot, kTurningP, kSetupTimeout);
+  right_master_.Config_kI(kTurningSlot, kTurningI, kSetupTimeout);
+  right_master_.Config_kD(kTurningSlot, kTurningD, kSetupTimeout);
+  right_master_.Config_kF(kTurningSlot, kTurningF, kSetupTimeout);
+  right_master_.Config_IntegralZone(kTurningSlot, 400, kSetupTimeout);
+
+  /* right_master_.ConfigNeutralDeadband(0, kPositionSlot); */
+  /* left_master_.ConfigNeutralDeadband(0, kPositionSlot); */
+
+  /* right_master_.ConfigNeutralDeadband(0.04, kVelocitySlot); */
+  /* left_master_.ConfigNeutralDeadband(0.04, kVelocitySlot); */
 }
 
 void DrivetrainInterface::SetBrakeMode(bool mode) {
@@ -81,14 +105,42 @@ DrivetrainInterface::DrivetrainInterface()
   right_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot, kSetupTimeout);
 
+  pigeon_.SetYaw(0, 100);
+
+  /* right_master_.ConfigRemoteFeedbackFilter(left_master_.GetDeviceID(),
+   * RemoteSensorSource::RemoteSensorSource_TalonSRX_SelectedSensor, 0, 100); */
+  right_master_.ConfigRemoteFeedbackFilter(
+      left_slave_a_.GetDeviceID(),
+      RemoteSensorSource::RemoteSensorSource_GadgeteerPigeon_Yaw, 1, 100);
+
+  /* right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum0,
+   * FeedbackDevice::RemoteSensor0, 100); */
+  /* right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum1,
+   * FeedbackDevice::CTRE_MagEncoder_Relative, 100); */
+  /* right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::SensorSum, 0,
+   * 100); */
+  /* right_master_.ConfigSelectedFeedbackCoefficient(0.5, 0, 100); */
+  right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::RemoteSensor1, 1,
+                                             100);
+  right_master_.ConfigSelectedFeedbackCoefficient((3600. / 8192.), 1, 100);
+
   left_master_.EnableVoltageCompensation(true);
   left_master_.ConfigVoltageCompSaturation(12.0, 100);
   left_master_.ConfigVoltageMeasurementFilter(32, 100);
+
+  left_master_.ConfigMotionCruiseVelocity(2000, 100);
+  right_master_.ConfigMotionCruiseVelocity(2000, 100);
+
+  left_master_.ConfigMotionAcceleration(2000, 100);
+  right_master_.ConfigMotionAcceleration(2000, 100);
 
   left_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
   right_master_.SetSelectedSensorPosition(kPositionSlot, 0, kSetupTimeout);
   left_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
   right_master_.SetSelectedSensorPosition(kVelocitySlot, 0, kSetupTimeout);
+
+  right_master_.ConfigAuxPIDPolarity(true, 100);
+  right_master_.ConfigClosedLoopPeakOutput(kTurningSlot, 1.0, 100);
 
   left_master_.SetSensorPhase(true);
 
@@ -115,6 +167,8 @@ DrivetrainInterface::DrivetrainInterface()
   SetBrakeMode(false);
 
   pigeon_offset_ = pigeon_.GetFusedHeading();
+
+  right_master_.ConfigAllowableClosedloopError(kTurningSlot, 0, 100);
 }
 
 void DrivetrainInterface::ReadSensors() {
@@ -168,13 +222,13 @@ void DrivetrainInterface::WriteActuators() {
       break;
     case TalonOutput::POSITION:
       compressor_.Stop();
-
-      left_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kPositionSlot, 0);
-      left_master_.Set(ControlMode::Position,
-                       outputs->left_setpoint() * kDriveConversionFactor);
-      right_master_.Set(ControlMode::Position,
-                        outputs->right_setpoint() * kDriveConversionFactor);
+      right_master_.SelectProfileSlot(kTurningSlot, 1);
+      right_master_.Set(ControlMode::PercentOutput, outputs->arc_vel() / 12.,
+                        DemandType_AuxPID,
+                        right_master_.GetSelectedSensorPosition(1) +
+                            outputs->yaw() * (3600. / (2. * M_PI)));
+      left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
     case TalonOutput::VELOCITY:
       compressor_.Stop();

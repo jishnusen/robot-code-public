@@ -93,11 +93,15 @@ class TeleopBase {
   double current_heading_;
   double cached_velocity_;
   double target_dist_;
+  double pricey_horiz_angle_;
   double horiz_angle_;
   int velocity_counter_;
   double height_distance_factor_ = 0.0;
   superstructure::ScoreGoal override_goal_;
   superstructure::ScoreGoal cached_goal_;
+  bool this_run_off_;
+  int flash_ticks_left_ = 0;
+  bool flash_ = false;
 };
 
 }  // namespace teleop
