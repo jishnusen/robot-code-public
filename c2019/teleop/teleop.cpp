@@ -375,7 +375,7 @@ void TeleopBase::SendSuperstructureMessage() {
         c2019::superstructure::INTAKE_GROUND_HATCH);*/
   }
   if (pop_->is_pressed()) {
-    superstructure_goal->set_intake_goal(c2019::superstructure::POP);
+    // superstructure_goal->set_intake_goal(c2019::superstructure::POP);
   }
 
   // Scoring positions - auto detects game piece

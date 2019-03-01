@@ -65,14 +65,9 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
-<<<<<<< HEAD
   if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
-      !zeroed_) {
-    zeroed_ = true;
-=======
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && !elevator_zeroed_) {
+      !elevator_zeroed_) {
     elevator_zeroed_ = true;
->>>>>>> db2e97db3945ef410506e8a5464774c6b7ac8fdd
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
 
@@ -83,10 +78,12 @@ void SuperstructureInterface::ReadSensors() {
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
-  /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P)); */
+  /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+   */
   inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
 
-  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) && !wrist_zeroed_) { */
+  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) &&
+   * !wrist_zeroed_) { */
   /*   wrist_zeroed_ = true; */
   /*   wrist_.SetSelectedSensorPosition(0, 0, 100); */
   /* } */
@@ -121,10 +118,10 @@ void SuperstructureInterface::LoadGains() {
   wrist_.Config_kF(0, kWristF, 100);
   wrist_.Config_IntegralZone(0, kWristIZone, 100);
 
-  wrist_.ConfigReverseLimitSwitchSource(
-      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
-  wrist_.ConfigForwardLimitSwitchSource(
-      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
+  wrist_.ConfigReverseLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
+                                        LimitSwitchNormal_NormallyOpen, 100);
+  wrist_.ConfigForwardLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
+                                        LimitSwitchNormal_NormallyOpen, 100);
 
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
