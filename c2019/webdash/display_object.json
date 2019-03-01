@@ -14,9 +14,10 @@
             "should-title": false
         },
         {
-            "name": "Video Stream",
-            "type": "image",
-            "coordinates": [1,1],
+            "name": "Link to Video Stream",
+            "type": "link",
+            "source": ["auto_selection", "streamUrl"],
+            "coordinates": [3, 0],
             "should-title": false
         },
         {
