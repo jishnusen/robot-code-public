@@ -128,13 +128,15 @@ void TeleopBase::Update() {
       SendSuperstructureMessage();
     }
     if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
-      table->PutNumber("ledMode", flash_ ? 2 : 0);
-      expensive_table->PutNumber("ledMode", flash_ ? 2 : 0);
+      table->PutNumber("ledMode",
+                       int(superstructure_status->elevator_goal() > 0.6));
+      expensive_table->PutNumber(
+          "ledMode", int(superstructure_status->elevator_goal() < 0.6));
       back_table->PutNumber("ledMode", flash_ ? 2 : 1);
     } else {
       table->PutNumber("ledMode", flash_ ? 2 : 1);
-      expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
-      back_table->PutNumber("ledMode", flash_ ? 2 : 0);
+      expensive_table->PutNumber("ledMode", 1);
+      back_table->PutNumber("ledMode", 0);
     }
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
@@ -256,7 +258,9 @@ void TeleopBase::SendDrivetrainMessage() {
         target_dist_ = lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
         y_int = -0.3;
-      } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
+      } else if ((lime_status->has_target() ||
+                  lime_status->pricey_has_target()) &&
+                 !vision_intake_->is_pressed()) {
         vision = true;
         distance_factor_ = 1;
         if (super_status->elevator_height() > 0.8) {
@@ -277,7 +281,7 @@ void TeleopBase::SendDrivetrainMessage() {
               std::copysign(std::abs(horiz_angle_) + 0.025, horiz_angle_);
           this_run_off_ = true;
         }
-        y_int = 0.5;
+        y_int = 0.4;
       }
     }
   }

@@ -147,7 +147,7 @@ void Limelight::Update() {
   double pricey_distance = 2.497 * pow(pricey_target_dist_, 2) -
                            0.0397 * pricey_target_dist_ + 0.2124;
   status->set_pricey_horiz_angle(pricey_horiz_angle_);
-  status->set_pricey_target_dist(pricey_distance / 2.2);
+  status->set_pricey_target_dist(pricey_distance / 3.90);
   status->set_pricey_has_target(
       static_cast<bool>(pricey_table->GetEntry("tv").GetDouble(0)));
   status_queue_->WriteMessage(status);
