@@ -138,7 +138,7 @@ void TeleopBase::Update() {
     }
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
-    back_table->PutNumber("ledMode", flash_ ? 2: 1);
+    back_table->PutNumber("ledMode", flash_ ? 2 : 1);
     expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
   }
 
@@ -150,7 +150,7 @@ void TeleopBase::Update() {
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_)) {
     flash_ticks_left_ = 0;
   }
-  
+
   if (flash_ticks_left_ < 50) {
     flash_ = true;
     flash_ticks_left_++;
@@ -259,8 +259,13 @@ void TeleopBase::SendDrivetrainMessage() {
       } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
         vision = true;
         distance_factor_ = 1;
-        target_dist_ = lime_status->target_dist();
-        horiz_angle_ = lime_status->horiz_angle();
+        if (super_status->elevator_height() > 0.8) {
+          horiz_angle_ = lime_status->pricey_horiz_angle();
+          target_dist_ = lime_status->pricey_target_dist();
+        } else {
+          horiz_angle_ = lime_status->horiz_angle();
+          target_dist_ = lime_status->target_dist();
+        }
         double skew = lime_status->skew();
         if (lime_status->skew() > -45) {
           skew = std::abs(lime_status->skew());
@@ -268,7 +273,8 @@ void TeleopBase::SendDrivetrainMessage() {
           skew += 90;
         }
         if (skew > 9.0 || this_run_off_) {
-          horiz_angle_ = std::copysign(std::abs(horiz_angle_) + 0.025, horiz_angle_);
+          horiz_angle_ =
+              std::copysign(std::abs(horiz_angle_) + 0.025, horiz_angle_);
           this_run_off_ = true;
         }
         y_int = 0.5;
@@ -294,11 +300,13 @@ void TeleopBase::SendDrivetrainMessage() {
   } else {
     /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
     /*     ->set_linear_velocity( */
-    /*         2.0 * (height_distance_factor_ * target_dist_ - distance_factor_)); */
+    /*         2.0 * (height_distance_factor_ * target_dist_ -
+     * distance_factor_)); */
     /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
     /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
-    drivetrain_goal->mutable_arc_goal()->set_linear(distance_factor_ * 2 * (target_dist_ - y_int));
+    drivetrain_goal->mutable_arc_goal()->set_linear((target_dist_ - y_int) *
+                                                    distance_factor_ * 4.0);
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);

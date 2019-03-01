@@ -40,6 +40,8 @@ class Limelight {
   bool to_the_left_;
   double back_horiz_angle_;
   double back_target_dist_;
+  double pricey_horiz_angle_;
+  double pricey_target_dist_;
   std::atomic<bool> running_;
 };
 }  // namespace limelight

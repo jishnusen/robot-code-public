@@ -431,7 +431,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       should_climb_ = true;
       break;
     case LIMELIGHT_OVERRIDE:
-      wrist_angle_ = 0.6;
+      wrist_angle_ = 0.1;
       elevator_height_ = kHatchRocketSecondHeight;
       break;
   }
