@@ -119,22 +119,45 @@ void TeleopBase::Update() {
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
   std::shared_ptr<nt::NetworkTable> back_table =
       inst.GetTable("limelight-back");
+  std::shared_ptr<nt::NetworkTable> expensive_table =
+      inst.GetTable("limelight-pricey");
+
   if (RobotController::IsSysActive()) {
     if (DriverStation::GetInstance().IsOperatorControl()) {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }
-    table->PutNumber("ledMode", 0);
-    back_table->PutNumber("ledMode", 0);
+    if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
+      table->PutNumber("ledMode", flash_ ? 2 : 0);
+      expensive_table->PutNumber("ledMode", flash_ ? 2 : 0);
+      back_table->PutNumber("ledMode", flash_ ? 2 : 1);
+    } else {
+      table->PutNumber("ledMode", flash_ ? 2 : 1);
+      expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
+      back_table->PutNumber("ledMode", flash_ ? 2 : 0);
+    }
   } else {
-    table->PutNumber("ledMode", 1);
-    back_table->PutNumber("ledMode", 1);
+    table->PutNumber("ledMode", flash_ ? 2 : 1);
+    back_table->PutNumber("ledMode", flash_ ? 2: 1);
+    expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
   }
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
     rumble_ticks_left_ = kRumbleTicks;
   }
+
+  if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_)) {
+    flash_ticks_left_ = 0;
+  }
+  
+  if (flash_ticks_left_ < 50) {
+    flash_ = true;
+    flash_ticks_left_++;
+  } else {
+    flash_ = false;
+  }
+
   had_cargo_ = has_cargo_;
   had_hp_hatch_ = has_hp_hatch_;
   had_ground_hatch_ = has_ground_hatch_;
@@ -188,6 +211,7 @@ void TeleopBase::Update() {
 
 void TeleopBase::SendDrivetrainMessage() {
   bool vision = false;
+  double y_int = 0;
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
   SuperstructureStatusProto super_status;
@@ -228,16 +252,32 @@ void TeleopBase::SendDrivetrainMessage() {
     if (vision_->is_pressed()) {
       if (vision_intake_->is_pressed() && lime_status->back_has_target()) {
         vision = true;
-        distance_factor_ = 0.1;
-        target_dist_ = -1 * lime_status->back_target_dist();
+        distance_factor_ = -1;
+        target_dist_ = lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
+        y_int = -0.3;
       } else if (lime_status->has_target() && !vision_intake_->is_pressed()) {
         vision = true;
-        distance_factor_ = 0.95 / 2.8;
+        distance_factor_ = 1;
         target_dist_ = lime_status->target_dist();
         horiz_angle_ = lime_status->horiz_angle();
+        double skew = lime_status->skew();
+        if (lime_status->skew() > -45) {
+          skew = std::abs(lime_status->skew());
+        } else {
+          skew += 90;
+        }
+        if (skew > 9.0 || this_run_off_) {
+          horiz_angle_ = std::copysign(std::abs(horiz_angle_) + 0.025, horiz_angle_);
+          this_run_off_ = true;
+        }
+        y_int = 0.5;
       }
     }
+  }
+
+  if (vision_->was_released()) {
+    this_run_off_ = false;
   }
 
   if (super_status->elevator_height() < 1.3 &&
@@ -247,17 +287,18 @@ void TeleopBase::SendDrivetrainMessage() {
 
   drivetrain_goal->set_high_gear(high_gear_);
 
-  // Drive controls
   if (!vision) {
     drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
     drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
     drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
   } else {
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(
-            2.0 * (height_distance_factor_ * target_dist_ - distance_factor_));
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(-16.0 * horiz_angle_);
+    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
+    /*     ->set_linear_velocity( */
+    /*         2.0 * (height_distance_factor_ * target_dist_ - distance_factor_)); */
+    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
+    /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
+    drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
+    drivetrain_goal->mutable_arc_goal()->set_linear(distance_factor_ * 2 * (target_dist_ - y_int));
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -302,9 +343,11 @@ void TeleopBase::SendSuperstructureMessage() {
       superstructure_goal->set_intake_goal(
           c2019::superstructure::OUTTAKE_GROUND_HATCH);
     }
-  } else if (hp_hatch_intake_->is_pressed()) {
+  } else if (hp_hatch_intake_->is_pressed() &&
+             !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_HATCH);
-  } else if (hp_hatch_outtake_->is_pressed()) {
+  } else if (hp_hatch_outtake_->is_pressed() &&
+             !(safety_->is_pressed() && safety2_->is_pressed())) {
     superstructure_goal->set_intake_goal(c2019::superstructure::OUTTAKE_HATCH);
   } else {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_NONE);
@@ -313,9 +356,9 @@ void TeleopBase::SendSuperstructureMessage() {
   // Handoff
   if (handoff_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {
-    superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
+    /* superstructure_goal->set_score_goal(c2019::superstructure::HANDOFF);
     superstructure_goal->set_intake_goal(
-        c2019::superstructure::INTAKE_GROUND_HATCH);
+        c2019::superstructure::INTAKE_GROUND_HATCH);*/
   }
   if (pop_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::POP);
@@ -359,7 +402,7 @@ void TeleopBase::SendSuperstructureMessage() {
         }
       }
     } else {
-      superstructure_goal->set_score_goal(c2019::superstructure::KISS);
+      superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
     }
   }
   if (level_2_->is_pressed()) {
@@ -369,14 +412,14 @@ void TeleopBase::SendSuperstructureMessage() {
             c2019::superstructure::CARGO_ROCKET_SECOND);
       } else {
         superstructure_goal->set_score_goal(
-            c2019::superstructure::LIMELIGHT_OVERRIDE);
+            c2019::superstructure::HATCH_ROCKET_SECOND);
         if (has_hp_hatch_) {
           superstructure_goal->set_intake_goal(
               c2019::superstructure::PREP_SCORE);
         }
       }
     } else {
-      superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
+      superstructure_goal->set_score_goal(c2019::superstructure::KISS);
     }
   }
   if (level_3_->is_pressed()) {
@@ -423,7 +466,7 @@ void TeleopBase::SendSuperstructureMessage() {
         }
       }
     } else {
-      superstructure_goal->set_score_goal(c2019::superstructure::CRAWL);
+      superstructure_goal->set_score_goal(c2019::superstructure::CLIMB);
     }
   }
 
@@ -433,13 +476,18 @@ void TeleopBase::SendSuperstructureMessage() {
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
-  if (drop_crawlers_->is_pressed() &&
-      (safety_->is_pressed() || safety2_->is_pressed())) {
-    superstructure_goal->set_score_goal(c2019::superstructure::DROP_CRAWLERS);
-  }
   if (winch_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {
     superstructure_goal->set_score_goal(c2019::superstructure::WINCH);
+  }
+
+  if (safety_->is_pressed() && safety2_->is_pressed()) {
+    if (hp_hatch_intake_->is_pressed()) {
+      superstructure_goal->set_manual_left_winch(true);
+    }
+    if (hp_hatch_outtake_->is_pressed()) {
+      superstructure_goal->set_manual_right_winch(true);
+    }
   }
   /*if (brake_->is_pressed() &&
       (safety_->is_pressed() || safety2_->is_pressed())) {

@@ -25,7 +25,7 @@ namespace superstructure {
 constexpr double kHatchShipForwardsHeight = 0.;
 constexpr double kHatchShipBackwardsHeight = 0.2;
 constexpr double kHatchRocketFirstHeight = 0.;
-constexpr double kHatchRocketBackwardsHeight = 0.;
+constexpr double kHatchRocketBackwardsHeight = 0.2;
 constexpr double kHatchRocketSecondHeight = 0.987;
 constexpr double kHatchRocketThirdHeight = 1.75;
 constexpr double kHatchLoadingStationHeight = 0.089;
@@ -40,7 +40,7 @@ constexpr double kCargoGroundHeight = 0.;
 constexpr double kHandoffHeight = 0.257;
 constexpr double kSpitHeight = 0.;
 constexpr double kStowHeight = 0.;
-constexpr double kKissHeight = 1.405;
+constexpr double kKissHeight = 1.39;
 constexpr double kClimbHeight = 0.02;
 constexpr double kLandHeight = 0.312;
 constexpr double kElevatorSafeHeight = 0.71;

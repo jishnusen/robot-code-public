@@ -23,7 +23,7 @@ static constexpr double kHoldingVoltage =
     5;  // TODO(Apurva) find value for this
 static constexpr double kMaxVoltage = 12;
 
-constexpr double kFF = 2.;  // TODO(alex) double check values
+constexpr double kFF = 1.53;  // TODO(alex) double check values
 constexpr double kFFHatch = 0.5;
 constexpr double kFFCargo = 0.3;
 
@@ -39,19 +39,8 @@ class Wrist {
   void Update(const WristInputProto& input, WristOutputProto* output,
               WristStatusProto* status, bool outputs_enabled);
 
-  double TimeLeftUntil(double angle, double final_angle);
-
-  // Getter for hall calibration
-  inline bool is_calibrated() const {
-    return hall_calibration_.is_calibrated();
-  }
-
-  inline double offset() const { return hall_calibration_.offset(); }
-
  private:
   double goal_;
-
-  muan::control::HallCalibration hall_calibration_{kHallEffectAngle};
 };
 
 }  // namespace wrist

@@ -1,9 +1,11 @@
 #include "c2019/subsystems/limelight/limelight.h"
+#include "c2019/subsystems/superstructure/queue_types.h"
 #include <algorithm>
 #include <memory>
 #include <vector>
 
 using muan::queues::QueueManager;
+using c2019::superstructure::SuperstructureStatusProto;
 
 namespace c2019 {
 namespace limelight {
@@ -16,7 +18,7 @@ Limelight::Limelight(const double limelight_height,
       object_height_(object_height) {}
 
 void Limelight::operator()() {
-  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(15));
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
   aos::SetCurrentThreadRealtimePriority(10);
   muan::utils::SetCurrentThreadName("Limelight");
 
@@ -30,8 +32,12 @@ void Limelight::operator()() {
 }
 
 void Limelight::Update() {
+  SuperstructureStatusProto super_status;
+  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
+      &super_status);
   auto inst = nt::NetworkTableInstance::GetDefault();
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
+  std::shared_ptr<nt::NetworkTable> expensive_table = inst.GetTable("limelight-pricey");
   double target_vertical_angle = table->GetEntry("ty").GetDouble(0);
   double skew = table->GetEntry("ts").GetDouble(0);
   double target_horizontal_angle = table->GetEntry("tx").GetDouble(0);
@@ -58,6 +64,9 @@ void Limelight::Update() {
   double distance =
       2.497 * pow(target_dist_, 2) - 0.0397 * target_dist_ + 0.2124;
 
+  if (super_status->elevator_height() > 1.0) {
+    target_horizontal_angle = expensive_table->GetEntry("tx").GetDouble(-1000);
+  }
   horiz_angle_ = (target_horizontal_angle * (M_PI / 180.));
 
   double overall_tx = target_horizontal_angle / (59.6 * 0.5); // normalized tx
@@ -92,14 +101,14 @@ void Limelight::Update() {
   double has_target = table->GetEntry("tv").GetDouble(0);
   LimelightStatusProto status;
   status->set_target_dist(distance / 2.2);
-  status->set_skew(target_skew_);
+  status->set_skew(skew);
   status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
   status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
   status->set_to_the_left(to_the_left_);
   status->set_heading(heading_);
   status->set_has_target(has_target == 1);
   status->set_difference(difference);
-  status->set_horiz_angle(std::copysign(std::abs(horiz_angle_), horiz_angle_));
+  status->set_horiz_angle(horiz_angle_ * 1.667 * (0.42 / 0.58));
   status->set_overall_tx(target_horizontal_angle / (59.6 * 0.5));
   status->set_unfiltered_horiz_angle_1(target_1_horizontal_angle);
   status->set_unfiltered_horiz_angle_2(target_2_horizontal_angle);
@@ -116,8 +125,6 @@ void Limelight::Update() {
   status->set_back_horiz_angle(back_horiz_angle_);
   status->set_back_target_dist(back_distance / 2.2);
   status->set_back_has_target(static_cast<bool>(back_table->GetEntry("tv").GetDouble(0)));
-  status_queue_->WriteMessage(status);
-
   status_queue_->WriteMessage(status);
 }
 

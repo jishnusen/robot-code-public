@@ -35,29 +35,29 @@ SuperstructureInterface::SuperstructureInterface()
       output_reader_{
           QueueManager<SuperstructureOutputProto>::Fetch()->MakeReader()} {
   LoadGains();
-  wrist_.SetSelectedSensorPosition(0, 0, 100);
+  /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
 }
 
 void SuperstructureInterface::ReadSensors() {
   SuperstructureInputProto inputs;
 
-  inputs->set_hatch_ground_current(pdp_.GetCurrent(kGroundPDPSlot));
-  inputs->set_cargo_current(pdp_.GetCurrent(kCargoPDPSlot));
-  inputs->set_current_1(pdp_.GetCurrent(1));
-  inputs->set_current_2(pdp_.GetCurrent(2));
-  inputs->set_current_3(pdp_.GetCurrent(3));
-  inputs->set_current_4(pdp_.GetCurrent(4));
-  inputs->set_current_5(pdp_.GetCurrent(5));
-  inputs->set_current_6(pdp_.GetCurrent(6));
-  inputs->set_current_7(pdp_.GetCurrent(7));
-  inputs->set_current_8(pdp_.GetCurrent(8));
-  inputs->set_current_9(pdp_.GetCurrent(9));
-  inputs->set_current_10(pdp_.GetCurrent(10));
-  inputs->set_current_11(pdp_.GetCurrent(11));
-  inputs->set_current_12(pdp_.GetCurrent(12));
-  inputs->set_current_13(pdp_.GetCurrent(13));
-  inputs->set_current_14(pdp_.GetCurrent(14));
-  inputs->set_current_15(pdp_.GetCurrent(15));
+  /* inputs->set_hatch_ground_current(pdp_.GetCurrent(kGroundPDPSlot)); */
+  /* inputs->set_cargo_current(pdp_.GetCurrent(kCargoPDPSlot)); */
+  /* inputs->set_current_1(pdp_.GetCurrent(1)); */
+  /* inputs->set_current_2(pdp_.GetCurrent(2)); */
+  /* inputs->set_current_3(pdp_.GetCurrent(3)); */
+  /* inputs->set_current_4(pdp_.GetCurrent(4)); */
+  /* inputs->set_current_5(pdp_.GetCurrent(5)); */
+  /* inputs->set_current_6(pdp_.GetCurrent(6)); */
+  /* inputs->set_current_7(pdp_.GetCurrent(7)); */
+  /* inputs->set_current_8(pdp_.GetCurrent(8)); */
+  /* inputs->set_current_9(pdp_.GetCurrent(9)); */
+  /* inputs->set_current_10(pdp_.GetCurrent(10)); */
+  /* inputs->set_current_11(pdp_.GetCurrent(11)); */
+  /* inputs->set_current_12(pdp_.GetCurrent(12)); */
+  /* inputs->set_current_13(pdp_.GetCurrent(13)); */
+  /* inputs->set_current_14(pdp_.GetCurrent(14)); */
+  /* inputs->set_current_15(pdp_.GetCurrent(15)); */
   inputs->set_wrist_current(wrist_.GetOutputCurrent());
   inputs->set_elevator_current(elevator_master_.GetOutputCurrent());
   inputs->set_wrist_voltage(wrist_.GetMotorOutputVoltage());
@@ -65,19 +65,32 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed()) {
-    zeroed_ = true;
+  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && !elevator_zeroed_) {
+    elevator_zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
 
   inputs->set_elevator_hall(elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
 
-  inputs->set_elevator_zeroed(zeroed_);
+  inputs->set_elevator_zeroed(elevator_zeroed_);
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
-  inputs->set_wrist_hall(
-      !canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+  /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P)); */
+  inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
+
+  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) && !wrist_zeroed_) { */
+  /*   wrist_zeroed_ = true; */
+  /*   wrist_.SetSelectedSensorPosition(0, 0, 100); */
+  /* } */
+
+  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && !wrist_zeroed_) {
+    wrist_zeroed_ = true;
+    wrist_.SetSelectedSensorPosition(0, 0, 100);
+  }
+
+  inputs->set_wrist_zeroed(wrist_zeroed_);
+
   inputs->set_cargo_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P) ||
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
@@ -101,13 +114,18 @@ void SuperstructureInterface::LoadGains() {
   wrist_.Config_kF(0, kWristF, 100);
   wrist_.Config_IntegralZone(0, kWristIZone, 100);
 
+  wrist_.ConfigReverseLimitSwitchSource(
+      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
+  wrist_.ConfigForwardLimitSwitchSource(
+      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
+
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
-  elevator_master_.SetSelectedSensorPosition(0, 0, 100);
+  /* elevator_master_.SetSelectedSensorPosition(0, 0, 100); */
 
   wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
                                       0, 100);
-  wrist_.SetSelectedSensorPosition(0, 0, 100);
+  /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
 
   const bool elevator_inverted = false;
 

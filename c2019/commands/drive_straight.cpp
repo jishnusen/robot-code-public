@@ -33,11 +33,13 @@ void DriveStraight::operator()() {
   SetFieldPosition(1.8, 1.1, 0.0);
   LOG(INFO, "Running NONE auto");
 
-  // score hatch on right side, 2, of the CS
-  GoTo(superstructure::HATCH_SHIP_FORWARDS, superstructure::PREP_SCORE);
-  StartDrivePath(7.17, 1.3, -80 * (M_PI / 180), 1, true);
-
-  WaitUntilDrivetrainNear(7.1, 1.5, .15);
+  StartDrivePath(6.0, -3.7, -15 * (M_PI / 180.), 1, true);
+  Wait(100);
+  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  // Wann get reasonably close to rocket before starting vision, also enables
+  // smooth transition to vision
+  WaitUntilDrivetrainNear(4.3, -2.4, 0.6);
+  // WaitForElevatorAndLL();
   StartDriveVision();
 
   ScoreHatch(100);

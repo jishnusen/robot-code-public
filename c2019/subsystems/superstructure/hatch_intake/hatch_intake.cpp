@@ -57,12 +57,11 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
       break;
     case OUTTAKING:
       flutes = false;
-      backplate = true;
+      backplate = counter_ < 10;
       counter_++;
       if (counter_ > kScoreTicks) {
         counter_ = 0;
         flutes = false;
-        backplate = false;
         state_ = (IDLE);
       }
       break;
@@ -90,7 +89,17 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
     (*output)->set_backplate_solenoid(false);
   }
 
-  (*status)->set_has_hatch(input->hatch_proxy());
+  bool proxy = input->hatch_proxy();
+  if (!proxy && has_hatch_) {
+    counter_++;
+    if (counter_ > 50) {
+      has_hatch_ = false;
+      counter_ = 0;
+    }
+  } else {
+    has_hatch_ = proxy;
+  }
+  (*status)->set_has_hatch(has_hatch_);
   (*status)->set_state(state_);
 }
 
