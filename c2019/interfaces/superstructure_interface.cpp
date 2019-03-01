@@ -207,7 +207,7 @@ void SuperstructureInterface::WriteActuators() {
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
           DemandType_ArbitraryFeedForward,
-          outputs->elevator_setpoint_ff() / 12.);
+          /*outputs->elevator_setpoint_ff()*/ 1.4 / 12.);
       break;
   }
 
