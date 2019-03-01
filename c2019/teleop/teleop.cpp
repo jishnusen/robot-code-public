@@ -155,7 +155,7 @@ void TeleopBase::Update() {
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_)) {
     flash_ticks_left_ = 0;
   }
-  
+
   if (flash_ticks_left_ < 50) {
     flash_ = true;
     flash_ticks_left_++;
@@ -214,7 +214,7 @@ void TeleopBase::Update() {
   ds_sender_.Send();
 
   // Camera "logic"
-  
+
   std::string url = "limelight-front.local:5801";
 
   if (superstructure_status->wrist_angle() > 2.0) {
