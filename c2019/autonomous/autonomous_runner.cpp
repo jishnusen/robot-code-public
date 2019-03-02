@@ -17,7 +17,7 @@ AutonomousRunner::AutonomousRunner()
     : driver_station_reader_(
           QueueManager<DriverStationProto>::Fetch()->MakeReader()),
       auto_mode_reader_(WebDashQueueWrapper::GetInstance()
-                            .auto_selection_queue()
+                            .webdash_queue()
                             .MakeReader()) {}
 
 void AutonomousRunner::operator()() {

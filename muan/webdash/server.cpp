@@ -15,8 +15,8 @@ WebDashQueueWrapper& WebDashQueueWrapper::GetInstance() {
   return instance;
 }
 
-AutoSelectionQueue& WebDashQueueWrapper::auto_selection_queue() {
-  return auto_selection_queue_;
+WebdashQueue& WebDashQueueWrapper::webdash_queue() {
+  return webdash_queue_queue_;
 }
 
 struct AutoChangeHandler : seasocks::WebSocket::Handler {
@@ -27,7 +27,7 @@ struct AutoChangeHandler : seasocks::WebSocket::Handler {
 
     output_proto->set_auto_modes(data);
 
-    WebDashQueueWrapper::GetInstance().auto_selection_queue().WriteMessage(
+    WebDashQueueWrapper::GetInstance().webdash_queue().WriteMessage(
         output_proto);
   }
   void onDisconnect(seasocks::WebSocket* /*socket*/) override {}

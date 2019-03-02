@@ -14,6 +14,7 @@ using muan::queues::QueueManager;
 using muan::teleop::JoystickStatusProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
+using muan::webdash::AutoSelectionProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
 using c2019::commands::Command;
@@ -29,6 +30,8 @@ TeleopBase::TeleopBase()
           c2019::superstructure::SuperstructureGoalProto>::Fetch()},
       superstructure_status_queue_{QueueManager<
           c2019::superstructure::SuperstructureStatusProto>::Fetch()},
+      webdash_queue_{QueueManager<
+          muan::webdash::AutoSelectionProto>::Fetch()},
       ds_sender_{QueueManager<DriverStationProto>::Fetch(),
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
@@ -106,6 +109,8 @@ void TeleopBase::Stop() { running_ = false; }
 void TeleopBase::Update() {
   AutoStatusProto auto_status;
   AutoGoalProto auto_goal;
+
+  AutoSelectionProto webdash_proto;
 
   auto_status_reader_.ReadLastMessage(&auto_status);
 
@@ -211,6 +216,19 @@ void TeleopBase::Update() {
   }
 
   ds_sender_.Send();
+
+  // Camera "logic"
+
+  std::string url = "limelight-front.local:5801";
+
+  if (superstructure_status->wrist_angle() > 2.0) {
+    url = "limelight-back.local:5802";
+    } else {
+    url = "limelight-front.local:5802";
+  }
+
+  webdash_proto->set_stream_url(url);
+  webdash_queue_->WriteMessage(webdash_proto);
 }
 
 void TeleopBase::SendDrivetrainMessage() {

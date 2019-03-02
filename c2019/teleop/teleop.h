@@ -31,6 +31,7 @@ class TeleopBase {
   c2019::superstructure::SuperstructureGoalQueue *superstructure_goal_queue_;
   c2019::superstructure::SuperstructureStatusQueue
       *superstructure_status_queue_;
+  muan::webdash::AutoSelectionQueue *webdash_queue_;
   std::atomic<bool> running_;
 
   void Update();
