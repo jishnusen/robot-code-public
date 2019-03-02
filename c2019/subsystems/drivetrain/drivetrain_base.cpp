@@ -65,7 +65,7 @@ muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
       .dt = 0.01,
 
       .max_velocity = 6.5,
-      .max_acceleration = 9,
+      .max_acceleration = 7,
       .max_centripetal_acceleration = 13,
 
       .high_gear_properties = high_gear,

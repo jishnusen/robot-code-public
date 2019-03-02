@@ -8,6 +8,7 @@
   </body>
   <script>
     var datasock = new WebSocket("ws://" + document.location.host + "/data");
+    var prev_url = "";
 
     datasock.onmessage = function(data) {
       var data = JSON.parse(data.data);
@@ -15,7 +16,10 @@
     }
 
     function UpdateStream(data) {
-      document.body.innerHTML = "<img style=\"display:block; margin:auto; text-align:center; height:100%;\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
+      if (!(prev_url === data["webdash"]["streamUrl"])) {
+        document.body.innerHTML = "<img style=\"display:block; margin:auto; text-align:center; height:100%;\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
+      }
+      prev_url = data["webdash"]["streamUrl"];
     }
 
     // Starts UpdateDisplay function

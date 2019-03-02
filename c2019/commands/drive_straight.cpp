@@ -48,8 +48,8 @@ void DriveStraight::operator()() {
   ScoreHatch(50);  // Backplates suck
 
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  SetFieldPosition(5.0, 3.2, drive_status->estimated_heading());
-  StartDrivePath(0.5, 3.7, 0, -1, true, true);
+  SetFieldPosition(5.0, 3.3, drive_status->estimated_heading());
+  StartDrivePath(0.7, 3.7, 0, -1, true, true);
   Wait(50);
   GoTo(superstructure::HATCH_SHIP_BACKWARDS, superstructure::INTAKE_HATCH);
 
@@ -60,7 +60,9 @@ void DriveStraight::operator()() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
 
   SetFieldPosition(0.0, 3.3, drive_status->estimated_heading());
-  StartDrivePath(5.8, 2.5, 0, 1, true);
+  max_lin_ = 3.0;
+  max_lin_acc_ = 3.0;
+  StartDrivePath(5., 2.8, 160 * (M_PI / 180.), 1, true);
   Wait(50);
   GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
 

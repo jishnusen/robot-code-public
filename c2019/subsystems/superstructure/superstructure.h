@@ -128,6 +128,8 @@ class Superstructure {
   bool cargo_out_ = false;
   bool climbing_ = false;
   bool request_crawl_ = false;
+  bool backplate_safe_ = false;
+  int safe_ticks_ = 0;
 
   SuperstructureState state_ = SuperstructureState::CALIBRATING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;

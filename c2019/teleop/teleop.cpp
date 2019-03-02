@@ -221,7 +221,7 @@ void TeleopBase::Update() {
 
   std::string url = "limelight-front.local:5801";
 
-  if (superstructure_status->wrist_angle() > 2.0) {
+  if (superstructure_status->wrist_goal() > 1.57) {
     url = "limelight-back.local:5802";
     } else {
     url = "limelight-pricey.local:5802";

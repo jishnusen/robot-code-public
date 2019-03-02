@@ -73,6 +73,8 @@ class CommandBase {
 
   double max_path_acceleration_;
   double max_path_velocity_;
+  double max_lin_ = 6.5;
+  double max_lin_acc_ = 7;
 
   aos::time::PhasedLoop loop_{std::chrono::milliseconds(10)};
 };
