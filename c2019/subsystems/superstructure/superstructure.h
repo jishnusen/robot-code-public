@@ -22,20 +22,20 @@ namespace superstructure {
 
 // TODO(hanson) test these numbers
 // elevator constants
-constexpr double kHatchShipForwardsHeight = 0.03;
+constexpr double kHatchShipForwardsHeight = 0.018;
 constexpr double kHatchShipBackwardsHeight = 0.2;
-constexpr double kHatchRocketFirstHeight = 0.03;
+constexpr double kHatchRocketFirstHeight = 0.018;
 constexpr double kHatchRocketBackwardsHeight = 0.2;
 constexpr double kHatchRocketSecondHeight = 0.987;
-constexpr double kHatchRocketThirdHeight = 1.75;
+constexpr double kHatchRocketThirdHeight = 1.78;
 constexpr double kHatchLoadingStationHeight = 0.089;
 constexpr double kHatchGroundHeight = 0.;
 constexpr double kCargoShipForwardsHeight = 1.173;
 constexpr double kCargoShipBackwardsHeight = 0.643;
-constexpr double kCargoRocketFirstHeight = 0.089;
+constexpr double kCargoRocketFirstHeight = 0.148;
 constexpr double kCargoRocketBackwardsHeight = 0.116;
-constexpr double kCargoRocketSecondHeight = 0.938;
-constexpr double kCargoRocketThirdHeight = 1.768;
+constexpr double kCargoRocketSecondHeight = 0.972;
+constexpr double kCargoRocketThirdHeight = 1.78;
 constexpr double kCargoGroundHeight = 0.;
 constexpr double kHandoffHeight = 0.257;
 constexpr double kSpitHeight = 0.;
@@ -116,6 +116,8 @@ class Superstructure {
   bool high_gear_ = true;
   bool crawler_down_ = false;
   bool brake_ = false;
+  bool request_climb_ = false;
+  bool request_crawlers_ = false;
 
   bool should_climb_ = false;
   bool buddy_ = false;

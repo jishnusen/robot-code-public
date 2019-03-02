@@ -45,7 +45,7 @@ class TeleopBase {
   void SendSuperstructureMessage();
 
   // climbing buttons
-  muan::teleop::Button *crawl_, *drop_forks_, *drop_crawlers_, *winch_, *brake_;
+  muan::teleop::Button *crawl_, *drop_forks_, *drop_crawlers_, *brake_;
 
   // safety button
   muan::teleop::Button *safety_, *safety2_;
@@ -80,7 +80,8 @@ class TeleopBase {
 
   muan::teleop::Button *shifting_high_, *shifting_low_, *quickturn_,
       *exit_auto_;
-  muan::teleop::Button *test_auto_, *drive_straight_, *vision_, *vision_intake_;
+  muan::teleop::Button *test_auto_, *drive_straight_, *vision_, *vision_intake_,
+      *winch_, *winch_left_, *winch_right_;
 
   bool high_gear_;
   /* bool running_command_; */

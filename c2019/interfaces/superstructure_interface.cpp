@@ -65,21 +65,25 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && !elevator_zeroed_) {
+  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
+      !elevator_zeroed_) {
     elevator_zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
 
-  inputs->set_elevator_hall(elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
+  inputs->set_elevator_hall(
+      elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
 
   inputs->set_elevator_zeroed(elevator_zeroed_);
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
-  /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P)); */
+  /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
+   */
   inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
 
-  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) && !wrist_zeroed_) { */
+  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) &&
+   * !wrist_zeroed_) { */
   /*   wrist_zeroed_ = true; */
   /*   wrist_.SetSelectedSensorPosition(0, 0, 100); */
   /* } */
@@ -114,10 +118,10 @@ void SuperstructureInterface::LoadGains() {
   wrist_.Config_kF(0, kWristF, 100);
   wrist_.Config_IntegralZone(0, kWristIZone, 100);
 
-  wrist_.ConfigReverseLimitSwitchSource(
-      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
-  wrist_.ConfigForwardLimitSwitchSource(
-      LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
+  wrist_.ConfigReverseLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
+                                        LimitSwitchNormal_NormallyOpen, 100);
+  wrist_.ConfigForwardLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
+                                        LimitSwitchNormal_NormallyOpen, 100);
 
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
@@ -203,7 +207,7 @@ void SuperstructureInterface::WriteActuators() {
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
           DemandType_ArbitraryFeedForward,
-          outputs->elevator_setpoint_ff() / 12.);
+          /*outputs->elevator_setpoint_ff()*/ 1.4 / 12.);
       break;
   }
 
@@ -224,8 +228,7 @@ void SuperstructureInterface::WriteActuators() {
   crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
   winch_.Set(ControlMode::PercentOutput, -outputs->left_winch_voltage() / 12.);
   winch_two_.Set(ControlMode::PercentOutput,
-                           -outputs->right_winch_voltage() / 12.);
-
+                 -outputs->right_winch_voltage() / 12.);
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
   backplate_solenoid_.Set(outputs->backplate_solenoid());
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());

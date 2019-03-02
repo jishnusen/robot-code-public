@@ -77,6 +77,7 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
         backplate = false;
         state_ = (CARRYING);
       }
+      break;
   }
   if (outputs_enabled) {
     (*output)->set_flute_solenoid(flutes);
