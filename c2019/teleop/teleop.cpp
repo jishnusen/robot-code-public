@@ -37,8 +37,8 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
-  winch_left_ = throttle_.MakeButton(7);
-  winch_right_ = throttle_.MakeButton(10);
+  winch_left_ = throttle_.MakeButton(10);
+  winch_right_ = throttle_.MakeButton(7);
   // brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   drop_crawlers_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
@@ -180,7 +180,7 @@ void TeleopBase::Update() {
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
 
-  if (exit_auto_->was_clicked()) {
+  /*if (exit_auto_->was_clicked()) {
     auto_goal->set_run_command(false);
     auto_goal_queue_->WriteMessage(auto_goal);
   } else if (!auto_status->running_command()) {
@@ -208,7 +208,7 @@ void TeleopBase::Update() {
       std::thread test_auto_thread(test_auto_command);
       test_auto_thread.detach();
     }
-  }
+  }*/
 
   ds_sender_.Send();
 }

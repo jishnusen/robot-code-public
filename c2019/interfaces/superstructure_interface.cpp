@@ -207,7 +207,7 @@ void SuperstructureInterface::WriteActuators() {
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
           DemandType_ArbitraryFeedForward,
-          /*outputs->elevator_setpoint_ff()*/ 1.4 / 12.);
+          outputs->elevator_setpoint_ff() / 12.);
       break;
   }
 
@@ -222,6 +222,8 @@ void SuperstructureInterface::WriteActuators() {
                  outputs->wrist_setpoint_ff() / 12.);
       break;
   }
+
+  pins_.Set(outputs->pins());
 
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);

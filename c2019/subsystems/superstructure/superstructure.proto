@@ -182,4 +182,5 @@ message SuperstructureOutput {
   required bool brake = 20;
   required bool cargo_out = 21;
   required bool climbing = 22;
+  required bool pins = 23;
 }

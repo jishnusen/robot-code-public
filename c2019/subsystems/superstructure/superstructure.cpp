@@ -268,7 +268,8 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
-  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.3);
+  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.4);
+  output->set_pins(pins_);
 
   if (request_crawl_) {
     if (elevator_status_->elevator_height() < 0.08) {
@@ -412,6 +413,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       request_crawl_ = false;
       crawler_down_ = false;
       request_climb_ = false;
+      pins_ = true;
       break;
     case DROP_FORKS:
       buddy_ = true;
