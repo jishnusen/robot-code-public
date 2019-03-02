@@ -281,7 +281,7 @@ void TeleopBase::SendDrivetrainMessage() {
               std::copysign(std::abs(horiz_angle_) + 0.025, horiz_angle_);
           this_run_off_ = true;
         }
-        y_int = 0.4;
+        y_int = 0.5;
       }
     }
   }

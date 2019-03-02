@@ -104,10 +104,11 @@ void CommandBase::StartDriveVision() {
 
   while (lime_status->target_dist() > 0.63 && lime_status->has_target() &&
          IsAutonomous()) {
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.2 * lime_status->target_dist() - 0.76);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(-16.0 * lime_status->horiz_angle());
+    drivetrain_goal->mutable_arc_goal()->set_angular(
+        lime_status->horiz_angle());
+    drivetrain_goal->mutable_arc_goal()->set_linear(
+        (lime_status->target_dist() - 0.4) * 4.0);
+
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
@@ -133,10 +134,11 @@ void CommandBase::StartDriveVisionBackwards() {
   while (lime_status->back_target_dist() > 0.28 &&
          lime_status->back_has_target() && IsAutonomous()) {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(2.4 * (-lime_status->back_target_dist() - 0.1));
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(-18.0 * lime_status->back_horiz_angle());
+    drivetrain_goal->mutable_arc_goal()->set_angular(
+        lime_status->back_horiz_angle());
+    drivetrain_goal->mutable_arc_goal()->set_linear(
+        (lime_status->back_target_dist() + 0.3) * -4.0);
+
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     loop_.SleepUntilNext();
     std::cout << "back tracking" << std::endl;
@@ -156,8 +158,8 @@ void CommandBase::GoTo(superstructure::ScoreGoal score_goal,
 void CommandBase::WaitForElevatorAndLL() {
   SuperstructureStatusProto super_status;
   LimelightStatusProto lime_status;
-  while (!lime_status->has_target() && super_status->elevator_height() > 1.4 &&
-         IsAutonomous()) {
+  while (!lime_status->pricey_has_target() &&
+         super_status->elevator_height() < 0.6 && IsAutonomous()) {
     Wait(1);
     QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
         &super_status);
@@ -178,6 +180,7 @@ void CommandBase::ScoreHatch(int num_ticks) {
     SuperstructureGoalProto super_goal;
     super_goal->set_score_goal(superstructure::NONE);
     super_goal->set_intake_goal(superstructure::OUTTAKE_HATCH);
+    Wait(1);
 
     QueueManager<SuperstructureGoalProto>::Fetch()->WriteMessage(super_goal);
   }

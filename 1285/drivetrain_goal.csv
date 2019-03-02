@@ -1,0 +1,5 @@
+timestamp,high_gear,teleop_goal.throttle,teleop_goal.steering,teleop_goal.quick_turn,path_goal.x,path_goal.y,path_goal.heading,path_goal.max_voltage,path_goal.backwards,path_goal.extra_distance_initial,path_goal.extra_distance_final,path_goal.final_velocity,path_goal.final_angular_velocity,path_goal.max_linear_velocity,path_goal.max_linear_accel,path_goal.max_centripetal_accel,point_turn_goal,distance_goal,left_right_goal.left_goal,left_right_goal.right_goal,linear_angular_velocity_goal.linear_velocity,linear_angular_velocity_goal.angular_velocity,arc_goal.linear,arc_goal.angular,queue_index
+1421050,1,0,0,0,4.00804,2.48772,-0.264867,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+1422690,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+
