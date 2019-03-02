@@ -218,9 +218,9 @@ void TeleopBase::Update() {
   std::string url = "limelight-front.local:5801";
 
   if (superstructure_status->wrist_angle() > 2.0) {
-    url = "limelight-back:5802";
+    url = "limelight-back.local:5802";
     } else {
-    url = "limelight-front:5802";
+    url = "limelight-front.local:5802";
   }
 
   webdash_proto->set_stream_url(url);
