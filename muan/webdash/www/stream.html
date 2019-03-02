@@ -15,7 +15,7 @@
     }
 
     function UpdateStream(data) {
-      document.innerHTML = "<img src=\"http://" + data["auto_selection"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
+      document.body.innerHTML = "<img style=\"display:block; margin:auto; text-align:center; height:100%;\" src=\"http://" + data["auto_selection"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
     }
 
     // Starts UpdateDisplay function
