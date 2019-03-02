@@ -9,7 +9,7 @@ namespace c2019 {
 namespace autonomous {
 
 using muan::queues::QueueManager;
-using muan::webdash::AutoSelectionProto;
+using muan::webdash::WebdashProto;
 using muan::webdash::WebDashQueueWrapper;
 using muan::wpilib::DriverStationProto;
 
@@ -42,7 +42,7 @@ void AutonomousRunner::operator()() {
 }
 
 std::string AutonomousRunner::AutoMode() {
-  AutoSelectionProto auto_mode;
+  WebdashProto auto_mode;
   std::string final_auto_mode;
   if (auto_mode_reader_.ReadLastMessage(&auto_mode)) {
     std::string autonomous_mode = auto_mode->auto_modes();

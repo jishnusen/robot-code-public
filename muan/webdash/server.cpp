@@ -16,14 +16,14 @@ WebDashQueueWrapper& WebDashQueueWrapper::GetInstance() {
 }
 
 WebdashQueue& WebDashQueueWrapper::webdash_queue() {
-  return webdash_queue_queue_;
+  return webdash_queue_;
 }
 
 struct AutoChangeHandler : seasocks::WebSocket::Handler {
   void onConnect(seasocks::WebSocket* /*socket*/) override {}
 
   void onData(seasocks::WebSocket* /*socket*/, const char* data) override {
-    AutoSelectionProto output_proto;
+    WebdashProto output_proto;
 
     output_proto->set_auto_modes(data);
 

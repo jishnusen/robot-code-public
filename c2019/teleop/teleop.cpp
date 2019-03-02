@@ -14,7 +14,7 @@ using muan::queues::QueueManager;
 using muan::teleop::JoystickStatusProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
-using muan::webdash::AutoSelectionProto;
+using muan::webdash::WebdashProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
 using c2019::commands::Command;
@@ -31,7 +31,7 @@ TeleopBase::TeleopBase()
       superstructure_status_queue_{QueueManager<
           c2019::superstructure::SuperstructureStatusProto>::Fetch()},
       webdash_queue_{QueueManager<
-          muan::webdash::AutoSelectionProto>::Fetch()},
+          muan::webdash::WebdashProto>::Fetch()},
       ds_sender_{QueueManager<DriverStationProto>::Fetch(),
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
@@ -110,7 +110,7 @@ void TeleopBase::Update() {
   AutoStatusProto auto_status;
   AutoGoalProto auto_goal;
 
-  AutoSelectionProto webdash_proto;
+  WebdashProto webdash_proto;
 
   auto_status_reader_.ReadLastMessage(&auto_status);
 
