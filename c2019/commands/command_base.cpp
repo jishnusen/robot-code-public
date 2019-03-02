@@ -98,13 +98,20 @@ void CommandBase::StartDriveVision() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
+  while (!lime_status->limelight_ok() && IsAutonomous()) {
+    drivetrain_goal->mutable_linear_angular_velocity_goal()
+        ->set_linear_velocity(0);
+    drivetrain_goal->mutable_linear_angular_velocity_goal()
+        ->set_angular_velocity(0);
+    Wait(1);
+  }
   while (!lime_status->has_target() && IsAutonomous()) {
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
   while (lime_status->target_dist() > 0.63 && lime_status->has_target() &&
-         IsAutonomous()) {
+         IsAutonomous() && lime_status->limelight_ok()) {
     drivetrain_goal->mutable_arc_goal()->set_angular(
         lime_status->horiz_angle());
     drivetrain_goal->mutable_arc_goal()->set_linear(
@@ -114,17 +121,23 @@ void CommandBase::StartDriveVision() {
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
-
-  // start
-  while (lime_status->target_dist() > 0.63 && IsAutonomous()) {
-    Wait(1);
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-  }  // end
   drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(
       0);
   drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(
       0);
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
+  // start
+  while ((!lime_status->has_target() || !lime_status->limelight_ok()) &&
+         IsAutonomous()) {
+    Wait(1);
+    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+  }
+
+  while ((lime_status->target_dist() > 0.63 || !lime_status->limelight_ok()) &&
+         IsAutonomous()) {
+    Wait(1);
+    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+  }  // end
 }
 
 void CommandBase::StartDriveVisionBackwards() {

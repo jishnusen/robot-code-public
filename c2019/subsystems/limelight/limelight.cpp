@@ -39,9 +39,16 @@ void Limelight::Update() {
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
   std::shared_ptr<nt::NetworkTable> expensive_table =
       inst.GetTable("limelight-pricey");
-  double target_vertical_angle = table->GetEntry("ty").GetDouble(0);
-  double skew = table->GetEntry("ts").GetDouble(0);
-  double target_horizontal_angle = table->GetEntry("tx").GetDouble(0);
+  double target_vertical_angle = table->GetEntry("ty").GetDouble(-1000);
+  double skew = table->GetEntry("ts").GetDouble(-1000);
+  double target_horizontal_angle = table->GetEntry("tx").GetDouble(-1000);
+
+  LimelightStatusProto status;
+  status->set_limelight_ok(target_vertical_angle != -1000);
+  status->set_latency(table->GetEntry("tl").GetDouble(-1000));
+  if (status->latency() == prev_latency_) {
+    status->set_limelight_ok(false);
+  }
 
   //  slope_ = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
 
@@ -68,7 +75,6 @@ void Limelight::Update() {
   }
 
   double has_target = table->GetEntry("tv").GetDouble(0);
-  LimelightStatusProto status;
   status->set_target_dist(distance / 2.2);
   status->set_skew(skew);
   status->set_has_target(has_target == 1);

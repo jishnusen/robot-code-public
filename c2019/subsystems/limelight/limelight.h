@@ -42,6 +42,8 @@ class Limelight {
   double back_target_dist_;
   double pricey_horiz_angle_;
   double pricey_target_dist_;
+  double prev_latency_;
+
   std::atomic<bool> running_;
 };
 }  // namespace limelight
