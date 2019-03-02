@@ -84,25 +84,27 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
 
   const Pose inital_pose{*cartesian_position_, *integrated_heading_};
 
+  Eigen::Vector2d linear_angular_velocity = *linear_angular_velocity_;
+  if (path_goal.full_send()) {
+    linear_angular_velocity = Eigen::Vector2d(0, 0);
+  }
   const HermiteSpline path{inital_pose,
                            goal_pose,
-                           (*linear_angular_velocity_)(0),
+                           (linear_angular_velocity)(0),
                            path_goal.final_velocity(),
                            path_goal.backwards(),
                            path_goal.extra_distance_initial(),
                            path_goal.extra_distance_final(),
-                           (*linear_angular_velocity_)(1),
+                           (linear_angular_velocity)(1),
                            path_goal.final_angular_velocity()};
 
-  const double max_velocity =
-      path_goal.has_max_linear_velocity()
-          ? path_goal.max_linear_velocity()
-          : dt_config_.max_velocity;
+  const double max_velocity = path_goal.has_max_linear_velocity()
+                                  ? path_goal.max_linear_velocity()
+                                  : dt_config_.max_velocity;
   const double max_voltage = path_goal.max_voltage();
-  const double max_acceleration =
-      path_goal.has_max_linear_accel()
-          ? path_goal.max_linear_accel()
-          : dt_config_.max_acceleration;
+  const double max_acceleration = path_goal.has_max_linear_accel()
+                                      ? path_goal.max_linear_accel()
+                                      : dt_config_.max_acceleration;
   const double max_centripetal_acceleration =
       path_goal.has_max_centripetal_accel()
           ? path_goal.max_centripetal_accel()
@@ -154,7 +156,8 @@ void ClosedLoopDrive::UpdatePointTurn(OutputProto* output,
 }
 
 void ClosedLoopDrive::UpdateDistance(OutputProto* output, StatusProto* status) {
-  Eigen::Vector2d delta = model_.InverseKinematics(Eigen::Vector2d(distance_goal_, 0));
+  Eigen::Vector2d delta =
+      model_.InverseKinematics(Eigen::Vector2d(distance_goal_, 0));
 
   (*status)->set_closed_loop_control_mode(control_mode_);
 
@@ -173,7 +176,8 @@ void ClosedLoopDrive::UpdateLeftRightManual(OutputProto* output,
 }
 
 void ClosedLoopDrive::UpdateLinearAngularVelocity(OutputProto* output) {
-  auto left_right = model_.InverseKinematics(Eigen::Vector2d(lin_vel_goal_, ang_vel_goal_));
+  auto left_right =
+      model_.InverseKinematics(Eigen::Vector2d(lin_vel_goal_, ang_vel_goal_));
   (*output)->set_output_type(VELOCITY);
   (*output)->set_left_setpoint(left_right(0));
   (*output)->set_right_setpoint(left_right(1));

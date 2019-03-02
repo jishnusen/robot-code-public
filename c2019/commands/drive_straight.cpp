@@ -51,12 +51,12 @@ void DriveStraight::operator()() {
   double init_heading = 0.0;
   double gyro_heading = drive_status->estimated_heading();
   double heading_offset = -(init_heading - gyro_heading);
-  SetFieldPosition(1.8, 1.2, init_heading);
+  SetFieldPosition(0.5, 1.2, init_heading);
   LOG(INFO, "Running NONE auto");
   // Move to 1st level height & socre hatch L1 rocket
   GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
 
-  StartDrivePath(5.0, 4.0, 10 * (M_PI / 180.), 1, true);
+  StartDrivePath(5.0, 4.0, 10 * (M_PI / 180.), 1, true, false, 1.3);
   Wait(50);
   GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
   // Wann get reasonably close to rocket before starting vision, also enables
@@ -68,7 +68,7 @@ void DriveStraight::operator()() {
 
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   SetFieldPosition(5.0, 3.2, drive_status->estimated_heading());
-  StartDrivePath(0.5, 3.3, 0, -1, true);
+  StartDrivePath(0.5, 3.7, 0, -1, true, true, 0., 1.5);
   Wait(50);
   GoTo(superstructure::HATCH_SHIP_BACKWARDS, superstructure::INTAKE_HATCH);
 
@@ -79,11 +79,12 @@ void DriveStraight::operator()() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
 
   SetFieldPosition(0.0, 3.3, drive_status->estimated_heading());
-  StartDrivePath(6.1, 3.4, 120 * (M_PI / 180.), 1, true);
+  StartDrivePath(5.9, 3.3, 160 * (M_PI / 180.), 1, true);
   Wait(50);
   GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
 
   WaitUntilDriveComplete();
+  ExitAutonomous();
   return;
 
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
@@ -104,7 +105,7 @@ void DriveStraight::operator()() {
   // Resetting field position again because we are in a known location
   //(Loading
   // station)
-  SetFieldPosition(0.5, -3.4,
+  SetFieldPosition(0.5, -3.2,
                    drive_status->estimated_heading() + heading_offset);
 
   StartDrivePath(7.23, -3.5, -128 * (M_PI / 180.), 1, true);

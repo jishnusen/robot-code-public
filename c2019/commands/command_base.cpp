@@ -55,7 +55,7 @@ void CommandBase::ExitAutonomous() {
 }
 
 void CommandBase::StartDrivePath(double x, double y, double heading,
-                                 int direction, bool gear,
+                                 int direction, bool gear, bool full_send,
                                  double extra_distance_initial,
                                  double extra_distance_final,
                                  double path_voltage) {
@@ -74,6 +74,7 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
   goal->mutable_path_goal()->set_max_voltage(path_voltage);
   goal->mutable_path_goal()->set_extra_distance_initial(extra_distance_initial);
   goal->mutable_path_goal()->set_extra_distance_final(extra_distance_final);
+  goal->mutable_path_goal()->set_full_send(full_send);
 
   goal->set_high_gear(gear);
 
@@ -107,12 +108,18 @@ void CommandBase::StartDriveVision() {
     drivetrain_goal->mutable_arc_goal()->set_angular(
         lime_status->horiz_angle());
     drivetrain_goal->mutable_arc_goal()->set_linear(
-        (lime_status->target_dist() - 0.4) * 4.0);
+        (lime_status->target_dist() - 0.5) * 4.0);
 
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
+
+  // start
+  while (lime_status->target_dist() > 0.63 && IsAutonomous()) {
+    Wait(1);
+    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+  }  // end
   drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(
       0);
   drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(

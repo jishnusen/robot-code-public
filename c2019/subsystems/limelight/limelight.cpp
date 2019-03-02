@@ -18,7 +18,7 @@ Limelight::Limelight(const double limelight_height,
       object_height_(object_height) {}
 
 void Limelight::operator()() {
-  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(15));
   aos::SetCurrentThreadRealtimePriority(10);
   muan::utils::SetCurrentThreadName("Limelight");
 
@@ -42,20 +42,9 @@ void Limelight::Update() {
   double target_vertical_angle = table->GetEntry("ty").GetDouble(0);
   double skew = table->GetEntry("ts").GetDouble(0);
   double target_horizontal_angle = table->GetEntry("tx").GetDouble(0);
-  double target_1_horizontal_angle =
-      table->GetEntry("tx0").GetDouble(-1000) * (59.6 / 2.0) * (M_PI / 180.);
-  double target_2_horizontal_angle =
-      table->GetEntry("tx1").GetDouble(-1000) * (59.6 / 2.0) * (M_PI / 180.);
-  double target_3_horizontal_angle =
-      table->GetEntry("tx2").GetDouble(-1000) * (59.6 / 2.0) * (M_PI / 180.);
-
-  std::vector<double> zero = {0, 0};
-  std::vector<double> y_corner = table->GetEntry("tcorny").GetDoubleArray(zero);
-  std::vector<double> x_corner = table->GetEntry("tcornx").GetDoubleArray(zero);
 
   //  slope_ = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
 
-  table->PutNumber("pipeline", 0);
   target_dist_ =
       std::tan((target_vertical_angle + limelight_angle_) * (M_PI / 180.)) *
       (limelight_height_ - object_height_ * 0.0254);
@@ -70,31 +59,6 @@ void Limelight::Update() {
   }
   horiz_angle_ = (target_horizontal_angle * (M_PI / 180.));
 
-  double overall_tx = target_horizontal_angle / (59.6 * 0.5);  // normalized tx
-  std::array<double, 3> horiz_angles = {
-      table->GetEntry("tx0").GetDouble(-1000),
-      table->GetEntry("tx1").GetDouble(-1000),
-      table->GetEntry("tx2").GetDouble(-1000)};
-  std::sort(horiz_angles.begin(), horiz_angles.end());
-  for (double angle : horiz_angles) {
-    if (angle < overall_tx) {
-      target_1_horizontal_angle_ = angle;
-    }
-  }
-  std::sort(horiz_angles.begin(), horiz_angles.end());
-  std::reverse(horiz_angles.begin(), horiz_angles.end());
-
-  for (double angle : horiz_angles) {
-    if (angle > overall_tx) {
-      target_2_horizontal_angle_ = angle;
-    }
-  }
-
-  target_1_horizontal_angle_ =
-      target_1_horizontal_angle_ * (59.6 * 0.5) * (M_PI / 180.);
-  target_2_horizontal_angle_ =
-      target_2_horizontal_angle_ * (59.6 * 0.5) * (M_PI / 180.);
-  double difference = target_1_horizontal_angle - target_2_horizontal_angle;
   if (skew > -45) {
     heading_ = std::abs(skew / 8.);
     to_the_left_ = true;
@@ -107,17 +71,8 @@ void Limelight::Update() {
   LimelightStatusProto status;
   status->set_target_dist(distance / 2.2);
   status->set_skew(skew);
-  status->set_target_1_horizontal_angle(target_1_horizontal_angle_);
-  status->set_target_2_horizontal_angle(target_2_horizontal_angle_);
-  status->set_to_the_left(to_the_left_);
-  status->set_heading(heading_);
   status->set_has_target(has_target == 1);
-  status->set_difference(difference);
   status->set_horiz_angle(horiz_angle_ * 1.667 * (0.42 / 0.58));
-  status->set_overall_tx(target_horizontal_angle / (59.6 * 0.5));
-  status->set_unfiltered_horiz_angle_1(target_1_horizontal_angle);
-  status->set_unfiltered_horiz_angle_2(target_2_horizontal_angle);
-  status->set_unfiltered_horiz_angle_3(target_3_horizontal_angle);
 
   std::shared_ptr<nt::NetworkTable> back_table =
       inst.GetTable("limelight-back");
