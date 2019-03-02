@@ -17,7 +17,7 @@
 
             "name": "Video Stream",
             "type": "image",
-            "source": ["auto_selection", "streamUrl"],
+            "source": ["webdash", "streamUrl"],
             "coordinates": [1,1],
             "should-title": false
         },
