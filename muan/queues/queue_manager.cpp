@@ -28,7 +28,6 @@ void Start() {
   logger_thread.detach();
 
   webdash = std::make_unique<webdash::WebDashRunner>();
-  webdash->AddQueue("auto_selection", &WebDashQueueWrapper::GetInstance().auto_selection_queue());
   std::thread webdash_thread{std::ref(*webdash)};
   webdash_thread.detach();
 }
