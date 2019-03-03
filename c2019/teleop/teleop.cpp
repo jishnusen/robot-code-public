@@ -217,17 +217,25 @@ void TeleopBase::Update() {
 
   ds_sender_.Send();
 
-  // Camera "logic"
+  // Camera stream "logic"
 
-  std::string url = "limelight-front.local:5801";
+  std::string url = "limelight-front.:5801";
+  bool camera_flipped = false;
+
+  table->PutNumber("stream",2);
+  back_table->PutNumber("stream",2);
+  expensive_table->PutNumber("stream",2);
 
   if (superstructure_status->wrist_goal() > 1.57) {
-    url = "limelight-back.local:5802";
+      url = "limelight-back.local:5800";
+      camera_flipped = true;
     } else {
-    url = "limelight-pricey.local:5802";
+    url = "limelight-pricey.local:5800";
+      camera_flipped = true;
   }
 
   webdash_proto->set_stream_url(url);
+  webdash_proto->set_flipped(camera_flipped);
   webdash_queue_->WriteMessage(webdash_proto);
 }
 

@@ -4,7 +4,7 @@
   <head>
     <link href = "/display.css" type = "text/css" rel ="stylesheet" />
   </head>
-  <body>
+  <body bgcolor="#d3d3d3">
   </body>
   <script>
     var datasock = new WebSocket("ws://" + document.location.host + "/data");
@@ -17,8 +17,12 @@
 
     function UpdateStream(data) {
       if (!(prev_url === data["webdash"]["streamUrl"])) {
-        document.body.innerHTML = "<img style=\"display:block; margin:auto; text-align:center; height:100%;\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
+        if (!data["webdash"]["flipped"]) {
+          document.body.innerHTML = "<img style=\"display:block; margin:auto; text-align:center; height:100%;\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
+      } else {
+        document.body.innerHTML = "<img style=\"display:block;-webkit-transform:scaleY(-1); transform:scaleY(-1); margin:auto; text-align:center; height:100%;\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
       }
+    }
       prev_url = data["webdash"]["streamUrl"];
     }
 
