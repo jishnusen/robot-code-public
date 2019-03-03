@@ -22,9 +22,9 @@ namespace superstructure {
 
 // TODO(hanson) test these numbers
 // elevator constants
-constexpr double kHatchShipForwardsHeight = 0.018;
+constexpr double kHatchShipForwardsHeight = 0.07;
 constexpr double kHatchShipBackwardsHeight = 0.2;
-constexpr double kHatchRocketFirstHeight = 0.018;
+constexpr double kHatchRocketFirstHeight = 0.07;
 constexpr double kHatchRocketBackwardsHeight = 0.2;
 constexpr double kHatchRocketSecondHeight = 0.987;
 constexpr double kHatchRocketThirdHeight = 1.78;
