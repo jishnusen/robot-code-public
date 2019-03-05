@@ -129,7 +129,7 @@ void TeleopBase::Update() {
       inst.GetTable("limelight-pricey");
 
   if (RobotController::IsSysActive()) {
-    if (DriverStation::GetInstance().IsOperatorControl()) {
+    if (!auto_status->running_command()) {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }
@@ -151,8 +151,11 @@ void TeleopBase::Update() {
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
     back_table->PutNumber("ledMode", flash_ ? 2 : 1);
-    expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
+    expensive_table->PutNumber("ledMode", 1);
   }
+
+  back_table->PutNumber("stream", 2);
+  expensive_table->PutNumber("stream", 2);
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
@@ -222,12 +225,12 @@ void TeleopBase::Update() {
 
   // Camera "logic"
 
-  std::string url = "limelight-front.local:5801";
+  std::string url = "";
 
   if (superstructure_status->wrist_goal() > 1.57) {
-    url = "limelight-back.local:5802";
+    url = "limelight-back.local:5800";
   } else {
-    url = "limelight-pricey.local:5802";
+    url = "limelight-pricey.local:5800";
   }
 
   webdash_proto->set_stream_url(url);
@@ -333,7 +336,7 @@ void TeleopBase::SendDrivetrainMessage() {
     /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
     drivetrain_goal->mutable_arc_goal()->set_linear((target_dist_ - y_int) *
-                                                    distance_factor_ * 4.0);
+                                                    distance_factor_ * 6.0);
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);

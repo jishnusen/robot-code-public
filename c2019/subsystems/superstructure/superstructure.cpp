@@ -50,15 +50,6 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
     force_backplate_ = false;
   }
 
-  /*if (!backplate_safe_) {
-    if (wrist_status_->wrist_angle() > 1.57) {
-      *wrist_goal = muan::utils::Cap(*wrist_goal, kWristSafeBackwardsAngle,
-                                     wrist::kMaxAngle);
-    } else {
-      *wrist_goal = wrist::kMinAngle;
-    }
-  }*/
-
   if ((*wrist_goal > kWristSafeBackwardsAngle &&
        wrist_status_->wrist_angle() < kWristSafeBackwardsAngle) ||
       (*wrist_goal < kWristSafeForwardsAngle &&
@@ -258,12 +249,6 @@ void Superstructure::Update() {
 
   output->set_arrow_solenoid(hatch_intake_output->flute_solenoid());
   output->set_backplate_solenoid(hatch_intake_output->backplate_solenoid());
-  /*if (!output->backplate_solenoid()) {
-    safe_ticks_++;
-  } else {
-    safe_ticks_ = 0;
-  }
-  backplate_safe_ = safe_ticks_ > 25;*/
   output->set_cargo_roller_voltage(cargo_intake_output->roller_voltage());
   output->set_hatch_roller_voltage(
       ground_hatch_intake_output->roller_voltage());

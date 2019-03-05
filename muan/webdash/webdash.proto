@@ -6,6 +6,10 @@ package muan.webdash;
 
 message Webdash {
   required uint64 timestamp = 1;
+  required string stream_url = 2;
+}
+
+message Auto {
+  required uint64 timestamp = 1;
   required string auto_modes = 2;
-  required string stream_url = 3;
 }
