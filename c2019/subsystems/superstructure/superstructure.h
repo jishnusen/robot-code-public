@@ -21,9 +21,9 @@ namespace c2019 {
 namespace superstructure {
 
 // elevator constants
-constexpr double kHatchShipForwardsHeight = 0.07;
+constexpr double kHatchShipForwardsHeight = 0.1;
 constexpr double kHatchShipBackwardsHeight = 0.2;
-constexpr double kHatchRocketFirstHeight = 0.07;
+constexpr double kHatchRocketFirstHeight = 0.1;
 constexpr double kHatchRocketBackwardsHeight = 0.2;
 constexpr double kHatchRocketSecondHeight = 0.987;
 constexpr double kHatchRocketThirdHeight = 1.78;
@@ -41,6 +41,7 @@ constexpr double kSpitHeight = 0.;
 constexpr double kStowHeight = 0.;
 constexpr double kKissHeight = 1.39;
 constexpr double kClimbHeight = 0.05;
+constexpr double kCrawlerHeight = 1.62;
 constexpr double kLandHeight = 0.312;
 constexpr double kElevatorSafeHeight = 0.71;
 constexpr double kElevatorPassThroughHeight = 0.023;

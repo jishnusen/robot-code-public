@@ -1,8 +1,8 @@
 #!/usr/bin/python
 from collections import OrderedDict
-from Tkinter import Tk, BOTH, N, S, E, W, Toplevel, StringVar, IntVar, Frame, HORIZONTAL, VERTICAL
-from ttk import Button, Style, Treeview, Scrollbar, Radiobutton, Checkbutton
-import tkFileDialog, tkMessageBox
+from tkinter import Tk, BOTH, N, S, E, W, Toplevel, StringVar, IntVar, Frame, HORIZONTAL, VERTICAL
+from tkinter.ttk import Button, Style, Treeview, Scrollbar, Radiobutton, Checkbutton
+import tkfiledialog, tkMessageBox
 from hackplotlib import HackPlot
 import sys, csv, os.path
 

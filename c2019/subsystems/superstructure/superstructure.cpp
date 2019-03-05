@@ -268,7 +268,7 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
-  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.4);
+  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.5);
   output->set_pins(pins_);
 
   if (request_crawl_) {
@@ -419,10 +419,10 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       buddy_ = true;
       break;
     case DROP_CRAWLERS:
-      elevator_height_ = kHatchRocketThirdHeight;
+      elevator_height_ = kCrawlerHeight;
       wrist_angle_ = kHatchForwardsAngle;
       request_crawlers_ = true;
-      if (status_->elevator_height() > kHatchRocketThirdHeight - .1) {
+      if (status_->elevator_height() > kCrawlerHeight - .03) {
         crawler_down_ = true;
       }
       break;
