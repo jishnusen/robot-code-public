@@ -26,92 +26,113 @@ bool DriveStraight::IsAutonomous() {
 
 void DriveStraight::operator()() {
   EnterAutonomous();
-  /* LimelightStatusProto status; */
-  /* if (!QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&status))
-   * { */
-  /*   LOG(WARNING, "No limelight status message provided wahhhhh."); */
-  /*   ExitAutonomous(); */
-  /*   return; */
-  /* } */
 
-  /* if (!status->has_target()) { */
-  /*   LOG(WARNING, "we fucked up sorry livy"); */
-  /*   ExitAutonomous(); */
-  /*   return; */
-  /* } */
-
-  // Set field position to right side of L1 HAB
-  // SetFieldPosition(0.5, -3.4, 0);
-  // StartDrivePath(6.5, -3.4, -120 * (M_PI / 180.), 1, true);
-  // WaitUntilDriveComplete();
-  // ExitAutonomous();
-  // return;
   DrivetrainStatus drive_status;
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   double init_heading = 0.0;
   double gyro_heading = drive_status->estimated_heading();
   double heading_offset = -(init_heading - gyro_heading);
-  SetFieldPosition(1.8, -1.2, init_heading);
+  SetFieldPosition(1.8, 1.2, init_heading);
   LOG(INFO, "Running NONE auto");
   // Move to 1st level height & socre hatch L1 rocket
+  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
 
-  StartDrivePath(6.0, -3.7, -15 * (M_PI / 180.), 1, true);
-  Wait(100);
+  StartDrivePath(5.0, 4.0, 10 * (M_PI / 180.), 1, true, false);
+  Wait(50);
   GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
   // Wann get reasonably close to rocket before starting vision, also enables
   // smooth transition to vision
-  WaitUntilDrivetrainNear(4.3, -2.4, 0.6);
+  WaitUntilDrivetrainNear(1.8 + 1.4, 1.2 + 1.0, 0.6);
   // WaitForElevatorAndLL();
   StartDriveVision();
   ScoreHatch(50);  // Backplates suck
-  Wait(50);
 
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  // Update field position to account for yeeting self off L1 HAB
-  SetFieldPosition(5.0, -3.2,
-                   drive_status->estimated_heading() + heading_offset);
-  // Begin reverse path to loading station
-  StartDrivePath(1.8, -3.25, 0, -1, true);
-  Wait(25);
+  SetFieldPosition(5.0, 3.3, drive_status->estimated_heading());
+  StartDrivePath(0.7, 3.7, 0, -1, true, true);
+  Wait(50);
   GoTo(superstructure::HATCH_SHIP_BACKWARDS, superstructure::INTAKE_HATCH);
-  WaitUntilDrivetrainNear(2.4, -3.08, 0.3);
-  WaitForBackLL();
 
-  // Activate vision once dt is reasonably near loading station
+  WaitUntilDrivetrainNear(3.0, 3.3, 0.5);
+  WaitForBackLL();
+  StartDriveVisionBackwards();
+
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+
+  SetFieldPosition(0.0, 3.3, drive_status->estimated_heading());
+  max_lin_ = 3.0;
+  max_lin_acc_ = 3.0;
+  StartDrivePath(5., 2.8, 160 * (M_PI / 180.), 1, true);
+  Wait(50);
+  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+
+  WaitUntilDriveComplete();
+  ExitAutonomous();
+  return;
+
+  ScoreHatch(100);
+  Wait(100);
+
+
+  // Go pick up hatch from left loading station
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+  SetFieldPosition(7.1, 1, drive_status->estimated_heading()); // At left 2nd CS
+  StartDrivePath(5, 2.4, -40 * (M_PI / 180), -1, true);
+
+  WaitUntilDrivetrainNear(5.2, 2.4, 0.2);
+  StartDrivePath(.2, 3.4  , 0 , -1, true);
+
+  // Wait(75);
+  // GoTo(superstructure::HATCH_SHIP_BACKWARDS, superstructure::INTAKE_HATCH);
+
+  WaitUntilDrivetrainNear(.6, 3.3, .15);
   StartDriveVisionBackwards();
 
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   // Resetting field position again because we are in a known location
   //(Loading
   // station)
-  SetFieldPosition(0.5, -3.4,
+  SetFieldPosition(0.5, -3.2,
                    drive_status->estimated_heading() + heading_offset);
 
-  StartDrivePath(7.23, -3.5, -128 * (M_PI / 180.), 1, true);
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
-  Wait(100);
+  /*QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+  SetFieldPosition(0, 3.45, drive_status->estimated_heading()); // At LS
 
-  // Waiting to activate vision until elevator/wrist are not covering LL FOV
-  Wait(300);
-  WaitForElevatorAndLL();
-  StartDriveVision();
-  ScoreHatch(100);
+  StartDrivePath(5, 2.4, -40 * (M_PI / 180), 1, true);
+
+  WaitUntilDrivetrainNear(5.2, 2.4, 0.2);
+  StartDrivePath(7.6, 1.3  , 80 * (M_PI / 180) , 1, true);
+
+  Wait(100);
+  GoTo(superstructure::HATCH_SHIP_FORWARDS, superstructure::PREP_SCORE);
+
+  WaitUntilDrivetrainNear(7.7,-1.7, .1);
+  StartDriveVision();*/
+
+
+/*
+
+
   Wait(50);
-  ExitAutonomous();  // bye
-  return;
-  // Reset field position (again)
+
+
+  ScoreHatch(1);
+  Wait(50);
+
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  SetFieldPosition(6.6, -3.48, drive_status->estimated_heading() +
-                                   heading_offset);  // Should be -150
-  // Drive to loading station to be ready to intake another hatch in teleop
-  StartDrivePath(7.2, -2.48, 180 * (M_PI / 180), -1, true);
-  WaitUntilDriveComplete();
-  StartDrivePath(2.6, -2.9, 180 * (M_PI / 180), 1, true);
-  // WaitUntilDrivetrainNear(2.2, -2.4, 0.3);
-  // GoTo(superstructure::CARGO_GROUND, superstructure::INTAKE_CARGO);
-  // Wait(100);
-  // StartDrivePath(5.8, -2.4, -90 * (M_PI / 180), -1, true);
-  WaitUntilDriveComplete();
+  SetFieldPosition(7.7, 1, drive_status->estimated_heading()); // At left CS
+
+  StartDrivePath(5, 2.4, -40 * (M_PI / 180), -1, true);
+
+  WaitUntilDrivetrainNear(5.2, 2.4, 0.2);
+  StartDrivePath(.2, 3.4  , 0 , -1, true);
+
+  // Wait(75);
+  // GoTo(superstructure::HATCH_SHIP_BACKWARDS, superstructure::INTAKE_HATCH);
+
+  WaitUntilDrivetrainNear(.6, 3.3, .15);
+  StartDriveVisionBackwards();
+  */
   ExitAutonomous();  // bye
 }
 

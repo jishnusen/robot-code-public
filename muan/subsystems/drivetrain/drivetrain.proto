@@ -115,6 +115,8 @@ message DrivetrainGoal {
     optional double max_linear_velocity = 10;
     optional double max_linear_accel = 11;
     optional double max_centripetal_accel = 12;
+
+    optional bool full_send = 13;
   }
 
   message LeftRightGoal {

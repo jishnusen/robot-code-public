@@ -31,6 +31,7 @@ class TeleopBase {
   c2019::superstructure::SuperstructureGoalQueue *superstructure_goal_queue_;
   c2019::superstructure::SuperstructureStatusQueue
       *superstructure_status_queue_;
+  muan::webdash::WebdashQueue *webdash_queue_;
   std::atomic<bool> running_;
 
   void Update();
@@ -73,6 +74,9 @@ class TeleopBase {
   bool had_cargo_ = false;
   bool had_hp_hatch_ = false;
   bool had_ground_hatch_ = false;
+
+  bool climb_mode_ = false;
+  int counter_ = 0;
 
   // vision buttons
   commands::AutoStatusQueue::QueueReader auto_status_reader_;

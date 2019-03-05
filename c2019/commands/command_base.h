@@ -33,7 +33,7 @@ class CommandBase {
 
   void StartDrivePath(double x, double y, double heading,
                       int force_direction = 0, bool gear = true,
-                      double extra_distance_initial = 0,
+                      bool full_send = false, double extra_distance_initial = 0,
                       double extra_distance_final = 0,
                       double path_voltage = 12.0);
 
@@ -73,6 +73,8 @@ class CommandBase {
 
   double max_path_acceleration_;
   double max_path_velocity_;
+  double max_lin_ = 6.5;
+  double max_lin_acc_ = 7;
 
   aos::time::PhasedLoop loop_{std::chrono::milliseconds(10)};
 };

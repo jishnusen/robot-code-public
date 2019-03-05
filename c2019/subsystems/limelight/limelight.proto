@@ -6,6 +6,7 @@ package c2019.limelight;
 
 message LimelightStatus {
   required uint64 timestamp = 1;
+
   optional double target_dist  = 2;
   optional double target_x = 3;
   optional double target_y = 4;
@@ -29,6 +30,8 @@ message LimelightStatus {
   optional bool pricey_has_target = 23;
   optional double pricey_horiz_angle = 24;
   optional double pricey_target_dist = 25;
+  required bool limelight_ok = 26;
+  required double latency = 27;
 }
 
 enum LimelightState {
