@@ -129,7 +129,7 @@ void TeleopBase::Update() {
       inst.GetTable("limelight-pricey");
 
   if (RobotController::IsSysActive()) {
-    if (DriverStation::GetInstance().IsOperatorControl()) {
+    if (!auto_status->running_command()) {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }

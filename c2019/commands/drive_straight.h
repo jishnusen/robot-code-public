@@ -10,7 +10,6 @@ namespace commands {
 class DriveStraight : public c2019::commands::CommandBase {
  public:
   bool IsAutonomous() override;
-  void LeftRocket();
   void RightRocket();
 };
 
