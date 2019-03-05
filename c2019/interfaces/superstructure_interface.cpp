@@ -171,7 +171,7 @@ void SuperstructureInterface::SetBrakeMode(bool mode) {
 }
 
 void SuperstructureInterface::WriteActuators() {
-  /*SuperstructureOutputProto outputs;
+  SuperstructureOutputProto outputs;
   muan::wpilib::DriverStationProto ds;
 
   QueueManager<muan::wpilib::DriverStationProto>::Fetch()->ReadLastMessage(&ds);
@@ -236,7 +236,7 @@ void SuperstructureInterface::WriteActuators() {
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
   shifter_.Set(!outputs->elevator_high_gear());
   fork_drop_.Set(outputs->drop_forks());
-  cargo_.Set(outputs->cargo_out());*/
+  cargo_.Set(outputs->cargo_out());
 }
 
 }  // namespace interfaces
