@@ -21,9 +21,9 @@ namespace c2019 {
 namespace superstructure {
 
 // elevator constants
-constexpr double kHatchShipForwardsHeight = 0.018;
+constexpr double kHatchShipForwardsHeight = 0.07;
 constexpr double kHatchShipBackwardsHeight = 0.2;
-constexpr double kHatchRocketFirstHeight = 0.018;
+constexpr double kHatchRocketFirstHeight = 0.07;
 constexpr double kHatchRocketBackwardsHeight = 0.2;
 constexpr double kHatchRocketSecondHeight = 0.987;
 constexpr double kHatchRocketThirdHeight = 1.78;
@@ -127,6 +127,7 @@ class Superstructure {
   bool cargo_out_ = false;
   bool climbing_ = false;
   bool request_crawl_ = false;
+  bool pins_ = false;
 
   SuperstructureState state_ = SuperstructureState::CALIBRATING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;

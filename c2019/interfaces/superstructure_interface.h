@@ -54,6 +54,7 @@ class SuperstructureInterface {
   Solenoid fork_drop_{kForkDrop};
   Solenoid shifter_{kShifter};
   Solenoid cargo_{kCargo};
+  Solenoid pins_{1};
 
   TalonSRX elevator_master_{kElevatorMaster};
   VictorSPX elevator_slave_a_{kElevatorSlaveA};

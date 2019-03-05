@@ -39,8 +39,8 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
-  winch_left_ = throttle_.MakeButton(7);
-  winch_right_ = throttle_.MakeButton(10);
+  winch_left_ = throttle_.MakeButton(10);
+  winch_right_ = throttle_.MakeButton(7);
   // brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   drop_crawlers_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
@@ -133,7 +133,11 @@ void TeleopBase::Update() {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }
-    if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
+    if (climb_mode_) {
+      table->PutNumber("ledMode", 0);
+      expensive_table->PutNumber("ledMode", 0);
+      back_table->PutNumber("ledMode", 0);
+    } else if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
       table->PutNumber("ledMode",
                        int(superstructure_status->elevator_goal() > 0.6));
       expensive_table->PutNumber(
@@ -186,6 +190,36 @@ void TeleopBase::Update() {
     // Set rumble off
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
+
+  /*if (exit_auto_->was_clicked()) {
+    auto_goal->set_run_command(false);
+    auto_goal_queue_->WriteMessage(auto_goal);
+  } else if (!auto_status->running_command()) {
+    if (test_auto_->was_clicked()) {
+      auto_goal->set_run_command(true);
+      auto_goal->set_command(Command::TEST_AUTO);
+    } else if (drive_straight_->was_clicked()) {
+      auto_goal->set_run_command(true);
+      auto_goal->set_command(Command::DRIVE_STRAIGHT);
+    } else {
+      auto_goal->set_run_command(false);
+      auto_goal->set_command(Command::NONE);
+    }
+
+    auto_goal_queue_->WriteMessage(auto_goal);
+
+    // TODO(jishnu) add actual commands
+    // NOTE: not using a switch here due to cross-initialization of the threads
+    if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
+      commands::DriveStraight drive_straight_command;
+      std::thread drive_straight_thread(drive_straight_command);
+      drive_straight_thread.detach();
+    } else if (auto_goal->command() == Command::TEST_AUTO) {
+      commands::TestAuto test_auto_command;
+      std::thread test_auto_thread(test_auto_command);
+      test_auto_thread.detach();
+    }
+  }*/
 
   ds_sender_.Send();
 
@@ -373,7 +407,7 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(c2019::superstructure::STOW);
   }
   if (level_1_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
@@ -410,7 +444,7 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (level_2_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_SECOND);
@@ -427,7 +461,7 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (level_3_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_THIRD);
@@ -444,7 +478,7 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (ship_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
@@ -498,6 +532,16 @@ void TeleopBase::SendSuperstructureMessage() {
   /* if (superstructure_goal->score_goal() != superstructure::NONE) { */
   /*   cached_goal_ = superstructure_goal->score_goal(); */
   /* } */
+
+  if (hp_hatch_intake_->is_pressed() && hp_hatch_outtake_->is_pressed() &&
+      cargo_intake_->is_pressed() && cargo_outtake_->is_pressed()) {
+    climb_mode_ = true;
+  }
+
+  if (climb_mode_ && ground_intake_height_->is_pressed()) {
+    climb_mode_ = false;
+  }
+
   if (wants_override_) {
     superstructure_goal->set_score_goal(override_goal_);
   }
