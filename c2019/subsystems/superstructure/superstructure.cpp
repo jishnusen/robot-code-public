@@ -312,7 +312,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
           request_crawl_ = true;
         }
       } else if (request_crawlers_) {
-        if (status_->elevator_height() > kHatchRocketThirdHeight - .1) {
+        if (status_->elevator_height() > kCrawlerHeight - .1) {
           crawler_down_ = true;
         }
       }
@@ -422,9 +422,6 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       elevator_height_ = kCrawlerHeight;
       wrist_angle_ = kHatchForwardsAngle;
       request_crawlers_ = true;
-      if (status_->elevator_height() > kCrawlerHeight - .03) {
-        crawler_down_ = true;
-      }
       break;
     case KISS:
       elevator_height_ = kKissHeight;

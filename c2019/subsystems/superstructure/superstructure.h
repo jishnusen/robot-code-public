@@ -41,10 +41,10 @@ constexpr double kSpitHeight = 0.;
 constexpr double kStowHeight = 0.;
 constexpr double kKissHeight = 1.39;
 constexpr double kClimbHeight = 0.05;
-constexpr double kCrawlerHeight = 1.62;
+constexpr double kCrawlerHeight = 1.66;
 constexpr double kLandHeight = 0.312;
 constexpr double kElevatorSafeHeight = 0.71;
-constexpr double kElevatorPassThroughHeight = 0.023;
+constexpr double kElevatorPassThroughHeight = 0.025;
 constexpr double kElevatorHandoffTolerance = 2e-3;
 constexpr double kElevatorWristHorizHeight = 0.05;
 
