@@ -96,6 +96,8 @@ DrivetrainInterface::DrivetrainInterface()
       pigeon_{&left_slave_a_},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
+  right_master_.ConfigFactoryDefault();
+  left_master_.ConfigFactoryDefault();
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout);
   right_master_.ConfigSelectedFeedbackSensor(
@@ -119,7 +121,6 @@ DrivetrainInterface::DrivetrainInterface()
    * FeedbackDevice::CTRE_MagEncoder_Relative, 100); */
   /* right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::SensorSum, 0,
    * 100); */
-  /* right_master_.ConfigSelectedFeedbackCoefficient(0.5, 0, 100); */
   right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::RemoteSensor1, 1,
                                              100);
   right_master_.ConfigSelectedFeedbackCoefficient((3600. / 8192.), 1, 100);

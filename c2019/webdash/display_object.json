@@ -1,6 +1,16 @@
 {
     "widgets": [
         {
+            "name": "Auto Selection",
+            "type": "auto",
+            "coordinates": [0, 3],
+            "should-title": false,
+            "autos": [
+                "LEFT_ROCKET",
+                "RIGHT_ROCKET"
+            ]
+        },
+        {
             "name": "Encouragement!",
             "type": "encouragement",
             "coordinates": [0, 0],
@@ -11,14 +21,6 @@
             "type": "link",
             "source": "\\data.html",
             "coordinates": [3, 3],
-            "should-title": false
-        },
-        {
-
-            "name": "Video Stream",
-            "type": "image",
-            "source": ["webdash", "streamUrl"],
-            "coordinates": [1,1],
             "should-title": false
         },
         {

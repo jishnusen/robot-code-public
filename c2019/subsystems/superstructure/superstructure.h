@@ -20,7 +20,6 @@
 namespace c2019 {
 namespace superstructure {
 
-// TODO(hanson) test these numbers
 // elevator constants
 constexpr double kHatchShipForwardsHeight = 0.018;
 constexpr double kHatchShipBackwardsHeight = 0.2;
@@ -41,7 +40,7 @@ constexpr double kHandoffHeight = 0.257;
 constexpr double kSpitHeight = 0.;
 constexpr double kStowHeight = 0.;
 constexpr double kKissHeight = 1.39;
-constexpr double kClimbHeight = 0.02;
+constexpr double kClimbHeight = 0.05;
 constexpr double kLandHeight = 0.312;
 constexpr double kElevatorSafeHeight = 0.71;
 constexpr double kElevatorPassThroughHeight = 0.023;
@@ -128,8 +127,6 @@ class Superstructure {
   bool cargo_out_ = false;
   bool climbing_ = false;
   bool request_crawl_ = false;
-  bool backplate_safe_ = false;
-  int safe_ticks_ = 0;
 
   SuperstructureState state_ = SuperstructureState::CALIBRATING;
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;

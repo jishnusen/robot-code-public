@@ -32,6 +32,8 @@ message LimelightStatus {
   optional double pricey_target_dist = 25;
   required bool limelight_ok = 26;
   required double latency = 27;
+  required bool back_limelight_ok = 28;
+  required bool bottom_limelight_ok = 29;
 }
 
 enum LimelightState {

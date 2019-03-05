@@ -19,15 +19,18 @@ WebdashQueue& WebDashQueueWrapper::webdash_queue() {
   return webdash_queue_;
 }
 
+AutoQueue& WebDashQueueWrapper::auto_queue() {
+  return auto_queue_;
+}
 struct AutoChangeHandler : seasocks::WebSocket::Handler {
   void onConnect(seasocks::WebSocket* /*socket*/) override {}
 
   void onData(seasocks::WebSocket* /*socket*/, const char* data) override {
-    WebdashProto output_proto;
+    AutoProto output_proto;
 
     output_proto->set_auto_modes(data);
 
-    WebDashQueueWrapper::GetInstance().webdash_queue().WriteMessage(
+    WebDashQueueWrapper::GetInstance().auto_queue().WriteMessage(
         output_proto);
   }
   void onDisconnect(seasocks::WebSocket* /*socket*/) override {}

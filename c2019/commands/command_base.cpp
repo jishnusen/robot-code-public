@@ -76,7 +76,7 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
   goal->mutable_path_goal()->set_extra_distance_final(extra_distance_final);
   goal->mutable_path_goal()->set_full_send(full_send);
   goal->mutable_path_goal()->set_max_linear_velocity(max_lin_);
-  goal->mutable_path_goal()->set_max_linear_accel(max_lin_acc_);
+  goal->mutable_path_goal()->set_max_linear_accel(max_acc_);
 
   goal->set_high_gear(gear);
 
@@ -89,93 +89,61 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
   drivetrain_goal_queue_->WriteMessage(goal);
 }
 
-void CommandBase::StartDriveVision() {
+bool CommandBase::StartDriveVision() {
   // run vision align stuff
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
-  SuperstructureStatusProto super_status;
-  DrivetrainStatus drivetrain_status;
-  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
-      &super_status);
-  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
-  /* while (!lime_status->limelight_ok() && IsAutonomous()) { */
-  /*   drivetrain_goal->mutable_linear_angular_velocity_goal() */
-  /*       ->set_linear_velocity(0); */
-  /*   drivetrain_goal->mutable_linear_angular_velocity_goal() */
-  /*       ->set_angular_velocity(0); */
-  /*   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal); */
-  /*   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status); */
-  /*   Wait(1); */
-  /* } */
+  int no_target = 0;
   while (!lime_status->has_target() && IsAutonomous()) {
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+    no_target++;
+    if (no_target > 70) {
+      return false;
+    }
   }
 
-  while (lime_status->target_dist() > 0.63 && lime_status->has_target() &&
-         IsAutonomous() && lime_status->limelight_ok()) {
-      drivetrain_goal->mutable_arc_goal()->set_angular(
-          lime_status->horiz_angle());
-      drivetrain_goal->mutable_arc_goal()->set_linear(
-          (lime_status->target_dist() - 0.5) * 4.0);
+  no_target = 0;
+  while (lime_status->target_dist() > 0.63 && IsAutonomous()) {
+    if (!lime_status->has_target()) {
+      no_target++;
+    } else {
+      no_target = 0;
+    }
+    if (no_target > 30) {
+      return false;
+    }
+    drivetrain_goal->mutable_arc_goal()->set_angular(
+        lime_status->horiz_angle());
+    drivetrain_goal->mutable_arc_goal()->set_linear(
+        (lime_status->target_dist() - 0.3) * 4.0);
 
-      QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-    Wait(1);
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-  }
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(
-      0);
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(
-      0);
-  QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-  // start
-  while ((!lime_status->has_target() || !lime_status->limelight_ok()) &&
-         IsAutonomous()) {
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(0);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(0);
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  while ((lime_status->target_dist() > 0.63 || !lime_status->limelight_ok()) &&
-         IsAutonomous()) {
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(0);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(0);
-    QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-    Wait(1);
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-  }  // end
+  if (lime_status->target_dist() > 0.63) {
+    return false;
+  }
+  return true;
 }
 
-void CommandBase::StartDriveVisionBackwards() {
+bool CommandBase::StartDriveVisionBackwards() {
   // run vision align stuff
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
-  SuperstructureStatusProto super_status;
-  DrivetrainStatus drivetrain_status;
-  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
-      &super_status);
-  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
-  int counter = 0;
+  int no_target = 0;
   while (!lime_status->back_has_target() && IsAutonomous()) {
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-    counter++;
-    if (counter > 30) {
-      drivetrain_goal->mutable_linear_angular_velocity_goal()
-          ->set_linear_velocity(0);
-      drivetrain_goal->mutable_linear_angular_velocity_goal()
-          ->set_angular_velocity(0);
-      QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
+    no_target++;
+    if (no_target > 70) {
+      return false;
     }
   }
 
@@ -185,24 +153,29 @@ void CommandBase::StartDriveVisionBackwards() {
     drivetrain_goal->mutable_arc_goal()->set_angular(
         lime_status->back_horiz_angle());
     drivetrain_goal->mutable_arc_goal()->set_linear(
-        (lime_status->back_target_dist() + 0.1) * -4.0);
+        (lime_status->back_target_dist() + 0.3) * -4.0);
 
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     loop_.SleepUntilNext();
     std::cout << "back tracking" << std::endl;
   }
 
-  while ((lime_status->back_target_dist() > 0.28 ||
-          !lime_status->limelight_ok()) &&
-         IsAutonomous()) {
-    Wait(1);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_linear_velocity(0);
-    drivetrain_goal->mutable_linear_angular_velocity_goal()
-        ->set_angular_velocity(0);
-    QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-  }  // end
+  if (lime_status->back_target_dist() > 0.28) {
+    return false;
+  }
+  return true;
+}
+
+void CommandBase::HoldPosition() {
+  if (!IsAutonomous()) {
+    return;
+  }
+
+  DrivetrainGoal drivetrain_goal;
+  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(0);
+  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(0);
+
+  QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }
 
 void CommandBase::GoTo(superstructure::ScoreGoal score_goal,
@@ -223,14 +196,6 @@ void CommandBase::WaitForElevatorAndLL() {
     Wait(1);
     QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
         &super_status);
-    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-  }
-}
-
-void CommandBase::WaitForBackLL() {
-  LimelightStatusProto lime_status;
-  while (!lime_status->back_has_target() && IsAutonomous()) {
-    Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 }

@@ -12,9 +12,9 @@ namespace teleop {
 
 using muan::queues::QueueManager;
 using muan::teleop::JoystickStatusProto;
+using muan::webdash::WebdashProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
-using muan::webdash::WebdashProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
 using c2019::commands::Command;
@@ -30,8 +30,7 @@ TeleopBase::TeleopBase()
           c2019::superstructure::SuperstructureGoalProto>::Fetch()},
       superstructure_status_queue_{QueueManager<
           c2019::superstructure::SuperstructureStatusProto>::Fetch()},
-      webdash_queue_{QueueManager<
-          muan::webdash::WebdashProto>::Fetch()},
+      webdash_queue_{QueueManager<muan::webdash::WebdashProto>::Fetch()},
       ds_sender_{QueueManager<DriverStationProto>::Fetch(),
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
@@ -148,8 +147,11 @@ void TeleopBase::Update() {
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
     back_table->PutNumber("ledMode", flash_ ? 2 : 1);
-    expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
+    expensive_table->PutNumber("ledMode", 1);
   }
+
+  back_table->PutNumber("stream", 2);
+  expensive_table->PutNumber("stream", 2);
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
@@ -185,46 +187,16 @@ void TeleopBase::Update() {
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
 
-  if (exit_auto_->was_clicked()) {
-    auto_goal->set_run_command(false);
-    auto_goal_queue_->WriteMessage(auto_goal);
-  } else if (!auto_status->running_command()) {
-    if (test_auto_->was_clicked()) {
-      auto_goal->set_run_command(true);
-      auto_goal->set_command(Command::TEST_AUTO);
-    } else if (drive_straight_->was_clicked()) {
-      auto_goal->set_run_command(true);
-      auto_goal->set_command(Command::DRIVE_STRAIGHT);
-    } else {
-      auto_goal->set_run_command(false);
-      auto_goal->set_command(Command::NONE);
-    }
-
-    auto_goal_queue_->WriteMessage(auto_goal);
-
-    // TODO(jishnu) add actual commands
-    // NOTE: not using a switch here due to cross-initialization of the threads
-    if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
-      commands::DriveStraight drive_straight_command;
-      std::thread drive_straight_thread(drive_straight_command);
-      drive_straight_thread.detach();
-    } else if (auto_goal->command() == Command::TEST_AUTO) {
-      commands::TestAuto test_auto_command;
-      std::thread test_auto_thread(test_auto_command);
-      test_auto_thread.detach();
-    }
-  }
-
   ds_sender_.Send();
 
   // Camera "logic"
 
-  std::string url = "limelight-front.local:5801";
+  std::string url = "";
 
   if (superstructure_status->wrist_goal() > 1.57) {
-    url = "limelight-back.local:5802";
-    } else {
-    url = "limelight-pricey.local:5802";
+    url = "limelight-back.local:5800";
+  } else {
+    url = "limelight-pricey.local:5800";
   }
 
   webdash_proto->set_stream_url(url);
