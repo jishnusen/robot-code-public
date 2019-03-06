@@ -8,9 +8,9 @@ constexpr double kElevatorConversionFactor =
 
 constexpr double kWristConversionFactor = (4096 * 2.933) / (2 * M_PI);
 
-constexpr double kElevatorP = 0.12;
+constexpr double kElevatorP = 0.18;
 constexpr double kElevatorI = 0.0;
-constexpr double kElevatorD = 4.0;
+constexpr double kElevatorD = 6.0;
 constexpr double kElevatorF = 0.06;
 constexpr double kElevatorIZone = 0.;
 constexpr double kElevatorMaxIntegral = 5e9;
