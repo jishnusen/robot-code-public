@@ -26,7 +26,7 @@ constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
 constexpr double kHighGearVelocityF = 0.12;
 
-constexpr double kTurningP = 1.9;
+constexpr double kTurningP = 2.0;
 constexpr double kTurningI = 0.0;
 constexpr double kTurningD = 4.0;
 constexpr double kTurningF = 0.0;
@@ -215,14 +215,18 @@ void DrivetrainInterface::WriteActuators() {
 
   switch (outputs->output_type()) {
     case TalonOutput::OPEN_LOOP:
-      compressor_.Start();
+      if (!compressor_.Enabled()) {
+        compressor_.Start();
+      }
 
       SetBrakeMode(false);
       left_master_.Set(ControlMode::PercentOutput, outputs->left_setpoint());
       right_master_.Set(ControlMode::PercentOutput, outputs->right_setpoint());
       break;
     case TalonOutput::POSITION:
-      compressor_.Stop();
+      if (compressor_.Enabled()) {
+        compressor_.Stop();
+      }
       right_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kTurningSlot, 1);
       right_master_.Set(ControlMode::PercentOutput, outputs->arc_vel() / 12.,
@@ -232,7 +236,9 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
     case TalonOutput::VELOCITY:
-      compressor_.Stop();
+      if (compressor_.Enabled()) {
+        compressor_.Stop();
+      }
       SetBrakeMode(true);
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
       right_master_.SelectProfileSlot(kVelocitySlot, 0);

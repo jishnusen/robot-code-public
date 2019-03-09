@@ -47,7 +47,7 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
       }
     }
   } else {
-    force_backplate_ = false;
+    force_backplate_ = cargo_out_;
   }
 
   if ((*wrist_goal > kWristSafeBackwardsAngle &&
