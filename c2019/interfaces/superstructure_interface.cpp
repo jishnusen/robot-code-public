@@ -156,18 +156,18 @@ void SuperstructureInterface::LoadGains() {
   elevator_slave_c_.Follow(elevator_master_);
   elevator_slave_c_.SetInverted(elevator_inverted);
 
-  /* winch_two_.SetInverted(true); */
+  winch_two_.SetInverted(true);
 }
 
 void SuperstructureInterface::SetBrakeMode(bool mode) {
   NeutralMode neutral_mode = mode ? NeutralMode::Brake : NeutralMode::Coast;
-  /* winch_two_.SetNeutralMode(neutral_mode); */
+  winch_two_.SetNeutralMode(neutral_mode);
   elevator_master_.SetNeutralMode(neutral_mode);
   elevator_slave_a_.SetNeutralMode(neutral_mode);
   elevator_slave_b_.SetNeutralMode(neutral_mode);
   elevator_slave_c_.SetNeutralMode(neutral_mode);
   wrist_.SetNeutralMode(neutral_mode);
-  /* winch_.SetNeutralMode(neutral_mode); */
+  winch_.SetNeutralMode(neutral_mode);
 }
 
 void SuperstructureInterface::WriteActuators() {
@@ -182,8 +182,8 @@ void SuperstructureInterface::WriteActuators() {
 
     cargo_intake_.Set(ControlMode::PercentOutput, 0);
     crawler_.Set(ControlMode::PercentOutput, 0);
-    /* winch_.Set(ControlMode::PercentOutput, 0); */
-    /* winch_two_.Set(ControlMode::PercentOutput, 0); */
+    winch_.Set(ControlMode::PercentOutput, 0);
+    winch_two_.Set(ControlMode::PercentOutput, 0);
 
     arrow_solenoid_.Set(false);
     backplate_solenoid_.Set(false);
@@ -228,9 +228,9 @@ void SuperstructureInterface::WriteActuators() {
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);
   crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
-  /* winch_.Set(ControlMode::PercentOutput, -outputs->left_winch_voltage() / 12.); */
-  /* winch_two_.Set(ControlMode::PercentOutput, */
-                 /* -outputs->right_winch_voltage() / 12.); */
+  winch_.Set(ControlMode::PercentOutput, -outputs->left_winch_voltage() / 12.);
+  winch_two_.Set(ControlMode::PercentOutput,
+                 -outputs->right_winch_voltage() / 12.);
   arrow_solenoid_.Set(!outputs->arrow_solenoid());
   backplate_solenoid_.Set(outputs->backplate_solenoid());
   crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());

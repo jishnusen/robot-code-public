@@ -46,7 +46,7 @@ class SuperstructureInterface {
   SuperstructureInputQueue* input_queue_;
   SuperstructureOutputQueue::QueueReader output_reader_;
 
-  /* VictorSPX winch_two_{kWinchTwo}; */
+  VictorSPX winch_two_{kWinchTwo};
   /* PowerDistributionPanel pdp_{0}; */
   Solenoid arrow_solenoid_{kArrow};
   Solenoid backplate_solenoid_{kBackplate};
@@ -62,7 +62,7 @@ class SuperstructureInterface {
   VictorSPX elevator_slave_c_{kElevatorSlaveC};
 
   VictorSPX crawler_{kCrawler};
-  /* VictorSPX winch_{kWinch}; */
+  VictorSPX winch_{kWinch};
 
   TalonSRX wrist_{kWrist};
   VictorSPX cargo_intake_{kCargoIntake};
