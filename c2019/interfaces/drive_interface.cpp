@@ -99,13 +99,17 @@ DrivetrainInterface::DrivetrainInterface()
   right_master_.ConfigFactoryDefault();
   left_master_.ConfigFactoryDefault();
   /* left_master_.ConfigSelectedFeedbackSensor( */
-  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout); */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot,
+   * kSetupTimeout); */
   /* right_master_.ConfigSelectedFeedbackSensor( */
-  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout); */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot,
+   * kSetupTimeout); */
   /* left_master_.ConfigSelectedFeedbackSensor( */
-  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot, kSetupTimeout); */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot,
+   * kSetupTimeout); */
   /* right_master_.ConfigSelectedFeedbackSensor( */
-  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot, kSetupTimeout); */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot,
+   * kSetupTimeout); */
 
   pigeon_.SetYaw(0, 100);
 
@@ -236,6 +240,14 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
     case TalonOutput::VELOCITY:
+      SetBrakeMode(true);
+      left_master_.SelectProfileSlot(kVelocitySlot, 0);
+      right_master_.SelectProfileSlot(kVelocitySlot, 0);
+      left_master_.Set(ControlMode::Velocity,
+                       outputs->left_setpoint() * kDriveConversionFactor * 0.1);
+      right_master_.Set(
+          ControlMode::Velocity,
+          outputs->right_setpoint() * kDriveConversionFactor * 0.1);
       break;
   }
 

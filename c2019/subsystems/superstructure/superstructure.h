@@ -26,7 +26,7 @@ constexpr double kHatchShipBackwardsHeight = 0.2;
 constexpr double kHatchRocketFirstHeight = 0.1;
 constexpr double kHatchRocketBackwardsHeight = 0.2;
 constexpr double kHatchRocketSecondHeight = 0.987;
-constexpr double kHatchRocketThirdHeight = 1.78;
+constexpr double kHatchRocketThirdHeight = 1.74;
 constexpr double kHatchLoadingStationHeight = 0.089;
 constexpr double kHatchGroundHeight = 0.;
 constexpr double kCargoShipForwardsHeight = 1.173;
@@ -34,7 +34,7 @@ constexpr double kCargoShipBackwardsHeight = 0.643;
 constexpr double kCargoRocketFirstHeight = 0.123;
 constexpr double kCargoRocketBackwardsHeight = 0.116;
 constexpr double kCargoRocketSecondHeight = 0.938;
-constexpr double kCargoRocketThirdHeight = 1.78;
+constexpr double kCargoRocketThirdHeight = 1.74;
 constexpr double kCargoGroundHeight = 0.;
 constexpr double kHandoffHeight = 0.257;
 constexpr double kSpitHeight = 0.;
@@ -48,6 +48,7 @@ constexpr double kDivingBoardHeight = 1.42;
 constexpr double kElevatorPassThroughHeight = 0.025;
 constexpr double kElevatorHandoffTolerance = 2e-3;
 constexpr double kElevatorWristHorizHeight = 0.05;
+constexpr double kElevatorBoardHeight = 1.42;
 
 // wrist constants
 constexpr double kHatchForwardsAngle = 0.0;

@@ -119,28 +119,14 @@ message SuperstructureInput {
   required double wrist_encoder = 6;
   required bool elevator_zeroed = 7;
   required bool wrist_hall = 8;
-  required double current_1 = 9;
-  required double current_2 = 10;
-  required double current_3 = 11;
-  required double current_4 = 12;
-  required double current_5 = 13;
-  required double current_6 = 14;
-  required double current_7 = 15;
-  required double current_8 = 16;
-  required double current_9 = 17;
-  required double current_10 = 18;
-  required double current_11 = 19;
-  required double current_12 = 20;
-  required double current_13 = 21;
-  required double current_14 = 22;
-  required double current_15 = 23;
-  required double wrist_current = 24;
-  required double elevator_current = 25;
-  required double wrist_voltage = 26;
-  required double elevator_voltage = 27;
-  required bool cargo_proxy = 28;
-  required bool elevator_hall = 29;
-  required bool wrist_zeroed = 30;
+  required double wrist_current = 9;
+  required double elevator_current = 10;
+  required double wrist_voltage = 11;
+  required double elevator_voltage = 12;
+  required bool cargo_proxy = 13;
+  required bool elevator_hall = 14;
+  required bool wrist_zeroed = 15;
+  required double elevator_absolute = 16;
 }
 
 message SuperstructureGoal {
