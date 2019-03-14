@@ -25,6 +25,12 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
                                    kWristSafeForwardsAngle);
   }
 
+  // Don't jump the diving board!
+  if (elevator_status_->elevator_height() > kDivingBoardHeight &&
+      *elevator_goal < kDivingBoardHeight) {
+    *wrist_goal = 0.;
+  }
+
   if (elevator_status_->elevator_height() < kElevatorWristHorizHeight) {
     *wrist_goal = muan::utils::Cap(*wrist_goal, wrist::kMinAngle, M_PI);
   }
@@ -319,7 +325,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case CARGO_ROCKET_FIRST:
       elevator_height_ = kCargoRocketFirstHeight;
-      wrist_angle_ = kCargoRocketFirstAngle;
+      wrist_angle_ = kCargoRocketAngle;
       high_gear_ = true;
       break;
     case CARGO_ROCKET_BACKWARDS:
@@ -329,12 +335,12 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       break;
     case CARGO_ROCKET_SECOND:
       elevator_height_ = kCargoRocketSecondHeight;
-      wrist_angle_ = kCargoRocketSecondAngle;
+      wrist_angle_ = kCargoRocketAngle;
       high_gear_ = true;
       break;
     case CARGO_ROCKET_THIRD:
       elevator_height_ = kCargoRocketThirdHeight;
-      wrist_angle_ = kCargoRocketThirdAngle;
+      wrist_angle_ = kCargoRocketAngle;
       high_gear_ = true;
       break;
     case CARGO_SHIP_FORWARDS:
