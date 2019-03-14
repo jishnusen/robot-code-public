@@ -153,7 +153,7 @@ void ClosedLoopDrive::UpdatePointTurn(OutputProto* output,
   (*output)->set_output_type(POSITION);
   (*output)->set_left_setpoint(delta(0) + prev_left_right_(0));
   (*output)->set_right_setpoint(delta(1) + prev_left_right_(1));
-  (*output)->set_yaw(point_turn_goal_);
+  (*output)->set_yaw(point_turn_goal_ - ((*linear_angular_velocity_)(1) * 0.01));
   (*output)->set_arc_vel(distance_goal_);
 }
 

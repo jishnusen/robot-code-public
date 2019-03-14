@@ -47,7 +47,7 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
       }
     }
   } else {
-    force_backplate_ = false;
+    force_backplate_ = cargo_out_;
   }
 
   if ((*wrist_goal > kWristSafeBackwardsAngle &&
@@ -268,14 +268,14 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
-  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.6);
+  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -2.7 : -4) : 1.5);
   output->set_pins(pins_);
 
   if (request_crawl_) {
     if (elevator_status_->elevator_height() < 0.08) {
       output->set_crawler_voltage(12.);
     } else {
-      output->set_crawler_voltage(2.);
+      output->set_crawler_voltage(2.5);
     }
   } else {
     output->set_crawler_voltage(0.);
@@ -426,7 +426,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
     case KISS:
       elevator_height_ = kKissHeight;
       wrist_angle_ = kHatchForwardsAngle;
-      high_gear_ = true;
+      high_gear_ = !buddy_;
       request_climb_ = !buddy_;
       break;
     case CRAWL:
