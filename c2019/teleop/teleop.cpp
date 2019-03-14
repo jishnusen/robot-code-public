@@ -152,7 +152,7 @@ void TeleopBase::Update() {
     expensive_table->PutNumber("ledMode", 1);
   }
 
-  /* back_table->PutNumber("stream", 2); */
+  /* table->PutNumber("stream", 2); */
   expensive_table->PutNumber("stream", 2);
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
@@ -226,7 +226,7 @@ void TeleopBase::Update() {
   std::string url = "";
 
   if (superstructure_status->wrist_goal() > 1.57) {
-    url = "limelight-back.local:5800";
+    url = "limelight-pricey.local:5800";
   } else {
     url = "limelight-pricey.local:5800";
   }
@@ -260,16 +260,14 @@ void TeleopBase::SendDrivetrainMessage() {
   if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
           &lime_status)) {
     if (vision_->is_pressed()) {
-      if (vision_intake_->is_pressed() && lime_status->back_has_target() && lime_status->back_limelight_ok()) {
+      if (vision_intake_->is_pressed() && lime_status->back_has_target() &&
+          lime_status->back_limelight_ok()) {
         vision = true;
         distance_factor_ = -0.8;
         target_dist_ = lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
         y_int = -0;
-      } else if ((lime_status->has_target() ||
-                  lime_status->pricey_has_target()) &&
-                 !vision_intake_->is_pressed() && lime_status->limelight_ok() && lime_status->bottom_limelight_ok()) {
-        vision = true;
+      } else if (!vision_intake_->is_pressed()) {
         distance_factor_ = 1;
         y_int = 0.35;
         if (super_status->elevator_height() > 0.8) {
@@ -277,9 +275,11 @@ void TeleopBase::SendDrivetrainMessage() {
           target_dist_ = lime_status->pricey_target_dist();
           distance_factor_ = 4.0 / 4.5;
           y_int = 0.4;
+          vision = lime_status->bottom_limelight_ok() && lime_status->pricey_has_target();
         } else {
           horiz_angle_ = lime_status->horiz_angle();
           target_dist_ = lime_status->target_dist();
+          vision = lime_status->limelight_ok() && lime_status->has_target();
         }
       }
     }
@@ -393,6 +393,10 @@ void TeleopBase::SendSuperstructureMessage() {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
               c2019::superstructure::HATCH_ROCKET_FIRST);
+          if (has_hp_hatch_) {
+            superstructure_goal->set_score_goal(
+                c2019::superstructure::CARGO_GROUND);
+          }
           if (has_hp_hatch_) {
             superstructure_goal->set_intake_goal(
                 c2019::superstructure::PREP_SCORE);
