@@ -56,6 +56,10 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
        wrist_status_->wrist_angle() > kWristSafeForwardsAngle)) {
     force_backplate_ = true;
   }
+
+  if (elevator_status_->elevator_height() > kElevatorBoardHeight && *elevator_goal < kElevatorBoardHeight) {
+    *wrist_goal = 0;
+  }
 }
 
 elevator::ElevatorGoalProto Superstructure::PopulateElevatorGoal() {
