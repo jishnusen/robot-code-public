@@ -275,7 +275,7 @@ void Superstructure::Update() {
     if (elevator_status_->elevator_height() < 0.08) {
       output->set_crawler_voltage(12.);
     } else {
-      output->set_crawler_voltage(2.);
+      output->set_crawler_voltage(2.5);
     }
   } else {
     output->set_crawler_voltage(0.);
