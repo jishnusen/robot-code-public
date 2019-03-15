@@ -47,16 +47,7 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
       }
     }
   } else {
-    force_backplate_ = false;
-  }
-
-  if (!backplate_safe_) {
-    if (wrist_status_->wrist_angle() > 1.57) {
-      *wrist_goal = muan::utils::Cap(*wrist_goal, kWristSafeBackwardsAngle,
-                                     wrist::kMaxAngle);
-    } else {
-      *wrist_goal = wrist::kMinAngle;
-    }
+    force_backplate_ = cargo_out_;
   }
 
   if ((*wrist_goal > kWristSafeBackwardsAngle &&
@@ -64,6 +55,10 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
       (*wrist_goal < kWristSafeForwardsAngle &&
        wrist_status_->wrist_angle() > kWristSafeForwardsAngle)) {
     force_backplate_ = true;
+  }
+
+  if (elevator_status_->elevator_height() > kElevatorBoardHeight && *elevator_goal < kElevatorBoardHeight) {
+    *wrist_goal = 0;
   }
 }
 
@@ -258,12 +253,6 @@ void Superstructure::Update() {
 
   output->set_arrow_solenoid(hatch_intake_output->flute_solenoid());
   output->set_backplate_solenoid(hatch_intake_output->backplate_solenoid());
-  if (!output->backplate_solenoid()) {
-    safe_ticks_++;
-  } else {
-    safe_ticks_ = 0;
-  }
-  backplate_safe_ = safe_ticks_ > 25;
   output->set_cargo_roller_voltage(cargo_intake_output->roller_voltage());
   output->set_hatch_roller_voltage(
       ground_hatch_intake_output->roller_voltage());
@@ -283,13 +272,14 @@ void Superstructure::Update() {
   output->set_wrist_setpoint_type(
       static_cast<TalonOutput>(wrist_output->output_type()));
   output->set_cargo_out(cargo_out_);
-  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -4 : -4) : 1.3);
+  output->set_elevator_setpoint_ff(climbing_ ? (high_gear_ ? -2.7: -4) : 1.5);
+  output->set_pins(pins_);
 
   if (request_crawl_) {
     if (elevator_status_->elevator_height() < 0.08) {
       output->set_crawler_voltage(12.);
     } else {
-      output->set_crawler_voltage(2.);
+      output->set_crawler_voltage(2.5);
     }
   } else {
     output->set_crawler_voltage(0.);
@@ -326,7 +316,7 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
           request_crawl_ = true;
         }
       } else if (request_crawlers_) {
-        if (status_->elevator_height() > kHatchRocketThirdHeight - .1) {
+        if (status_->elevator_height() > kCrawlerHeight - .1) {
           crawler_down_ = true;
         }
       }
@@ -427,22 +417,20 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       request_crawl_ = false;
       crawler_down_ = false;
       request_climb_ = false;
+      pins_ = true;
       break;
     case DROP_FORKS:
       buddy_ = true;
       break;
     case DROP_CRAWLERS:
-      elevator_height_ = kHatchRocketThirdHeight;
+      elevator_height_ = kCrawlerHeight;
       wrist_angle_ = kHatchForwardsAngle;
       request_crawlers_ = true;
-      if (status_->elevator_height() > kHatchRocketThirdHeight - .1) {
-        crawler_down_ = true;
-      }
       break;
     case KISS:
       elevator_height_ = kKissHeight;
       wrist_angle_ = kHatchForwardsAngle;
-      high_gear_ = true;
+      high_gear_ = !buddy_;
       request_climb_ = !buddy_;
       break;
     case CRAWL:

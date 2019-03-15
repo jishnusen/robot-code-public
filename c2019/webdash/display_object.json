@@ -1,6 +1,15 @@
 {
     "widgets": [
         {
+            "name": "Auto Selection",
+            "type": "auto",
+            "coordinates": [0, 3],
+            "should-title": false,
+            "autos": [
+                "RIGHT_ROCKET"
+            ]
+        },
+        {
             "name": "Encouragement!",
             "type": "encouragement",
             "coordinates": [0, 0],
@@ -11,14 +20,6 @@
             "type": "link",
             "source": "\\data.html",
             "coordinates": [3, 3],
-            "should-title": false
-        },
-        {
-
-            "name": "Video Stream",
-            "type": "image",
-            "source": ["webdash", "streamUrl"],
-            "coordinates": [1,1],
             "should-title": false
         },
         {
@@ -46,10 +47,10 @@
             }
         },
         {
-            "name": "Drivetrain Left Encoder > .01",
+            "name": "Front Limelight OK",
             "type": "boolean",
-            "source": ["drivetrain_input", "leftEncoder"],
-            "condition": "Math.abs(source) > .01",
+            "source": ["limelight_status", "limelightOk"],
+            "condition": "source",
             "coordinates": [2, 1],
             "should-title": true,
             "colors": {
@@ -58,10 +59,10 @@
             }
         },
         {
-            "name": "Drivetrain Right Encoder > .01",
+            "name": "Bottom Limelight OK",
             "type": "boolean",
-            "source": ["drivetrain_input", "rightEncoder"],
-            "condition": "Math.abs(source) > .01",
+            "source": ["limelight_status", "bottomLimelightOk"],
+            "condition": "source",
             "coordinates": [2, 0],
             "should-title": true,
             "colors": {
@@ -70,23 +71,11 @@
             }
         },
         {
-            "name": "Drivetrain Left Encoder Not 0",
+            "name": "Back Limelight OK",
             "type": "boolean",
-            "source": ["drivetrain_input", "leftEncoder"],
-            "condition": "source != 0",
+            "source": ["limelight_status", "backLimelightOk"],
+            "condition": "source",
             "coordinates": [2, 2],
-            "should-title": true,
-            "colors": {
-              "if_true": "#00ff00",
-              "if_false": "#ff0000"
-            }
-        },
-        {
-            "name": "Drivetrain Right Encoder Not 0",
-            "type": "boolean",
-            "source": ["drivetrain_input", "rightEncoder"],
-            "condition": "source != 0",
-            "coordinates": [2, 3],
             "should-title": true,
             "colors": {
               "if_true": "#00ff00",

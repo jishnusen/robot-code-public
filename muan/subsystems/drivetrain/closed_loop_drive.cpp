@@ -71,59 +71,61 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
     return;
   }
 
-  control_mode_ = ControlMode::PATH_FOLLOWING;
-  const auto path_goal = goal->path_goal();
-  const Pose goal_pose{
-      Eigen::Vector3d(path_goal.x(), path_goal.y(), path_goal.heading())};
+  if (goal->has_path_goal()) {
+    control_mode_ = ControlMode::PATH_FOLLOWING;
+    const auto path_goal = goal->path_goal();
+    const Pose goal_pose{
+        Eigen::Vector3d(path_goal.x(), path_goal.y(), path_goal.heading())};
 
-  if (goal_pose.Get() == last_goal_pose_.Get()) {
-    return;
-  } else {
-    last_goal_pose_ = goal_pose;
+    if (goal_pose.Get() == last_goal_pose_.Get()) {
+      return;
+    } else {
+      last_goal_pose_ = goal_pose;
+    }
+
+    const Pose inital_pose{*cartesian_position_, *integrated_heading_};
+
+    Eigen::Vector2d linear_angular_velocity = *linear_angular_velocity_;
+    if (path_goal.full_send()) {
+      linear_angular_velocity = Eigen::Vector2d(0, 0);
+    }
+    const HermiteSpline path{inital_pose,
+                             goal_pose,
+                             (linear_angular_velocity)(0),
+                             path_goal.final_velocity(),
+                             path_goal.backwards(),
+                             path_goal.extra_distance_initial(),
+                             path_goal.extra_distance_final(),
+                             (linear_angular_velocity)(1),
+                             path_goal.final_angular_velocity()};
+
+    const double max_velocity = path_goal.has_max_linear_velocity()
+                                    ? path_goal.max_linear_velocity()
+                                    : dt_config_.max_velocity;
+    const double max_voltage = path_goal.max_voltage();
+    const double max_acceleration = path_goal.has_max_linear_accel()
+                                        ? path_goal.max_linear_accel()
+                                        : dt_config_.max_acceleration;
+    const double max_centripetal_acceleration =
+        path_goal.has_max_centripetal_accel()
+            ? path_goal.max_centripetal_accel()
+            : dt_config_.max_centripetal_acceleration;
+
+    const double initial_velocity = (*linear_angular_velocity_)(0);
+    const double final_velocity = path_goal.final_velocity();
+
+    const Trajectory::Constraints constraints{
+        max_velocity,                  //  NOLINT
+        max_voltage,                   //  NOLINT
+        max_acceleration,              //  NOLINT
+        max_centripetal_acceleration,  //  NOLINT
+        initial_velocity,              //  NOLINT
+        final_velocity,                //  NOLINT
+    };
+
+    trajectory_ = Trajectory(path, constraints, goal->high_gear(), model_);
+    high_gear_ = goal->high_gear();
   }
-
-  const Pose inital_pose{*cartesian_position_, *integrated_heading_};
-
-  Eigen::Vector2d linear_angular_velocity = *linear_angular_velocity_;
-  if (path_goal.full_send()) {
-    linear_angular_velocity = Eigen::Vector2d(0, 0);
-  }
-  const HermiteSpline path{inital_pose,
-                           goal_pose,
-                           (linear_angular_velocity)(0),
-                           path_goal.final_velocity(),
-                           path_goal.backwards(),
-                           path_goal.extra_distance_initial(),
-                           path_goal.extra_distance_final(),
-                           (linear_angular_velocity)(1),
-                           path_goal.final_angular_velocity()};
-
-  const double max_velocity = path_goal.has_max_linear_velocity()
-                                  ? path_goal.max_linear_velocity()
-                                  : dt_config_.max_velocity;
-  const double max_voltage = path_goal.max_voltage();
-  const double max_acceleration = path_goal.has_max_linear_accel()
-                                      ? path_goal.max_linear_accel()
-                                      : dt_config_.max_acceleration;
-  const double max_centripetal_acceleration =
-      path_goal.has_max_centripetal_accel()
-          ? path_goal.max_centripetal_accel()
-          : dt_config_.max_centripetal_acceleration;
-
-  const double initial_velocity = (*linear_angular_velocity_)(0);
-  const double final_velocity = path_goal.final_velocity();
-
-  const Trajectory::Constraints constraints{
-      max_velocity,                  //  NOLINT
-      max_voltage,                   //  NOLINT
-      max_acceleration,              //  NOLINT
-      max_centripetal_acceleration,  //  NOLINT
-      initial_velocity,              //  NOLINT
-      final_velocity,                //  NOLINT
-  };
-
-  trajectory_ = Trajectory(path, constraints, goal->high_gear(), model_);
-  high_gear_ = goal->high_gear();
 }
 
 void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
@@ -151,7 +153,7 @@ void ClosedLoopDrive::UpdatePointTurn(OutputProto* output,
   (*output)->set_output_type(POSITION);
   (*output)->set_left_setpoint(delta(0) + prev_left_right_(0));
   (*output)->set_right_setpoint(delta(1) + prev_left_right_(1));
-  (*output)->set_yaw(point_turn_goal_);
+  (*output)->set_yaw(point_turn_goal_ - ((*linear_angular_velocity_)(1) * 0.01));
   (*output)->set_arc_vel(distance_goal_);
 }
 

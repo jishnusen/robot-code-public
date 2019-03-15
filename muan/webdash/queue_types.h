@@ -10,8 +10,11 @@ namespace webdash {
 
 using WebdashProto =
     muan::proto::StackProto<Webdash, 512>;
+using AutoProto =
+    muan::proto::StackProto<Auto, 512>;
 
 using WebdashQueue = muan::queues::MessageQueue<WebdashProto>;
+using AutoQueue = muan::queues::MessageQueue<AutoProto>;
 
 }  // namespace webdash
 }  // namespace muan

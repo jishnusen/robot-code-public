@@ -64,11 +64,22 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_voltage(elevator_master_.GetMotorOutputVoltage());
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
+  inputs->set_elevator_absolute(elevator_master_.GetSelectedSensorPosition(1) /
+                               kElevatorConversionFactor);
 
   if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
       !elevator_zeroed_) {
     elevator_zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
+    elevator_master_.SetSelectedSensorPosition(0, 1, 100);
+  }
+
+  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->elevator_encoder()) > 0.05) {
+    elevator_zeroed_ = false;
+  }
+
+  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->wrist_encoder()) > 0.05) {
+    /* wrist_zeroed_ = false; */
   }
 
   inputs->set_elevator_hall(
@@ -125,6 +136,8 @@ void SuperstructureInterface::LoadGains() {
 
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
+  elevator_master_.ConfigSelectedFeedbackSensor(
+      FeedbackDevice::CTRE_MagEncoder_Absolute, 1, 100);
   /* elevator_master_.SetSelectedSensorPosition(0, 0, 100); */
 
   wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
@@ -207,7 +220,7 @@ void SuperstructureInterface::WriteActuators() {
           ControlMode::MotionMagic,
           outputs->elevator_setpoint() * kElevatorConversionFactor,
           DemandType_ArbitraryFeedForward,
-          /*outputs->elevator_setpoint_ff()*/ 1.4 / 12.);
+          outputs->elevator_setpoint_ff() / 12.);
       break;
   }
 
@@ -222,6 +235,8 @@ void SuperstructureInterface::WriteActuators() {
                  outputs->wrist_setpoint_ff() / 12.);
       break;
   }
+
+  pins_.Set(outputs->pins());
 
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);

@@ -18,7 +18,7 @@ class AutonomousRunner {
 
  private:
   muan::wpilib::DriverStationQueue::QueueReader driver_station_reader_;
-  muan::webdash::WebdashQueue::QueueReader auto_mode_reader_;
+  muan::webdash::AutoQueue::QueueReader auto_mode_reader_;
 
   std::string AutoMode();
 

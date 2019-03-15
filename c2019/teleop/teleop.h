@@ -75,6 +75,9 @@ class TeleopBase {
   bool had_hp_hatch_ = false;
   bool had_ground_hatch_ = false;
 
+  bool climb_mode_ = false;
+  int counter_ = 0;
+
   // vision buttons
   commands::AutoStatusQueue::QueueReader auto_status_reader_;
   commands::AutoGoalQueue *auto_goal_queue_;

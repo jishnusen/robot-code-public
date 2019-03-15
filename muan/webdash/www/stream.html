@@ -17,10 +17,14 @@
 
     function UpdateStream(data) {
       if (!(prev_url === data["webdash"]["streamUrl"])) {
+<<<<<<< HEAD
         if (!data["webdash"]["flipped"]) {
           document.body.innerHTML = "<img style=\"display:block; margin:auto; text-align:center; height:100%;\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
       } else {
         document.body.innerHTML = "<img style=\"display:block;-webkit-transform:scaleY(-1); transform:scaleY(-1); margin:auto; text-align:center; height:100%;\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
+=======
+        document.body.innerHTML = "<img style=\"display:block;margin:auto;text-align:center; height:100%; transform:rotate(180deg);\" src=\"http://" + data["webdash"]["streamUrl"] + "\" alt=\"Unable to read stream\">";
+>>>>>>> e5bd263fba83490b33cb2e03cc7c4b538565982c
       }
     }
       prev_url = data["webdash"]["streamUrl"];

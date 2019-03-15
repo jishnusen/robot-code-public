@@ -9,7 +9,7 @@ namespace c2019 {
 namespace autonomous {
 
 using muan::queues::QueueManager;
-using muan::webdash::WebdashProto;
+using muan::webdash::AutoProto;
 using muan::webdash::WebDashQueueWrapper;
 using muan::wpilib::DriverStationProto;
 
@@ -17,7 +17,7 @@ AutonomousRunner::AutonomousRunner()
     : driver_station_reader_(
           QueueManager<DriverStationProto>::Fetch()->MakeReader()),
       auto_mode_reader_(WebDashQueueWrapper::GetInstance()
-                            .webdash_queue()
+                            .auto_queue()
                             .MakeReader()) {}
 
 void AutonomousRunner::operator()() {
@@ -37,16 +37,15 @@ void AutonomousRunner::operator()() {
   }
 
   commands::DriveStraight drive_straight_command;
-  std::thread drive_straight_thread(drive_straight_command);
-  drive_straight_thread.detach();
+  if (AutoMode() == "RIGHT_ROCKET") {
+    drive_straight_command.RightRocket();
+  }
 }
 
 std::string AutonomousRunner::AutoMode() {
-  WebdashProto auto_mode;
-  std::string final_auto_mode;
+  AutoProto auto_mode;
   if (auto_mode_reader_.ReadLastMessage(&auto_mode)) {
-    std::string autonomous_mode = auto_mode->auto_modes();
-    return autonomous_mode.substr(7, autonomous_mode.size() - 7);
+    return auto_mode->auto_modes();
   } else {
     return "DRIVE";
   }

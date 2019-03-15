@@ -12,9 +12,9 @@ namespace teleop {
 
 using muan::queues::QueueManager;
 using muan::teleop::JoystickStatusProto;
+using muan::webdash::WebdashProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
-using muan::webdash::WebdashProto;
 using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
 using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
 using c2019::commands::Command;
@@ -30,8 +30,7 @@ TeleopBase::TeleopBase()
           c2019::superstructure::SuperstructureGoalProto>::Fetch()},
       superstructure_status_queue_{QueueManager<
           c2019::superstructure::SuperstructureStatusProto>::Fetch()},
-      webdash_queue_{QueueManager<
-          muan::webdash::WebdashProto>::Fetch()},
+      webdash_queue_{QueueManager<muan::webdash::WebdashProto>::Fetch()},
       ds_sender_{QueueManager<DriverStationProto>::Fetch(),
                  QueueManager<GameSpecificStringProto>::Fetch()},
       throttle_{1, QueueManager<JoystickStatusProto>::Fetch("throttle")},
@@ -40,8 +39,8 @@ TeleopBase::TeleopBase()
       auto_status_reader_{QueueManager<AutoStatusProto>::Fetch()->MakeReader()},
       auto_goal_queue_{QueueManager<AutoGoalProto>::Fetch()} {
   // winch_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::START));
-  winch_left_ = throttle_.MakeButton(7);
-  winch_right_ = throttle_.MakeButton(10);
+  winch_left_ = throttle_.MakeButton(10);
+  winch_right_ = throttle_.MakeButton(7);
   // brake_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::LEFT_CLICK_IN));
   drop_forks_ = gamepad_.MakeButton(uint32_t(muan::teleop::XBox::BACK));
   drop_crawlers_ = gamepad_.MakeAxisRange(-105, -75, 0, 1, 0.8);
@@ -124,32 +123,37 @@ void TeleopBase::Update() {
 
   nt::NetworkTableInstance inst = nt::NetworkTableInstance::GetDefault();
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
-  std::shared_ptr<nt::NetworkTable> back_table =
-      inst.GetTable("limelight-back");
+  /* std::shared_ptr<nt::NetworkTable> back_table = */
+  /*     inst.GetTable("limelight-back"); */
   std::shared_ptr<nt::NetworkTable> expensive_table =
       inst.GetTable("limelight-pricey");
 
   if (RobotController::IsSysActive()) {
-    if (DriverStation::GetInstance().IsOperatorControl()) {
-      SendDrivetrainMessage();
-      SendSuperstructureMessage();
-    }
-    if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
+    SendDrivetrainMessage();
+    SendSuperstructureMessage();
+    if (climb_mode_) {
+      table->PutNumber("ledMode", 0);
+      expensive_table->PutNumber("ledMode", 0);
+      /* back_table->PutNumber("ledMode", 0); */
+    } else if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
       table->PutNumber("ledMode",
                        int(superstructure_status->elevator_goal() > 0.6));
       expensive_table->PutNumber(
           "ledMode", int(superstructure_status->elevator_goal() < 0.6));
-      back_table->PutNumber("ledMode", flash_ ? 2 : 1);
+      /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
     } else {
       table->PutNumber("ledMode", flash_ ? 2 : 1);
       expensive_table->PutNumber("ledMode", 1);
-      back_table->PutNumber("ledMode", 0);
+      /* back_table->PutNumber("ledMode", 0); */
     }
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
-    back_table->PutNumber("ledMode", flash_ ? 2 : 1);
-    expensive_table->PutNumber("ledMode", flash_ ? 2 : 1);
+    /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
+    expensive_table->PutNumber("ledMode", 1);
   }
+
+  /* table->PutNumber("stream", 2); */
+  expensive_table->PutNumber("stream", 2);
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
@@ -185,7 +189,7 @@ void TeleopBase::Update() {
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
 
-  if (exit_auto_->was_clicked()) {
+  /*if (exit_auto_->was_clicked()) {
     auto_goal->set_run_command(false);
     auto_goal_queue_->WriteMessage(auto_goal);
   } else if (!auto_status->running_command()) {
@@ -213,12 +217,13 @@ void TeleopBase::Update() {
       std::thread test_auto_thread(test_auto_command);
       test_auto_thread.detach();
     }
-  }
+  }*/
 
   ds_sender_.Send();
 
   // Camera stream "logic"
 
+<<<<<<< HEAD
   std::string url = "limelight-front.:5801";
   bool camera_flipped = false;
 
@@ -232,6 +237,14 @@ void TeleopBase::Update() {
     } else {
     url = "limelight-pricey.local:5800";
       camera_flipped = true;
+=======
+  std::string url = "";
+
+  if (superstructure_status->wrist_goal() > 1.57) {
+    url = "limelight-pricey.local:5800";
+  } else {
+    url = "limelight-pricey.local:5800";
+>>>>>>> e5bd263fba83490b33cb2e03cc7c4b538565982c
   }
 
   webdash_proto->set_stream_url(url);
@@ -264,52 +277,27 @@ void TeleopBase::SendDrivetrainMessage() {
   if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
           &lime_status)) {
     if (vision_->is_pressed()) {
-      if (super_status->elevator_goal() == 0.987) {
-        bool score_possible =
-            lime_status->target_dist() < 1.9 && lime_status->has_target();
-        wants_override_ = true;
-        height_distance_factor_ = 0.7;
-        override_goal_ = score_possible ? superstructure::HATCH_ROCKET_SECOND
-                                        : superstructure::LIMELIGHT_OVERRIDE;
-      } else {
-        wants_override_ = false;
-        height_distance_factor_ = 0.7;
-      }
-    } else {
-      wants_override_ = false;
-      height_distance_factor_ = 1.0;
-    }
-    if (vision_->is_pressed()) {
-      if (vision_intake_->is_pressed() && lime_status->back_has_target()) {
+      if (vision_intake_->is_pressed() && lime_status->back_has_target() &&
+          lime_status->back_limelight_ok()) {
         vision = true;
-        distance_factor_ = -1;
+        distance_factor_ = -0.8;
         target_dist_ = lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
-        y_int = -0.3;
-      } else if ((lime_status->has_target() ||
-                  lime_status->pricey_has_target()) &&
-                 !vision_intake_->is_pressed()) {
-        vision = true;
+        y_int = -0;
+      } else if (!vision_intake_->is_pressed()) {
         distance_factor_ = 1;
+        y_int = 0.35;
         if (super_status->elevator_height() > 0.8) {
           horiz_angle_ = lime_status->pricey_horiz_angle();
           target_dist_ = lime_status->pricey_target_dist();
+          distance_factor_ = 4.0 / 4.5;
+          y_int = 0.4;
+          vision = lime_status->bottom_limelight_ok() && lime_status->pricey_has_target();
         } else {
           horiz_angle_ = lime_status->horiz_angle();
           target_dist_ = lime_status->target_dist();
+          vision = lime_status->limelight_ok() && lime_status->has_target();
         }
-        double skew = lime_status->skew();
-        if (lime_status->skew() > -45) {
-          skew = std::abs(lime_status->skew());
-        } else {
-          skew += 90;
-        }
-        if (skew > 9.0 || this_run_off_) {
-          horiz_angle_ =
-              std::copysign(std::abs(horiz_angle_) + 0.025, horiz_angle_);
-          this_run_off_ = true;
-        }
-        y_int = 0.5;
       }
     }
   }
@@ -338,7 +326,7 @@ void TeleopBase::SendDrivetrainMessage() {
     /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
     drivetrain_goal->mutable_arc_goal()->set_linear((target_dist_ - y_int) *
-                                                    distance_factor_ * 4.0);
+                                                    distance_factor_ * 4.5);
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -409,7 +397,7 @@ void TeleopBase::SendSuperstructureMessage() {
     superstructure_goal->set_score_goal(c2019::superstructure::STOW);
   }
   if (level_1_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
@@ -422,6 +410,10 @@ void TeleopBase::SendSuperstructureMessage() {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
               c2019::superstructure::HATCH_ROCKET_FIRST);
+          if (has_hp_hatch_) {
+            superstructure_goal->set_score_goal(
+                c2019::superstructure::CARGO_GROUND);
+          }
           if (has_hp_hatch_) {
             superstructure_goal->set_intake_goal(
                 c2019::superstructure::PREP_SCORE);
@@ -446,7 +438,7 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (level_2_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_SECOND);
@@ -463,7 +455,7 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (level_3_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         superstructure_goal->set_score_goal(
             c2019::superstructure::CARGO_ROCKET_THIRD);
@@ -480,7 +472,7 @@ void TeleopBase::SendSuperstructureMessage() {
     }
   }
   if (ship_->is_pressed()) {
-    if (!(safety_->is_pressed() || safety2_->is_pressed())) {
+    if (!climb_mode_) {
       if (has_cargo_) {
         if (!backwards_->is_pressed()) {
           superstructure_goal->set_score_goal(
@@ -534,9 +526,16 @@ void TeleopBase::SendSuperstructureMessage() {
   /* if (superstructure_goal->score_goal() != superstructure::NONE) { */
   /*   cached_goal_ = superstructure_goal->score_goal(); */
   /* } */
-  if (wants_override_) {
-    superstructure_goal->set_score_goal(override_goal_);
+
+  if (hp_hatch_intake_->is_pressed() && hp_hatch_outtake_->is_pressed() &&
+      cargo_intake_->is_pressed() && cargo_outtake_->is_pressed()) {
+    climb_mode_ = true;
   }
+
+  if (climb_mode_ && ground_intake_height_->is_pressed()) {
+    climb_mode_ = false;
+  }
+
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }
 

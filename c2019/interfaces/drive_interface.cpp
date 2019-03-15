@@ -26,7 +26,7 @@ constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
 constexpr double kHighGearVelocityF = 0.12;
 
-constexpr double kTurningP = 1.9;
+constexpr double kTurningP = 2.0;
 constexpr double kTurningI = 0.0;
 constexpr double kTurningD = 4.0;
 constexpr double kTurningF = 0.0;
@@ -96,14 +96,20 @@ DrivetrainInterface::DrivetrainInterface()
       pigeon_{&left_slave_a_},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
-  left_master_.ConfigSelectedFeedbackSensor(
-      FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout);
-  right_master_.ConfigSelectedFeedbackSensor(
-      FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout);
-  left_master_.ConfigSelectedFeedbackSensor(
-      FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot, kSetupTimeout);
-  right_master_.ConfigSelectedFeedbackSensor(
-      FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot, kSetupTimeout);
+  right_master_.ConfigFactoryDefault();
+  left_master_.ConfigFactoryDefault();
+  /* left_master_.ConfigSelectedFeedbackSensor( */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot,
+   * kSetupTimeout); */
+  /* right_master_.ConfigSelectedFeedbackSensor( */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot,
+   * kSetupTimeout); */
+  /* left_master_.ConfigSelectedFeedbackSensor( */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot,
+   * kSetupTimeout); */
+  /* right_master_.ConfigSelectedFeedbackSensor( */
+  /*     FeedbackDevice::CTRE_MagEncoder_Relative, kVelocitySlot,
+   * kSetupTimeout); */
 
   pigeon_.SetYaw(0, 100);
 
@@ -119,7 +125,6 @@ DrivetrainInterface::DrivetrainInterface()
    * FeedbackDevice::CTRE_MagEncoder_Relative, 100); */
   /* right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::SensorSum, 0,
    * 100); */
-  /* right_master_.ConfigSelectedFeedbackCoefficient(0.5, 0, 100); */
   right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::RemoteSensor1, 1,
                                              100);
   right_master_.ConfigSelectedFeedbackCoefficient((3600. / 8192.), 1, 100);
@@ -174,14 +179,14 @@ DrivetrainInterface::DrivetrainInterface()
 void DrivetrainInterface::ReadSensors() {
   InputProto sensors;
 
-  sensors->set_left_encoder(left_master_.GetSelectedSensorPosition(0) /
-                            kDriveConversionFactor);
-  sensors->set_right_encoder(right_master_.GetSelectedSensorPosition(0) /
-                             kDriveConversionFactor);
-  sensors->set_left_velocity(left_master_.GetSelectedSensorVelocity(0) /
-                             kDriveConversionFactor / 0.1);
-  sensors->set_right_velocity(right_master_.GetSelectedSensorVelocity(0) /
-                              kDriveConversionFactor / 0.1);
+  /* sensors->set_left_encoder(left_master_.GetSelectedSensorPosition(0) / */
+  /*                           kDriveConversionFactor); */
+  /* sensors->set_right_encoder(right_master_.GetSelectedSensorPosition(0) / */
+  /*                            kDriveConversionFactor); */
+  /* sensors->set_left_velocity(left_master_.GetSelectedSensorVelocity(0) / */
+  /*                            kDriveConversionFactor / 0.1); */
+  /* sensors->set_right_velocity(right_master_.GetSelectedSensorVelocity(0) / */
+  /*                             kDriveConversionFactor / 0.1); */
 
   sensors->set_gyro(-(pigeon_.GetFusedHeading() - pigeon_offset_) * M_PI /
                     180.);
@@ -214,14 +219,18 @@ void DrivetrainInterface::WriteActuators() {
 
   switch (outputs->output_type()) {
     case TalonOutput::OPEN_LOOP:
-      compressor_.Start();
+      if (!compressor_.Enabled()) {
+        compressor_.Start();
+      }
 
       SetBrakeMode(false);
       left_master_.Set(ControlMode::PercentOutput, outputs->left_setpoint());
       right_master_.Set(ControlMode::PercentOutput, outputs->right_setpoint());
       break;
     case TalonOutput::POSITION:
-      compressor_.Stop();
+      if (compressor_.Enabled()) {
+        compressor_.Stop();
+      }
       right_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kTurningSlot, 1);
       right_master_.Set(ControlMode::PercentOutput, outputs->arc_vel() / 12.,
@@ -231,20 +240,14 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
     case TalonOutput::VELOCITY:
-      compressor_.Stop();
       SetBrakeMode(true);
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1);
-      /* DemandType_ArbitraryFeedForward, */
-      /* outputs->left_setpoint_ff() / 12.); */
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
-      /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
-       */
-
       break;
   }
 

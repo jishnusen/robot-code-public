@@ -21,9 +21,11 @@ class WebDashQueueWrapper {
  public:
   static WebDashQueueWrapper &GetInstance();
   WebdashQueue &webdash_queue();
+  AutoQueue &auto_queue();
 
  private:
   WebdashQueue webdash_queue_{100};
+  AutoQueue auto_queue_{100};
 };
 
 enum WebDashMode { ROBORIO, JETSON };
