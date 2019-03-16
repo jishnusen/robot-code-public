@@ -12,9 +12,4 @@ message Webdash {
 message Auto {
   required uint64 timestamp = 1;
   required string auto_modes = 2;
-<<<<<<< HEAD
-  required string stream_url = 3;
-  required bool flipped = 4;
-=======
->>>>>>> e5bd263fba83490b33cb2e03cc7c4b538565982c
 }

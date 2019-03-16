@@ -10,6 +10,7 @@ namespace autonomous {
 class HatchRocketFront : public c2019::autonomous::AutonomousBase {
  public:
   void RightSide();
+  void LeftSide();
 };
 
 }  // namespace autonomous

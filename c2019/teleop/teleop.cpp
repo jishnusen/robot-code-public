@@ -129,8 +129,8 @@ void TeleopBase::Update() {
       inst.GetTable("limelight-pricey");
 
   if (RobotController::IsSysActive()) {
-    SendDrivetrainMessage();
-    SendSuperstructureMessage();
+    //SendDrivetrainMessage();
+    //SendSuperstructureMessage();
     if (climb_mode_) {
       table->PutNumber("ledMode", 0);
       expensive_table->PutNumber("ledMode", 0);
@@ -203,9 +203,7 @@ void TeleopBase::Update() {
       auto_goal->set_run_command(false);
       auto_goal->set_command(Command::NONE);
     }
-
     auto_goal_queue_->WriteMessage(auto_goal);
-
     // TODO(jishnu) add actual commands
     // NOTE: not using a switch here due to cross-initialization of the threads
     if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
@@ -221,34 +219,17 @@ void TeleopBase::Update() {
 
   ds_sender_.Send();
 
-  // Camera stream "logic"
+  // Camera "logic"
 
-<<<<<<< HEAD
-  std::string url = "limelight-front.:5801";
-  bool camera_flipped = false;
-
-  table->PutNumber("stream",2);
-  back_table->PutNumber("stream",2);
-  expensive_table->PutNumber("stream",2);
-
-  if (superstructure_status->wrist_goal() > 1.57) {
-      url = "limelight-back.local:5800";
-      camera_flipped = true;
-    } else {
-    url = "limelight-pricey.local:5800";
-      camera_flipped = true;
-=======
   std::string url = "";
 
   if (superstructure_status->wrist_goal() > 1.57) {
     url = "limelight-pricey.local:5800";
   } else {
     url = "limelight-pricey.local:5800";
->>>>>>> e5bd263fba83490b33cb2e03cc7c4b538565982c
   }
 
   webdash_proto->set_stream_url(url);
-  webdash_proto->set_flipped(camera_flipped);
   webdash_queue_->WriteMessage(webdash_proto);
 }
 

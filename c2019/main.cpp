@@ -21,14 +21,14 @@ class WpilibRobot : public IterativeRobot {
     std::thread teleop_thread(std::ref(main_));
     teleop_thread.detach();
 
-    /* std::thread autonomous_thread(std::ref(autonomous_)); */
-    /* autonomous_thread.detach(); */
+    std::thread autonomous_thread(std::ref(autonomous_));
+    autonomous_thread.detach();
   }
 
  private:
   c2019::subsystems::SubsystemRunner subsystem_runner_;
   c2019::teleop::TeleopBase main_;
-  /* c2019::autonomous::AutonomousRunner autonomous_; */
+  c2019::autonomous::AutonomousRunner autonomous_;
 };
 
 int main(int argc, char **argv) {

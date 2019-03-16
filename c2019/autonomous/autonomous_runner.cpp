@@ -37,9 +37,8 @@ void AutonomousRunner::operator()() {
   }
 
   commands::DriveStraight drive_straight_command;
-  if (AutoMode() == "RIGHT_ROCKET") {
+
     drive_straight_command.RightRocket();
-  }
 }
 
 std::string AutonomousRunner::AutoMode() {

@@ -4,10 +4,10 @@ cc_library(
     hdrs = ["autonomous_runner.h"],
     deps = [
         "//c2019/commands",
-                "//muan/wpilib:wpilib_queues",
-
+        "//muan/wpilib:wpilib_queues",
         "//muan/queues:queue_manager",
         "//muan/logging:logger",
+        ":autonomous"
     ],
     visibility = ["//visibility:public"],
     restricted_to = ["//tools:roborio"],
@@ -63,6 +63,26 @@ cc_library(
     name = "cargo_ship",
     srcs = ["cargo_ship.cpp"],
     hdrs = ["cargo_ship.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":autonomous_base",
+    ],
+)
+
+cc_library(
+    name = "cargo_rocket",
+    srcs = ["cargo_rocket.cpp"],
+    hdrs = ["cargo_rocket.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":autonomous_base",
+    ],
+)
+
+cc_library(
+    name = "hatch_rocket_back",
+    srcs = ["hatch_rocket_back.cpp"],
+    hdrs = ["hatch_rocket_back.h"],
     visibility = ["//visibility:public"],
     deps = [
         ":autonomous_base",
