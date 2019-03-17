@@ -7,8 +7,10 @@
             "should-title": false,
             "autos": [
                 "LEFT_ROCKET",
+                "RIGHT_ROCKET",
                 "CARGO_SHIP",
-                "CARGO_ROCKET"
+                "CARGO_ROCKET",
+                "RIGHT_CARGO_ROCKET"
             ]
         },
         {

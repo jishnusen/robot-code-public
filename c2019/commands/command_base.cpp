@@ -28,17 +28,21 @@ CommandBase::CommandBase()
       auto_goal_reader_(QueueManager<AutoGoalProto>::Fetch()->MakeReader()) {}
 
 bool CommandBase::IsAutonomous() {
+  std::cout << "getting called" << std::endl;
   DriverStationProto driver_station;
   if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station status found.");
+    ExitAutonomous();
     return false;
   }
 
-  if (driver_station->is_sys_active()) {
-    return true;
+  if (!driver_station->is_sys_active()) {
+    LOG(WARNING, "Tried to run command while disabled.");
+    ExitAutonomous();
+    return false;
   }
 
-  return false;
+  return driver_station->mode() == RobotMode::AUTONOMOUS;
 }
 
 void CommandBase::EnterAutonomous() {
