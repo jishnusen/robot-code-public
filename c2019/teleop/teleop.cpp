@@ -129,8 +129,10 @@ void TeleopBase::Update() {
       inst.GetTable("limelight-pricey");
 
   if (RobotController::IsSysActive()) {
-    //SendDrivetrainMessage();
-    //SendSuperstructureMessage();
+    if (!auto_status->running_command()) {
+        SendDrivetrainMessage();
+        SendSuperstructureMessage();
+    }
     if (climb_mode_) {
       table->PutNumber("ledMode", 0);
       expensive_table->PutNumber("ledMode", 0);

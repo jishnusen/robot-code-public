@@ -29,6 +29,7 @@ class ClosedLoopDrive {
 
  private:
   void UpdatePointTurn(OutputProto* output, StatusProto* status);
+  void UpdateVisionArc(OutputProto* output, StatusProto* status);
   void UpdateDistance(OutputProto* output, StatusProto* status);
   void UpdateLeftRightManual(OutputProto* output, StatusProto* status);
   void UpdatePathFollower(OutputProto* output, StatusProto* status);

@@ -64,14 +64,11 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_elevator_voltage(elevator_master_.GetMotorOutputVoltage());
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
-  inputs->set_elevator_absolute(elevator_master_.GetSelectedSensorPosition(1) /
-                               kElevatorConversionFactor);
 
   if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
       !elevator_zeroed_) {
     elevator_zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
-    elevator_master_.SetSelectedSensorPosition(0, 1, 100);
   }
 
   if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->elevator_encoder()) > 0.05) {
@@ -135,12 +132,10 @@ void SuperstructureInterface::LoadGains() {
                                         LimitSwitchNormal_NormallyOpen, 100);
 
   elevator_master_.ConfigSelectedFeedbackSensor(
-      FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
-  elevator_master_.ConfigSelectedFeedbackSensor(
-      FeedbackDevice::CTRE_MagEncoder_Absolute, 1, 100);
+      FeedbackDevice::CTRE_MagEncoder_Absolute, 0, 100);
   /* elevator_master_.SetSelectedSensorPosition(0, 0, 100); */
 
-  wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
+  wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Absolute,
                                       0, 100);
   /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
 

@@ -26,6 +26,7 @@ enum TalonOutput {
   OPEN_LOOP = 0;
   POSITION = 1;
   VELOCITY = 2;
+  ARC = 3;
 }
 
 message DrivetrainOutput {
@@ -51,6 +52,7 @@ enum ControlMode {
     DISTANCE = 2;
     LEFT_RIGHT = 3;
     LINEAR_ANGULAR_VEL = 4;
+    VISION_ARC = 5;
 }
 
 message DrivetrainStatus {

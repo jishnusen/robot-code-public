@@ -19,7 +19,7 @@ constexpr int kSetupTimeout = 100;
 constexpr double kHighGearPositionP = 0.6;
 constexpr double kHighGearPositionI = 0;
 constexpr double kHighGearPositionD = 6.;
-constexpr double kHighGearPositionF = .09;
+constexpr double kHighGearPositionF = 0.;
 
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
@@ -232,14 +232,14 @@ void DrivetrainInterface::WriteActuators() {
         compressor_.Stop();
       }
       right_master_.SelectProfileSlot(kPositionSlot, 0);
-      right_master_.SelectProfileSlot(kTurningSlot, 1);
-      right_master_.Set(ControlMode::PercentOutput, outputs->arc_vel() / 12.,
-                        DemandType_AuxPID,
-                        right_master_.GetSelectedSensorPosition(1) +
-                            outputs->yaw() * (3600. / (2. * M_PI)));
-      left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
+      left_master_.SelectProfileSlot(kPositionSlot, 0);
+      right_master_.Set(ControlMode::Position, outputs->right_setpoint() * kDriveConversionFactor);
+      left_master_.Set(ControlMode::Position, outputs->left_setpoint() * kDriveConversionFactor);
       break;
     case TalonOutput::VELOCITY:
+      if (compressor_.Enabled()) {
+        compressor_.Stop();
+      }
       SetBrakeMode(true);
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
@@ -248,6 +248,18 @@ void DrivetrainInterface::WriteActuators() {
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
+      break;
+    case TalonOutput::ARC:
+      if (compressor_.Enabled()) {
+        compressor_.Stop();
+      }
+      right_master_.SelectProfileSlot(kPositionSlot, 0);
+      right_master_.SelectProfileSlot(kTurningSlot, 1);
+      right_master_.Set(ControlMode::PercentOutput, outputs->arc_vel() / 12.,
+                        DemandType_AuxPID,
+                        right_master_.GetSelectedSensorPosition(1) +
+                            outputs->yaw() * (3600. / (2. * M_PI)));
+      left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
   }
 

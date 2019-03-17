@@ -89,6 +89,13 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
   drivetrain_goal_queue_->WriteMessage(goal);
 }
 
+void CommandBase::StartPointTurn(double theta) {
+  DrivetrainGoal goal;
+  goal->set_point_turn_goal(theta);
+  goal->set_high_gear(false);
+  drivetrain_goal_queue_->WriteMessage(goal);
+}
+
 bool CommandBase::StartDriveVision() {
   // run vision align stuff
   DrivetrainGoal drivetrain_goal;
@@ -101,31 +108,79 @@ bool CommandBase::StartDriveVision() {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
     no_target++;
     if (no_target > 70) {
+      LOG(WARNING, "Didn't get target");
       return false;
     }
   }
 
   no_target = 0;
-  while (lime_status->target_dist() > 0.63 && IsAutonomous()) {
+  while (lime_status->target_dist() > 0.71 && IsAutonomous()) {
     if (!lime_status->has_target()) {
       no_target++;
     } else {
       no_target = 0;
     }
     if (no_target > 30) {
+      LOG(WARNING, "Didn't get target while tracking");
       return false;
     }
     drivetrain_goal->mutable_arc_goal()->set_angular(
         lime_status->horiz_angle());
     drivetrain_goal->mutable_arc_goal()->set_linear(
-        (lime_status->target_dist() - 0.3) * 4.0);
+        (lime_status->target_dist() - 0.35) * 5.5);
 
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  if (lime_status->target_dist() > 0.63) {
+  if (lime_status->target_dist() > 0.71) {
+    LOG(WARNING, "Couldn't converge");
+    return false;
+  }
+  return true;
+}
+
+bool CommandBase::StartDriveVisionBottom() {
+  // run vision align stuff
+  DrivetrainGoal drivetrain_goal;
+  LimelightStatusProto lime_status;
+  QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+
+  int no_target = 0;
+  while (!lime_status->pricey_has_target() && IsAutonomous()) {
+    Wait(1);
+    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+    no_target++;
+    if (no_target > 70) {
+      LOG(WARNING, "Didn't get target");
+      return false;
+    }
+  }
+
+  no_target = 0;
+  while (lime_status->pricey_target_dist() > 0.41 && IsAutonomous()) {
+    if (!lime_status->pricey_has_target()) {
+      no_target++;
+    } else {
+      no_target = 0;
+    }
+    if (no_target > 30) {
+      LOG(WARNING, "Didn't get target while tracking");
+      return false;
+    }
+    drivetrain_goal->mutable_arc_goal()->set_angular(
+        lime_status->pricey_horiz_angle());
+    drivetrain_goal->mutable_arc_goal()->set_linear(
+        (lime_status->pricey_target_dist() - 0.2) * 4.0);
+
+    QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
+    Wait(1);
+    QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
+  }
+
+  if (lime_status->pricey_target_dist() > 0.45) {
+    LOG(WARNING, "Couldn't converge");
     return false;
   }
   return true;
@@ -223,6 +278,12 @@ bool CommandBase::IsDriveComplete() {
           status->profile_complete()) {
         return true;
       }
+    } else if (goal->has_point_turn_goal()) {
+        std::cout << status->heading_error() << std::endl;
+        std::cout << goal->point_turn_goal() << std::endl;
+      if (std::abs(goal->point_turn_goal() - status->estimated_heading()) < 1e-1) {
+          return true;
+      }
     }
   }
 
@@ -232,6 +293,14 @@ bool CommandBase::IsDriveComplete() {
 void CommandBase::WaitUntilDriveComplete() {
   while (!IsDriveComplete() && IsAutonomous()) {
     loop_.SleepUntilNext();
+  }
+}
+
+void CommandBase::WaitForHatch() {
+  SuperstructureStatusProto super_status;
+  while (!super_status->has_hp_hatch() && IsAutonomous()) {
+      loop_.SleepUntilNext();
+      QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(&super_status);
   }
 }
 
