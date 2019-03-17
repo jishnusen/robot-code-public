@@ -7,67 +7,80 @@ namespace autonomous {
 using muan::queues::QueueManager;
 
 void HatchRocketBack::LeftSide() {
+  EnterAutonomous();
   // Set field position to right side of L1 HAB
-  double init_theta = 180;
+  double init_theta = M_PI;
+
+
   SetFieldPosition(1.8, 1.1, init_theta);
   DrivetrainStatus drive_status;
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  double init_theta_offset = init_theta - drive_status->estimated_heading();
+  double init_gyro = drive_status->estimated_heading();
   LOG(INFO, "Running NONE auto");
 
-  // Move to 1st level height & socre hatch back L1 rocket
-  GoTo(superstructure::HATCH_ROCKET_BACKWARDS);
-  StartDrivePath(6.4, 3.2, -40 * (M_PI / 180.), -1, true/*, 1.0*/);
-  WaitUntilDrivetrainNear(6.9, 2.9, 0.2);
-  StartDriveVision();
-  ScoreHatch(1); // Backplates suck
-  Wait(50);
+  StartDrivePath(7.4, 2.2, 155 * (M_PI / 180.), -1, true);
+  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  WaitUntilDriveComplete();
+  bool success = StartDriveVision();
+  if (!success) {
+    LOG(WARNING, "Vision didn't work");
+  ExitAutonomous();
+  return;
+  }
+  ScoreHatch(1);
+  Wait(25);
 
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  // At back rocket
-  SetFieldPosition(6.4, 3.4 , drive_status->estimated_heading() + init_theta_offset);
+  SetFieldPosition(6.4, 3.4, (drive_status->estimated_heading() - init_gyro) + init_theta);
 
-  StartDrivePath(6.5, 1.4, 270, 1, true);
+  StartDrivePath(7., 2.5, 150. * (M_PI / 180.), -1, true);
 
-  WaitUntilDrivetrainNear(6.4, 2.4, .2);
-  StartDrivePath(.4, 3.2, 160, 1, true);
+  WaitUntilDriveComplete();
+  StartDrivePath(.4, 3.4, M_PI, 1, true, true, 0, 0.5);
   Wait(150);
-  GoTo(superstructure::HATCH_SHIP_FORWARDS);
+  GoTo(superstructure::HATCH_SHIP_FORWARDS, superstructure::INTAKE_HATCH);
 
-  WaitUntilDrivetrainNear(1.3, 2.9, 0.3);
+  WaitUntilDrivetrainNear(1.4, 3.4, 0.6);
   // Activate vision once dt is reasonably near loading station
-  StartDriveVision();
+success = StartDriveVision();
+  if (!success) {
+    LOG(WARNING, "Vision didn't work");
+  ExitAutonomous();
+  return;
+  }
 
 
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   // Resetting field position again because we are in a known location (Loading
   // station)
-  SetFieldPosition(0, 3.4, drive_status->estimated_heading() + init_theta_offset);
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+  SetFieldPosition(0.4, 3.4, (drive_status->estimated_heading() - init_gyro) + init_theta);
 
-  StartDrivePath(6.4, 3.2,  -40 * (M_PI / 180.), -1, true);
-  Wait(100);
-  GoTo(superstructure::HATCH_ROCKET_FIRST);
-
-  WaitUntilDrivetrainNear(6.9, 2.9, 0.2);
-  StartDriveVision();
-  ScoreHatch(1); // Backplates suck
+  StartDrivePath(7.4, 2.8,  220 * (M_PI / 180.), -1, true);
+  WaitUntilDrivetrainNear(5.9, 1.8, .2);
+  GoTo(superstructure::HATCH_ROCKET_SECOND, superstructure::PREP_SCORE);
+  WaitUntilDriveComplete();
+  StartPointTurn(-80 * (M_PI / 180.));
   Wait(50);
+ success = StartDriveVisionBottom();
+  if (!success) {
+    LOG(WARNING, "Vision didn't work");
+  ExitAutonomous();
+  return;
+  }
 
-    // Reset field position (again)
-    QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-    // At back rocket
-    SetFieldPosition(6.4, 3.4 , drive_status->estimated_heading() + init_theta_offset);
+  ScoreHatch(1);
+  Wait(25);
 
-    StartDrivePath(6.5, 1.4, 270, 1, true);
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+  SetFieldPosition(6.6, 3.4, (drive_status->estimated_heading() - init_gyro) + init_theta);
 
-    WaitUntilDrivetrainNear(6.4, 2.4, .2);
-    StartDrivePath(.4, 3.2, 160, 1, true);
-    Wait(150);
-    GoTo(superstructure::HATCH_SHIP_FORWARDS);
-
-    WaitUntilDrivetrainNear(1.3, 2.9, 0.3);
-    // Activate vision once dt is reasonably near loading station
-    StartDriveVision();
+  StartDrivePath(4.6, 2.3, 0. * (M_PI / 180.), -1, true);
+  Wait(25);
+  GoTo(superstructure::HATCH_SHIP_FORWARDS);
+  WaitUntilDriveComplete();
+  ExitAutonomous();  // bye
+}
 }
 
 }  // namespace autonomous
