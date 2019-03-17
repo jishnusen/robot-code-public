@@ -81,7 +81,6 @@ success = StartDriveVision();
   WaitUntilDriveComplete();
   ExitAutonomous();  // bye
 }
-}
 
 }  // namespace autonomous
 }  // namespace c2019

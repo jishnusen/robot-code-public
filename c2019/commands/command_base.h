@@ -38,7 +38,7 @@ class CommandBase {
                       double path_voltage = 12.0);
   void StartPointTurn(double theta);
 
-  bool StartDriveVision();
+  bool StartDriveVision(double target_dist = 0.73);
   bool StartDriveVisionBottom();
   bool StartDriveVisionBackwards();
   void HoldPosition();

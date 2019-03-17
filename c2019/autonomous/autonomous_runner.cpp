@@ -34,11 +34,18 @@ void AutonomousRunner::operator()() {
   while (driver_station_reader_.ReadLastMessage(&driver_station),
          driver_station->mode() != RobotMode::AUTONOMOUS) {
     loop_.SleepUntilNext();
+    std::cout << (AutoMode() == "LEFT_ROCKET") << std::endl;
   }
 
   commands::DriveStraight drive_straight_command;
 
-    drive_straight_command.RightRocket();
+  if ((AutoMode() == "LEFT_ROCKET")) {
+    drive_straight_command.LeftRocket();
+  } else if (AutoMode() == "CARGO_SHIP") {
+    drive_straight_command.CargoShip();
+  } else if (AutoMode() == "CARGO_ROCKET") {
+    drive_straight_command.CargoRocket();
+  }
 }
 
 std::string AutonomousRunner::AutoMode() {

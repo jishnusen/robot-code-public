@@ -96,7 +96,10 @@ void CommandBase::StartPointTurn(double theta) {
   drivetrain_goal_queue_->WriteMessage(goal);
 }
 
-bool CommandBase::StartDriveVision() {
+bool CommandBase::StartDriveVision(double target_dist) {
+  if (!IsAutonomous()) {
+    return false;
+  }
   // run vision align stuff
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
@@ -114,7 +117,7 @@ bool CommandBase::StartDriveVision() {
   }
 
   no_target = 0;
-  while (lime_status->target_dist() > 0.71 && IsAutonomous()) {
+  while (lime_status->target_dist() > target_dist && IsAutonomous()) {
     if (!lime_status->has_target()) {
       no_target++;
     } else {
@@ -134,7 +137,7 @@ bool CommandBase::StartDriveVision() {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  if (lime_status->target_dist() > 0.71) {
+  if (lime_status->target_dist() > target_dist) {
     LOG(WARNING, "Couldn't converge");
     return false;
   }
@@ -142,6 +145,9 @@ bool CommandBase::StartDriveVision() {
 }
 
 bool CommandBase::StartDriveVisionBottom() {
+  if (!IsAutonomous()) {
+    return false;
+  }
   // run vision align stuff
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
@@ -159,7 +165,7 @@ bool CommandBase::StartDriveVisionBottom() {
   }
 
   no_target = 0;
-  while (lime_status->pricey_target_dist() > 0.41 && IsAutonomous()) {
+  while (lime_status->pricey_target_dist() > 0.44 && IsAutonomous()) {
     if (!lime_status->pricey_has_target()) {
       no_target++;
     } else {
@@ -187,6 +193,9 @@ bool CommandBase::StartDriveVisionBottom() {
 }
 
 bool CommandBase::StartDriveVisionBackwards() {
+  if (!IsAutonomous()) {
+    return false;
+  }
   // run vision align stuff
   DrivetrainGoal drivetrain_goal;
   LimelightStatusProto lime_status;
@@ -236,6 +245,9 @@ void CommandBase::HoldPosition() {
 void CommandBase::GoTo(superstructure::ScoreGoal score_goal,
                        superstructure::IntakeGoal intake_goal) {
   std::cout << "moving" << std::endl;
+  if (!IsAutonomous()) {
+    return;
+  }
   SuperstructureGoalProto super_goal;
   super_goal->set_score_goal(score_goal);
   super_goal->set_intake_goal(intake_goal);

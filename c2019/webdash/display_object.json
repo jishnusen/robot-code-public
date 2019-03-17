@@ -6,7 +6,9 @@
             "coordinates": [0, 3],
             "should-title": false,
             "autos": [
-                "RIGHT_ROCKET"
+                "LEFT_ROCKET",
+                "CARGO_SHIP",
+                "CARGO_ROCKET"
             ]
         },
         {
