@@ -28,7 +28,6 @@ CommandBase::CommandBase()
       auto_goal_reader_(QueueManager<AutoGoalProto>::Fetch()->MakeReader()) {}
 
 bool CommandBase::IsAutonomous() {
-  std::cout << "getting called" << std::endl;
   DriverStationProto driver_station;
   if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station status found.");
@@ -54,6 +53,7 @@ void CommandBase::EnterAutonomous() {
 
 void CommandBase::ExitAutonomous() {
   AutoStatusProto auto_status;
+  LOG(INFO, "Exited running command");
   auto_status->set_running_command(false);
   auto_status_queue_->WriteMessage(auto_status);
 }
@@ -64,6 +64,7 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
                                  double extra_distance_final,
                                  double path_voltage) {
   if (!IsAutonomous()) {
+    ExitAutonomous();
     return;
   }
 
@@ -94,6 +95,10 @@ void CommandBase::StartDrivePath(double x, double y, double heading,
 }
 
 void CommandBase::StartPointTurn(double theta) {
+  if (!IsAutonomous()) {
+    ExitAutonomous();
+    return;
+  }
   DrivetrainGoal goal;
   goal->set_point_turn_goal(theta);
   goal->set_high_gear(false);
@@ -102,6 +107,7 @@ void CommandBase::StartPointTurn(double theta) {
 
 bool CommandBase::StartDriveVision(double target_dist) {
   if (!IsAutonomous()) {
+    ExitAutonomous();
     return false;
   }
   // run vision align stuff
@@ -150,6 +156,7 @@ bool CommandBase::StartDriveVision(double target_dist) {
 
 bool CommandBase::StartDriveVisionBottom() {
   if (!IsAutonomous()) {
+    ExitAutonomous();
     return false;
   }
   // run vision align stuff
@@ -198,6 +205,7 @@ bool CommandBase::StartDriveVisionBottom() {
 
 bool CommandBase::StartDriveVisionBackwards() {
   if (!IsAutonomous()) {
+    ExitAutonomous();
     return false;
   }
   // run vision align stuff
@@ -236,6 +244,7 @@ bool CommandBase::StartDriveVisionBackwards() {
 
 void CommandBase::HoldPosition() {
   if (!IsAutonomous()) {
+    ExitAutonomous();
     return;
   }
 
@@ -248,8 +257,8 @@ void CommandBase::HoldPosition() {
 
 void CommandBase::GoTo(superstructure::ScoreGoal score_goal,
                        superstructure::IntakeGoal intake_goal) {
-  std::cout << "moving" << std::endl;
   if (!IsAutonomous()) {
+    ExitAutonomous();
     return;
   }
   SuperstructureGoalProto super_goal;
