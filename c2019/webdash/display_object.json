@@ -10,7 +10,8 @@
                 "RIGHT_ROCKET",
                 "CARGO_SHIP",
                 "CARGO_ROCKET",
-                "RIGHT_CARGO_ROCKET"
+                "RIGHT_CARGO_ROCKET",
+                "TELEOP"
             ]
         },
         {
