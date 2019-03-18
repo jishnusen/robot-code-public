@@ -10,7 +10,6 @@ using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 
 bool DriveStraight::IsAutonomous() {
-  std::cout << "getting called" << std::endl;
   DriverStationProto driver_station;
   if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station status found.");
