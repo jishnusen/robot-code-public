@@ -129,9 +129,10 @@ void TeleopBase::Update() {
       inst.GetTable("limelight-pricey");
 
   if (RobotController::IsSysActive()) {
-    if (DriverStation::GetInstance().IsOperatorControl() || !auto_status->running_command()) {
-        SendDrivetrainMessage();
-        SendSuperstructureMessage();
+    if (DriverStation::GetInstance().IsOperatorControl() ||
+        !auto_status->running_command()) {
+      SendDrivetrainMessage();
+      SendSuperstructureMessage();
     }
     if (climb_mode_) {
       table->PutNumber("ledMode", 0);
@@ -275,11 +276,27 @@ void TeleopBase::SendDrivetrainMessage() {
           target_dist_ = lime_status->pricey_target_dist();
           distance_factor_ = 4.0 / 4.5;
           y_int = 0.4;
-          vision = lime_status->bottom_limelight_ok() && lime_status->pricey_has_target();
+          vision = lime_status->bottom_limelight_ok() &&
+                   lime_status->pricey_has_target();
         } else {
           horiz_angle_ = lime_status->horiz_angle();
           target_dist_ = lime_status->target_dist();
           vision = lime_status->limelight_ok() && lime_status->has_target();
+          double skew = lime_status->skew();
+          if (lime_status->skew() > -45) {
+            skew = std::abs(lime_status->skew());
+          } else {
+            skew += 90;
+          }
+
+          if (skew > 5 || this_run_off_) {
+            horiz_angle_ += offset_;
+            if (!this_run_off_) {
+              offset_ =
+                  0.05 * (lime_status->to_the_left() ? 1 : -1) * (skew / 13);
+            }
+            this_run_off_ = true;
+          }
         }
       }
     }
@@ -287,6 +304,7 @@ void TeleopBase::SendDrivetrainMessage() {
 
   if (vision_->was_released()) {
     this_run_off_ = false;
+    offset_ = 0.;
   }
 
   if (super_status->elevator_height() < 1.3 &&

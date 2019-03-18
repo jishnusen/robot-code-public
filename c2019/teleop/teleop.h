@@ -106,6 +106,7 @@ class TeleopBase {
   bool this_run_off_;
   int flash_ticks_left_ = 0;
   bool flash_ = false;
+  double offset_ = 0;
 };
 
 }  // namespace teleop
