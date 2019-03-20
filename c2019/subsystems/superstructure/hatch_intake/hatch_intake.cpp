@@ -86,7 +86,7 @@ void HatchIntake::Update(const HatchIntakeInputProto& input,
       (*output)->set_backplate_solenoid(false);
     }
   } else {
-    (*output)->set_flute_solenoid(false);
+    (*output)->set_flute_solenoid(true);
     (*output)->set_backplate_solenoid(false);
   }
 

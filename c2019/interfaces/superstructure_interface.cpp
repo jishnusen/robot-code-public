@@ -75,8 +75,8 @@ void SuperstructureInterface::ReadSensors() {
     elevator_zeroed_ = false;
   }
 
-  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->wrist_encoder()) > 0.05) {
-    /* wrist_zeroed_ = false; */
+  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->wrist_encoder()) > 0.01) {
+    wrist_zeroed_ = false;
   }
 
   inputs->set_elevator_hall(

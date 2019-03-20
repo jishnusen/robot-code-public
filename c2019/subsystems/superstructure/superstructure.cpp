@@ -469,6 +469,9 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
   switch (goal->intake_goal()) {
     case INTAKE_NONE:
       intake_goal_ = goal->intake_goal();
+      if (cargo_intake_status_->has_cargo()) {
+        cargo_out_ = false;
+      }
       break;
     case INTAKE_HATCH:
       if (!hatch_intake_status_->has_hatch()) {
