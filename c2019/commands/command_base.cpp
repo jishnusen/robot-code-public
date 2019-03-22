@@ -29,6 +29,7 @@ CommandBase::CommandBase()
 
 bool CommandBase::IsAutonomous() {
   DriverStationProto driver_station;
+  AutoGoalProto auto_goal;
   if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
     LOG(WARNING, "No driver station status found.");
     ExitAutonomous();
@@ -37,6 +38,13 @@ bool CommandBase::IsAutonomous() {
 
   if (!driver_station->is_sys_active()) {
     LOG(WARNING, "Tried to run command while disabled.");
+    ExitAutonomous();
+    return false;
+  }
+
+  QueueManager<AutoGoalProto>::Fetch()->ReadLastMessage(&auto_goal);
+
+  if (auto_goal->cancel_command()) {
     ExitAutonomous();
     return false;
   }
@@ -176,7 +184,7 @@ bool CommandBase::StartDriveVisionBottom() {
   }
 
   no_target = 0;
-  while (lime_status->pricey_target_dist() > 0.44 && IsAutonomous()) {
+  while (lime_status->pricey_target_dist() > 0.48 && IsAutonomous()) {
     if (!lime_status->pricey_has_target()) {
       no_target++;
     } else {
@@ -196,7 +204,7 @@ bool CommandBase::StartDriveVisionBottom() {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  if (lime_status->pricey_target_dist() > 0.45) {
+  if (lime_status->pricey_target_dist() > 0.48) {
     LOG(WARNING, "Couldn't converge");
     return false;
   }
@@ -232,7 +240,7 @@ bool CommandBase::StartDriveVisionBackwards() {
         (lime_status->back_target_dist() + 0.3) * -4.0);
 
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
-    loop_.SleepUntilNext();
+    Wait(1);
     std::cout << "back tracking" << std::endl;
   }
 
@@ -249,8 +257,10 @@ void CommandBase::HoldPosition() {
   }
 
   DrivetrainGoal drivetrain_goal;
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(0);
-  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(0);
+  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_linear_velocity(
+      0);
+  drivetrain_goal->mutable_linear_angular_velocity_goal()->set_angular_velocity(
+      0);
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }
@@ -304,10 +314,11 @@ bool CommandBase::IsDriveComplete() {
         return true;
       }
     } else if (goal->has_point_turn_goal()) {
-        std::cout << status->heading_error() << std::endl;
-        std::cout << goal->point_turn_goal() << std::endl;
-      if (std::abs(goal->point_turn_goal() - status->estimated_heading()) < 1e-1) {
-          return true;
+      std::cout << status->heading_error() << std::endl;
+      std::cout << goal->point_turn_goal() << std::endl;
+      if (std::abs(goal->point_turn_goal() - status->estimated_heading()) <
+          1e-1) {
+        return true;
       }
     }
   }
@@ -317,15 +328,16 @@ bool CommandBase::IsDriveComplete() {
 
 void CommandBase::WaitUntilDriveComplete() {
   while (!IsDriveComplete() && IsAutonomous()) {
-    loop_.SleepUntilNext();
+    Wait(1);
   }
 }
 
 void CommandBase::WaitForHatch() {
   SuperstructureStatusProto super_status;
   while (!super_status->has_hp_hatch() && IsAutonomous()) {
-      loop_.SleepUntilNext();
-      QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(&super_status);
+    Wait(1);
+    QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
+        &super_status);
   }
 }
 
@@ -348,7 +360,7 @@ bool CommandBase::IsDrivetrainNear(double x, double y, double distance) {
 
 void CommandBase::WaitUntilDrivetrainNear(double x, double y, double distance) {
   while (!IsDrivetrainNear(x, y, distance)) {
-    loop_.SleepUntilNext();
+    Wait(1);
   }
 }
 

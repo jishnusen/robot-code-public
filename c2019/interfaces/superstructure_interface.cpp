@@ -72,11 +72,13 @@ void SuperstructureInterface::ReadSensors() {
   }
 
   if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->elevator_encoder()) > 0.05) {
-    elevator_zeroed_ = false;
+    /* elevator_zeroed_ = false; */
   }
 
+  inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
+                            kWristConversionFactor);
   if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->wrist_encoder()) > 0.01) {
-    wrist_zeroed_ = false;
+    /* wrist_zeroed_ = false; */
   }
 
   inputs->set_elevator_hall(
@@ -84,8 +86,6 @@ void SuperstructureInterface::ReadSensors() {
 
   inputs->set_elevator_zeroed(elevator_zeroed_);
 
-  inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
-                            kWristConversionFactor);
   /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
    */
   inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
@@ -132,10 +132,10 @@ void SuperstructureInterface::LoadGains() {
                                         LimitSwitchNormal_NormallyOpen, 100);
 
   elevator_master_.ConfigSelectedFeedbackSensor(
-      FeedbackDevice::CTRE_MagEncoder_Absolute, 0, 100);
+      FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
   /* elevator_master_.SetSelectedSensorPosition(0, 0, 100); */
 
-  wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Absolute,
+  wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
                                       0, 100);
   /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
 

@@ -26,7 +26,7 @@ class CommandBase {
  protected:
   FRIEND_TEST(C2019AutonomousTest, PathDriveTransformsZeroInit);
   FRIEND_TEST(C2019AutonomousTest, PathDriveTransformsNonzeroInit);
-  virtual bool IsAutonomous();
+  bool IsAutonomous();
   void EnterAutonomous();
   void ExitAutonomous();
   void Wait(uint32_t num_cycles);

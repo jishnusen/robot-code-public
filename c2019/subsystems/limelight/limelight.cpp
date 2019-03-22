@@ -69,9 +69,9 @@ void Limelight::Update() {
   prev_latency_ = latency;
   bottom_prev_latency_ = bottom_latency;
   /* back_prev_latency_ = back_latency; */
-  status->set_limelight_ok(bad_ticks_ < 3);
+  status->set_limelight_ok(bad_ticks_ < 10);
   status->set_back_limelight_ok(false);
-  status->set_bottom_limelight_ok(bottom_bad_ticks_ < 3);
+  status->set_bottom_limelight_ok(bottom_bad_ticks_ < 10);
 
   //  slope_ = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
 

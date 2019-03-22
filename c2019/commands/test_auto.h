@@ -10,7 +10,6 @@ namespace commands {
 
 class TestAuto : public c2019::commands::CommandBase {
  public:
-  bool IsAutonomous() override;
   void operator()();
 };
 

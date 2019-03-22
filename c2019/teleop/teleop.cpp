@@ -192,10 +192,9 @@ void TeleopBase::Update() {
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 0.0);
   }
 
-  /*if (exit_auto_->was_clicked()) {
-    auto_goal->set_run_command(false);
-    auto_goal_queue_->WriteMessage(auto_goal);
-  } else if (!auto_status->running_command()) {
+  if (exit_auto_->was_clicked()) {
+    cancel_command_ = true;
+  }/* else if (!auto_status->running_command()) {
     if (test_auto_->was_clicked()) {
       auto_goal->set_run_command(true);
       auto_goal->set_command(Command::TEST_AUTO);
@@ -219,6 +218,9 @@ void TeleopBase::Update() {
       test_auto_thread.detach();
     }
   }*/
+
+  auto_goal->set_cancel_command(cancel_command_);
+  auto_goal_queue_->WriteMessage(auto_goal);
 
   ds_sender_.Send();
 

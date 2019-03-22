@@ -197,6 +197,8 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_left_voltage(left_master_.GetMotorOutputVoltage());
   sensors->set_right_voltage(right_master_.GetMotorOutputVoltage());
 
+  sensors->set_right_bus(right_master_.GetBusVoltage());
+
   input_queue_->WriteMessage(sensors);
 }
 
@@ -226,6 +228,7 @@ void DrivetrainInterface::WriteActuators() {
       SetBrakeMode(false);
       left_master_.Set(ControlMode::PercentOutput, outputs->left_setpoint());
       right_master_.Set(ControlMode::PercentOutput, outputs->right_setpoint());
+      std::cout << "setting open loop" << std::endl;
       break;
     case TalonOutput::POSITION:
       if (compressor_.Enabled()) {
@@ -235,6 +238,7 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.Set(ControlMode::Position, outputs->right_setpoint() * kDriveConversionFactor);
       left_master_.Set(ControlMode::Position, outputs->left_setpoint() * kDriveConversionFactor);
+      std::cout << "setting position" << std::endl;
       break;
     case TalonOutput::VELOCITY:
       if (compressor_.Enabled()) {
@@ -248,6 +252,7 @@ void DrivetrainInterface::WriteActuators() {
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
+      std::cout << "setting position" << std::endl;
       break;
     case TalonOutput::ARC:
       if (compressor_.Enabled()) {
@@ -260,6 +265,7 @@ void DrivetrainInterface::WriteActuators() {
                         right_master_.GetSelectedSensorPosition(1) +
                             outputs->yaw() * (3600. / (2. * M_PI)));
       left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
+      std::cout << "setting position" << std::endl;
       break;
   }
 

@@ -9,23 +9,6 @@ using c2019::limelight::LimelightStatusProto;
 using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
 
-bool DriveStraight::IsAutonomous() {
-  DriverStationProto driver_station;
-  if (!driver_station_reader_.ReadLastMessage(&driver_station)) {
-    LOG(WARNING, "No driver station status found.");
-    ExitAutonomous();
-    return false;
-  }
-
-  if (!driver_station->is_sys_active()) {
-    LOG(WARNING, "Tried to run command while disabled.");
-    ExitAutonomous();
-    return false;
-  }
-
-  return driver_station->mode() == RobotMode::AUTONOMOUS;
-}
-
 void DriveStraight::LeftRocket() {
   EnterAutonomous();
   // Set field position to right side of L1 HAB
@@ -63,7 +46,7 @@ void DriveStraight::LeftRocket() {
 
   WaitUntilDrivetrainNear(1.4, 3.4, 0.6);
   // Activate vision once dt is reasonably near loading station
-  success = StartDriveVision();
+  success = StartDriveVision(0.65);
   if (!success) {
     LOG(WARNING, "Vision didn't work");
     ExitAutonomous();
@@ -263,7 +246,7 @@ void DriveStraight::RightRocket() {
 
   WaitUntilDrivetrainNear(1.4, -3.4, 0.6);
   // Activate vision once dt is reasonably near loading station
-  success = StartDriveVision();
+  success = StartDriveVision(0.65);
   if (!success) {
     LOG(WARNING, "Vision didn't work");
     ExitAutonomous();

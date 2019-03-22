@@ -13,7 +13,7 @@ namespace wrist {
 static constexpr double kMinAngle = 0.0;
 static constexpr double kStowAngle =
     M_PI / 3;  // TODO(Apurva) find value for this
-static constexpr double kMaxAngle = 210 * (M_PI / 180.);
+static constexpr double kMaxAngle = M_PI / 2.;
 
 // Hall Calibration constants
 static constexpr double kCalibVoltage = 0;

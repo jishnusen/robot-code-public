@@ -494,6 +494,9 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
         }
       }
       cargo_out_ = true;
+      if (cargo_intake_status_->has_cargo()) {
+        cargo_out_ = false;
+      }
       break;
     case INTAKE_GROUND_HATCH:
       cargo_out_ = false;
