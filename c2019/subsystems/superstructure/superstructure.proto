@@ -68,13 +68,15 @@ enum HatchIntakeState {
   HATCH_CARRYING = 2;
   HATCH_OUTTAKING = 3;
   HATCH_PREPPING_SCORE = 4;
+  HATCH_HANDOFF_INTAKING = 5;
 }
 
 enum CargoIntakeState {
-  CARGO_HOLDING = 0;
+  CARGO_IDLE = 0;
   CARGO_INTAKING = 1;
   CARGO_PICKING_UP = 2;
-  CARGO_OUTTAKING = 3;
+  CARGO_HOLDING = 3;
+  CARGO_OUTTAKING = 4;
 }
 
 enum ClimbType {

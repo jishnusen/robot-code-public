@@ -155,7 +155,7 @@ bool CommandBase::StartDriveVision(double target_dist) {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  if (lime_status->target_dist() > target_dist) {
+  if (lime_status->target_dist() > target_dist || !lime_status->limelight_ok()) {
     LOG(WARNING, "Couldn't converge");
     return false;
   }
@@ -184,7 +184,7 @@ bool CommandBase::StartDriveVisionBottom() {
   }
 
   no_target = 0;
-  while (lime_status->pricey_target_dist() > 0.48 && IsAutonomous()) {
+  while (lime_status->pricey_target_dist() > 0.52 && IsAutonomous()) {
     if (!lime_status->pricey_has_target()) {
       no_target++;
     } else {
@@ -204,7 +204,7 @@ bool CommandBase::StartDriveVisionBottom() {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  if (lime_status->pricey_target_dist() > 0.48) {
+  if (lime_status->pricey_target_dist() > 0.52 || !lime_status->pricey_has_target()) {
     LOG(WARNING, "Couldn't converge");
     return false;
   }
@@ -328,7 +328,7 @@ bool CommandBase::IsDriveComplete() {
 
 void CommandBase::WaitUntilDriveComplete() {
   while (!IsDriveComplete() && IsAutonomous()) {
-    Wait(1);
+    loop_.SleepUntilNext();
   }
 }
 

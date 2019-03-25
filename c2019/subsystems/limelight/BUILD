@@ -25,18 +25,9 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":limelight_queues",
+        "//c2019/subsystems/superstructure:superstructure_queues",
         "//muan/queues:queue_manager",
         "//muan/wpilib:wpilib_queues",
         "//third_party/wpilibsuite:ntcore",
-        "//c2019/subsystems/superstructure:superstructure_queues",
-    ],
-)
-
-cc_test(
-    name = "limelight_test",
-    srcs = ["limelight_test.cpp"],
-    deps = [
-        ":limelight",
-        "//third_party/google/googletest",
     ],
 )

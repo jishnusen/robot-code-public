@@ -77,8 +77,8 @@ void SuperstructureInterface::ReadSensors() {
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
-  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->wrist_encoder()) > 0.01) {
-    /* wrist_zeroed_ = false; */
+  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->wrist_encoder()) > 0.1) {
+    wrist_zeroed_ = false;
   }
 
   inputs->set_elevator_hall(

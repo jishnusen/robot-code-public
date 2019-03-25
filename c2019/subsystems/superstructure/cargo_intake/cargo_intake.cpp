@@ -41,7 +41,7 @@ void CargoIntake::Update(const CargoIntakeInputProto& input,
         }
         break;
       case OUTTAKING:
-        roller_voltage = -12;
+        roller_voltage = -10;
         outtake_counter_++;
         if (outtake_counter_ > kOuttakeTicks) {
           state_ = IDLE;

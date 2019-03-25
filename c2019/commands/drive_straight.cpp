@@ -21,7 +21,7 @@ void DriveStraight::LeftRocket() {
   LOG(INFO, "Running NONE auto");
 
   StartDrivePath(7.4, 3.1, 210 * (M_PI / 180.), -1, true);
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   WaitUntilDrivetrainNear(7.4, 3.1, 0.2);
   StartPointTurn(-60 * (M_PI / 180.));
   Wait(50);
@@ -98,7 +98,7 @@ void DriveStraight::CargoShip() {
   LOG(INFO, "Running NONE auto");
 
   // score hatch on left side, 2, of the CS
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   StartDrivePath(7.2, 1.3, -85 * (M_PI / 180), 1,
                  true);  // 1.0 m extra intial distance; lvl 2
 
@@ -151,14 +151,13 @@ void DriveStraight::CargoRocket() {
   // Set field position to right side of L1 HAB
   double init_theta = 0;
 
-  SetFieldPosition(0.8, 1.1, init_theta);
+  SetFieldPosition(1.8, 1.1, init_theta);
   DrivetrainStatus drive_status;
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   double init_gyro = drive_status->estimated_heading();
   LOG(INFO, "Running CARGO_RCOKET auto");
-  (void)init_gyro;
 
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   StartDrivePath(5., .3, 0., 1, true, false, 2.0);
   WaitUntilDrivetrainNear(4.3, 1.3, .6);
   StartDriveVision(0.78);
@@ -168,13 +167,13 @@ void DriveStraight::CargoRocket() {
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   SetFieldPosition(
       5.2, .3, (drive_status->estimated_heading() - init_gyro) + init_theta);
-  GoTo(superstructure::HATCH_SHIP_FORWARDS, superstructure::INTAKE_HATCH);
+  GoTo(superstructure::CARGO_GROUND, superstructure::INTAKE_HATCH);
   StartDrivePath(1.6, 2.9, 0., -1, true);
   WaitUntilDriveComplete();
   StartPointTurn(-180 * (M_PI / 180.));
   Wait(100);
 
-  bool success = StartDriveVision();
+  bool success = StartDriveVision(0.69);
   if (!success) {
     LOG(WARNING, "Vision didn't work");
     ExitAutonomous();
@@ -187,26 +186,11 @@ void DriveStraight::CargoRocket() {
   StartDrivePath(7.4, 2.8, 220 * (M_PI / 180.), -1, true);
   WaitUntilDrivetrainNear(6.2, 2.3, .6);
   GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
-  WaitUntilDriveComplete();
+  WaitUntilDrivetrainNear(7.4, 2.8, 0.2);
   StartPointTurn(-80 * (M_PI / 180.));
   Wait(50);
-  success = StartDriveVision();
-  if (!success) {
-    LOG(WARNING, "Vision didn't work");
-    ExitAutonomous();
-    return;
-  }
-
-  ScoreHatch(1);
-  Wait(25);
-
-  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  SetFieldPosition(
-      6.6, 3.4, (drive_status->estimated_heading() - init_gyro) + init_theta);
-
-  StartDrivePath(4.6, 2., 0. * (M_PI / 180.), -1, true);
-  WaitUntilDriveComplete();
   ExitAutonomous();  // bye
+  return;
 }
 
 void DriveStraight::RightRocket() {
@@ -221,7 +205,7 @@ void DriveStraight::RightRocket() {
   LOG(INFO, "Running NONE auto");
 
   StartDrivePath(7.4, -3.1, -210 * (M_PI / 180.), -1, true);
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   WaitUntilDrivetrainNear(7.4, -3.1, 0.2);
   StartPointTurn(60 * (M_PI / 180.));
   Wait(50);
@@ -291,14 +275,13 @@ void DriveStraight::RightCargoRocket() {
   // Set field position to right side of L1 HAB
   double init_theta = 0;
 
-  SetFieldPosition(0.8, -1.1, init_theta);
+  SetFieldPosition(1.8, -1.1, init_theta);
   DrivetrainStatus drive_status;
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
   double init_gyro = drive_status->estimated_heading();
   LOG(INFO, "Running CARGO_RCOKET auto");
-  (void)init_gyro;
 
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   StartDrivePath(5., -.3, 0., 1, true, false, 2.0);
   WaitUntilDrivetrainNear(4.3, -1.3, .6);
   StartDriveVision(0.78);
@@ -314,7 +297,7 @@ void DriveStraight::RightCargoRocket() {
   StartPointTurn(180 * (M_PI / 180.));
   Wait(100);
 
-  bool success = StartDriveVision();
+  bool success = StartDriveVision(0.69);
   if (!success) {
     LOG(WARNING, "Vision didn't work");
     ExitAutonomous();
@@ -326,27 +309,12 @@ void DriveStraight::RightCargoRocket() {
 
   StartDrivePath(7.4, -2.8, -220 * (M_PI / 180.), -1, true);
   WaitUntilDrivetrainNear(6.2, -2.3, .6);
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
-  WaitUntilDriveComplete();
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
+  WaitUntilDrivetrainNear(7.4, -2.8, 0.2);
   StartPointTurn(80 * (M_PI / 180.));
   Wait(50);
-  success = StartDriveVision();
-  if (!success) {
-    LOG(WARNING, "Vision didn't work");
-    ExitAutonomous();
-    return;
-  }
-
-  ScoreHatch(1);
-  Wait(25);
-
-  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  SetFieldPosition(
-      6.6, -3.4, (drive_status->estimated_heading() - init_gyro) + init_theta);
-
-  StartDrivePath(4.6, -2., 0. * (M_PI / 180.), -1, true);
-  WaitUntilDriveComplete();
   ExitAutonomous();  // bye
+  return;
 }
 
 }  // namespace commands

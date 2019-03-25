@@ -58,9 +58,10 @@ void Trajectory::TimeReparametrize(const HermiteSpline& spline,
                                  constrained_pose.pose.curvature() *
                                  (backwards ? -1. : 1.);
 
-    /* Bounds min_max_accel = model.CalculateMinMaxAcceleration( */
-    /*     linear_angular_velocity, constrained_pose.pose.curvature(), */
-    /*     constraints.max_voltage, high_gear); */
+    Bounds min_max_accel = model.CalculateMinMaxAcceleration(
+        linear_angular_velocity, constrained_pose.pose.curvature(),
+        constraints.max_voltage, high_gear);
+    (void)min_max_accel;
 
     /* constrained_pose.min_acceleration = */
     /*     std::max(constrained_pose.min_acceleration, */
