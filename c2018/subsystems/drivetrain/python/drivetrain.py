@@ -11,21 +11,21 @@ FLAGS = gflags.FLAGS
 gflags.DEFINE_bool('plot', False, 'If true, plot the loop response.')
 
 mass = 63.0
-distribution_radius = 0.45
+distribution_radius = 0.42
 
 kDrivetrain = drivetrain.DrivetrainParams(J = mass * distribution_radius ** 2.0,
                                           mass = mass,
-                                          robot_radius = 0.426,
-                                          wheel_radius = 6.0 * 0.0254 / 2.0,
-                                          G_high = (12.0 / 50.0) * (18.0 / 46.0) * (50.0 / 34.0),
-                                          G_low = (12.0 / 50.0) * (18.0 / 46.0) * (34.0 / 50.0),
-                                          motor_type = control_loop.MiniCIM(),
+                                          robot_radius = 0.36,
+                                          wheel_radius = 4.0 * 0.0254 / 2.0,
+                                          G_high = (1./6.),
+                                          G_low = (1./6.),
+                                          motor_type = control_loop.CIM(),
                                           num_motors = 3,
-                                          q_pos_low = 0.12,
+                                          q_pos_low = 0.14,
                                           q_pos_high = 0.14,
                                           q_vel_low = 1.0,
                                           q_vel_high = 1.0,
-                                          efficiency_high = 0.75,
+                                          efficiency_high = 0.8,
                                           efficiency_low = 0.8,
                                           )
 

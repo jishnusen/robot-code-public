@@ -90,7 +90,8 @@ cc_library(
     ':polydrivetrain',
     ':ssdrivetrain',
     '//muan/wpilib/gyro:gyro_queues',
-    '//muan/wpilib:wpilib_queues'
+    '//muan/wpilib:wpilib_queues',
+    '//muan/control:rc_filter',
   ],
 )
 

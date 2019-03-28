@@ -13,6 +13,8 @@
 #include "third_party/frc971/control_loops/drivetrain/queue_types.h"
 #include "third_party/frc971/control_loops/drivetrain/ssdrivetrain.h"
 
+#include "muan/control/rc_filter.h"
+
 namespace frc971 {
 namespace control_loops {
 namespace drivetrain {
@@ -77,6 +79,11 @@ class DrivetrainLoop {
   bool right_high_requested_;
 
   bool has_been_enabled_ = false;
+
+  double last_forward_velocity_ = 0;
+  double last_angular_velocity_ = 0;
+  muan::control::RcFilter left_filter_{0.01, 0.005, 0.0};
+  muan::control::RcFilter right_filter_{0.01, 0.005, 0.0};
 };
 
 }  // namespace drivetrain

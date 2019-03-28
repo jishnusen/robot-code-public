@@ -251,7 +251,7 @@ class KFDrivetrain(Drivetrain):
     self.KalmanGain, self.Q_steady = controls.kalman(
         A=self.A, B=self.B, C=self.C, Q=self.Q, R=self.R)
 
-    self.L = self.A * self.KalmanGain
+    self.L = self.A * self.KalmanGain * 0
 
     unaug_K = self.K
 

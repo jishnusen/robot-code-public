@@ -65,7 +65,19 @@ message PdpStatus {
   required uint64 num_failures = 20;
 }
 
+message AccelerometerInput {
+  required uint64 timestamp = 1;
+  required double x_acceleration = 2;  // Forwards is positive
+  required double y_acceleration = 3;  // Left is positive
+  required double z_acceleration = 4;  // Up is positive
+}
+
 message GameSpecificString {
   required uint64 timestamp = 1;
   optional string code = 2;
+}
+
+message TiltStatus {
+  required uint64 timestamp = 1;
+  required double filtered_z_acceleration = 2;  // UP
 }

@@ -258,3 +258,19 @@ cc_test(
         "//third_party/google/googletest",
     ],
 )
+
+cc_library(
+    name = "rc_filter",
+    srcs = ["rc_filter.cpp"],
+    hdrs = ["rc_filter.h"],
+    linkopts = ["-lm"],
+)
+
+cc_test(
+    name = "rc_filter_test",
+    srcs = ["rc_filter_test.cpp"],
+    deps = [
+        ":rc_filter",
+        "//third_party/google/googletest",
+    ],
+)
