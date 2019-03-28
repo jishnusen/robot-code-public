@@ -189,12 +189,12 @@ class ScoreSubsystemTest : public ::testing::Test {
 
   void SetWeights(bool second_stage, bool has_cube) {
     if (second_stage && has_cube) {
-      elevator_plant_.A() = frc1678::elevator::controller::
-          second_stage_cube_integral::A();
-      elevator_plant_.B() = frc1678::elevator::controller::
-          second_stage_cube_integral::B();
-      elevator_plant_.C() = frc1678::elevator::controller::
-          second_stage_cube_integral::C();
+      elevator_plant_.A() =
+          frc1678::elevator::controller::second_stage_cube_integral::A();
+      elevator_plant_.B() =
+          frc1678::elevator::controller::second_stage_cube_integral::B();
+      elevator_plant_.C() =
+          frc1678::elevator::controller::second_stage_cube_integral::C();
     } else if (second_stage && !has_cube) {
       elevator_plant_.A() =
           frc1678::elevator::controller::second_stage_integral::A();
@@ -203,12 +203,12 @@ class ScoreSubsystemTest : public ::testing::Test {
       elevator_plant_.C() =
           frc1678::elevator::controller::second_stage_integral::C();
     } else if (!second_stage && has_cube) {
-      elevator_plant_.A() = frc1678::elevator::controller::
-          first_stage_cube_integral::A();
-      elevator_plant_.B() = frc1678::elevator::controller::
-          first_stage_cube_integral::B();
-      elevator_plant_.C() = frc1678::elevator::controller::
-          first_stage_cube_integral::C();
+      elevator_plant_.A() =
+          frc1678::elevator::controller::first_stage_cube_integral::A();
+      elevator_plant_.B() =
+          frc1678::elevator::controller::first_stage_cube_integral::B();
+      elevator_plant_.C() =
+          frc1678::elevator::controller::first_stage_cube_integral::C();
     } else if (!second_stage && !has_cube) {
       elevator_plant_.A() =
           frc1678::elevator::controller::first_stage_integral::A();
@@ -431,6 +431,34 @@ TEST_F(ScoreSubsystemTest, ForceIntake) {
   CheckGoal(kElevatorIntake0, kWristForwardAngle);
 }
 #endif
+
+TEST_F(ScoreSubsystemTest, TiltFault) {
+  CalibrateDisabled();
+
+  {
+    muan::wpilib::AccelerometerProto accelerometer;
+    accelerometer->set_z_acceleration(-9.81);
+    accelerometer->set_x_acceleration(0);
+    accelerometer->set_y_acceleration(0);
+    muan::queues::QueueManager<muan::wpilib::AccelerometerProto>::Fetch()
+        ->WriteMessage(accelerometer);
+  }
+
+  SetGoal(ScoreGoal::SCALE_HIGH_FORWARD, IntakeGoal::INTAKE_NONE, true);
+  RunFor(1000);
+  EXPECT_GT(score_subsystem_status_proto_->elevator_actual_height(), 1.5);
+  {
+    muan::wpilib::AccelerometerProto accelerometer;
+    accelerometer->set_z_acceleration(-10);
+    accelerometer->set_y_acceleration(-7);
+    accelerometer->set_x_acceleration(-7);
+
+    muan::queues::QueueManager<muan::wpilib::AccelerometerProto>::Fetch()
+        ->WriteMessage(accelerometer);
+  }
+  RunFor(1000);
+  EXPECT_NEAR(score_subsystem_status_proto_->elevator_actual_height(), 0, 2.0);
+}
 
 }  // namespace score_subsystem
 }  // namespace c2018

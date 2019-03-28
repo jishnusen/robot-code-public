@@ -1,6 +1,7 @@
 #include "c2018/subsystems/score_subsystem/score_subsystem.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace c2018 {
 namespace score_subsystem {
@@ -16,7 +17,10 @@ ScoreSubsystem::ScoreSubsystem()
       status_queue_{QueueManager<ScoreSubsystemStatusProto>::Fetch()},
       output_queue_{QueueManager<ScoreSubsystemOutputProto>::Fetch()},
       ds_status_reader_{
-          QueueManager<DriverStationProto>::Fetch()->MakeReader()} {}
+          QueueManager<DriverStationProto>::Fetch()->MakeReader()},
+      accelerometer_status_reader_{
+          QueueManager<muan::wpilib::AccelerometerProto>::Fetch()
+              ->MakeReader()} {}
 
 void ScoreSubsystem::BoundGoal(double* elevator_goal, double* wrist_goal) {
   // Elevator goal doesn't get too low if the wrist can't handle it
@@ -62,6 +66,9 @@ void ScoreSubsystem::Update() {
     // All the logic in the state machine is in this function
     RunStateMachine();
   }
+  if (driver_station->mode() == RobotMode::TELEOP) {
+    TiltFault();
+  }
 
   // These are the goals before they get safety-ized
   double constrained_elevator_height = elevator_height_;
@@ -85,6 +92,50 @@ void ScoreSubsystem::Update() {
   // Write those queues after Updating the controllers
   output_queue_->WriteMessage(output);
   status_queue_->WriteMessage(status_);
+}
+
+void ScoreSubsystem::TiltFault() {
+  muan::wpilib::AccelerometerProto accelerometer;
+  if (accelerometer_status_reader_.ReadLastMessage(&accelerometer)) {
+    double filtered_x_acceleration =
+        rc_filter_x_.Update(accelerometer->x_acceleration());
+    double filtered_y_acceleration =
+        rc_filter_y_.Update(accelerometer->y_acceleration());
+    double filtered_z_acceleration =
+        rc_filter_z_.Update(accelerometer->z_acceleration());
+
+    double max_squared_x_y_grav =
+        std::max(0.0, std::pow(9.81, 2) - std::pow(filtered_z_acceleration, 2));
+    double x_y_mag_squared = std::pow(filtered_x_acceleration, 2) +
+                             std::pow(filtered_y_acceleration, 2);
+    if (x_y_mag_squared > max_squared_x_y_grav + 0.2) {
+      double scale = std::sqrt(max_squared_x_y_grav / x_y_mag_squared);
+      filtered_x_acceleration *= (1 / scale);
+      filtered_y_acceleration *= (1 / scale);
+      x_y_mag_squared = max_squared_x_y_grav;
+    }
+
+    // double roll = std::atan2(std::abs(filtered_y_acceleration),
+    // std::abs(filtered_z_acceleration));
+    double angle = std::atan2(std::sqrt(x_y_mag_squared),
+                              std::abs(filtered_z_acceleration));
+
+    if (std::abs(angle) > kPitchTip) {
+      tip_ticks_++;
+    } else {
+      tip_ticks_ = 0;
+    }
+
+    if (tip_ticks_ > kTipTicks && elevator_height_ > 1.1) {
+      elevator_height_ = 0;
+      wrist_angle_ = kWristStowAngle;
+
+      LOG(WARNING, "Detected a tip for %i ticks! Trying to recover.",
+          tip_ticks_);
+    }
+  } else {
+    tip_ticks_ = 0;
+  }
 }
 
 void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
@@ -162,7 +213,8 @@ void ScoreSubsystem::SetGoal(const ScoreSubsystemGoalProto& goal) {
       whisker_ = false;
       break;
     case SCALE_SHOOT:
-      elevator_height_ = kElevatorBaseHeight + kCubeHeight + kElevatorReversedOffset;
+      elevator_height_ =
+          kElevatorBaseHeight + kCubeHeight + kElevatorReversedOffset;
       wrist_angle_ = kWristShootAngle;
       whisker_ = false;
       break;

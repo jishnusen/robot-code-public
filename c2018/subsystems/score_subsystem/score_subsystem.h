@@ -5,6 +5,7 @@
 #include "c2018/subsystems/score_subsystem/elevator/elevator.h"
 #include "c2018/subsystems/score_subsystem/queue_types.h"
 #include "c2018/subsystems/score_subsystem/wrist/wrist.h"
+#include "muan/control/rc_filter.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/wpilib/queue_types.h"
 
@@ -42,6 +43,12 @@ static constexpr double kWristSafeAngle = 90 * (M_PI / 180);
 
 static constexpr double kWristShootAngle = 140 * (M_PI / 180);
 
+static constexpr double kTipTicks = 35;
+
+// Tipping thresholds in radians
+static constexpr double kRollTip = 0.41;
+static constexpr double kPitchTip = 0.351;
+
 class ScoreSubsystem {
  public:
   ScoreSubsystem();
@@ -67,10 +74,20 @@ class ScoreSubsystem {
 
   double elevator_height_;
   double wrist_angle_;
+  void TiltFault();
 
   bool whisker_ = false;
 
   ScoreSubsystemState state_ = ScoreSubsystemState::CALIBRATING;
+
+  muan::wpilib::AccelerometerQueue::QueueReader accelerometer_status_reader_;
+
+  muan::control::RcFilter rc_filter_x_{0.2, 0.005, 0};
+  muan::control::RcFilter rc_filter_y_{0.2, 0.005, 0};
+  muan::control::RcFilter rc_filter_z_{0.2, 0.005, 9.81};
+
+  int tip_ticks_ = 0;
+
   // Only valid if `state_` is INTAKE_RUNNING
   IntakeGoal intake_goal_ = IntakeGoal::INTAKE_NONE;
 };

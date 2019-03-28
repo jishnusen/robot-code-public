@@ -121,43 +121,46 @@ message DrivetrainStatus {
   // Estimated forwards velocity (of the center of the robot) in m/s, forwards
   // is positive
   required double forward_velocity = 2;
+  required double angular_velocity = 3;
+  required double forward_acceleration = 4;
+  required double angular_acceleration = 5;
 
   // Estimated position of each drivetrain side in meters, forwards is positive
-  required double estimated_left_position = 3;
-  required double estimated_right_position = 4;
+  required double estimated_left_position = 6;
+  required double estimated_right_position = 7;
 
   // Estimated velocity of each drivetrain side in m/s, forwards is positive
-  required double estimated_left_velocity = 5;
-  required double estimated_right_velocity = 6;
+  required double estimated_left_velocity = 8;
+  required double estimated_right_velocity = 9;
 
   // The voltage we wanted to send to each drivetrain side last cycle.
-  required double uncapped_left_voltage = 7;
-  required double uncapped_right_voltage = 8;
+  required double uncapped_left_voltage = 10;
+  required double uncapped_right_voltage = 11;
 
   // The goal velocities for the polydrive controller.
-  required double left_velocity_goal = 9;
-  required double right_velocity_goal = 10;
+  required double left_velocity_goal = 12;
+  required double right_velocity_goal = 13;
 
   // The voltage error for the left and right sides.
-  required double left_voltage_error = 11;
-  required double right_voltage_error = 12;
+  required double left_voltage_error = 14;
+  required double right_voltage_error = 15;
 
   // The profiled goal states.
-  required double profiled_left_position_goal = 13;
-  required double profiled_right_position_goal = 14;
-  required double profiled_left_velocity_goal = 15;
-  required double profiled_right_velocity_goal = 16;
+  required double profiled_left_position_goal = 16;
+  required double profiled_right_position_goal = 17;
+  required double profiled_left_velocity_goal = 18;
+  required double profiled_right_velocity_goal = 19;
 
   // The KF offset
-  required double estimated_angular_velocity_error = 17;
+  required double estimated_angular_velocity_error = 20;
   // The KF estimated heading.
-  required double estimated_heading = 18;
+  required double estimated_heading = 21;
 
-  required double estimated_x_position = 19;
-  required double estimated_y_position = 20;
+  required double estimated_x_position = 22;
+  required double estimated_y_position = 23;
 
   // True if the output voltage was capped last cycle.
-  required bool output_was_capped = 21;
+  required bool output_was_capped = 24;
 
   message PathStatus {
     required double profiled_x_goal = 1;
@@ -168,5 +171,5 @@ message DrivetrainStatus {
     required bool profile_complete = 6;
   }
 
-  optional PathStatus path_status = 22;
+  optional PathStatus path_status = 25;
 }

@@ -1,10 +1,10 @@
 #include "third_party/frc971/control_loops/drivetrain/drivetrain.h"
 
-#include "Eigen/Dense"
-#include <cmath>
-#include <memory>
 #include <sched.h>
 #include <stdio.h>
+#include <cmath>
+#include <memory>
+#include "Eigen/Dense"
 
 #include "third_party/frc971/control_loops/drivetrain/drivetrain_config.h"
 #include "third_party/frc971/control_loops/drivetrain/polydrivetrain.h"
@@ -32,7 +32,8 @@ DrivetrainLoop::DrivetrainLoop(
       cartesian_position_(Eigen::Matrix<double, 2, 1>::Zero()),
       kf_(dt_config_.make_kf_drivetrain_loop()),
       dt_openloop_(dt_config_, &kf_),
-      dt_closedloop_(dt_config_, &kf_, &integrated_kf_heading_, &cartesian_position_),
+      dt_closedloop_(dt_config_, &kf_, &integrated_kf_heading_,
+                     &cartesian_position_),
       left_gear_(dt_config_.default_high_gear ? Gear::kHighGear
                                               : Gear::kLowGear),
       right_gear_(dt_config_.default_high_gear ? Gear::kHighGear
@@ -164,7 +165,8 @@ void DrivetrainLoop::RunIteration(
   bool control_loop_driving = false;
   if (goal) {
     // TODO(Kyle) Check this condition
-    control_loop_driving = (*goal)->has_distance_command() || (*goal)->has_path_command();
+    control_loop_driving =
+        (*goal)->has_distance_command() || (*goal)->has_path_command();
 
     dt_closedloop_.SetGoal(*goal);
     dt_openloop_.SetGoal(*goal);
@@ -184,15 +186,27 @@ void DrivetrainLoop::RunIteration(
   {
     Eigen::Matrix<double, 2, 1> linear =
         dt_closedloop_.LeftRightToLinear(kf_.X_hat());
-    cartesian_position_(0) += linear(1) * ::std::cos(integrated_kf_heading_) * 0.005;
-    cartesian_position_(1) += linear(1) * ::std::sin(integrated_kf_heading_) * 0.005;
+    cartesian_position_(0) +=
+        linear(1) * ::std::cos(integrated_kf_heading_) * 0.005;
+    cartesian_position_(1) +=
+        linear(1) * ::std::sin(integrated_kf_heading_) * 0.005;
   }
 
   // The output should now contain the shift request.
 
   // set the output status of the control loop state
   if (status) {
-    (*status)->set_forward_velocity((kf_.X_hat(1, 0) + kf_.X_hat(3, 0)) / 2.0);
+    double forward_velocity = (kf_.X_hat(1, 0) + kf_.X_hat(3, 0)) / 2.0;
+    double angular_velocity =
+        (kf_.X_hat(3, 0) - kf_.X_hat(2, 0)) / (dt_config_.robot_radius * 2.0);
+    (*status)->set_forward_velocity(forward_velocity);
+    (*status)->set_angular_velocity(angular_velocity);
+    (*status)->set_forward_acceleration(
+        (forward_velocity - last_forward_velocity_) / dt_config_.dt);
+    (*status)->set_angular_acceleration(
+        (angular_velocity - last_angular_velocity_) / dt_config_.dt);
+    last_forward_velocity_ = forward_velocity;
+    last_angular_velocity_ = angular_velocity;
 
     Eigen::Matrix<double, 2, 1> linear =
         dt_closedloop_.LeftRightToLinear(kf_.X_hat());
@@ -229,6 +243,11 @@ void DrivetrainLoop::RunIteration(
   double right_voltage = 0.0;
   if (output) {
     left_voltage = (*output)->left_voltage();
+    (*output)->set_left_voltage(left_filter_.Update(left_voltage));
+    left_voltage = (*output)->left_voltage();
+
+    right_voltage = (*output)->right_voltage();
+    (*output)->set_right_voltage(right_filter_.Update(right_voltage));
     right_voltage = (*output)->right_voltage();
     left_high_requested_ = right_high_requested_ = (*output)->high_gear();
   }
@@ -237,6 +256,8 @@ void DrivetrainLoop::RunIteration(
 
   left_voltage *= scalar;
   right_voltage *= scalar;
+
+  right_filter_.Update(right_voltage);
 
   // To validate, look at the following:
 

@@ -21,6 +21,7 @@ cc_library(
         "//c2018/subsystems/lights:lights_queues",
         "//muan/queues:queue_manager",
         "//muan/wpilib:can_wrapper",
+        "//muan/wpilib:accelerometer",
         "//muan/wpilib/gyro:gyro",
         "//third_party/frc971/control_loops/drivetrain:drivetrain_queues",
         "//third_party/wpilibsuite:wpilib",

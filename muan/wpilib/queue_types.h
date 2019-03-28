@@ -11,6 +11,12 @@ namespace wpilib {
 using DriverStationProto = muan::proto::StackProto<DriverStationStatus, 256>;
 using DriverStationQueue = muan::queues::MessageQueue<DriverStationProto>;
 
+using AccelerometerProto = muan::proto::StackProto<AccelerometerInput, 256>;
+using AccelerometerQueue = muan::queues::MessageQueue<AccelerometerProto>;
+
+using TiltProto = muan::proto::StackProto<TiltStatus, 256>;
+using TiltQueue = muan::queues::MessageQueue<TiltProto>;
+
 using PdpMessage = muan::proto::StackProto<PdpStatus, 512>;
 using PdpQueue = muan::queues::MessageQueue<PdpMessage>;
 

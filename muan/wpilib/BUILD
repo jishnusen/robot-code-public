@@ -90,3 +90,14 @@ cc_library(
     ],
     restricted_to = ["//tools:roborio"],
 )
+
+cc_library(
+    name = "accelerometer",
+    srcs = ["accelerometer.cpp"],
+    hdrs = ["accelerometer.h"],
+    deps = [
+        ":wpilib_queues",
+        "//third_party/wpilibsuite:wpilib",
+    ],
+    restricted_to = ["//tools:roborio"],
+)

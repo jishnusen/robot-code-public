@@ -62,64 +62,9 @@ void AutonomousRunner::operator()() {
     none_ = true;
   }
 
-  // Start of autonomous. Grab the game specific string.
-  auto left_right_codes = game_specific_string->code();
-  LOG(INFO, "Starting autonomous with layout %s", left_right_codes.c_str());
-  if (switch_only_) {
-    c2018::autonomous::SwitchOnly switch_only;
-    if (left_right_codes[0] == 'L') {
-      switch_only.LeftSwitch();
-    } else if (left_right_codes[0] == 'R') {
-      switch_only.RightSwitch();
-    }
-  } else if (scale_only_) {
-    c2018::autonomous::ScaleOnly scale_only;
-    if (left_right_codes[1] == 'L') {
-      scale_only.LeftScale();
-    } else if (left_right_codes[1] == 'R') {
-      scale_only.RightScale();
-    }
-  } else if (switch_and_scale_) {
-    c2018::autonomous::SwitchAndScale switch_and_scale;
-    if (left_right_codes[0] == 'L') {
-      if (left_right_codes[1] == 'L') {
-        switch_and_scale.LeftLeftSwitch();
-      } else if (left_right_codes[1] == 'R') {
-        switch_and_scale.LeftRightSwitch();
-      }
-    } else if (left_right_codes[0] == 'R') {
-      if (left_right_codes[1] == 'L') {
-        switch_and_scale.RightLeftSwitch();
-      } else if (left_right_codes[1] == 'R') {
-        switch_and_scale.RightRightSwitch();
-      }
-    }
-  } else if (backside_switch_) {
-    if (left_right_codes[0] == 'L') {
-      c2018::autonomous::BacksideSwitch backside_switch;
-      backside_switch.SwitchBack();
-    } else {
-      c2018::autonomous::Drive drive;
-      drive.DriveBackwards();
-    }
-  } else if (drive_) {
-    c2018::autonomous::Drive drive;
-    drive.DriveBackwards();
-  } else if (sneak_) {
-    c2018::autonomous::Sneak sneak;
-    if (left_right_codes[1] == 'L') {
-      sneak.SneakLeft();
-    } else {
-      sneak.SneakRight();
-    }
-  } else if (none_) {
-    c2018::autonomous::None none;
-    none.NoneAuto();
-  } else {  // Keeping this so we know if webdash selector somehow broke itself
-    LOG(WARNING, "No auto mode selected, running none auto!");
-    c2018::autonomous::None none;
-    none.NoneAuto();
-  }
+  c2018::autonomous::None none;
+  none.NoneAuto();
+
   LOG(INFO, "Finished with auto!");
 }
 
