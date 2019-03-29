@@ -13,12 +13,10 @@ InterfaceRunner::InterfaceRunner()
 }
 
 void InterfaceRunner::ReadSensors() {
-  drive_.ReadSensors();
   superstructure_.ReadSensors();
 }
 
 void InterfaceRunner::WriteActuators() {
-  drive_.WriteActuators();
   superstructure_.WriteActuators();
 }
 

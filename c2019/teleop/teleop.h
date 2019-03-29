@@ -4,9 +4,10 @@
 #include <atomic>
 #include "WPILib.h"
 #include "c2019/commands/queue_types.h"
+#include "c2019/commands/command_base.h"
 #include "c2019/subsystems/superstructure/queue_types.h"
 #include "muan/queues/queue_manager.h"
-#include "muan/subsystems/drivetrain/queue_types.h"
+#include "third_party/frc971/control_loops/drivetrain/queue_types.h"
 #include "muan/teleop/joystick.h"
 #include "muan/utils/threading_utils.h"
 #include "muan/wpilib/ds_sender.h"
@@ -107,6 +108,9 @@ class TeleopBase {
   bool flash_ = false;
   double offset_ = 0;
   bool cancel_command_ = false;
+  bool in_vision_ = false;
+
+  commands::CommandBase command_base_;
 };
 
 }  // namespace teleop

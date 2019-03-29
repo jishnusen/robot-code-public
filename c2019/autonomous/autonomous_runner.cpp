@@ -37,16 +37,17 @@ void AutonomousRunner::operator()() {
   }
 
   commands::Rocket rocket_command;
+  std::cout << "running autonomous thread" << std::endl;
 
-  if ((AutoMode() == "LEFT_ROCKET")) {
+  /* if ((AutoMode() == "LEFT_ROCKET")) { */
     rocket_command.LeftRocket();
-  } else if (AutoMode() == "LEFT_CARGO_ROCKET") {
-    rocket_command.LeftCargoRocket();
-  } else if (AutoMode() == "RIGHT_ROCKET") {
-    rocket_command.RightRocket();
-  } else if (AutoMode() == "RIGHT_CARGO_ROCKET") {
-    rocket_command.RightCargoRocket();
-  }
+  /* } else if (AutoMode() == "LEFT_CARGO_ROCKET") { */
+    /* rocket_command.LeftCargoRocket(); */
+  /* } else if (AutoMode() == "RIGHT_ROCKET") { */
+    /* rocket_command.RightRocket(); */
+  /* } else if (AutoMode() == "RIGHT_CARGO_ROCKET") { */
+    /* rocket_command.RightCargoRocket(); */
+  /* } */
 }
 
 std::string AutonomousRunner::AutoMode() {

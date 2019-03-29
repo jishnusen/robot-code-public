@@ -17,8 +17,7 @@ using muan::teleop::JoystickStatusProto;
 using muan::webdash::WebdashProto;
 using muan::wpilib::DriverStationProto;
 using muan::wpilib::GameSpecificStringProto;
-using DrivetrainGoal = muan::subsystems::drivetrain::GoalProto;
-using DrivetrainStatus = muan::subsystems::drivetrain::StatusProto;
+using DrivetrainGoalProto = frc971::control_loops::drivetrain::GoalProto;
 using c2019::commands::Command;
 using c2019::limelight::LimelightStatusProto;
 using c2019::superstructure::SuperstructureGoalProto;
@@ -127,38 +126,39 @@ void TeleopBase::Update() {
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
   /* std::shared_ptr<nt::NetworkTable> back_table = */
   /*     inst.GetTable("limelight-back"); */
-  std::shared_ptr<nt::NetworkTable> expensive_table =
-      inst.GetTable("limelight-pricey");
+  /* std::shared_ptr<nt::NetworkTable> expensive_table = */
+  /*     inst.GetTable("limelight-pricey"); */
 
   if (RobotController::IsSysActive()) {
-    if (DriverStation::GetInstance().IsOperatorControl() ||
-        !auto_status->running_command()) {
+    if (DriverStation::GetInstance().IsOperatorControl()) {
       SendDrivetrainMessage();
       SendSuperstructureMessage();
     }
     if (climb_mode_) {
       table->PutNumber("ledMode", 0);
-      expensive_table->PutNumber("ledMode", 0);
+      /* expensive_table->PutNumber("ledMode", 0); */
       /* back_table->PutNumber("ledMode", 0); */
     } else if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
-      table->PutNumber("ledMode",
-                       static_cast<int>(superstructure_status->elevator_goal() > 0.6));
-      expensive_table->PutNumber(
-          "ledMode", static_cast<int>(superstructure_status->elevator_goal() < 0.6));
+      table->PutNumber(
+          "ledMode",
+          static_cast<int>(superstructure_status->elevator_goal() > 0.6));
+      /* expensive_table->PutNumber( */
+      /*     "ledMode", */
+      /*     static_cast<int>(superstructure_status->elevator_goal() < 0.6)); */
       /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
     } else {
       table->PutNumber("ledMode", flash_ ? 2 : 1);
-      expensive_table->PutNumber("ledMode", 1);
+      /* expensive_table->PutNumber("ledMode", 1); */
       /* back_table->PutNumber("ledMode", 0); */
     }
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
     /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
-    expensive_table->PutNumber("ledMode", 1);
+    /* expensive_table->PutNumber("ledMode", 1); */
   }
 
-  /* table->PutNumber("stream", 2); */
-  expensive_table->PutNumber("stream", 2);
+  table->PutNumber("stream", 2);
+  /* expensive_table->PutNumber("stream", 2); */
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
@@ -187,7 +187,7 @@ void TeleopBase::Update() {
     // Set rumble on
     rumble_ticks_left_--;
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 1.0);
-    /* table->PutNumber("ledMode", 2); */
+    table->PutNumber("ledMode", 2);
     /* back_table->PutNumber("ledMode", 2); */
   } else {
     // Set rumble off
@@ -218,15 +218,9 @@ void TeleopBase::Update() {
 }
 
 void TeleopBase::SendDrivetrainMessage() {
-  bool vision = false;
-  double y_int = 0;
+  using DrivetrainGoal = frc971::control_loops::drivetrain::GoalProto;
+
   DrivetrainGoal drivetrain_goal;
-  LimelightStatusProto lime_status;
-  SuperstructureStatusProto super_status;
-  DrivetrainStatus drivetrain_status;
-  QueueManager<SuperstructureStatusProto>::Fetch()->ReadLastMessage(
-      &super_status);
-  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drivetrain_status);
 
   double throttle = -throttle_.wpilib_joystick()->GetRawAxis(1);
   double wheel = -wheel_.wpilib_joystick()->GetRawAxis(0);
@@ -239,79 +233,29 @@ void TeleopBase::SendDrivetrainMessage() {
   if (shifting_low_->was_clicked()) {
     high_gear_ = false;
   }
-  if (QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(
-          &lime_status)) {
-    if (vision_->is_pressed()) {
-      if (vision_intake_->is_pressed() && lime_status->back_has_target() &&
-          lime_status->back_limelight_ok()) {
-        vision = true;
-        distance_factor_ = -0.8;
-        target_dist_ = lime_status->back_target_dist();
-        horiz_angle_ = lime_status->back_horiz_angle();
-        y_int = -0;
-      } else if (!vision_intake_->is_pressed()) {
-        distance_factor_ = 1;
-        y_int = 0.35;
-        if (super_status->elevator_height() > 0.8) {
-          horiz_angle_ = lime_status->pricey_horiz_angle();
-          target_dist_ = lime_status->pricey_target_dist();
-          distance_factor_ = 4.0 / 4.5;
-          y_int = 0.4;
-          vision = lime_status->bottom_limelight_ok() &&
-                   lime_status->pricey_has_target();
-        } else {
-          horiz_angle_ = lime_status->horiz_angle();
-          target_dist_ = lime_status->target_dist();
-          vision = lime_status->limelight_ok() && lime_status->has_target();
-          double skew = lime_status->skew();
-          if (lime_status->skew() > -45) {
-            skew = std::abs(lime_status->skew());
-          } else {
-            skew += 90;
-          }
 
-          if (skew > 5 || this_run_off_) {
-            horiz_angle_ += offset_;
-            if (!this_run_off_) {
-              offset_ =
-                  0.05 * (lime_status->to_the_left() ? 1 : -1) * (skew / 13);
-            }
-            this_run_off_ = true;
-          }
-        }
-      }
-    }
+  if (vision_->is_pressed()) {
+    in_vision_ = true;
+    command_base_.StartDriveVision();
   }
 
   if (vision_->was_released()) {
-    this_run_off_ = false;
-    offset_ = 0.;
+    in_vision_ = false;
   }
 
-  if (super_status->elevator_height() < 1.3 &&
-      super_status->elevator_goal() > 1.5) {
-    vision = false;
+  if (!in_vision_) {
+    drivetrain_goal->set_gear(
+        high_gear_ ? frc971::control_loops::drivetrain::Gear::kHighGear
+                   : frc971::control_loops::drivetrain::Gear::kLowGear);
+
+    // Drive controls
+    drivetrain_goal->mutable_teleop_command()->set_steering(wheel);
+    drivetrain_goal->mutable_teleop_command()->set_throttle(throttle);
+    drivetrain_goal->mutable_teleop_command()->set_quick_turn(quickturn);
+
+    QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
   }
 
-  drivetrain_goal->set_high_gear(high_gear_);
-
-  if (!vision) {
-    drivetrain_goal->mutable_teleop_goal()->set_steering(-wheel);
-    drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
-    drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
-  } else {
-    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
-    /*     ->set_linear_velocity( */
-    /*         2.0 * (height_distance_factor_ * target_dist_ -
-     * distance_factor_)); */
-    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
-    /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
-    drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
-    drivetrain_goal->mutable_arc_goal()->set_linear((target_dist_ - y_int) *
-                                                    distance_factor_ * 4.5);
-  }
-
-  QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
 }
 
 void TeleopBase::SendSuperstructureMessage() {

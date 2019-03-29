@@ -13,6 +13,8 @@ bool Button::was_clicked() { return current_ && !last_; }
 
 bool Button::was_released() { return !current_ && last_; }
 
+bool Button::was_depressed() { return current_ && !last_; }
+
 bool Button::is_pressed() { return current_; }
 
 void Button::Update() {

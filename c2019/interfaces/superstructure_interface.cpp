@@ -74,9 +74,9 @@ void SuperstructureInterface::ReadSensors() {
 
   inputs->set_elevator_zeroed(elevator_zeroed_);
 
-  inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR));
+  inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
 
-  if (!canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR) && !wrist_zeroed_) {
+  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && !wrist_zeroed_) {
     wrist_zeroed_ = true;
     wrist_offset_ = inputs->wrist_encoder();
   }

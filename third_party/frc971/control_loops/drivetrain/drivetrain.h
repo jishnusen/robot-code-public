@@ -82,8 +82,8 @@ class DrivetrainLoop {
 
   double last_forward_velocity_ = 0;
   double last_angular_velocity_ = 0;
-  muan::control::RcFilter left_filter_{0.01, 0.005, 0.0};
-  muan::control::RcFilter right_filter_{0.01, 0.005, 0.0};
+  muan::control::RcFilter left_filter_{0.2, 0.005, 0.0};
+  muan::control::RcFilter right_filter_{0.2, 0.005, 0.0};
 };
 
 }  // namespace drivetrain

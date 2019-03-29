@@ -17,7 +17,6 @@ class InterfaceRunner {
 
  private:
   muan::wpilib::CanWrapper can_;
-  DrivetrainInterface drive_;
   SuperstructureInterface superstructure_;
 };
 

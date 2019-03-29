@@ -25,6 +25,7 @@ class Button {
  public:
   bool was_clicked();
   bool was_released();
+  bool was_depressed();
   bool is_pressed();
 
   virtual void Update();

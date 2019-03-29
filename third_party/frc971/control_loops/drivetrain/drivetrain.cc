@@ -198,7 +198,7 @@ void DrivetrainLoop::RunIteration(
   if (status) {
     double forward_velocity = (kf_.X_hat(1, 0) + kf_.X_hat(3, 0)) / 2.0;
     double angular_velocity =
-        (kf_.X_hat(3, 0) - kf_.X_hat(2, 0)) / (dt_config_.robot_radius * 2.0);
+        (kf_.X_hat(3, 0) - kf_.X_hat(1, 0)) / (dt_config_.robot_radius * 2.0);
     (*status)->set_forward_velocity(forward_velocity);
     (*status)->set_angular_velocity(angular_velocity);
     (*status)->set_forward_acceleration(
@@ -256,8 +256,6 @@ void DrivetrainLoop::RunIteration(
 
   left_voltage *= scalar;
   right_voltage *= scalar;
-
-  right_filter_.Update(right_voltage);
 
   // To validate, look at the following:
 
