@@ -318,16 +318,22 @@ void CommandBase::StartDriveVision() {
                          drive_status->angular_velocity() * 0.01);
 }
 
-void CommandBase::StartDriveVisionAuto() {
+void CommandBase::StartDriveVisionAuto(double dist) {
+  double old_max_forward = max_forward_velocity_;
+  double old_max_forward_acc = max_forward_acceleration_;
+  max_forward_velocity_ = 3.0;
+  max_forward_acceleration_ = 3.0;
   LimelightStatusProto lime_status;
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
 
-  while (IsAutonomous() && lime_status->target_dist() > 0.035 &&
+  while (IsAutonomous() && lime_status->target_dist() > dist &&
          lime_status->has_target()) {
     StartDriveVision();
     Wait(1);
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
+  max_forward_velocity_ = old_max_forward;
+  max_forward_acceleration_ = old_max_forward_acc;
 }
 
 bool CommandBase::simulated_ = false;

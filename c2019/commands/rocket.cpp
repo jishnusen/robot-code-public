@@ -11,19 +11,50 @@ using muan::wpilib::DriverStationProto;
 using frc971::control_loops::drivetrain::Gear;
 
 void Rocket::LeftRocket() {
+  max_forward_velocity_ = 4.0;
+  max_forward_acceleration_ = 9.0;
   double init_theta = M_PI;
 
   SetFieldPosition(1.8, 1.1, init_theta);
   DrivetrainStatus drive_status;
   QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
-  /* double init_gyro = drive_status->estimated_heading(); */
+  double init_gyro = drive_status->estimated_heading();
 
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  GoTo(superstructure::AUTO_HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
   StartDrivePath(7.4, 3.4, 240. * (M_PI / 180.), -1);
   WaitUntilDriveComplete();
   StartPointTurn(-80. * (M_PI / 180.));
   WaitUntilDriveComplete();
   StartDriveVisionAuto();
+  ScoreHatch(50);
+  Wait(50);
+
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+  SetFieldPosition(
+      6.7, 3.3, (drive_status->estimated_heading() - init_gyro) + init_theta);
+
+  StartDrivePath(7.3, 1.6, 160. * (M_PI / 180.), -1);
+
+  WaitUntilDriveComplete();
+  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::PREP_SCORE);
+  StartDrivePath(.4, 3.2, -M_PI, 1, Gear::kHighGear, 0, 0.5);
+  WaitUntilDrivetrainNear(1.6, 3.3, 0.5);
+  StartDriveVisionAuto(-0.03);
+
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+  SetFieldPosition(
+      0.5, 3.3, (drive_status->estimated_heading() - init_gyro) + init_theta);
+
+  StartDrivePath(7.9, 3.2, 240 * (M_PI / 180.), -1);
+  GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
+  QueueManager<DrivetrainStatus>::Fetch()->ReadLastMessage(&drive_status);
+  WaitUntilDriveComplete();
+  StartPointTurn(-75 * (M_PI / 180.));
+  WaitUntilDriveComplete();
+  StartDriveVisionAuto();
+  ScoreHatch(50);
+  Wait(50);
 }
 
 void Rocket::LeftCargoRocket() {

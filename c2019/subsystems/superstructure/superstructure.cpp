@@ -352,7 +352,13 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       high_gear_ = true;
       break;
     case HATCH_ROCKET_FIRST:
-      elevator_height_ = 0.0;
+      elevator_height_ = kHatchRocketFirstHeight;
+      wrist_angle_ = kHatchForwardsAngle;
+      intake_goal_ = PREP_SCORE;
+      high_gear_ = true;
+      break;
+    case AUTO_HATCH_ROCKET_FIRST:
+      elevator_height_ = 0;
       wrist_angle_ = kHatchForwardsAngle;
       intake_goal_ = PREP_SCORE;
       high_gear_ = true;
