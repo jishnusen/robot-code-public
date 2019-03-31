@@ -7,9 +7,14 @@
 #include "third_party/frc971/control_loops/drivetrain/drivetrain_config.h"
 #include "third_party/frc971/control_loops/state_feedback_loop.h"
 
+#include "muan/subsystems/drivetrain/open_loop_drive.h"
+
 namespace frc971 {
 namespace control_loops {
 namespace drivetrain {
+
+using MuanDriveGoalProto = muan::subsystems::drivetrain::GoalProto;
+using MuanDriveOutputProto = muan::subsystems::drivetrain::OutputProto;
 
 PolyDrivetrain::PolyDrivetrain(const DrivetrainConfig &dt_config,
                                StateFeedbackLoop<7, 2, 3> *kf)
@@ -32,14 +37,32 @@ PolyDrivetrain::PolyDrivetrain(const DrivetrainConfig &dt_config,
       wheel_(0.0),
       throttle_(0.0),
       quickturn_(false),
-      left_gear_(dt_config.default_high_gear ? Gear::kHighGear : Gear::kLowGear),
-      right_gear_(dt_config.default_high_gear ? Gear::kHighGear : Gear::kLowGear),
+      left_gear_(dt_config.default_high_gear ? Gear::kHighGear
+                                             : Gear::kLowGear),
+      right_gear_(dt_config.default_high_gear ? Gear::kHighGear
+                                              : Gear::kLowGear),
       counter_(0),
       dt_config_(dt_config) {
   last_position_->set_left_encoder(0.0);
   last_position_->set_right_encoder(0.0);
   position_->set_left_encoder(0.0);
   position_->set_right_encoder(0.0);
+}
+
+void PolyDrivetrain::UpdateCheesy(double throttle, double wheel,
+                                  bool quickturn) {
+  MuanDriveGoalProto goal;
+  goal->mutable_teleop_goal()->set_throttle(throttle);
+  goal->mutable_teleop_goal()->set_steering(wheel);
+  goal->mutable_teleop_goal()->set_quick_turn(quickturn);
+
+  cheesy_.SetGoal(goal);
+
+  MuanDriveOutputProto output;
+  cheesy_.Update(&output);
+
+  cheesy_left_ = output->left_setpoint() * 12.;
+  cheesy_right_ = output->right_setpoint() * 12.;
 }
 
 double PolyDrivetrain::MotorSpeed(
@@ -92,7 +115,8 @@ Gear PolyDrivetrain::UpdateSingleGear(Gear requested_gear, Gear current_gear) {
         }
       }
     } else {
-      if (requested_gear == Gear::kHighGear && current_gear == Gear::kShiftingDown) {
+      if (requested_gear == Gear::kHighGear &&
+          current_gear == Gear::kShiftingDown) {
         current_gear = Gear::kShiftingUp;
       } else if (requested_gear == Gear::kLowGear &&
                  current_gear == Gear::kShiftingUp) {
@@ -111,6 +135,7 @@ void PolyDrivetrain::SetGoal(
   const double throttle = teleop_goal.throttle();
   const bool quickturn = teleop_goal.quick_turn();
   const bool highgear = goal->gear() == Gear::kHighGear;
+  UpdateCheesy(throttle, -wheel, quickturn);
 
   // Apply a sin function that's scaled to make it feel better.
   const double angular_range = M_PI_2 * dt_config_.wheel_non_linearity;
@@ -167,9 +192,9 @@ double PolyDrivetrain::FilterVelocity(double throttle) const {
 
   const double adjusted_ff_voltage =
       ::aos::Clip(throttle * 12.0 * min_FF_sum / high_min_FF_sum, -12.0, 12.0);
-  return (adjusted_ff_voltage +
-          ttrust_ * min_K_sum * (loop_->X_hat(0, 0) + loop_->X_hat(1, 0)) /
-              2.0) /
+  return (adjusted_ff_voltage + ttrust_ * min_K_sum *
+                                    (loop_->X_hat(0, 0) + loop_->X_hat(1, 0)) /
+                                    2.0) /
          (ttrust_ * min_K_sum + min_FF_sum);
 }
 
@@ -269,14 +294,16 @@ void PolyDrivetrain::Update() {
           loop_->plant().A() * loop_->X_hat() + loop_->plant().B() * loop_->U();
     }
 
-    // Housekeeping: set the shifting logging values to zero, because we're not shifting
+    // Housekeeping: set the shifting logging values to zero, because we're not
+    // shifting
     left_motor_speed_ = 0.0;
     right_motor_speed_ = 0.0;
     current_left_velocity_ = 0.0;
     current_right_velocity_ = 0.0;
   } else {
     current_left_velocity_ =
-        (position_->left_encoder() - last_position_->left_encoder()) / dt_config_.dt;
+        (position_->left_encoder() - last_position_->left_encoder()) /
+        dt_config_.dt;
     current_right_velocity_ =
         (position_->right_encoder() - last_position_->right_encoder()) /
         dt_config_.dt;
@@ -312,8 +339,8 @@ void PolyDrivetrain::Update() {
 void PolyDrivetrain::SetOutput(
     ::frc971::control_loops::drivetrain::OutputProto *output) {
   if (output != NULL) {
-    (*output)->set_left_voltage(loop_->U(0, 0));
-    (*output)->set_right_voltage(loop_->U(1, 0));
+    (*output)->set_left_voltage(cheesy_left_);
+    (*output)->set_right_voltage(cheesy_right_);
     (*output)->set_high_gear(MaybeHigh(left_gear_));
   }
 }

@@ -12,6 +12,7 @@ namespace interfaces {
 class InterfaceRunner {
  public:
   InterfaceRunner();
+  void operator()();
   void ReadSensors();
   void WriteActuators();
 

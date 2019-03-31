@@ -63,20 +63,16 @@ void SuperstructureInterface::ReadSensors() {
   }
 
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
-                            kWristConversionFactor - wrist_offset_);
-  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR) && */
-  /*     std::abs(inputs->wrist_encoder()) > 0.1) { */
-  /*   wrist_zeroed_ = false; */
-  /* } */
+                            kWristConversionFactor - wrist_offset_);// - wrist_zeroed_ ? wrist_offset_ : 0);
 
   inputs->set_elevator_hall(
       elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
 
   inputs->set_elevator_zeroed(elevator_zeroed_);
 
-  inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
+  inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR));
 
-  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && !wrist_zeroed_) {
+  if (!canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR) && !wrist_zeroed_) {
     wrist_zeroed_ = true;
     wrist_offset_ = inputs->wrist_encoder();
   }
@@ -93,6 +89,8 @@ void SuperstructureInterface::ReadSensors() {
 }
 
 void SuperstructureInterface::LoadGains() {
+  wrist_.ConfigFactoryDefault();
+  elevator_master_.ConfigFactoryDefault();
   elevator_master_.Config_kP(0, kElevatorP, 100);
   elevator_master_.Config_kI(0, kElevatorI, 100);
   elevator_master_.Config_kD(0, kElevatorD, 100);
@@ -206,7 +204,7 @@ void SuperstructureInterface::WriteActuators() {
       break;
     case TalonOutput::POSITION:
       wrist_.Set(ControlMode::MotionMagic,
-                 outputs->wrist_setpoint() * kWristConversionFactor + wrist_offset_,
+                 (outputs->wrist_setpoint() + wrist_offset_) * kWristConversionFactor,
                  DemandType_ArbitraryFeedForward,
                  outputs->wrist_setpoint_ff() / 12.);
       break;

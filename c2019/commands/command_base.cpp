@@ -300,22 +300,32 @@ void CommandBase::StartDriveVision() {
     return;
   }
 
+  superstructure::SuperstructureStatusProto super_status;
+  QueueManager<superstructure::SuperstructureStatusProto>::Fetch()->ReadLastMessage(
+      &super_status);
+
   LimelightStatusProto lime_status;
   QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
-  double skew = lime_status->skew();
-  if (skew > -45) {
-    skew = std::abs(skew);
-  } else {
-    skew += 90;
-  }
+  if (super_status->elevator_height() < 0.82) {
+    double skew = lime_status->skew();
+    if (skew > -45) {
+      skew = std::abs(skew);
+    } else {
+      skew += 90;
+    }
 
-  double offset = 0;
-  if (skew > 5) {
-    offset = 0.05 * (lime_status->to_the_left() ? 1 : -1) * (skew / 12);
+    double offset = 0;
+    if (skew > 5) {
+      offset = 0.05 * (lime_status->to_the_left() ? 1 : -1) * (skew / 12);
+    }
+    StartDriveRelative(lime_status->target_dist(),
+                       -(lime_status->horiz_angle() + offset) -
+                           drive_status->angular_velocity() * 0.01);
+  } else {
+    StartDriveRelative(lime_status->pricey_target_dist(),
+                       -(lime_status->pricey_horiz_angle()) -
+                           drive_status->angular_velocity() * 0.01);
   }
-  StartDriveRelative(lime_status->target_dist(),
-                     -(lime_status->horiz_angle() + offset) -
-                         drive_status->angular_velocity() * 0.01);
 }
 
 void CommandBase::StartDriveVisionAuto(double dist) {

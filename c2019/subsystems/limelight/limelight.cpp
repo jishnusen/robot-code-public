@@ -18,7 +18,7 @@ Limelight::Limelight(const double limelight_height,
       object_height_(object_height) {}
 
 void Limelight::operator()() {
-  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20));
   aos::SetCurrentThreadRealtimePriority(10);
   muan::utils::SetCurrentThreadName("Limelight");
 
@@ -37,8 +37,8 @@ void Limelight::Update() {
       &super_status);
   auto inst = nt::NetworkTableInstance::GetDefault();
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
-  /* std::shared_ptr<nt::NetworkTable> pricey_table = */
-  /*     inst.GetTable("limelight-pricey"); */
+  std::shared_ptr<nt::NetworkTable> pricey_table =
+      inst.GetTable("limelight-pricey");
   /* std::shared_ptr<nt::NetworkTable> back_table = */
   /*     inst.GetTable("limelight-back"); */
   double target_vertical_angle = table->GetEntry("ty").GetDouble(-1000);
@@ -48,7 +48,7 @@ void Limelight::Update() {
   LimelightStatusProto status;
   double latency = table->GetEntry("tl").GetDouble(-1000);
   /* double back_latency = back_table->GetEntry("tl").GetDouble(-1000); */
-  /* double bottom_latency = pricey_table->GetEntry("tl").GetDouble(-1000); */
+  double bottom_latency = pricey_table->GetEntry("tl").GetDouble(-1000);
   if (latency == prev_latency_) {
     bad_ticks_++;
   } else {
@@ -61,16 +61,16 @@ void Limelight::Update() {
   /*   back_bad_ticks_ = 0; */
   /* } */
 
-  /* if (bottom_latency == bottom_prev_latency_) { */
-  /*   bottom_bad_ticks_++; */
-  /* } else { */
-  /*   bottom_bad_ticks_ = 0; */
-  /* } */
+  if (bottom_latency == bottom_prev_latency_) {
+    bottom_bad_ticks_++;
+  } else {
+    bottom_bad_ticks_ = 0;
+  }
   prev_latency_ = latency;
-  /* bottom_prev_latency_ = bottom_latency; */
+  bottom_prev_latency_ = bottom_latency;
   /* back_prev_latency_ = back_latency; */
   status->set_limelight_ok(bad_ticks_ < 10);
-  status->set_back_limelight_ok(false);
+  status->set_back_limelight_ok(bottom_bad_ticks_ < 10);
   status->set_bottom_limelight_ok(false);
 
   //  slope_ = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
@@ -120,21 +120,19 @@ void Limelight::Update() {
   /*     static_cast<bool>(back_table->GetEntry("tv").GetDouble(0))); */
   /* std::shared_ptr<nt::NetworkTable> pricey_table = */
   /*     inst.GetTable("limelight-pricey"); */
-  /* double pricey_target_horizontal_angle = */
-  /*     pricey_table->GetEntry("tx").GetDouble(0); */
-  /* pricey_horiz_angle_ = (pricey_target_horizontal_angle * (M_PI / 180.)); */
-  /* status->set_pricey_horiz_angle(pricey_horiz_angle_); */
-  /* double pricey_target_vertical_angle = */
-  /*     pricey_table->GetEntry("ty").GetDouble(0); */
-  /* pricey_target_dist_ = */
-  /*     ((object_height_)*0.0254) / */
-  /*     std::tan((pricey_target_vertical_angle + 30.0) * (M_PI / 180.)); */
-  /* double pricey_distance = 2.497 * pow(pricey_target_dist_, 2) - */
-  /*                          0.0397 * pricey_target_dist_ + 0.2124; */
-  /* status->set_pricey_horiz_angle(pricey_horiz_angle_); */
-  /* status->set_pricey_target_dist(pricey_distance / 3.70); */
-  /* status->set_pricey_has_target( */
-  /*     static_cast<bool>(pricey_table->GetEntry("tv").GetDouble(0))); */
+  double pricey_target_horizontal_angle =
+      pricey_table->GetEntry("tx").GetDouble(0);
+  pricey_horiz_angle_ = (pricey_target_horizontal_angle * (M_PI / 180.));
+  status->set_pricey_horiz_angle(pricey_horiz_angle_);
+  double pricey_target_vertical_angle =
+      pricey_table->GetEntry("ty").GetDouble(0);
+  pricey_target_dist_ =
+      ((19.0)*0.0254) /
+      std::tan((pricey_target_vertical_angle + 30.0) * (M_PI / 180.));
+  status->set_pricey_horiz_angle(pricey_horiz_angle_);
+  status->set_pricey_target_dist(pricey_target_dist_ - 0.47);
+  status->set_pricey_has_target(
+      static_cast<bool>(pricey_table->GetEntry("tv").GetDouble(0)));
   status_queue_->WriteMessage(status);
 }
 

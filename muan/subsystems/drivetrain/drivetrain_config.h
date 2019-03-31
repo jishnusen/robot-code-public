@@ -8,10 +8,10 @@ namespace subsystems {
 namespace drivetrain {
 
 struct DrivetrainConfig {
-  double high_gear_wheel_non_linearity = 1.;
-  double low_gear_wheel_non_linearity = 1.;
-  double high_gear_sensitivity = 1.;
-  double low_gear_sensitivity = 1.;
+  double high_gear_wheel_non_linearity = 0.65;
+  double low_gear_wheel_non_linearity = 0.65;
+  double high_gear_sensitivity = 0.65;
+  double low_gear_sensitivity = 0.65;
 
   double beta = 1.;
   double zeta = 1.;

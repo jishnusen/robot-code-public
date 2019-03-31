@@ -8,7 +8,7 @@ SubsystemRunner::SubsystemRunner() {}
 
 void SubsystemRunner::operator()() {
   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
-  aos::SetCurrentThreadRealtimePriority(50);
+  aos::SetCurrentThreadRealtimePriority(10);
   muan::utils::SetCurrentThreadName("SubsystemRunner");
 
   running_ = true;
@@ -16,11 +16,12 @@ void SubsystemRunner::operator()() {
   std::thread lime_thread(std::ref(limelight_));
   lime_thread.detach();
 
+  std::thread interface_thread(std::ref(interface_runner_));
+  interface_thread.detach();
+
   while (running_) {
     // Subsystems go here
-    interface_runner_.ReadSensors();
     superstructure_.Update();
-    interface_runner_.WriteActuators();
     phased_loop.SleepUntilNext();
   }
 }

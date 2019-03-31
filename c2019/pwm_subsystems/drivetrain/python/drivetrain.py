@@ -23,9 +23,9 @@ kDrivetrain = drivetrain.DrivetrainParams(
     motor_type=control_loop.CIM(),
     num_motors=3,
     q_pos_low=0.12,
-    q_pos_high=0.12,
+    q_pos_high=0.14,
     q_vel_low=1.0,
-    q_vel_high=1.0,
+    q_vel_high=0.95,
     efficiency_high=0.8,
     efficiency_low=0.8,
 )

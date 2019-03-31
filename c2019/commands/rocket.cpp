@@ -6,11 +6,17 @@ namespace c2019 {
 namespace commands {
 
 using c2019::limelight::LimelightStatusProto;
+using frc971::control_loops::drivetrain::Gear;
 using muan::queues::QueueManager;
 using muan::wpilib::DriverStationProto;
-using frc971::control_loops::drivetrain::Gear;
 
 void Rocket::LeftRocket() {
+  {
+    SetFieldPosition(0, 0, 0);
+    StartDrivePath(1, 0, 0);
+    WaitUntilDriveComplete();
+  }
+  return;
   max_forward_velocity_ = 4.0;
   max_forward_acceleration_ = 9.0;
   double init_theta = M_PI;

@@ -274,3 +274,10 @@ cc_test(
         "//third_party/google/googletest",
     ],
 )
+
+cc_library(
+    name = "low_pass_filter",
+    srcs = ["low_pass_filter.cpp"],
+    hdrs = ["low_pass_filter.h"],
+    linkopts = ["-lm"],
+)

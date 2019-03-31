@@ -3,11 +3,13 @@
 
 #include "third_party/aos/common/controls/polytope.h"
 
-#include "third_party/frc971/shifter_hall_effect.h"
+#include "third_party/frc971/control_loops/drivetrain/drivetrain_config.h"
 #include "third_party/frc971/control_loops/drivetrain/gear.h"
 #include "third_party/frc971/control_loops/drivetrain/queue_types.h"
 #include "third_party/frc971/control_loops/state_feedback_loop.h"
-#include "third_party/frc971/control_loops/drivetrain/drivetrain_config.h"
+#include "third_party/frc971/shifter_hall_effect.h"
+
+#include "muan/subsystems/drivetrain/open_loop_drive.h"
 
 namespace frc971 {
 namespace control_loops {
@@ -44,6 +46,7 @@ class PolyDrivetrain {
   // Computes the next state of a shifter given the current state and the
   // requested state.
   Gear UpdateSingleGear(Gear requested_gear, Gear current_gear);
+  void UpdateCheesy(double throttle, double wheel, bool quickturn);
 
  private:
   StateFeedbackLoop<7, 2, 3> *kf_;
@@ -73,6 +76,12 @@ class PolyDrivetrain {
   double right_motor_speed_ = 0.0;
   double current_left_velocity_ = 0.0;
   double current_right_velocity_ = 0.0;
+
+  muan::subsystems::drivetrain::OpenLoopDrive cheesy_{
+      muan::subsystems::drivetrain::DrivetrainConfig()};
+
+  double cheesy_left_;
+  double cheesy_right_;
 };
 
 }  // namespace drivetrain

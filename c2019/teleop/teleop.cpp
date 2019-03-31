@@ -126,8 +126,8 @@ void TeleopBase::Update() {
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
   /* std::shared_ptr<nt::NetworkTable> back_table = */
   /*     inst.GetTable("limelight-back"); */
-  /* std::shared_ptr<nt::NetworkTable> expensive_table = */
-  /*     inst.GetTable("limelight-pricey"); */
+  std::shared_ptr<nt::NetworkTable> expensive_table =
+      inst.GetTable("limelight-pricey");
 
   if (RobotController::IsSysActive()) {
     if (DriverStation::GetInstance().IsOperatorControl()) {
@@ -136,29 +136,29 @@ void TeleopBase::Update() {
     }
     if (climb_mode_) {
       table->PutNumber("ledMode", 0);
-      /* expensive_table->PutNumber("ledMode", 0); */
+      expensive_table->PutNumber("ledMode", 0);
       /* back_table->PutNumber("ledMode", 0); */
     } else if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
       table->PutNumber(
           "ledMode",
           static_cast<int>(superstructure_status->elevator_goal() > 0.6));
-      /* expensive_table->PutNumber( */
-      /*     "ledMode", */
-      /*     static_cast<int>(superstructure_status->elevator_goal() < 0.6)); */
+      expensive_table->PutNumber(
+          "ledMode",
+          static_cast<int>(superstructure_status->elevator_goal() < 0.6));
       /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
     } else {
       table->PutNumber("ledMode", flash_ ? 2 : 1);
-      /* expensive_table->PutNumber("ledMode", 1); */
+      expensive_table->PutNumber("ledMode", 1);
       /* back_table->PutNumber("ledMode", 0); */
     }
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
     /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
-    /* expensive_table->PutNumber("ledMode", 1); */
+    expensive_table->PutNumber("ledMode", 1);
   }
 
   table->PutNumber("stream", 2);
-  /* expensive_table->PutNumber("stream", 2); */
+  expensive_table->PutNumber("stream", 2);
 
   if ((has_cargo_ && !had_cargo_) || (has_hp_hatch_ && !had_hp_hatch_) ||
       (has_ground_hatch_ && !had_ground_hatch_)) {
@@ -187,7 +187,7 @@ void TeleopBase::Update() {
     // Set rumble on
     rumble_ticks_left_--;
     gamepad_.wpilib_joystick()->SetRumble(GenericHID::kLeftRumble, 1.0);
-    table->PutNumber("ledMode", 2);
+    /* table->PutNumber("ledMode", 2); */
     /* back_table->PutNumber("ledMode", 2); */
   } else {
     // Set rumble off

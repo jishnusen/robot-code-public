@@ -162,11 +162,11 @@ void DrivetrainLoop::RunIteration(
 
   dt_openloop_.SetPosition(input, left_gear_, right_gear_);
 
-  bool control_loop_driving = false;
   if (goal) {
     // TODO(Kyle) Check this condition
-    control_loop_driving =
-        (*goal)->has_distance_command() || (*goal)->has_path_command();
+    control_loop_driving_ =
+        (*goal)->has_distance_command() || (*goal)->has_path_command()
+        || (*goal)->has_velocity_command();
 
     dt_closedloop_.SetGoal(*goal);
     dt_openloop_.SetGoal(*goal);
@@ -174,7 +174,7 @@ void DrivetrainLoop::RunIteration(
 
   dt_openloop_.Update();
 
-  if (control_loop_driving) {
+  if (control_loop_driving_) {
     dt_closedloop_.Update(output != NULL);
     dt_closedloop_.SetOutput(output);
   } else {
@@ -243,13 +243,19 @@ void DrivetrainLoop::RunIteration(
   double right_voltage = 0.0;
   if (output) {
     left_voltage = (*output)->left_voltage();
-    (*output)->set_left_voltage(left_filter_.Update(left_voltage));
-    left_voltage = (*output)->left_voltage();
+    right_voltage = (*output)->right_voltage();
 
-    right_voltage = (*output)->right_voltage();
-    (*output)->set_right_voltage(right_filter_.Update(right_voltage));
-    right_voltage = (*output)->right_voltage();
+
     left_high_requested_ = right_high_requested_ = (*output)->high_gear();
+  }
+
+  /* left_voltage = left_filter_.Update(left_voltage); */
+  /* right_voltage = right_filter_.Update(right_voltage); */
+
+
+  if (control_loop_driving_) {
+    (*output)->set_left_voltage(left_filter_.Update(left_voltage));
+    (*output)->set_right_voltage(right_filter_.Update(right_voltage));
   }
 
   const double scalar = 1.0;  // ::aos::robot_state->voltage_battery / 12.0;

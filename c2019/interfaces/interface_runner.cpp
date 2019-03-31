@@ -12,13 +12,21 @@ InterfaceRunner::InterfaceRunner()
   can_thread.detach();
 }
 
-void InterfaceRunner::ReadSensors() {
-  superstructure_.ReadSensors();
+void InterfaceRunner::operator()() {
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(50));
+  aos::SetCurrentThreadRealtimePriority(10);
+  muan::utils::SetCurrentThreadName("InterfaceRunner");
+
+  while (true) {
+    ReadSensors();
+    phased_loop.SleepUntilNext();
+    WriteActuators();
+  }
 }
 
-void InterfaceRunner::WriteActuators() {
-  superstructure_.WriteActuators();
-}
+void InterfaceRunner::ReadSensors() { superstructure_.ReadSensors(); }
+
+void InterfaceRunner::WriteActuators() { superstructure_.WriteActuators(); }
 
 }  // namespace interfaces
 }  // namespace c2019
