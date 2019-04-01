@@ -5,8 +5,7 @@
 
 #include "muan/logging/logger.h"
 #include "muan/queues/queue_manager.h"
-#include "c2019/autonomous/autonomous_base.h"
-#include "c2019/autonomous/queue_types.h"
+#include "muan/wpilib/queue_types.h"
 #include "third_party/aos/common/util/phased_loop.h"
 
 namespace c2019 {
@@ -19,8 +18,7 @@ class AutonomousRunner {
 
  private:
   muan::wpilib::DriverStationQueue::QueueReader driver_station_reader_;
-  AutoStatusQueue::QueueReader auto_status_reader_;
-  muan::webdash::AutoSelectionQueue::QueueReader auto_mode_reader_;
+  muan::webdash::AutoQueue::QueueReader auto_mode_reader_;
 
   std::string AutoMode();
 
