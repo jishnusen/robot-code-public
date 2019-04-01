@@ -86,7 +86,8 @@ void Limelight::Update() {
   double distance = target_dist_;
 
   if (super_status->elevator_height() > 1.0) {
-    /* target_horizontal_angle = expensive_table->GetEntry("tx").GetDouble(-1000); */
+    /* target_horizontal_angle =
+     * expensive_table->GetEntry("tx").GetDouble(-1000); */
   }
   horiz_angle_ = (target_horizontal_angle * (M_PI / 180.));
 
@@ -105,17 +106,19 @@ void Limelight::Update() {
   status->set_skew(skew);
   status->set_has_target(has_target == 1);
   status->set_horiz_angle(horiz_angle_ * 1.667 * (0.42 / 0.58));
-
-  /* double back_target_vertical_angle = back_table->GetEntry("ty").GetDouble(0); */
-  /* double back_target_horizontal_angle = back_table->GetEntry("tx").GetDouble(0); */
-  /* back_target_dist_ = */
-  /*     std::tan((back_target_vertical_angle + 60.0) * (M_PI / 180.)) * */
-  /*     ((limelight_height_ - object_height_) * 0.0254); */
+  std::shared_ptr<nt::NetworkTable> back_table =
+      inst.GetTable("limelight-back");
+  double back_target_vertical_angle = back_table->GetEntry("ty").GetDouble(0);
+  double back_target_horizontal_angle = back_table->GetEntry("tx").GetDouble(0);
+  back_target_dist_ =
+      std::tan((back_target_vertical_angle + 60.0) * (M_PI / 180.)) *
+      ((limelight_height_ - object_height_) * 0.0254);
   /* double back_distance = */
-  /*     2.497 * pow(back_target_dist_, 2) - 0.0397 * back_target_dist_ + 0.2124; */
-  /* back_horiz_angle_ = (back_target_horizontal_angle * (M_PI / 180.)); */
-  /* status->set_back_horiz_angle(back_horiz_angle_); */
-  /* status->set_back_target_dist(back_distance / 2.2); */
+  /*     2.497 * pow(back_target_dist_, 2) - 0.0397 * back_target_dist_ +
+   * 0.2124; */
+  back_horiz_angle_ = (back_target_horizontal_angle * (M_PI / 180.));
+  status->set_back_horiz_angle(back_horiz_angle_);
+  status->set_back_target_dist(back_target_dist_);
   /* status->set_back_has_target( */
   /*     static_cast<bool>(back_table->GetEntry("tv").GetDouble(0))); */
   /* std::shared_ptr<nt::NetworkTable> pricey_table = */
