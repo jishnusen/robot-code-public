@@ -257,17 +257,17 @@ void TeleopBase::SendDrivetrainMessage() {
         if (super_status->elevator_height() > 0.8) {
           horiz_angle_ = lime_status->pricey_horiz_angle();
           target_dist_ = lime_status->pricey_target_dist();
-          distance_factor_ = 4.0 / 4.5;
-          y_int = 0.4;
+          distance_factor_ = 2.0 / 4.5;
+          y_int = 0.25;
           vision = lime_status->bottom_limelight_ok() &&
                    lime_status->pricey_has_target();
-        }
-        if (super_status->wrist_angle() > 1.5) {
+        } else if (super_status->wrist_angle() > 1.5) {
           horiz_angle_ = lime_status->back_horiz_angle();
           target_dist_ = lime_status->back_target_dist();
           distance_factor_ = -4.0 / 4.5;
           y_int = 0.25;
-          vision = true;
+          vision = lime_status->back_limelight_ok() &&
+                   lime_status->back_has_target();
         } else {
           horiz_angle_ = lime_status->horiz_angle();
           target_dist_ = lime_status->target_dist();
@@ -316,8 +316,15 @@ void TeleopBase::SendDrivetrainMessage() {
     /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
     /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
-    drivetrain_goal->mutable_arc_goal()->set_linear((target_dist_ - y_int) *
-                                                    distance_factor_ * 4.5);
+    double voltage = (target_dist_ - y_int) * distance_factor_ * 4.5;
+    if (voltage < 0) {
+      if (voltage > -1.6) {
+        voltage = -1.6;
+      }
+    } else if (voltage < 1.6) {
+      voltage = 1.6;
+    }
+    drivetrain_goal->mutable_arc_goal()->set_linear(voltage);
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);

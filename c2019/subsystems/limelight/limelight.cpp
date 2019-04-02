@@ -46,8 +46,10 @@ void Limelight::Update() {
   double target_horizontal_angle = table->GetEntry("tx").GetDouble(-1000);
 
   LimelightStatusProto status;
+  std::shared_ptr<nt::NetworkTable> back_table =
+      inst.GetTable("limelight-back");
   double latency = table->GetEntry("tl").GetDouble(-1000);
-  /* double back_latency = back_table->GetEntry("tl").GetDouble(-1000); */
+  double back_latency = back_table->GetEntry("tl").GetDouble(-1000);
   double bottom_latency = pricey_table->GetEntry("tl").GetDouble(-1000);
   if (latency == prev_latency_) {
     bad_ticks_++;
@@ -55,11 +57,11 @@ void Limelight::Update() {
     bad_ticks_ = 0;
   }
 
-  /* if (back_latency == back_prev_latency_) { */
-  /*   back_bad_ticks_++; */
-  /* } else { */
-  /*   back_bad_ticks_ = 0; */
-  /* } */
+  if (back_latency == back_prev_latency_) {
+    back_bad_ticks_++;
+  } else {
+    back_bad_ticks_ = 0;
+  }
 
   if (bottom_latency == bottom_prev_latency_) {
     bottom_bad_ticks_++;
@@ -68,9 +70,9 @@ void Limelight::Update() {
   }
   prev_latency_ = latency;
   bottom_prev_latency_ = bottom_latency;
-  /* back_prev_latency_ = back_latency; */
+  back_prev_latency_ = back_latency;
   status->set_limelight_ok(bad_ticks_ < 10);
-  status->set_back_limelight_ok(false);
+  status->set_back_limelight_ok(back_bad_ticks_ < 10);
   status->set_bottom_limelight_ok(bottom_bad_ticks_ < 10);
 
   //  slope_ = (x_corner[3] - x_corner[1]) / (y_corner[3] - y_corner[1]);
@@ -106,8 +108,7 @@ void Limelight::Update() {
   status->set_skew(skew);
   status->set_has_target(has_target == 1);
   status->set_horiz_angle(horiz_angle_ * 1.667 * (0.42 / 0.58));
-  std::shared_ptr<nt::NetworkTable> back_table =
-      inst.GetTable("limelight-back");
+
   double back_target_vertical_angle = back_table->GetEntry("ty").GetDouble(0);
   double back_target_horizontal_angle = back_table->GetEntry("tx").GetDouble(0);
   back_target_dist_ =
@@ -119,8 +120,8 @@ void Limelight::Update() {
   back_horiz_angle_ = (back_target_horizontal_angle * (M_PI / 180.));
   status->set_back_horiz_angle(back_horiz_angle_);
   status->set_back_target_dist(back_target_dist_);
-  /* status->set_back_has_target( */
-  /*     static_cast<bool>(back_table->GetEntry("tv").GetDouble(0))); */
+  status->set_back_has_target(
+      static_cast<bool>(back_table->GetEntry("tv").GetDouble(0)));
   /* std::shared_ptr<nt::NetworkTable> pricey_table = */
   /*     inst.GetTable("limelight-pricey"); */
   double pricey_target_horizontal_angle =

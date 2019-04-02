@@ -40,10 +40,12 @@ class Limelight {
   double pricey_target_dist_;
   double prev_latency_ = 0;
   double bottom_prev_latency_ = 0;
+  double back_prev_latency_ = 0;
 
   std::atomic<bool> running_;
   int bad_ticks_ = 0;
   int bottom_bad_ticks_ = 0;
+  int back_bad_ticks_ = 0;
 };
 }  // namespace limelight
 }  // namespace c2019
