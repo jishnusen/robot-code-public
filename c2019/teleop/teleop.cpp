@@ -358,9 +358,6 @@ void TeleopBase::SendSuperstructureMessage() {
   // Intake buttons
   if (cargo_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_CARGO);
-    if (has_cargo_) {
-      superstructure_goal->set_score_goal(c2019::superstructure::STOW);
-    }
   } else if (cargo_outtake_->is_pressed()) {
     if (!has_ground_hatch_) {
       superstructure_goal->set_intake_goal(
@@ -502,8 +499,7 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
-  if (drop_forks_->is_pressed() &&
-      (safety_->is_pressed() || safety2_->is_pressed())) {
+  if (drop_forks_->is_pressed() && climb_mode_) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
   /*if (winch_->is_pressed() &&
