@@ -98,6 +98,13 @@ DrivetrainInterface::DrivetrainInterface()
                             ->MakeReader()} {
   right_master_.ConfigFactoryDefault();
   left_master_.ConfigFactoryDefault();
+
+  right_slave_a_.ConfigFactoryDefault();
+  right_slave_b_.ConfigFactoryDefault();
+
+  left_slave_a_.ConfigFactoryDefault();
+  left_slave_b_.ConfigFactoryDefault();
+
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout);
   right_master_.ConfigSelectedFeedbackSensor(
@@ -170,6 +177,18 @@ DrivetrainInterface::DrivetrainInterface()
   pigeon_offset_ = pigeon_.GetFusedHeading();
 
   right_master_.ConfigAllowableClosedloopError(kTurningSlot, 0, 100);
+
+  right_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 10, 100);
+  right_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 5, 100);
+
+  right_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature, 10, 100);
+
+  left_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 10, 100);
+  left_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 5, 100);
+
+  left_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature, 10, 100);
+
+  left_slave_a_.SetStatusFramePeriod(StatusFrameEnhanced::Status_11_UartGadgeteer, 10, 10);
 }
 
 void DrivetrainInterface::ReadSensors() {
