@@ -42,7 +42,7 @@
             "name": "Wrist Calibrated",
             "type": "boolean",
             "condition": "source",
-            "source": ["superstructure_status", "wristIsCalibrated"],
+            "source": ["superstructure_input", "wristOk"],
             "coordinates": [0,2],
             "should-title": true,
             "colors": {

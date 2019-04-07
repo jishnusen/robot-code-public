@@ -129,6 +129,7 @@ message SuperstructureInput {
   required bool elevator_hall = 14;
   required bool wrist_zeroed = 15;
   required double elevator_absolute = 16;
+  required bool wrist_ok = 17;
 }
 
 message SuperstructureGoal {

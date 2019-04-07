@@ -68,6 +68,7 @@ class SuperstructureInterface {
 
   bool elevator_zeroed_ = false;
   bool wrist_zeroed_ = false;
+  bool int_zeroed_ = false;
 };
 
 }  // namespace interfaces

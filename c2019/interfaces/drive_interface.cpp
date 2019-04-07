@@ -96,6 +96,7 @@ DrivetrainInterface::DrivetrainInterface()
       pigeon_{&left_slave_a_},
       ds_status_reader_{QueueManager<muan::wpilib::DriverStationProto>::Fetch()
                             ->MakeReader()} {
+  comp_ = compressor_.Enabled();
   right_master_.ConfigFactoryDefault();
   left_master_.ConfigFactoryDefault();
 
@@ -234,8 +235,9 @@ void DrivetrainInterface::WriteActuators() {
 
   switch (outputs->output_type()) {
     case TalonOutput::OPEN_LOOP:
-      if (!compressor_.Enabled()) {
+      if (!comp_) {
         compressor_.Start();
+        comp_ = true;
       }
 
       SetBrakeMode(false);
@@ -243,8 +245,9 @@ void DrivetrainInterface::WriteActuators() {
       right_master_.Set(ControlMode::PercentOutput, outputs->right_setpoint());
       break;
     case TalonOutput::POSITION:
-      if (compressor_.Enabled()) {
+      if (comp_) {
         compressor_.Stop();
+        comp_ = false;
       }
       right_master_.SelectProfileSlot(kPositionSlot, 0);
       left_master_.SelectProfileSlot(kPositionSlot, 0);
@@ -254,8 +257,9 @@ void DrivetrainInterface::WriteActuators() {
                        outputs->left_setpoint() * kDriveConversionFactor);
       break;
     case TalonOutput::VELOCITY:
-      if (compressor_.Enabled()) {
+      if (comp_) {
         compressor_.Stop();
+        comp_ = false;
       }
       SetBrakeMode(true);
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
@@ -267,8 +271,9 @@ void DrivetrainInterface::WriteActuators() {
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
       break;
     case TalonOutput::ARC:
-      if (compressor_.Enabled()) {
+      if (comp_) {
         compressor_.Stop();
+        comp_ = false;
       }
       right_master_.SelectProfileSlot(kPositionSlot, 0);
       right_master_.SelectProfileSlot(kTurningSlot, 1);

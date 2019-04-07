@@ -254,13 +254,16 @@ void TeleopBase::SendDrivetrainMessage() {
       } else if (!vision_intake_->is_pressed()) {
         distance_factor_ = 1;
         y_int = 0.4;
-        if (super_status->elevator_height() > 0.8) {
+        if (super_status->elevator_height() > 0.6) {
           horiz_angle_ = lime_status->pricey_horiz_angle();
           target_dist_ = lime_status->pricey_target_dist();
-          distance_factor_ = 2.0 / 4.5;
-          y_int = 0.25;
+          distance_factor_ = 3.5 / 4.5;
+          y_int = 0.2;
           vision = lime_status->bottom_limelight_ok() &&
                    lime_status->pricey_has_target();
+          if (!vision) {
+            LOG(WARNING, "Tried upper level vision without a target or limelight not OK");
+          }
         } else if (super_status->wrist_angle() > 1.5) {
           horiz_angle_ = lime_status->back_horiz_angle();
           target_dist_ = lime_status->back_target_dist();
@@ -268,6 +271,9 @@ void TeleopBase::SendDrivetrainMessage() {
           y_int = 0.25;
           vision = lime_status->back_limelight_ok() &&
                    lime_status->back_has_target();
+          if (!vision) {
+            LOG(WARNING, "Tried back vision without a target or limelight not OK");
+          }
         } else {
           horiz_angle_ = lime_status->horiz_angle();
           target_dist_ = lime_status->target_dist();
@@ -287,6 +293,10 @@ void TeleopBase::SendDrivetrainMessage() {
             }
             this_run_off_ = true;
           }
+
+          if (!vision) {
+            LOG(WARNING, "Tried first level vision without a target or limelight not OK");
+          }
         }
       }
     }
@@ -295,11 +305,6 @@ void TeleopBase::SendDrivetrainMessage() {
   if (vision_->was_released()) {
     this_run_off_ = false;
     offset_ = 0.;
-  }
-
-  if (super_status->elevator_height() < 1.3 &&
-      super_status->elevator_goal() > 1.5) {
-    vision = false;
   }
 
   drivetrain_goal->set_high_gear(high_gear_);

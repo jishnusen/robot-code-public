@@ -16,10 +16,10 @@ constexpr double kElevatorIZone = 0.;
 constexpr double kElevatorMaxIntegral = 5e9;
 constexpr double kElevatorDeadband = 0.0;
 
-constexpr double kWristP = 2.5;
+constexpr double kWristP = 1.0;
 constexpr double kWristI = 0.0;
-constexpr double kWristD = 35.0;
-constexpr double kWristF = 0.8;
+constexpr double kWristD = 20.0;
+constexpr double kWristF = 0.3;
 constexpr double kWristIZone = 0.;
 constexpr double kWristMaxIntegral = 5e9;
 constexpr double kWristDeadband = 0.0;
@@ -73,11 +73,15 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_wrist_hall(
       !canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR));
 
-  if (inputs->wrist_hall() && !wrist_zeroed_) {
+  if (inputs->wrist_hall() && (!wrist_zeroed_ || !int_zeroed_)) {
     wrist_zeroed_ = true;
+    int_zeroed_ = true;
     wrist_.SetSelectedSensorPosition(0, 0, 100);
     canifier_.SetQuadraturePosition(0, 0);
   }
+
+  inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
+                            kWristConversionFactor);
 
   inputs->set_wrist_zeroed(wrist_zeroed_);
 
@@ -87,10 +91,23 @@ void SuperstructureInterface::ReadSensors() {
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) &&
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CS));
 
+  inputs->set_wrist_ok(inputs->wrist_zeroed());
+  if ((std::abs(inputs->wrist_encoder()) < 2e-2 && !inputs->wrist_hall()) ||
+      (inputs->wrist_hall() && std::abs(inputs->wrist_encoder()) > 0.1)) {
+    inputs->set_wrist_ok(false);
+    int_zeroed_ = false;
+  }
+
   input_queue_->WriteMessage(inputs);
 }
 
 void SuperstructureInterface::LoadGains() {
+  elevator_master_.ConfigFactoryDefault();
+  elevator_slave_a_.ConfigFactoryDefault();
+  elevator_slave_b_.ConfigFactoryDefault();
+
+  wrist_.ConfigFactoryDefault();
+
   elevator_master_.Config_kP(0, kElevatorP, 100);
   elevator_master_.Config_kI(0, kElevatorI, 100);
   elevator_master_.Config_kD(0, kElevatorD, 100);
@@ -130,8 +147,8 @@ void SuperstructureInterface::LoadGains() {
       LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
   elevator_master_.ConfigMotionCruiseVelocity(2865 * 5, 100);
   elevator_master_.ConfigMotionAcceleration(3820 * 5, 100);
-  wrist_.ConfigMotionCruiseVelocity(2865 * 0.6, 100);
-  wrist_.ConfigMotionAcceleration(3820 * 0.6, 100);
+  wrist_.ConfigMotionCruiseVelocity(2865 * 0.5, 100);
+  wrist_.ConfigMotionAcceleration(3820 * 0.3, 100);
   elevator_master_.ConfigAllowableClosedloopError(0, kElevatorDeadband, 0);
 
   elevator_master_.ConfigForwardSoftLimitEnable(false);
@@ -145,6 +162,16 @@ void SuperstructureInterface::LoadGains() {
   elevator_slave_c_.SetInverted(elevator_inverted);
 
   winch_two_.SetInverted(true);
+
+  wrist_.ConfigContinuousCurrentLimit(30, 100);
+  wrist_.ConfigPeakCurrentLimit(40, 100);
+  wrist_.ConfigPeakCurrentDuration(200, 100);
+  wrist_.ConfigClosedloopRamp(0.001, 100);
+  wrist_.EnableCurrentLimit(true);
+  wrist_.OverrideLimitSwitchesEnable(true);
+  wrist_.OverrideSoftLimitsEnable(true);
+  wrist_.ConfigVoltageCompSaturation(12.0, 100);
+  wrist_.EnableVoltageCompensation(true);
 }
 
 void SuperstructureInterface::SetBrakeMode(bool mode) {

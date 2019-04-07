@@ -53,6 +53,7 @@ class DrivetrainInterface {
   PigeonIMU pigeon_;
   double pigeon_offset_ = 0;
   Compressor compressor_;
+  bool comp_ = true;
 
   muan::wpilib::DriverStationQueue::QueueReader ds_status_reader_;
 };
