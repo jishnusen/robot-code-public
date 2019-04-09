@@ -32,21 +32,21 @@ double DriveTransmission::CalculateTorque(double velocity,
   double effective_voltage = voltage;
   if (velocity > 1e-6) {
     // rolling forward, friction negative
-    effective_voltage -= friction_voltage();
-  } else if (velocity < 1e-6) {
-    // rolling backward, frcition positive
-    effective_voltage = +friction_voltage();
+    effective_voltage -= std::copysign(friction_voltage(), voltage);
+  } else if (velocity < -1e-6) {
+    // rolling backward, friction positive
+    effective_voltage += std::copysign(friction_voltage(), voltage);
   } else if (voltage > 1e-6) {
     // static, with positive voltage
     effective_voltage = std::max(0.0, voltage - friction_voltage());
-  } else if (voltage < 1e-6) {
+  } else if (voltage < -1e-6) {
     // static, with negative voltage
     effective_voltage = std::min(0.0, voltage + friction_voltage());
   } else {
     return 0.0;
   }
 
-  return torque_per_volt() * (-velocity / speed_per_volt() + effective_voltage);
+  return torque_per_volt() * (effective_voltage - (velocity / speed_per_volt()));
 }
 
 double DriveTransmission::VoltageFromTorque(double velocity,
@@ -68,8 +68,9 @@ double DriveTransmission::VoltageFromTorque(double velocity,
     return 0.0;
   }
 
-  return torque / torque_per_volt() + velocity / speed_per_volt() +
+  double res = torque / torque_per_volt() + velocity / speed_per_volt() +
          effective_friction_voltage;
+  return res;
 }
 
 DrivetrainModel::DrivetrainModel(DrivetrainModel::Properties properties,
@@ -95,17 +96,16 @@ DrivetrainModel::DrivetrainModel(DrivetrainModel::Properties properties,
 Eigen::Vector2d DrivetrainModel::ForwardKinematics(
     Eigen::Vector2d left_right) const {
   Eigen::Vector2d linear_angular;
-  linear_angular(0) = wheel_radius_ * (left_right(0) + left_right(1)) / 2.0;
-  linear_angular(1) =
-      wheel_radius_ * (left_right(1) - left_right(0)) / (2 * wheelbase_radius_);
-  return linear_angular;
+  linear_angular(0) = (left_right(0) + left_right(1)) / 2.0;
+  linear_angular(1) = (left_right(1) - left_right(0)) / (2 * wheelbase_radius_);
+  return linear_angular * wheel_radius_;
 }
 
 Eigen::Vector2d DrivetrainModel::InverseKinematics(
     Eigen::Vector2d linear_angular) const {
   Eigen::Vector2d left_right;
-  left_right(0) = linear_angular(0) - linear_angular(1) * wheelbase_radius_;
-  left_right(1) = linear_angular(0) + linear_angular(1) * wheelbase_radius_;
+  left_right(0) = (linear_angular(0) - linear_angular(1) * wheelbase_radius_);
+  left_right(1) = (linear_angular(0) + linear_angular(1) * wheelbase_radius_);
   return left_right / wheel_radius_;
 }
 
@@ -190,6 +190,66 @@ Eigen::Vector2d DrivetrainModel::CalculateMaxVelocity(double curvature,
 
   return ForwardKinematics(
       Eigen::Vector2d(left_constrained, free_speed).cwiseAbs());
+}
+
+Bounds DrivetrainModel::CalculateMinMaxAcceleration(Eigen::Vector2d velocity,
+                                                    double curvature,
+                                                    double max_voltage,
+                                                    bool high_gear) const {
+  DriveTransmission transmission =
+      high_gear ? transmission_high_ : transmission_low_;
+  Bounds result{.min = 1e9, .max = -1e9};
+
+  Eigen::Vector2d wheel_velocity = InverseKinematics(velocity);  // left, right
+
+  const double linear_term =
+      (std::abs(velocity(0)) < 1e-4) ? 0.0 : mass_ * wheelbase_radius_;
+  const double angular_term = (std::abs(velocity(0)) < 1e-4)
+                                  ? moment_inertia_
+                                  : moment_inertia_ * curvature;
+
+  const double drag_torque = velocity(1) * angular_drag_;
+
+  std::array<bool, 2> left_right = {false, true};
+  std::array<double, 2> positive_negative = {1.0, -1.0};
+
+  for (bool left : left_right) {
+    for (double sign : positive_negative) {
+      const DriveTransmission fixed_transmission = transmission;
+      const DriveTransmission variable_transmission = transmission;
+
+      const double fixed_torque = fixed_transmission.CalculateTorque(
+          wheel_velocity(static_cast<int>(!left)), sign * max_voltage);
+      double variable_torque = 0.0;
+
+      if (left) {
+        variable_torque = (-drag_torque * mass_ * wheel_radius_ +
+                           fixed_torque * (linear_term + angular_term)) /
+                          (linear_term - angular_term);
+      } else {
+        variable_torque = (drag_torque * mass_ * wheel_radius_ +
+                           fixed_torque * (linear_term - angular_term)) /
+                          (linear_term + angular_term);
+      }
+      const double variable_voltage = variable_transmission.VoltageFromTorque(
+          wheel_velocity(static_cast<int>(left)), variable_torque);
+      if (std::abs(variable_voltage) <= max_voltage + 1e-6) {
+        double accel = 0.0;
+        if (std::abs(velocity(0)) < 1e-4) {
+          accel = (left ? -1.0 : 1.0) * (fixed_torque - variable_torque) *
+                      wheelbase_radius_ / (moment_inertia_ * wheel_radius_) -
+                  drag_torque / moment_inertia_;
+        } else {
+          accel = (fixed_torque + variable_torque) / (mass_ * wheel_radius_);
+        }
+
+        result.min = std::copysign(std::min(result.min, accel), -1.0);
+        result.max = std::copysign(std::max(result.max, accel), 1.0);
+      }
+    }
+  }
+
+  return result;
 }
 
 }  // namespace control
