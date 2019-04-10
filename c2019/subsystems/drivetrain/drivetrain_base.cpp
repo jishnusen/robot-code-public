@@ -20,12 +20,6 @@ constexpr double kMoment = kMass * kDistRadius * kDistRadius;  // kg * m^2
 
 constexpr double kAngularDrag = 12.0;  // N*m / (rad / s)
 
-constexpr double kHighGearRatio = (1 / 7.2);
-constexpr double kLowGearRatio = (1 / 7.2);
-
-constexpr double kHighGearEfficiency = 0.8;
-constexpr double kLowGearEfficiency = 0.8;
-
 muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
   muan::control::DriveTransmission::Properties high_gear{
       .speed_per_volt = 1.0 / kDriveKv,

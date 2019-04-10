@@ -1,7 +1,6 @@
 #include "muan/control/nonlinear_feedback_controller.h"
 #include "gtest/gtest.h"
 #include "muan/control/trajectory.h"
-#include <fstream>
 
 namespace muan {
 namespace control {
@@ -10,11 +9,11 @@ DrivetrainModel GenerateModel() {
   DrivetrainModel::Properties properties;
   {
     properties.mass = 60.0;
-    properties.moment_inertia = properties.mass * properties.wheelbase_radius *
-                                properties.wheelbase_radius;
     properties.angular_drag = 12.0;
     properties.wheel_radius = 0.0508;
     properties.wheelbase_radius = 0.36;
+    properties.moment_inertia = properties.mass * properties.wheelbase_radius *
+                                properties.wheelbase_radius;
   }
 
   DriveTransmission::Properties trans_properties;
@@ -23,7 +22,7 @@ DrivetrainModel GenerateModel() {
     trans_properties.torque_per_volt =
         (properties.wheel_radius * properties.wheel_radius * properties.mass) /
         (2.0 * 0.012);
-    trans_properties.friction_voltage = 1.0;
+    trans_properties.friction_voltage = 1.01;
   }
 
   return DrivetrainModel(properties, DriveTransmission(trans_properties),
@@ -49,7 +48,6 @@ class TestFixture : public ::testing::Test {
     NonLinearFeedbackController::Output goal;
 
     Pose error;
-    std::ofstream file("/tmp/nonlin.csv");
 
     double t = 0.0;
     while (!trajectory.done()) {
@@ -81,6 +79,13 @@ class TestFixture : public ::testing::Test {
       EXPECT_LT(std::abs(delta(0)), constraints_.max_velocity + 1e-9);
       EXPECT_LT(std::abs(goal.feedforwards(0)), 12.1);
       EXPECT_LT(std::abs(goal.feedforwards(1)), 12.1);
+
+      Eigen::Vector2d estimated_response = model_.ForwardDynamics(
+          (Eigen::Vector2d() << sample.v, omega).finished(), goal.feedforwards,
+          high_gear);
+      EXPECT_NEAR(sample.a, estimated_response(0), 1e-2);
+      EXPECT_NEAR(sample.a * sample.pose.curvature(), estimated_response(1),
+                  1e-2);
     }
 
     EXPECT_LT(error.translational().norm(), 3e-2);  // ~3cm within the goal

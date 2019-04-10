@@ -8,11 +8,11 @@ DrivetrainModel GenerateModel() {
   DrivetrainModel::Properties properties;
   {
     properties.mass = 60.0;
-    properties.moment_inertia = properties.mass * properties.wheelbase_radius *
-                                properties.wheelbase_radius;
     properties.angular_drag = 12.0;
     properties.wheel_radius = 0.0508;
     properties.wheelbase_radius = 0.36;
+    properties.moment_inertia = properties.mass * properties.wheelbase_radius *
+                                properties.wheelbase_radius;
   }
 
   DriveTransmission::Properties trans_properties;
@@ -100,7 +100,7 @@ class TrajectoryTest : public ::testing::Test {
       .max_velocity = 4.0,
       .max_voltage = 12.,
       .max_acceleration = 3.0,
-      .max_centripetal_acceleration = M_PI / 2.,
+      .max_centripetal_acceleration = 1.,
 
       .initial_velocity = 0.,
       .final_velocity = 0.,

@@ -226,6 +226,8 @@ void ClosedLoopDrive::UpdatePathFollower(OutputProto* output,
   (*status)->set_profiled_y_goal(goal.pose.Get()(1));
   (*status)->set_profiled_heading_goal(goal.pose.Get()(2));
   (*status)->set_profiled_velocity_goal(goal.v);
+  (*status)->set_profiled_acceleration_goal(goal.a);
+  (*status)->set_profiled_curvature_goal(goal.pose.curvature());
   (*status)->set_adjusted_velocity_goal(
       model_.ForwardKinematics(setpoint.velocity)(0));
   (*status)->set_profile_complete(trajectory_.done());

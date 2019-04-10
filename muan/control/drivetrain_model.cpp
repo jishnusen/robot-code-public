@@ -32,10 +32,10 @@ double DriveTransmission::CalculateTorque(double velocity,
   double effective_voltage = voltage;
   if (velocity > 1e-6) {
     // rolling forward, friction negative
-    effective_voltage -= std::copysign(friction_voltage(), voltage);
+    effective_voltage -= friction_voltage();
   } else if (velocity < -1e-6) {
     // rolling backward, friction positive
-    effective_voltage += std::copysign(friction_voltage(), voltage);
+    effective_voltage += friction_voltage();
   } else if (voltage > 1e-6) {
     // static, with positive voltage
     effective_voltage = std::max(0.0, voltage - friction_voltage());
@@ -55,22 +55,21 @@ double DriveTransmission::VoltageFromTorque(double velocity,
   if (velocity > 1e-6) {
     // rolling forward, friction negative
     effective_friction_voltage = friction_voltage();
-  } else if (velocity < 1e-6) {
+  } else if (velocity < -1e-6) {
     // rolling backward, friction positive
     effective_friction_voltage = -friction_voltage();
   } else if (torque > 1e-6) {
     // static, wants net torque forward
     effective_friction_voltage = friction_voltage();
-  } else if (torque < 1e-6) {
+  } else if (torque < -1e-6) {
     // static, wants net torque backward
     effective_friction_voltage = -friction_voltage();
   } else {
     return 0.0;
   }
 
-  double res = torque / torque_per_volt() + velocity / speed_per_volt() +
+  return torque / torque_per_volt() + velocity / speed_per_volt() +
          effective_friction_voltage;
-  return res;
 }
 
 DrivetrainModel::DrivetrainModel(DrivetrainModel::Properties properties,
