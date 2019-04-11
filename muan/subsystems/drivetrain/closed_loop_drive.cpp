@@ -151,6 +151,10 @@ void ClosedLoopDrive::UpdatePointTurn(OutputProto* output,
   (*output)->set_output_type(POSITION);
   (*output)->set_left_setpoint(delta(0) + prev_left_right_(0));
   (*output)->set_right_setpoint(delta(1) + prev_left_right_(1));
+
+  bool left_complete = std::abs((*left_right_position_)(0) - (*output)->left_setpoint()) < 5e-2;
+  bool right_complete = std::abs((*left_right_position_)(1) - (*output)->right_setpoint()) < 5e-2;
+  (*status)->set_point_turn_complete(left_complete && right_complete);
   (*status)->set_heading_error((prev_heading_ + point_turn_goal_) -
                                *integrated_heading_);
 }

@@ -96,6 +96,7 @@ message DrivetrainStatus {
   optional double encoder_heading = 26;
 
   optional double dt = 27;
+  optional bool point_turn_complete = 28;
 }
 
 message DrivetrainGoal {

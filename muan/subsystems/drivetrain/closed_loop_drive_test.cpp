@@ -143,41 +143,43 @@ class DrivetrainTest : public ::testing::Test {
       &linear_angular_velocity_, &left_right_position_};
 };
 
-/* TEST_F(DrivetrainTest, PointTurn) { */
-/*   integrated_heading_ = 0.; */
-/*   left_right_position_ = Eigen::Vector2d(0, 0); */
-/*   cartesian_position_ = Eigen::Vector2d(0, 0); */
-/*   goal_->set_point_turn_goal(M_PI / 2.); */
-/*   Update(); */
-/*   EXPECT_NEAR(integrated_heading_, M_PI / 2., 1e-6); */
-/*   EXPECT_NEAR(cartesian_position_.norm(), 0., 1e-6); */
-/* } */
+TEST_F(DrivetrainTest, PointTurn) {
+  aos::time::EnableMockTime(aos::monotonic_clock::epoch());
+  integrated_heading_ = 0.;
+  left_right_position_ = Eigen::Vector2d(0, 0);
+  cartesian_position_ = Eigen::Vector2d(0, 0);
+  goal_->set_point_turn_goal(M_PI / 2.);
+  Update();
+  Update();
+  EXPECT_NEAR(integrated_heading_, M_PI / 2., 1e-6);
+  EXPECT_NEAR(cartesian_position_.norm(), 0., 1e-6);
+  EXPECT_TRUE(status_->point_turn_complete());
+}
 
-/* TEST_F(DrivetrainTest, Distance) { */
-/*   integrated_heading_ = 0.; */
-/*   left_right_position_ = Eigen::Vector2d(0, 0); */
-/*   cartesian_position_ = Eigen::Vector2d(0, 0); */
-/*   goal_->set_distance_goal(1.); */
-/*   Update(); */
-/*   EXPECT_NEAR(integrated_heading_, 0., 1e-6); */
-/*   EXPECT_NEAR(cartesian_position_.norm(), 1., 1e-6); */
-/* } */
+TEST_F(DrivetrainTest, Distance) {
+  integrated_heading_ = 0.;
+  left_right_position_ = Eigen::Vector2d(0, 0);
+  cartesian_position_ = Eigen::Vector2d(0, 0);
+  goal_->set_distance_goal(1.);
+  Update();
+  EXPECT_NEAR(integrated_heading_, 0., 1e-6);
+  EXPECT_NEAR(cartesian_position_.norm(), 1., 1e-6);
+}
 
-/* TEST_F(DrivetrainTest, LeftRight) { */
-/*   integrated_heading_ = 0.; */
-/*   left_right_position_ = Eigen::Vector2d(0, 0); */
-/*   cartesian_position_ = Eigen::Vector2d(0, 0); */
-/*   Eigen::Vector2d delta = */
-/*       model_.InverseKinematics(Eigen::Vector2d(1., M_PI / 4.)); */
-/*   goal_->mutable_left_right_goal()->set_left_goal(delta(0)); */
-/*   goal_->mutable_left_right_goal()->set_right_goal(delta(1)); */
-/*   Update(); */
-/*   EXPECT_NEAR(integrated_heading_, M_PI / 4., 1e-6); */
-/*   EXPECT_NEAR(cartesian_position_.norm(), 1., 1e-6); */
-/* } */
+TEST_F(DrivetrainTest, LeftRight) {
+  integrated_heading_ = 0.;
+  left_right_position_ = Eigen::Vector2d(0, 0);
+  cartesian_position_ = Eigen::Vector2d(0, 0);
+  Eigen::Vector2d delta =
+      model_.InverseKinematics(Eigen::Vector2d(1., M_PI / 4.));
+  goal_->mutable_left_right_goal()->set_left_goal(delta(0));
+  goal_->mutable_left_right_goal()->set_right_goal(delta(1));
+  Update();
+  EXPECT_NEAR(integrated_heading_, M_PI / 4., 1e-6);
+  EXPECT_NEAR(cartesian_position_.norm(), 1., 1e-6);
+}
 
 TEST_F(DrivetrainTest, PathFollowBackwards) {
-  aos::time::EnableMockTime(aos::monotonic_clock::epoch());
   integrated_heading_ = M_PI;
   left_right_position_ = Eigen::Vector2d(0, 0);
   cartesian_position_ = Eigen::Vector2d(0, 0);
@@ -194,7 +196,6 @@ TEST_F(DrivetrainTest, PathFollowBackwards) {
 }
 
 TEST_F(DrivetrainTest, PathFollow) {
-  aos::time::EnableMockTime(aos::monotonic_clock::now());
   integrated_heading_ = 0.;
   left_right_position_ = Eigen::Vector2d(0, 0);
   cartesian_position_ = Eigen::Vector2d(0, 0);

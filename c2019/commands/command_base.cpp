@@ -315,8 +315,7 @@ bool CommandBase::IsDriveComplete() {
         return true;
       }
     } else if (goal->has_point_turn_goal()) {
-      if (std::abs(goal->point_turn_goal() - status->estimated_heading()) <
-          1e-1) {
+      if (status->point_turn_complete()) {
         return true;
       }
     }
@@ -345,10 +344,9 @@ bool CommandBase::IsDrivetrainNear(double x, double y, double distance) {
 
   if (drivetrain_status_reader_.ReadLastMessage(&status)) {
     Eigen::Vector2d field_position =
-        transform_f0_ *
-        (Eigen::Vector2d() << status->profiled_x_goal(),
-         status->profiled_y_goal())
-            .finished();
+        transform_f0_ * (Eigen::Vector2d() << status->profiled_x_goal(),
+                         status->profiled_y_goal())
+                            .finished();
     if ((field_position(0) - x) * (field_position(0) - x) +
             (field_position(1) - y) * (field_position(1) - y) <
         distance * distance) {
