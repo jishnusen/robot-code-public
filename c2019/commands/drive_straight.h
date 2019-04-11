@@ -9,11 +9,8 @@ namespace commands {
 
 class DriveStraight : public c2019::commands::CommandBase {
  public:
-  void LeftRocket();
-  void CargoShip();
-  void CargoRocket();
-  void RightRocket();
-  void RightCargoRocket();
+  bool IsAutonomous() override;
+  void operator()();
 };
 
 }  // namespace commands

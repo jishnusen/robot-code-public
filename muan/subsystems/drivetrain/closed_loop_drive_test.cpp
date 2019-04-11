@@ -61,6 +61,7 @@ muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
 
 class DrivetrainTest : public ::testing::Test {
  public:
+  DrivetrainTest() { aos::time::EnableMockTime(aos::monotonic_clock::epoch()); }
   void RunFor(int ticks) {
     for (int i = 0; i < ticks; i++) {
       Update();
@@ -71,6 +72,7 @@ class DrivetrainTest : public ::testing::Test {
     closed_loop_drive_.SetGoal(goal_);
     closed_loop_drive_.Update(&output_, &status_);
     SetInputs();
+    aos::time::IncrementMockTime(std::chrono::milliseconds(20));
   }
 
   void SetInputs() {
@@ -85,15 +87,16 @@ class DrivetrainTest : public ::testing::Test {
     } else if (output_->output_type() == VELOCITY) {
       Eigen::Vector2d velocity = model_.ForwardKinematics(
           Eigen::Vector2d(output_->left_setpoint(), output_->right_setpoint()));
-      integrated_heading_ += 0.01 * velocity(1);
+      integrated_heading_ += status_->dt() * velocity(1);
       cartesian_position_(0) +=
-          velocity(0) * 0.01 * std::cos(integrated_heading_);
+          velocity(0) * status_->dt() * std::cos(integrated_heading_);
       cartesian_position_(1) +=
-          velocity(0) * 0.01 * std::sin(integrated_heading_);
+          velocity(0) * status_->dt() * std::sin(integrated_heading_);
       linear_angular_velocity_ = velocity;
 
-      left_right_position_(0) += output_->left_setpoint() * 0.01;
-      left_right_position_(1) += output_->right_setpoint() * 0.01;
+      std::cout << status_->dt() << std::endl;
+      left_right_position_(0) += output_->left_setpoint() * status_->dt();
+      left_right_position_(1) += output_->right_setpoint() * status_->dt();
 
       /* if (!status_->profile_complete()) { */
       /*   Eigen::Vector2d estimated_response = model_.ForwardDynamics( */
@@ -164,22 +167,6 @@ class DrivetrainTest : public ::testing::Test {
 /*   EXPECT_NEAR(cartesian_position_.norm(), 1., 1e-6); */
 /* } */
 
-TEST_F(DrivetrainTest, PathFollow) {
-  integrated_heading_ = 0.;
-  left_right_position_ = Eigen::Vector2d(0, 0);
-  cartesian_position_ = Eigen::Vector2d(0, 0);
-  linear_angular_velocity_ = Eigen::Vector2d(0, 0);
-  goal_->mutable_path_goal()->set_x(1.);
-  goal_->mutable_path_goal()->set_y(1.);
-  goal_->mutable_path_goal()->set_heading(0.);
-  goal_->mutable_path_goal()->set_max_voltage(12.);
-  goal_->mutable_path_goal()->set_backwards(false);
-  RunFor(500);
-  EXPECT_NEAR(cartesian_position_(0), 1, 1e-2);
-  EXPECT_NEAR(cartesian_position_(1), 1, 1e-2);
-  EXPECT_NEAR(integrated_heading_, 0, 1.5e-2);
-}
-
 TEST_F(DrivetrainTest, PathFollowBackwards) {
   integrated_heading_ = M_PI;
   left_right_position_ = Eigen::Vector2d(0, 0);
@@ -194,6 +181,22 @@ TEST_F(DrivetrainTest, PathFollowBackwards) {
   EXPECT_NEAR(cartesian_position_(0), 1, 1e-2);
   EXPECT_NEAR(cartesian_position_(1), 1, 1e-2);
   EXPECT_NEAR(integrated_heading_, M_PI, 2e-2);
+}
+
+TEST_F(DrivetrainTest, PathFollow) {
+  integrated_heading_ = 0.;
+  left_right_position_ = Eigen::Vector2d(0, 0);
+  cartesian_position_ = Eigen::Vector2d(0, 0);
+  linear_angular_velocity_ = Eigen::Vector2d(0, 0);
+  goal_->mutable_path_goal()->set_x(1.);
+  goal_->mutable_path_goal()->set_y(1.);
+  goal_->mutable_path_goal()->set_heading(0.);
+  goal_->mutable_path_goal()->set_max_voltage(12.);
+  goal_->mutable_path_goal()->set_backwards(false);
+  RunFor(500);
+  EXPECT_NEAR(cartesian_position_(0), 1, 1e-2);
+  EXPECT_NEAR(cartesian_position_(1), 1, 1e-2);
+  EXPECT_NEAR(integrated_heading_, 0, 2e-2);
 }
 
 /* TEST_F(DrivetrainTest, Transition) { */
@@ -219,10 +222,12 @@ TEST_F(DrivetrainTest, PathFollowBackwards) {
 /*   prev_head = integrated_heading_; */
 /*   Eigen::Vector2d delta = */
 /*       model_.InverseKinematics(Eigen::Vector2d(0., M_PI / 4.)); */
-/*   goal_->mutable_left_right_goal()->set_left_goal(left_right_position_(0) + */
+/*   goal_->mutable_left_right_goal()->set_left_goal(left_right_position_(0) +
+ */
 
 /*                                                   delta(0)); */
-/*   goal_->mutable_left_right_goal()->set_right_goal(left_right_position_(1) + */
+/*   goal_->mutable_left_right_goal()->set_right_goal(left_right_position_(1) +
+ */
 
 /*                                                    delta(1)); */
 /*   Update(); */
@@ -231,10 +236,12 @@ TEST_F(DrivetrainTest, PathFollowBackwards) {
 /*   prev_pos = cartesian_position_; */
 /*   prev_head = integrated_heading_; */
 /*   delta = model_.InverseKinematics(Eigen::Vector2d(1., 0.)); */
-/*   goal_->mutable_left_right_goal()->set_left_goal(left_right_position_(0) + */
+/*   goal_->mutable_left_right_goal()->set_left_goal(left_right_position_(0) +
+ */
 
 /*                                                   delta(0)); */
-/*   goal_->mutable_left_right_goal()->set_right_goal(left_right_position_(1) + */
+/*   goal_->mutable_left_right_goal()->set_right_goal(left_right_position_(1) +
+ */
 
 /*                                                    delta(1)); */
 /*   Update(); */

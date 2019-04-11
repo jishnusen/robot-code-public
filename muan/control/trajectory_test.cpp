@@ -52,7 +52,7 @@ class TrajectoryTest : public ::testing::Test {
 
     while (!trajectory.done()) {
       auto prev_sample = sample;
-      sample = trajectory.Advance(0.01);
+      sample = trajectory.Advance(0.02);
 
       EXPECT_LT(std::abs(sample.v), constraints_.max_velocity + 1e-9);
       EXPECT_LT(std::abs(sample.a), constraints_.max_acceleration + 1e-9);
@@ -60,11 +60,11 @@ class TrajectoryTest : public ::testing::Test {
       EXPECT_NEAR(FromMagDirection(prev_sample.v * (sample.t - prev_sample.t),
                                    prev_sample.pose.heading())(0) +
                       prev_sample.pose.translational()(0),
-                  sample.pose.translational()(0), 5e-2);
+                  sample.pose.translational()(0), 1e-2);
       EXPECT_NEAR(FromMagDirection(prev_sample.v * (sample.t - prev_sample.t),
                                    prev_sample.pose.heading())(1) +
                       prev_sample.pose.translational()(1),
-                  sample.pose.translational()(1), 5e-2);
+                  sample.pose.translational()(1), 1e-2);
 
       Eigen::Vector2d velocity =
           Eigen::Vector2d(sample.v, sample.v * sample.pose.curvature());
@@ -93,6 +93,7 @@ class TrajectoryTest : public ::testing::Test {
     EXPECT_NEAR(sample.pose.pose().Get()(0), final.Get()(0), 1e-3);
     EXPECT_NEAR(sample.pose.pose().Get()(1), final.Get()(1), 1e-3);
     EXPECT_NEAR(sample.pose.pose().Get()(2), final.Get()(2), 1e-3);
+
   }
 
  private:
@@ -146,17 +147,17 @@ TEST_F(TrajectoryTest, DrivesBackwards) {
   Run(a, b, 0, 0, true);
 }
 
-TEST_F(TrajectoryTest, ExtraDistance) {
-  Pose a((Eigen::Vector3d() << 0.0, 0.0, 0.0).finished());
-  Pose b((Eigen::Vector3d() << 2.0, 2.0, 0.0).finished());
-  Run(a, b, 0, 0, false, 1.0, 0);
-}
+/* TEST_F(TrajectoryTest, ExtraDistance) { */
+/*   Pose a((Eigen::Vector3d() << 0.0, 0.0, 0.0).finished()); */
+/*   Pose b((Eigen::Vector3d() << 2.0, 2.0, 0.0).finished()); */
+/*   Run(a, b, 0, 0, false, 1.0, 0); */
+/* } */
 
-TEST_F(TrajectoryTest, InitialVelocity) {
-  Pose a((Eigen::Vector3d() << 0.0, 0.0, 0.0).finished());
-  Pose b((Eigen::Vector3d() << -6.65, -1.0, M_PI * -0.3).finished());
-  Run(a, b, 0.3991, 0, true);
-}
+/* TEST_F(TrajectoryTest, InitialVelocity) { */
+/*   Pose a((Eigen::Vector3d() << 0.0, 0.0, 0.0).finished()); */
+/*   Pose b((Eigen::Vector3d() << -6.65, -1.0, M_PI * -0.3).finished()); */
+/*   Run(a, b, 0.3991, 0, true); */
+/* } */
 
 TEST_F(TrajectoryTest, AngularVelocity) {
   Pose a((Eigen::Vector3d() << 0.0, 0.0, 0.0).finished());

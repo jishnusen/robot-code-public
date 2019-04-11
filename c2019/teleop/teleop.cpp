@@ -1,6 +1,8 @@
 #include "c2019/teleop/teleop.h"
-#include "c2019/commands/drive_straight.h"
-#include "c2019/commands/test_auto.h"
+
+#include <memory>
+#include <string>
+
 #include "c2019/subsystems/limelight/queue_types.h"
 #include "muan/logging/logger.h"
 #include "networktables/NetworkTable.h"
@@ -123,8 +125,8 @@ void TeleopBase::Update() {
 
   nt::NetworkTableInstance inst = nt::NetworkTableInstance::GetDefault();
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
-  /* std::shared_ptr<nt::NetworkTable> back_table = */
-  /*     inst.GetTable("limelight-back"); */
+  std::shared_ptr<nt::NetworkTable> back_table =
+      inst.GetTable("limelight-back");
   std::shared_ptr<nt::NetworkTable> expensive_table =
       inst.GetTable("limelight-pricey");
 
@@ -137,21 +139,23 @@ void TeleopBase::Update() {
     if (climb_mode_) {
       table->PutNumber("ledMode", 0);
       expensive_table->PutNumber("ledMode", 0);
-      /* back_table->PutNumber("ledMode", 0); */
+      back_table->PutNumber("ledMode", 0);
     } else if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
-      table->PutNumber("ledMode",
-                       int(superstructure_status->elevator_goal() > 0.6));
+      table->PutNumber(
+          "ledMode",
+          static_cast<int>(superstructure_status->elevator_goal() > 0.6));
       expensive_table->PutNumber(
-          "ledMode", int(superstructure_status->elevator_goal() < 0.6));
-      /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
+          "ledMode",
+          static_cast<int>(superstructure_status->elevator_goal() < 0.6));
+      back_table->PutNumber("ledMode", flash_ ? 2 : 1);
     } else {
       table->PutNumber("ledMode", flash_ ? 2 : 1);
       expensive_table->PutNumber("ledMode", 1);
-      /* back_table->PutNumber("ledMode", 0); */
+      back_table->PutNumber("ledMode", 0);
     }
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
-    /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
+    back_table->PutNumber("ledMode", flash_ ? 2 : 1);
     expensive_table->PutNumber("ledMode", 1);
   }
 
@@ -194,30 +198,7 @@ void TeleopBase::Update() {
 
   if (exit_auto_->was_clicked()) {
     cancel_command_ = true;
-  }/* else if (!auto_status->running_command()) {
-    if (test_auto_->was_clicked()) {
-      auto_goal->set_run_command(true);
-      auto_goal->set_command(Command::TEST_AUTO);
-    } else if (drive_straight_->was_clicked()) {
-      auto_goal->set_run_command(true);
-      auto_goal->set_command(Command::DRIVE_STRAIGHT);
-    } else {
-      auto_goal->set_run_command(false);
-      auto_goal->set_command(Command::NONE);
-    }
-    auto_goal_queue_->WriteMessage(auto_goal);
-    // TODO(jishnu) add actual commands
-    // NOTE: not using a switch here due to cross-initialization of the threads
-    if (auto_goal->command() == Command::DRIVE_STRAIGHT) {
-      commands::DriveStraight drive_straight_command;
-      std::thread drive_straight_thread(drive_straight_command);
-      drive_straight_thread.detach();
-    } else if (auto_goal->command() == Command::TEST_AUTO) {
-      commands::TestAuto test_auto_command;
-      std::thread test_auto_thread(test_auto_command);
-      test_auto_thread.detach();
-    }
-  }*/
+  }
 
   auto_goal->set_cancel_command(cancel_command_);
   auto_goal_queue_->WriteMessage(auto_goal);
@@ -272,14 +253,21 @@ void TeleopBase::SendDrivetrainMessage() {
         y_int = -0;
       } else if (!vision_intake_->is_pressed()) {
         distance_factor_ = 1;
-        y_int = 0.35;
+        y_int = 0.4;
         if (super_status->elevator_height() > 0.8) {
           horiz_angle_ = lime_status->pricey_horiz_angle();
           target_dist_ = lime_status->pricey_target_dist();
-          distance_factor_ = 4.0 / 4.5;
-          y_int = 0.4;
+          distance_factor_ = 2.0 / 4.5;
+          y_int = 0.25;
           vision = lime_status->bottom_limelight_ok() &&
                    lime_status->pricey_has_target();
+        } else if (super_status->wrist_angle() > 1.5) {
+          horiz_angle_ = lime_status->back_horiz_angle();
+          target_dist_ = lime_status->back_target_dist();
+          distance_factor_ = -4.0 / 4.5;
+          y_int = 0.25;
+          vision = lime_status->back_limelight_ok() &&
+                   lime_status->back_has_target();
         } else {
           horiz_angle_ = lime_status->horiz_angle();
           target_dist_ = lime_status->target_dist();
@@ -328,8 +316,15 @@ void TeleopBase::SendDrivetrainMessage() {
     /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
     /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
-    drivetrain_goal->mutable_arc_goal()->set_linear((target_dist_ - y_int) *
-                                                    distance_factor_ * 4.5);
+    double voltage = (target_dist_ - y_int) * distance_factor_ * 4.5;
+    if (voltage < 0) {
+      if (voltage > -1.6) {
+        voltage = -1.6;
+      }
+    } else if (voltage < 1.6) {
+      voltage = 1.6;
+    }
+    drivetrain_goal->mutable_arc_goal()->set_linear(voltage);
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
@@ -363,9 +358,6 @@ void TeleopBase::SendSuperstructureMessage() {
   // Intake buttons
   if (cargo_intake_->is_pressed()) {
     superstructure_goal->set_intake_goal(c2019::superstructure::INTAKE_CARGO);
-    if (has_cargo_) {
-      superstructure_goal->set_score_goal(c2019::superstructure::STOW);
-    }
   } else if (cargo_outtake_->is_pressed()) {
     if (!has_ground_hatch_) {
       superstructure_goal->set_intake_goal(
@@ -507,8 +499,7 @@ void TeleopBase::SendSuperstructureMessage() {
 
   // Climbing buttons
   // drop forks and drop crawlers require safety button to prevent an oops
-  if (drop_forks_->is_pressed() &&
-      (safety_->is_pressed() || safety2_->is_pressed())) {
+  if (drop_forks_->is_pressed() && climb_mode_) {
     superstructure_goal->set_score_goal(c2019::superstructure::DROP_FORKS);
   }
   /*if (winch_->is_pressed() &&

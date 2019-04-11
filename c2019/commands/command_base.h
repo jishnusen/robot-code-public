@@ -74,8 +74,8 @@ class CommandBase {
   Eigen::Transform<double, 2, Eigen::AffineCompact> transform_f0_;
   double theta_offset_ = 0.0;
 
-  double max_lin_ = 3.0;
-  double max_acc_ = 3.5;
+  double max_lin_ = 4.0;
+  double max_acc_ = 4.0;
 
   aos::time::PhasedLoop loop_{std::chrono::milliseconds(10)};
 };

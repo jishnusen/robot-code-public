@@ -1,8 +1,8 @@
 #include "c2019/commands/command_base.h"
-#include "c2019/subsystems/limelight/queue_types.h"
 
 #include <chrono>
 
+#include "c2019/subsystems/limelight/queue_types.h"
 #include "muan/logging/logger.h"
 #include "muan/queues/queue_manager.h"
 
@@ -155,7 +155,8 @@ bool CommandBase::StartDriveVision(double target_dist) {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  if (lime_status->target_dist() > target_dist || !lime_status->limelight_ok()) {
+  if (lime_status->target_dist() > target_dist ||
+      !lime_status->limelight_ok()) {
     LOG(WARNING, "Couldn't converge");
     return false;
   }
@@ -204,7 +205,8 @@ bool CommandBase::StartDriveVisionBottom() {
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
   }
 
-  if (lime_status->pricey_target_dist() > 0.52 || !lime_status->pricey_has_target()) {
+  if (lime_status->pricey_target_dist() > 0.52 ||
+      !lime_status->pricey_has_target()) {
     LOG(WARNING, "Couldn't converge");
     return false;
   }
@@ -237,11 +239,10 @@ bool CommandBase::StartDriveVisionBackwards() {
     drivetrain_goal->mutable_arc_goal()->set_angular(
         lime_status->back_horiz_angle());
     drivetrain_goal->mutable_arc_goal()->set_linear(
-        (lime_status->back_target_dist() + 0.3) * -4.0);
+        (lime_status->back_target_dist() + 0.25) * -4.0);
 
     QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);
     Wait(1);
-    std::cout << "back tracking" << std::endl;
   }
 
   if (lime_status->back_target_dist() > 0.28) {
@@ -314,8 +315,6 @@ bool CommandBase::IsDriveComplete() {
         return true;
       }
     } else if (goal->has_point_turn_goal()) {
-      std::cout << status->heading_error() << std::endl;
-      std::cout << goal->point_turn_goal() << std::endl;
       if (std::abs(goal->point_turn_goal() - status->estimated_heading()) <
           1e-1) {
         return true;
@@ -346,9 +345,10 @@ bool CommandBase::IsDrivetrainNear(double x, double y, double distance) {
 
   if (drivetrain_status_reader_.ReadLastMessage(&status)) {
     Eigen::Vector2d field_position =
-        transform_f0_ * (Eigen::Vector2d() << status->profiled_x_goal(),
-                         status->profiled_y_goal())
-                            .finished();
+        transform_f0_ *
+        (Eigen::Vector2d() << status->profiled_x_goal(),
+         status->profiled_y_goal())
+            .finished();
     if ((field_position(0) - x) * (field_position(0) - x) +
             (field_position(1) - y) * (field_position(1) - y) <
         distance * distance) {

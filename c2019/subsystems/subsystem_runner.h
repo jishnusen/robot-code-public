@@ -7,7 +7,6 @@
 #include "c2019/subsystems/drivetrain/drivetrain_base.h"
 #include "c2019/subsystems/limelight/limelight.h"
 #include "c2019/subsystems/superstructure/superstructure.h"
-#include "c2019/subsystems/superstructure/superstructure.h"
 #include "muan/subsystems/drivetrain/drivetrain.h"
 #include "third_party/aos/common/time.h"
 #include "third_party/aos/common/util/phased_loop.h"

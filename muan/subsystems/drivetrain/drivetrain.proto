@@ -94,6 +94,8 @@ message DrivetrainStatus {
 
   optional ControlMode closed_loop_control_mode = 25;
   optional double encoder_heading = 26;
+
+  optional double dt = 27;
 }
 
 message DrivetrainGoal {

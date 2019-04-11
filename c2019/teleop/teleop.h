@@ -5,7 +5,6 @@
 #include "WPILib.h"
 #include "c2019/commands/queue_types.h"
 #include "c2019/subsystems/superstructure/queue_types.h"
-#include "c2019/subsystems/superstructure/superstructure.h"
 #include "muan/queues/queue_manager.h"
 #include "muan/subsystems/drivetrain/queue_types.h"
 #include "muan/teleop/joystick.h"

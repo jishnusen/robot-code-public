@@ -221,8 +221,9 @@ TEST_F(SuperstructureTest, ScoreGoals) {
   RunFor(10);
   CheckGoal(kCargoRocketFirstHeight, kCargoRocketFirstAngle);
 
-  /* // CARGO_ROCKET_BACKWARDS */
-  /* SetGoal(ScoreGoal::CARGO_ROCKET_BACKWARDS, IntakeGoal::INTAKE_NONE, true); */
+  // CARGO_ROCKET_BACKWARDS
+  /* SetGoal(ScoreGoal::CARGO_ROCKET_BACKWARDS, IntakeGoal::INTAKE_NONE, true);
+   */
   /* RunFor(3); */
   /* SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true); */
   /* RunFor(10); */
@@ -249,8 +250,9 @@ TEST_F(SuperstructureTest, ScoreGoals) {
   RunFor(10);
   CheckGoal(kHatchRocketFirstHeight, kHatchForwardsAngle);
 
-  /* // HATCH_ROCKET_BACKWARDS */
-  /* SetGoal(ScoreGoal::HATCH_ROCKET_BACKWARDS, IntakeGoal::INTAKE_NONE, true); */
+  // HATCH_ROCKET_BACKWARDS
+  /* SetGoal(ScoreGoal::HATCH_ROCKET_BACKWARDS, IntakeGoal::INTAKE_NONE, true);
+   */
   /* RunFor(3); */
   /* SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true); */
   /* RunFor(10); */
@@ -277,7 +279,7 @@ TEST_F(SuperstructureTest, ScoreGoals) {
   RunFor(10);
   CheckGoal(kCargoShipForwardsHeight, kCargoShipForwardsAngle);
 
-  /* // CARGO_SHIP_BACKWARDS */
+  // CARGO_SHIP_BACKWARDS
   /* SetGoal(ScoreGoal::CARGO_SHIP_BACKWARDS, IntakeGoal::INTAKE_NONE, true); */
   /* RunFor(3); */
   /* SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true); */
@@ -291,7 +293,7 @@ TEST_F(SuperstructureTest, ScoreGoals) {
   RunFor(10);
   CheckGoal(kHatchShipForwardsHeight, kHatchForwardsAngle);
 
-  /* // HATCH_SHIP_BACKWARDS */
+  // HATCH_SHIP_BACKWARDS
   /* SetGoal(ScoreGoal::HATCH_SHIP_BACKWARDS, IntakeGoal::INTAKE_NONE, true); */
   /* RunFor(3); */
   /* SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true); */
@@ -332,8 +334,8 @@ TEST_F(SuperstructureTest, IntakeGoals) {
   SetIntakeInputs(false, false, false);
 
   SetGoal(ScoreGoal::CARGO_GROUND, IntakeGoal::INTAKE_CARGO, true);
-  RunFor(1);
-  EXPECT_EQ(superstructure_status_proto_->state(), 4);
+  RunFor(5);
+  EXPECT_EQ(superstructure_status_proto_->state(), HOLDING);  // jank
 
   SetGoal(ScoreGoal::NONE, IntakeGoal::INTAKE_NONE, true);
   RunFor(2);
@@ -506,7 +508,8 @@ TEST_F(SuperstructureTest, Crawl) {
 /*   RunFor(1000); */
 
 /*   EXPECT_EQ(superstructure_output_proto_->elevator_setpoint(), 0); */
-/*   EXPECT_EQ(superstructure_output_proto_->elevator_setpoint_type(), OPEN_LOOP); */
+/*   EXPECT_EQ(superstructure_output_proto_->elevator_setpoint_type(),
+ * OPEN_LOOP); */
 /*   EXPECT_TRUE(superstructure_output_proto_->brake()); */
 /*   EXPECT_TRUE(superstructure_status_proto_->braked()); */
 /* } */

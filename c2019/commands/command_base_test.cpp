@@ -1,7 +1,6 @@
 #include <thread>
 
 #include "c2019/commands/command_base.h"
-#include "c2019/commands/test_auto.h"
 #include "gtest/gtest.h"
 #include "muan/queues/queue_manager.h"
 

@@ -30,34 +30,25 @@ constexpr uint32_t kCargoPDPSlot = 6;
 using c2019::superstructure::TalonOutput;
 using muan::queues::QueueManager;
 
-SuperstructureInterface::SuperstructureInterface()
+SuperstructureInterface::SuperstructureInterface(
+    muan::wpilib::CanWrapper* can_wrapper)
     : input_queue_{QueueManager<SuperstructureInputProto>::Fetch()},
       output_reader_{
-          QueueManager<SuperstructureOutputProto>::Fetch()->MakeReader()} {
+          QueueManager<SuperstructureOutputProto>::Fetch()->MakeReader()},
+      pcm_{can_wrapper->pcm()} {
   LoadGains();
-  /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
+  pcm_->CreateSolenoid(kArrow);
+  pcm_->CreateSolenoid(kBackplate);
+  pcm_->CreateSolenoid(kCrawlerOne);
+  pcm_->CreateSolenoid(kForkDrop);
+  pcm_->CreateSolenoid(kShifter);
+  pcm_->CreateSolenoid(kCargo);
+  pcm_->CreateSolenoid(kPins);
 }
 
 void SuperstructureInterface::ReadSensors() {
   SuperstructureInputProto inputs;
 
-  /* inputs->set_hatch_ground_current(pdp_.GetCurrent(kGroundPDPSlot)); */
-  /* inputs->set_cargo_current(pdp_.GetCurrent(kCargoPDPSlot)); */
-  /* inputs->set_current_1(pdp_.GetCurrent(1)); */
-  /* inputs->set_current_2(pdp_.GetCurrent(2)); */
-  /* inputs->set_current_3(pdp_.GetCurrent(3)); */
-  /* inputs->set_current_4(pdp_.GetCurrent(4)); */
-  /* inputs->set_current_5(pdp_.GetCurrent(5)); */
-  /* inputs->set_current_6(pdp_.GetCurrent(6)); */
-  /* inputs->set_current_7(pdp_.GetCurrent(7)); */
-  /* inputs->set_current_8(pdp_.GetCurrent(8)); */
-  /* inputs->set_current_9(pdp_.GetCurrent(9)); */
-  /* inputs->set_current_10(pdp_.GetCurrent(10)); */
-  /* inputs->set_current_11(pdp_.GetCurrent(11)); */
-  /* inputs->set_current_12(pdp_.GetCurrent(12)); */
-  /* inputs->set_current_13(pdp_.GetCurrent(13)); */
-  /* inputs->set_current_14(pdp_.GetCurrent(14)); */
-  /* inputs->set_current_15(pdp_.GetCurrent(15)); */
   inputs->set_wrist_current(wrist_.GetOutputCurrent());
   inputs->set_elevator_current(elevator_master_.GetOutputCurrent());
   inputs->set_wrist_voltage(wrist_.GetMotorOutputVoltage());
@@ -71,43 +62,29 @@ void SuperstructureInterface::ReadSensors() {
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
 
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->elevator_encoder()) > 0.05) {
-    /* elevator_zeroed_ = false; */
-  }
-
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
-  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && std::abs(inputs->wrist_encoder()) > 0.1) {
-    wrist_zeroed_ = false;
-  }
 
   inputs->set_elevator_hall(
       elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
 
   inputs->set_elevator_zeroed(elevator_zeroed_);
 
-  /* inputs->set_wrist_hall(!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P));
-   */
-  inputs->set_wrist_hall(wrist_.GetSensorCollection().IsRevLimitSwitchClosed());
+  inputs->set_wrist_hall(
+      !canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR));
 
-  /* if (!canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) &&
-   * !wrist_zeroed_) { */
-  /*   wrist_zeroed_ = true; */
-  /*   wrist_.SetSelectedSensorPosition(0, 0, 100); */
-  /* } */
-
-  if (wrist_.GetSensorCollection().IsRevLimitSwitchClosed() && !wrist_zeroed_) {
+  if (inputs->wrist_hall() && !wrist_zeroed_) {
     wrist_zeroed_ = true;
     wrist_.SetSelectedSensorPosition(0, 0, 100);
+    canifier_.SetQuadraturePosition(0, 0);
   }
 
   inputs->set_wrist_zeroed(wrist_zeroed_);
 
   inputs->set_cargo_proxy(
-      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P) ||
-      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MISO_PWM2P));
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CLK_PWM0P));
   inputs->set_hatch_intake_proxy(
-      canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR) &&
+      canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) &&
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CS));
 
   input_queue_->WriteMessage(inputs);
@@ -126,24 +103,27 @@ void SuperstructureInterface::LoadGains() {
   wrist_.Config_kF(0, kWristF, 100);
   wrist_.Config_IntegralZone(0, kWristIZone, 100);
 
-  wrist_.ConfigReverseLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
-                                        LimitSwitchNormal_NormallyOpen, 100);
+  wrist_.ConfigReverseLimitSwitchSource(RemoteLimitSwitchSource_RemoteCANifier,
+                                        LimitSwitchNormal_NormallyOpen,
+                                        kCANifier, 100);
   wrist_.ConfigForwardLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
                                         LimitSwitchNormal_NormallyOpen, 100);
 
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
-  /* elevator_master_.SetSelectedSensorPosition(0, 0, 100); */
 
-  wrist_.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative,
-                                      0, 100);
-  /* wrist_.SetSelectedSensorPosition(0, 0, 100); */
+  wrist_.ConfigRemoteFeedbackFilter(
+      0, RemoteSensorSource::RemoteSensorSource_CANifier_Quadrature, kCANifier,
+      100);
 
-  const bool elevator_inverted = false;
+  wrist_.ConfigSelectedFeedbackSensor(RemoteFeedbackDevice_RemoteSensor0, 0,
+                                      100);
 
   elevator_master_.SetSensorPhase(false);
 
+  constexpr bool elevator_inverted = false;
   elevator_master_.SetInverted(elevator_inverted);
+
   elevator_master_.ConfigReverseLimitSwitchSource(
       LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
   elevator_master_.ConfigForwardLimitSwitchSource(
@@ -193,12 +173,14 @@ void SuperstructureInterface::WriteActuators() {
     winch_.Set(ControlMode::PercentOutput, 0);
     winch_two_.Set(ControlMode::PercentOutput, 0);
 
-    arrow_solenoid_.Set(false);
-    backplate_solenoid_.Set(false);
-    crawler_one_solenoid_.Set(false);
-    shifter_.Set(false);
-    fork_drop_.Set(false);
-    cargo_.Set(false);
+    pcm_->WriteSolenoid(kArrow, false);
+    pcm_->WriteSolenoid(kBackplate, false);
+    pcm_->WriteSolenoid(kCrawlerOne, false);
+    pcm_->WriteSolenoid(kForkDrop, false);
+    pcm_->WriteSolenoid(kShifter, false);
+    pcm_->WriteSolenoid(kCargo, false);
+    pcm_->WriteSolenoid(kPins, false);
+
     SetBrakeMode(false);
     return;
   }
@@ -231,20 +213,20 @@ void SuperstructureInterface::WriteActuators() {
       break;
   }
 
-  pins_.Set(outputs->pins());
-
   cargo_intake_.Set(ControlMode::PercentOutput,
                     -outputs->cargo_roller_voltage() / 12.);
   crawler_.Set(ControlMode::PercentOutput, -outputs->crawler_voltage() / 12.);
-  winch_.Set(ControlMode::PercentOutput, -outputs->left_winch_voltage() / 12.);
+  winch_.Set(ControlMode::PercentOutput, outputs->left_winch_voltage() / 12.);
   winch_two_.Set(ControlMode::PercentOutput,
-                 -outputs->right_winch_voltage() / 12.);
-  arrow_solenoid_.Set(!outputs->arrow_solenoid());
-  backplate_solenoid_.Set(outputs->backplate_solenoid());
-  crawler_one_solenoid_.Set(outputs->crawler_one_solenoid());
-  shifter_.Set(!outputs->elevator_high_gear());
-  fork_drop_.Set(outputs->drop_forks());
-  cargo_.Set(outputs->cargo_out());
+                 outputs->right_winch_voltage() / 12.);
+
+  pcm_->WriteSolenoid(kArrow, !outputs->arrow_solenoid());
+  pcm_->WriteSolenoid(kBackplate, outputs->backplate_solenoid());
+  pcm_->WriteSolenoid(kCrawlerOne, outputs->crawler_one_solenoid());
+  pcm_->WriteSolenoid(kForkDrop, outputs->drop_forks());
+  pcm_->WriteSolenoid(kShifter, !outputs->elevator_high_gear());
+  pcm_->WriteSolenoid(kCargo, outputs->cargo_out());
+  pcm_->WriteSolenoid(kPins, outputs->pins());
 }
 
 }  // namespace interfaces

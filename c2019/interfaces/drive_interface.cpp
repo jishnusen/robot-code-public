@@ -98,6 +98,13 @@ DrivetrainInterface::DrivetrainInterface()
                             ->MakeReader()} {
   right_master_.ConfigFactoryDefault();
   left_master_.ConfigFactoryDefault();
+
+  right_slave_a_.ConfigFactoryDefault();
+  right_slave_b_.ConfigFactoryDefault();
+
+  left_slave_a_.ConfigFactoryDefault();
+  left_slave_b_.ConfigFactoryDefault();
+
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout);
   right_master_.ConfigSelectedFeedbackSensor(
@@ -246,11 +253,11 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1,
                        DemandType_ArbitraryFeedForward,
-                       outputs->left_setpoint_ff());
+                       outputs->left_setpoint_ff() / 12.);
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1,
-          DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff());
+          DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
       break;
     case TalonOutput::ARC:
       if (compressor_.Enabled()) {

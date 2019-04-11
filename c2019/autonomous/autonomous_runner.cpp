@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "c2019/autonomous/autonomous_runner.h"
-#include "c2019/commands/drive_straight.h"
+#include "c2019/commands/rocket.h"
 
 namespace c2019 {
 namespace autonomous {
@@ -36,18 +36,16 @@ void AutonomousRunner::operator()() {
     loop_.SleepUntilNext();
   }
 
-  commands::DriveStraight drive_straight_command;
+  commands::Rocket rocket_command;
 
   if ((AutoMode() == "LEFT_ROCKET")) {
-    drive_straight_command.LeftRocket();
-  } else if (AutoMode() == "CARGO_SHIP") {
-    drive_straight_command.CargoShip();
-  } else if (AutoMode() == "CARGO_ROCKET") {
-    drive_straight_command.CargoRocket();
+    rocket_command.LeftRocket();
+  } else if (AutoMode() == "LEFT_CARGO_ROCKET") {
+    rocket_command.LeftCargoRocket();
   } else if (AutoMode() == "RIGHT_ROCKET") {
-    drive_straight_command.RightRocket();
+    rocket_command.RightRocket();
   } else if (AutoMode() == "RIGHT_CARGO_ROCKET") {
-    drive_straight_command.RightCargoRocket();
+    rocket_command.RightCargoRocket();
   }
 }
 

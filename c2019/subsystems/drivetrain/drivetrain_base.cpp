@@ -5,7 +5,7 @@ namespace subsystems {
 namespace drivetrain {
 
 constexpr double kRobotRadius = 0.3489513;
-constexpr double kWheelRadius = 4.0 * 0.0254 / 2.0;
+constexpr double kWheelRadius = 0.0508;
 
 constexpr double kMaxVoltage = 12.0;
 constexpr double kFreeSpeed = 4.34 / kWheelRadius;  // rad / s
@@ -45,7 +45,7 @@ muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
       .low_gear_sensitivity = 0.65,
       .beta = 2.0,
       .zeta = 0.7,
-      .dt = 0.01,
+      .dt = 0.02,
 
       .max_velocity = 4.0,
       .max_acceleration = 3.0,
