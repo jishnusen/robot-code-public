@@ -129,14 +129,6 @@ void ClosedLoopDrive::SetGoal(const GoalProto& goal) {
 }
 
 void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
-  uint32_t prev_timestamp = timestamp_;
-  timestamp_ = std::chrono::duration_cast<std::chrono::milliseconds>(
-                   aos::monotonic_clock::now() - aos::monotonic_clock::epoch())
-                   .count();
-  double dt = (timestamp_ - prev_timestamp) / 1000.;
-
-  (*status)->set_dt(dt);
-
   if (control_mode_ == ControlMode::POINT_TURN) {
     UpdatePointTurn(output, status);
   } else if (control_mode_ == ControlMode::DISTANCE) {
@@ -144,7 +136,7 @@ void ClosedLoopDrive::Update(OutputProto* output, StatusProto* status) {
   } else if (control_mode_ == ControlMode::LEFT_RIGHT) {
     UpdateLeftRightManual(output, status);
   } else if (control_mode_ == ControlMode::PATH_FOLLOWING) {
-    UpdatePathFollower(output, status, dt);
+    UpdatePathFollower(output, status, (*status)->dt());
   } else if (control_mode_ == ControlMode::LINEAR_ANGULAR_VEL) {
     UpdateLinearAngularVelocity(output);
   } else if (control_mode_ == ControlMode::VISION_ARC) {

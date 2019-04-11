@@ -58,8 +58,6 @@ class ClosedLoopDrive {
   double lin_vel_goal_;
   double ang_vel_goal_;
   ControlMode control_mode_;
-
-  uint32_t timestamp_;
 };
 
 }  // namespace drivetrain

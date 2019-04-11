@@ -61,7 +61,6 @@ muan::subsystems::drivetrain::DrivetrainConfig GetDrivetrainConfig() {
 
 class DrivetrainTest : public ::testing::Test {
  public:
-  DrivetrainTest() { aos::time::EnableMockTime(aos::monotonic_clock::epoch()); }
   void RunFor(int ticks) {
     for (int i = 0; i < ticks; i++) {
       Update();
@@ -69,6 +68,15 @@ class DrivetrainTest : public ::testing::Test {
   }
 
   void Update() {
+    uint64_t prev_timestamp = timestamp_;
+    timestamp_ =
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            aos::monotonic_clock::now() - aos::monotonic_clock::epoch())
+            .count();
+    double dt = (timestamp_ - prev_timestamp) / 1000.;
+
+    status_->set_dt(dt);
+
     closed_loop_drive_.SetGoal(goal_);
     closed_loop_drive_.Update(&output_, &status_);
     SetInputs();
@@ -94,7 +102,6 @@ class DrivetrainTest : public ::testing::Test {
           velocity(0) * status_->dt() * std::sin(integrated_heading_);
       linear_angular_velocity_ = velocity;
 
-      std::cout << status_->dt() << std::endl;
       left_right_position_(0) += output_->left_setpoint() * status_->dt();
       left_right_position_(1) += output_->right_setpoint() * status_->dt();
 
@@ -120,6 +127,8 @@ class DrivetrainTest : public ::testing::Test {
   Eigen::Vector2d cartesian_position_;
   Eigen::Vector2d left_right_position_;
   Eigen::Vector2d linear_angular_velocity_;
+
+  uint64_t timestamp_;
 
   /* std::ofstream file_{"/tmp/test.csv"}; */
 
@@ -168,6 +177,7 @@ class DrivetrainTest : public ::testing::Test {
 /* } */
 
 TEST_F(DrivetrainTest, PathFollowBackwards) {
+  aos::time::EnableMockTime(aos::monotonic_clock::epoch());
   integrated_heading_ = M_PI;
   left_right_position_ = Eigen::Vector2d(0, 0);
   cartesian_position_ = Eigen::Vector2d(0, 0);
@@ -184,6 +194,7 @@ TEST_F(DrivetrainTest, PathFollowBackwards) {
 }
 
 TEST_F(DrivetrainTest, PathFollow) {
+  aos::time::EnableMockTime(aos::monotonic_clock::now());
   integrated_heading_ = 0.;
   left_right_position_ = Eigen::Vector2d(0, 0);
   cartesian_position_ = Eigen::Vector2d(0, 0);
