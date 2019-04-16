@@ -42,6 +42,7 @@ class SuperstructureInterface {
   explicit SuperstructureInterface(muan::wpilib::CanWrapper* can_wrapper);
   void WriteActuators();
   void ReadSensors();
+  void operator()();
 
  private:
   void SetBrakeMode(bool mode);

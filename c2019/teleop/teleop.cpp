@@ -258,8 +258,8 @@ void TeleopBase::SendDrivetrainMessage() {
         if (super_status->elevator_height() > 0.8) {
           horiz_angle_ = lime_status->pricey_horiz_angle();
           target_dist_ = lime_status->pricey_target_dist();
-          distance_factor_ = 2.0 / 4.5;
-          y_int = 0.25;
+          distance_factor_ = 3.0 / 4.5;
+          y_int = -0.1;
           vision = lime_status->bottom_limelight_ok() &&
                    lime_status->pricey_has_target();
         } else if (super_status->wrist_angle() > 1.5) {
@@ -284,7 +284,7 @@ void TeleopBase::SendDrivetrainMessage() {
             horiz_angle_ += offset_;
             if (!this_run_off_) {
               offset_ =
-                  0.05 * (lime_status->to_the_left() ? 1 : -1) * (skew / 13);
+                  0.05 * (lime_status->to_the_left() ? 1 : -1) * (skew / 20);
             }
             this_run_off_ = true;
           }
@@ -310,22 +310,14 @@ void TeleopBase::SendDrivetrainMessage() {
     drivetrain_goal->mutable_teleop_goal()->set_throttle(throttle);
     drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
   } else {
-    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
-    /*     ->set_linear_velocity( */
-    /*         2.0 * (height_distance_factor_ * target_dist_ -
-     * distance_factor_)); */
-    /* drivetrain_goal->mutable_linear_angular_velocity_goal() */
-    /*     ->set_angular_velocity(-16.0 * horiz_angle_); */
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
     double voltage = (target_dist_ - y_int) * distance_factor_ * 4.5;
-    if (voltage < 0) {
-      if (voltage > -1.6) {
-        voltage = -1.6;
-      }
-    } else if (voltage < 1.6) {
-      voltage = 1.6;
+    double scalar = 1.5;
+    if (drivetrain_status->linear_velocity() > 2.0) {
+      scalar = 1.0;
     }
-    drivetrain_goal->mutable_arc_goal()->set_linear(voltage);
+    drivetrain_goal->mutable_arc_goal()->set_linear(muan::utils::Cap(
+        voltage * scalar - (std::abs(horiz_angle_) * 20), 1.6, 12));
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);

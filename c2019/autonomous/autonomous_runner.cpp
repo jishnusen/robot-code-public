@@ -38,14 +38,26 @@ void AutonomousRunner::operator()() {
 
   commands::Rocket rocket_command;
 
-  if ((AutoMode() == "LEFT_ROCKET")) {
-    rocket_command.LeftRocket();
+  if ((AutoMode() == "LEFT_BACK_ROCKET")) {
+    rocket_command.LeftBackRocket();
+  } else if (AutoMode() == "LEFT_SIDE_CARGO_SHIP") {
+    rocket_command.LeftSideCargoShip();
+  } else if (AutoMode() == "LEFT_FRONT_CARGO_SHIP") {
+    rocket_command.LeftFrontCargoShip();
   } else if (AutoMode() == "LEFT_CARGO_ROCKET") {
     rocket_command.LeftCargoRocket();
-  } else if (AutoMode() == "RIGHT_ROCKET") {
-    rocket_command.RightRocket();
+  } else if (AutoMode() == "LEFT_DOUBLE_ROCKET") {
+    rocket_command.LeftDoubleRocket();
+  } else if (AutoMode() == "RIGHT_SIDE_CARGO_SHIP") {
+    rocket_command.RightSideCargoShip();
+  } else if (AutoMode() == "RIGHT_FRONT_CARGO_SHIP") {
+    rocket_command.RightFrontCargoShip();
   } else if (AutoMode() == "RIGHT_CARGO_ROCKET") {
     rocket_command.RightCargoRocket();
+  } else if (AutoMode() == "RIGHT_DOUBLE_ROCKET") {
+    rocket_command.RightDoubleRocket();
+  } else if (AutoMode() == "RIGHT_BACK_ROCKET") {
+    rocket_command.RightBackRocket();
   }
 }
 

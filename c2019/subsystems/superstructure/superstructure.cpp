@@ -511,6 +511,9 @@ void Superstructure::SetGoal(const SuperstructureGoalProto& goal) {
       elevator_rezeroed_ = false;
       wrist_rezeroed_ = false;
       break;
+    case CARGO_AUTO:
+      wrist_angle_ = 0.52;
+      elevator_height_ = 0.0;
   }
 
   // Godmode

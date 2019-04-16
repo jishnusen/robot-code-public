@@ -53,6 +53,7 @@ enum ScoreGoal {
   LIMELIGHT_OVERRIDE = 25;
   LAND = 26;
   REZERO = 27;
+  CARGO_AUTO = 28;
 }
 
 enum GroundHatchIntakeState {

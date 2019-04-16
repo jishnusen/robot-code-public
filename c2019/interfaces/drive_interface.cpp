@@ -7,7 +7,7 @@ using muan::queues::QueueManager;
 using muan::subsystems::drivetrain::TalonOutput;
 
 constexpr double kWheelRadius = 4.0 * 0.0254 / 2.0;
-constexpr double kDriveConversionFactor = 4096 / (2. * M_PI * kWheelRadius);
+constexpr double kDriveConversionFactor = 4096 / (2. * M_PI);
 
 constexpr uint32_t kShifter = 0;
 
@@ -24,7 +24,7 @@ constexpr double kHighGearPositionF = 0.;
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
-constexpr double kHighGearVelocityF = 0.12;
+constexpr double kHighGearVelocityF = 0.;
 
 constexpr double kTurningP = 2.0;
 constexpr double kTurningI = 0.0;
@@ -98,6 +98,13 @@ DrivetrainInterface::DrivetrainInterface()
                             ->MakeReader()} {
   right_master_.ConfigFactoryDefault();
   left_master_.ConfigFactoryDefault();
+
+  right_slave_a_.ConfigFactoryDefault();
+  right_slave_b_.ConfigFactoryDefault();
+
+  left_slave_a_.ConfigFactoryDefault();
+  left_slave_b_.ConfigFactoryDefault();
+
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout);
   right_master_.ConfigSelectedFeedbackSensor(
@@ -193,6 +200,8 @@ void DrivetrainInterface::ReadSensors() {
   sensors->set_left_voltage(left_master_.GetMotorOutputVoltage());
   sensors->set_right_voltage(right_master_.GetMotorOutputVoltage());
 
+  sensors->set_right_bus(right_master_.GetBusVoltage());
+
   input_queue_->WriteMessage(sensors);
 }
 
@@ -242,10 +251,13 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
-                       outputs->left_setpoint() * kDriveConversionFactor * 0.1);
+                       outputs->left_setpoint() * kDriveConversionFactor * 0.1,
+                       DemandType_ArbitraryFeedForward,
+                       outputs->left_setpoint_ff() / 12.);
       right_master_.Set(
           ControlMode::Velocity,
-          outputs->right_setpoint() * kDriveConversionFactor * 0.1);
+          outputs->right_setpoint() * kDriveConversionFactor * 0.1,
+          DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
       break;
     case TalonOutput::ARC:
       if (compressor_.Enabled()) {

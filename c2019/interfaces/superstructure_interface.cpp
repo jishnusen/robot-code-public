@@ -16,10 +16,10 @@ constexpr double kElevatorIZone = 0.;
 constexpr double kElevatorMaxIntegral = 5e9;
 constexpr double kElevatorDeadband = 0.0;
 
-constexpr double kWristP = 2.5;
+constexpr double kWristP = 1.0;
 constexpr double kWristI = 0.0;
-constexpr double kWristD = 35.0;
-constexpr double kWristF = 0.8;
+constexpr double kWristD = 20.0;
+constexpr double kWristF = 0.3;
 constexpr double kWristIZone = 0.;
 constexpr double kWristMaxIntegral = 5e9;
 constexpr double kWristDeadband = 0.0;
@@ -46,6 +46,18 @@ SuperstructureInterface::SuperstructureInterface(
   pcm_->CreateSolenoid(kPins);
 }
 
+void SuperstructureInterface::operator()() {
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
+  aos::SetCurrentThreadRealtimePriority(10);
+  muan::utils::SetCurrentThreadName("SuperInterface");
+
+  while (true) {
+    ReadSensors();
+    phased_loop.SleepUntilNext();
+    WriteActuators();
+  }
+}
+
 void SuperstructureInterface::ReadSensors() {
   SuperstructureInputProto inputs;
 
@@ -57,7 +69,7 @@ void SuperstructureInterface::ReadSensors() {
                                kElevatorConversionFactor);
 
   if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
-      !elevator_zeroed_) {
+      (std::abs(inputs->elevator_encoder()) > 0.025 || !elevator_zeroed_)) {
     elevator_zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
@@ -73,7 +85,7 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_wrist_hall(
       !canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR));
 
-  if (inputs->wrist_hall() && !wrist_zeroed_) {
+  if (inputs->wrist_hall() && (!wrist_zeroed_ || std::abs(inputs->wrist_encoder()) > 0.025)) {
     wrist_zeroed_ = true;
     wrist_.SetSelectedSensorPosition(0, 0, 100);
     canifier_.SetQuadraturePosition(0, 0);
@@ -108,7 +120,6 @@ void SuperstructureInterface::LoadGains() {
                                         kCANifier, 100);
   wrist_.ConfigForwardLimitSwitchSource(LimitSwitchSource_FeedbackConnector,
                                         LimitSwitchNormal_NormallyOpen, 100);
-
   elevator_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, 0, 100);
 
@@ -130,8 +141,8 @@ void SuperstructureInterface::LoadGains() {
       LimitSwitchSource_FeedbackConnector, LimitSwitchNormal_NormallyOpen, 100);
   elevator_master_.ConfigMotionCruiseVelocity(2865 * 5, 100);
   elevator_master_.ConfigMotionAcceleration(3820 * 5, 100);
-  wrist_.ConfigMotionCruiseVelocity(2865 * 0.6, 100);
-  wrist_.ConfigMotionAcceleration(3820 * 0.6, 100);
+  wrist_.ConfigMotionCruiseVelocity(2865 * 0.5, 100);
+  wrist_.ConfigMotionAcceleration(3820 * 0.4, 100);
   elevator_master_.ConfigAllowableClosedloopError(0, kElevatorDeadband, 0);
 
   elevator_master_.ConfigForwardSoftLimitEnable(false);
@@ -143,6 +154,9 @@ void SuperstructureInterface::LoadGains() {
   elevator_slave_b_.SetInverted(elevator_inverted);
   elevator_slave_c_.Follow(elevator_master_);
   elevator_slave_c_.SetInverted(elevator_inverted);
+
+  elevator_master_.OverrideLimitSwitchesEnable(true);
+  elevator_master_.OverrideSoftLimitsEnable(true);
 
   winch_two_.SetInverted(true);
 }
