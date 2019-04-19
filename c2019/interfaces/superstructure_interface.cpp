@@ -47,7 +47,7 @@ SuperstructureInterface::SuperstructureInterface(
 }
 
 void SuperstructureInterface::operator()() {
-  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(10));
+  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20));
   aos::SetCurrentThreadRealtimePriority(10);
   muan::utils::SetCurrentThreadName("SuperInterface");
 
@@ -60,16 +60,20 @@ void SuperstructureInterface::operator()() {
 
 void SuperstructureInterface::ReadSensors() {
   SuperstructureInputProto inputs;
+  muan::wpilib::PdpMessage pdp;
+  QueueManager<muan::wpilib::PdpMessage>::Fetch()->ReadLastMessage(&pdp);
 
   inputs->set_wrist_current(wrist_.GetOutputCurrent());
-  inputs->set_elevator_current(elevator_master_.GetOutputCurrent());
+  inputs->set_elevator_current(pdp->current3());
   inputs->set_wrist_voltage(wrist_.GetMotorOutputVoltage());
   inputs->set_elevator_voltage(elevator_master_.GetMotorOutputVoltage());
   inputs->set_elevator_encoder(elevator_master_.GetSelectedSensorPosition() /
                                kElevatorConversionFactor);
 
-  if (elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed() &&
-      (std::abs(inputs->elevator_encoder()) > 0.025 || !elevator_zeroed_)) {
+  inputs->set_elevator_hall(
+      elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
+
+  if (inputs->elevator_hall() && !elevator_zeroed_) {
     elevator_zeroed_ = true;
     elevator_master_.SetSelectedSensorPosition(0, 0, 100);
   }
@@ -77,15 +81,12 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_wrist_encoder(wrist_.GetSelectedSensorPosition() /
                             kWristConversionFactor);
 
-  inputs->set_elevator_hall(
-      elevator_master_.GetSensorCollection().IsRevLimitSwitchClosed());
-
   inputs->set_elevator_zeroed(elevator_zeroed_);
 
   inputs->set_wrist_hall(
       !canifier_.GetGeneralInput(CANifier::GeneralPin::LIMR));
 
-  if (inputs->wrist_hall() && (!wrist_zeroed_ || std::abs(inputs->wrist_encoder()) > 0.025)) {
+  if (inputs->wrist_hall() && !wrist_zeroed_) {
     wrist_zeroed_ = true;
     wrist_.SetSelectedSensorPosition(0, 0, 100);
     canifier_.SetQuadraturePosition(0, 0);
@@ -157,6 +158,9 @@ void SuperstructureInterface::LoadGains() {
 
   elevator_master_.OverrideLimitSwitchesEnable(true);
   elevator_master_.OverrideSoftLimitsEnable(true);
+
+  wrist_.OverrideLimitSwitchesEnable(true);
+  wrist_.OverrideSoftLimitsEnable(true);
 
   winch_two_.SetInverted(true);
 }

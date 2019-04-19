@@ -32,7 +32,7 @@ class CanWrapper {
   void Stop();
 
  private:
-  // PdpWrapper pdp_;
+  PdpWrapper pdp_;
   PcmWrapper pcm_;
 
   std::atomic<bool> running_{false};

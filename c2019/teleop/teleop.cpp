@@ -211,9 +211,9 @@ void TeleopBase::Update() {
   std::string url = "";
 
   if (superstructure_status->wrist_goal() > 1.57) {
-    url = "limelight-pricey.local:5800";
+    url = "10.16.78.13:5800";
   } else {
-    url = "limelight-pricey.local:5800";
+    url = "10.16.78.13:5800";
   }
 
   webdash_proto->set_stream_url(url);
@@ -311,13 +311,15 @@ void TeleopBase::SendDrivetrainMessage() {
     drivetrain_goal->mutable_teleop_goal()->set_quick_turn(quickturn);
   } else {
     drivetrain_goal->mutable_arc_goal()->set_angular(horiz_angle_);
-    double voltage = (target_dist_ - y_int) * distance_factor_ * 4.5;
+    double voltage = std::abs((target_dist_ - y_int) * distance_factor_ * 4.5);
     double scalar = 1.5;
     if (drivetrain_status->linear_velocity() > 2.0) {
       scalar = 1.0;
     }
-    drivetrain_goal->mutable_arc_goal()->set_linear(muan::utils::Cap(
-        voltage * scalar - (std::abs(horiz_angle_) * 20), 1.6, 12));
+    voltage = muan::utils::Cap(voltage * scalar - (std::abs(horiz_angle_) * 20),
+                               1.6, 12);
+    voltage = std::copysign(voltage, distance_factor_);
+    drivetrain_goal->mutable_arc_goal()->set_linear(voltage);
   }
 
   QueueManager<DrivetrainGoal>::Fetch()->WriteMessage(drivetrain_goal);

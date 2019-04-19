@@ -230,8 +230,18 @@ bool CommandBase::StartDriveVisionBackwards() {
     }
   }
 
+  no_target = 0;
   while (lime_status->back_target_dist() > 0.41 &&
          lime_status->back_has_target() && IsAutonomous()) {
+    if (!lime_status->back_has_target()) {
+      no_target++;
+    } else {
+      no_target = 0;
+    }
+    if (no_target > 5) {
+      return false;
+    }
+
     QueueManager<LimelightStatusProto>::Fetch()->ReadLastMessage(&lime_status);
     drivetrain_goal->mutable_arc_goal()->set_angular(
         lime_status->back_horiz_angle());

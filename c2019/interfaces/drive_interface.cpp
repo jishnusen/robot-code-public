@@ -24,7 +24,7 @@ constexpr double kHighGearPositionF = 0.;
 constexpr double kHighGearVelocityP = 0.9;
 constexpr double kHighGearVelocityI = 0;
 constexpr double kHighGearVelocityD = 10.;
-constexpr double kHighGearVelocityF = 0.;
+constexpr double kHighGearVelocityF = 0.18;
 
 constexpr double kTurningP = 2.0;
 constexpr double kTurningI = 0.0;
@@ -132,9 +132,13 @@ DrivetrainInterface::DrivetrainInterface()
                                              100);
   right_master_.ConfigSelectedFeedbackCoefficient((3600. / 8192.), 1, 100);
 
-  left_master_.EnableVoltageCompensation(true);
+  left_master_.EnableVoltageCompensation(false);
   left_master_.ConfigVoltageCompSaturation(12.0, 100);
   left_master_.ConfigVoltageMeasurementFilter(32, 100);
+
+  right_master_.EnableVoltageCompensation(false);
+  right_master_.ConfigVoltageCompSaturation(12.0, 100);
+  right_master_.ConfigVoltageMeasurementFilter(32, 100);
 
   left_master_.ConfigMotionCruiseVelocity(2000, 100);
   right_master_.ConfigMotionCruiseVelocity(2000, 100);
@@ -177,6 +181,15 @@ DrivetrainInterface::DrivetrainInterface()
   pigeon_offset_ = pigeon_.GetFusedHeading();
 
   right_master_.ConfigAllowableClosedloopError(kTurningSlot, 0, 100);
+
+  right_master_.ClearStickyFaults(100);
+  left_master_.ClearStickyFaults(100);
+
+  right_slave_a_.ClearStickyFaults(100);
+  left_slave_a_.ClearStickyFaults(100);
+
+  right_slave_b_.ClearStickyFaults(100);
+  left_slave_b_.ClearStickyFaults(100);
 }
 
 void DrivetrainInterface::ReadSensors() {
@@ -251,13 +264,13 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.SelectProfileSlot(kVelocitySlot, 0);
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
-                       outputs->left_setpoint() * kDriveConversionFactor * 0.1,
-                       DemandType_ArbitraryFeedForward,
-                       outputs->left_setpoint_ff() / 12.);
+                       outputs->left_setpoint() * kDriveConversionFactor * 0.1);
+                       /* DemandType_ArbitraryFeedForward, */
+                       /* outputs->left_setpoint_ff() / 12.); */
       right_master_.Set(
           ControlMode::Velocity,
-          outputs->right_setpoint() * kDriveConversionFactor * 0.1,
-          DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.);
+          outputs->right_setpoint() * kDriveConversionFactor * 0.1);
+          /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.); */
       break;
     case TalonOutput::ARC:
       if (compressor_.Enabled()) {

@@ -22,17 +22,17 @@ namespace superstructure {
 
 // elevator constants
 constexpr double kHatchShipForwardsHeight = 0.1;
-constexpr double kHatchShipBackwardsHeight = 0.2;
+constexpr double kHatchShipBackwardsHeight = 0.13;
 constexpr double kHatchRocketFirstHeight = 0.1;
-constexpr double kHatchRocketBackwardsHeight = 0.2;
+constexpr double kHatchRocketBackwardsHeight = 0.13;
 constexpr double kHatchRocketSecondHeight = 0.987;
 constexpr double kHatchRocketThirdHeight = 1.74;
 constexpr double kHatchLoadingStationHeight = 0.089;
 constexpr double kHatchGroundHeight = 0.;
 constexpr double kCargoShipForwardsHeight = 1.103;
-constexpr double kCargoShipBackwardsHeight = 0.643;
+constexpr double kCargoShipBackwardsHeight = 0.13;
 constexpr double kCargoRocketFirstHeight = 0.093;
-constexpr double kCargoRocketBackwardsHeight = 0.116;
+constexpr double kCargoRocketBackwardsHeight = 0.13;
 constexpr double kCargoRocketSecondHeight = 0.928;
 constexpr double kCargoRocketThirdHeight = 1.74;
 constexpr double kCargoGroundHeight = 0.;
@@ -52,15 +52,15 @@ constexpr double kElevatorRezeroCurrentThreshold = 3;  // tune
 
 // wrist constants
 constexpr double kHatchForwardsAngle = 0.0;
-constexpr double kHatchBackwardsAngle = 3.05;
+constexpr double kHatchBackwardsAngle = 2.98;
 constexpr double kCargoRocketFirstAngle = .87;
 constexpr double kCargoRocketSecondAngle = .87;
 constexpr double kCargoRocketThirdAngle = .87;
 constexpr double kCargoRocketBackwardsAngle = M_PI;
 constexpr double kCargoShipForwardsAngle = 0.0;
-constexpr double kCargoShipBackwardsAngle = 3.23;
+constexpr double kCargoShipBackwardsAngle =2.98;
 constexpr double kCargoGroundAngle = 0.0;
-constexpr double kHandoffAngle = 3.414;
+constexpr double kHandoffAngle = 2.98;
 constexpr double kStowAngle = 1.2;
 constexpr double kClimbAngle = 0.3;
 constexpr double kWristSafeForwardsAngle = 1.3;
