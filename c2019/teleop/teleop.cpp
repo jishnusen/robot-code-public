@@ -91,7 +91,7 @@ TeleopBase::TeleopBase()
 
 void TeleopBase::operator()() {
   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20));
-  aos::SetCurrentThreadRealtimePriority(10);
+  /* aos::SetCurrentThreadRealtimePriority(10); */
   muan::utils::SetCurrentThreadName("TeleopBase");
 
   LOG(INFO, "Starting TeleopBase thread!");
@@ -126,8 +126,8 @@ void TeleopBase::Update() {
 
   nt::NetworkTableInstance inst = nt::NetworkTableInstance::GetDefault();
   std::shared_ptr<nt::NetworkTable> table = inst.GetTable("limelight-front");
-  std::shared_ptr<nt::NetworkTable> back_table =
-      inst.GetTable("limelight-back");
+  /* std::shared_ptr<nt::NetworkTable> back_table = */
+  /*     inst.GetTable("limelight-back"); */
   std::shared_ptr<nt::NetworkTable> expensive_table =
       inst.GetTable("limelight-pricey");
 
@@ -140,7 +140,7 @@ void TeleopBase::Update() {
     if (climb_mode_) {
       table->PutNumber("ledMode", 0);
       expensive_table->PutNumber("ledMode", 0);
-      back_table->PutNumber("ledMode", 0);
+      /* back_table->PutNumber("ledMode", 0); */
     } else if (superstructure_status->wrist_goal() < (M_PI / 2.)) {
       table->PutNumber(
           "ledMode",
@@ -148,15 +148,15 @@ void TeleopBase::Update() {
       expensive_table->PutNumber(
           "ledMode",
           static_cast<int>(superstructure_status->elevator_goal() < 0.6));
-      back_table->PutNumber("ledMode", flash_ ? 2 : 1);
+      /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
     } else {
       table->PutNumber("ledMode", flash_ ? 2 : 1);
       expensive_table->PutNumber("ledMode", 1);
-      back_table->PutNumber("ledMode", 0);
+      /* back_table->PutNumber("ledMode", 0); */
     }
   } else {
     table->PutNumber("ledMode", flash_ ? 2 : 1);
-    back_table->PutNumber("ledMode", flash_ ? 2 : 1);
+    /* back_table->PutNumber("ledMode", flash_ ? 2 : 1); */
     expensive_table->PutNumber("ledMode", 1);
   }
 
@@ -247,7 +247,7 @@ void TeleopBase::SendDrivetrainMessage() {
     if (vision_->is_pressed()) {
       if (vision_intake_->is_pressed() && lime_status->back_has_target() &&
           lime_status->back_limelight_ok()) {
-        vision = true;
+        vision = false;
         distance_factor_ = -0.8;
         target_dist_ = lime_status->back_target_dist();
         horiz_angle_ = lime_status->back_horiz_angle();
@@ -525,6 +525,8 @@ void TeleopBase::SendSuperstructureMessage() {
   if (climb_mode_ && ground_intake_height_->is_pressed()) {
     climb_mode_ = false;
   }
+
+  superstructure_goal->set_climb_mode(climb_mode_);
 
   superstructure_goal_queue_->WriteMessage(superstructure_goal);
 }

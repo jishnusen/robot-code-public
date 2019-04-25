@@ -22,6 +22,8 @@ message DrivetrainInput {
   required double gyro = 10;
 
   required double right_bus = 11;
+
+  required bool pigeon_ready = 12;
 }
 
 enum TalonOutput {

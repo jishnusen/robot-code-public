@@ -105,6 +105,11 @@ DrivetrainInterface::DrivetrainInterface()
   left_slave_a_.ConfigFactoryDefault();
   left_slave_b_.ConfigFactoryDefault();
 
+  pigeon_.ConfigFactoryDefault();
+
+  right_master_.OverrideLimitSwitchesEnable(false);
+  left_master_.OverrideLimitSwitchesEnable(false);
+
   left_master_.ConfigSelectedFeedbackSensor(
       FeedbackDevice::CTRE_MagEncoder_Relative, kPositionSlot, kSetupTimeout);
   right_master_.ConfigSelectedFeedbackSensor(
@@ -132,11 +137,11 @@ DrivetrainInterface::DrivetrainInterface()
                                              100);
   right_master_.ConfigSelectedFeedbackCoefficient((3600. / 8192.), 1, 100);
 
-  left_master_.EnableVoltageCompensation(false);
+  left_master_.EnableVoltageCompensation(true);
   left_master_.ConfigVoltageCompSaturation(12.0, 100);
   left_master_.ConfigVoltageMeasurementFilter(32, 100);
 
-  right_master_.EnableVoltageCompensation(false);
+  right_master_.EnableVoltageCompensation(true);
   right_master_.ConfigVoltageCompSaturation(12.0, 100);
   right_master_.ConfigVoltageMeasurementFilter(32, 100);
 
@@ -182,18 +187,22 @@ DrivetrainInterface::DrivetrainInterface()
 
   right_master_.ConfigAllowableClosedloopError(kTurningSlot, 0, 100);
 
-  right_master_.ClearStickyFaults(100);
-  left_master_.ClearStickyFaults(100);
+  right_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 5, 100);
+  left_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 5, 100);
 
-  right_slave_a_.ClearStickyFaults(100);
-  left_slave_a_.ClearStickyFaults(100);
+  right_master_.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_50Ms, 100);
+  /* left_master_.ConfigVelocityMeasurementWindow(1, 100); */
 
-  right_slave_b_.ClearStickyFaults(100);
-  left_slave_b_.ClearStickyFaults(100);
+  right_master_.ConfigVelocityMeasurementWindow(VelocityMeasPeriod::Period_50Ms, 100);
+  /* left_master_.ConfigVelocityMeasurementWIndow(1, 100); */
+
+  left_slave_a_.SetStatusFramePeriod(StatusFrameEnhanced::Status_11_UartGadgeteer, 10, 10);
 }
 
 void DrivetrainInterface::ReadSensors() {
   InputProto sensors;
+
+  sensors->set_pigeon_ready(true);
 
   sensors->set_left_encoder(left_master_.GetSelectedSensorPosition(0) /
                             kDriveConversionFactor);

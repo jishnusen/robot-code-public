@@ -57,6 +57,18 @@
             }
         },
         {
+            "name": "Gyro Calibrated",
+            "type": "boolean",
+            "condition": "source",
+            "source": ["drivetrain_input", "pigeonReady"],
+            "coordinates": [2,3],
+            "should-title": true,
+            "colors": {
+              "if_true": "#00ff00",
+              "if_false": "#ff0000"
+            }
+        },
+        {
             "name": "Front Limelight OK",
             "type": "boolean",
             "source": ["limelight_status", "limelightOk"],

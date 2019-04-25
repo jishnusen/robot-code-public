@@ -36,6 +36,14 @@ SuperstructureInterface::SuperstructureInterface(
       output_reader_{
           QueueManager<SuperstructureOutputProto>::Fetch()->MakeReader()},
       pcm_{can_wrapper->pcm()} {
+  elevator_master_.ConfigFactoryDefault();
+  elevator_slave_a_.ConfigFactoryDefault();
+  elevator_slave_b_.ConfigFactoryDefault();
+  elevator_slave_c_.ConfigFactoryDefault();
+
+  wrist_.ConfigFactoryDefault();
+  canifier_.ConfigFactoryDefault();
+
   LoadGains();
   pcm_->CreateSolenoid(kArrow);
   pcm_->CreateSolenoid(kBackplate);
@@ -44,19 +52,42 @@ SuperstructureInterface::SuperstructureInterface(
   pcm_->CreateSolenoid(kShifter);
   pcm_->CreateSolenoid(kCargo);
   pcm_->CreateSolenoid(kPins);
+
+  elevator_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General,
+                                        20, 100);
+  elevator_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0,
+                                        20, 100);
+
+  elevator_slave_a_.SetStatusFramePeriod(StatusFrame::Status_1_General_, 100,
+                                         100);
+  elevator_slave_a_.SetStatusFramePeriod(StatusFrame::Status_2_Feedback0_, 100,
+                                         100);
+
+  elevator_slave_b_.SetStatusFramePeriod(StatusFrame::Status_1_General_, 100,
+                                         100);
+  elevator_slave_b_.SetStatusFramePeriod(StatusFrame::Status_2_Feedback0_, 100,
+                                         100);
+
+  elevator_slave_c_.SetStatusFramePeriod(StatusFrame::Status_1_General_, 100,
+                                         100);
+  elevator_slave_c_.SetStatusFramePeriod(StatusFrame::Status_2_Feedback0_, 100,
+                                         100);
+
+  wrist_.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20, 100);
+  wrist_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20, 100);
 }
 
-void SuperstructureInterface::operator()() {
-  aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20));
-  aos::SetCurrentThreadRealtimePriority(10);
-  muan::utils::SetCurrentThreadName("SuperInterface");
+/* void SuperstructureInterface::operator()() { */
+/*   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20)); */
+/*   aos::SetCurrentThreadRealtimePriority(10); */
+/*   muan::utils::SetCurrentThreadName("SuperInterface"); */
 
-  while (true) {
-    ReadSensors();
-    phased_loop.SleepUntilNext();
-    WriteActuators();
-  }
-}
+/*   while (true) { */
+/*     ReadSensors(); */
+/*     phased_loop.SleepUntilNext(); */
+/*     WriteActuators(); */
+/*   } */
+/* } */
 
 void SuperstructureInterface::ReadSensors() {
   SuperstructureInputProto inputs;
@@ -99,6 +130,18 @@ void SuperstructureInterface::ReadSensors() {
   inputs->set_hatch_intake_proxy(
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_MOSI_PWM1P) &&
       canifier_.GetGeneralInput(CANifier::GeneralPin::SPI_CS));
+
+  if (elevator_master_.GetControlMode() == ControlMode::MotionMagic) {
+    inputs->set_elevator_profiled_goal(
+        elevator_master_.GetActiveTrajectoryPosition());
+    inputs->set_elevator_profiled_velocity(
+        elevator_master_.GetActiveTrajectoryVelocity());
+  }
+
+  if (wrist_.GetControlMode() == ControlMode::MotionMagic) {
+    inputs->set_wrist_profiled_goal(wrist_.GetActiveTrajectoryPosition());
+    inputs->set_wrist_profiled_velocity(wrist_.GetActiveTrajectoryVelocity());
+  }
 
   input_queue_->WriteMessage(inputs);
 }

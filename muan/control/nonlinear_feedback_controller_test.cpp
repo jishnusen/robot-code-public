@@ -43,7 +43,7 @@ class TestFixture : public ::testing::Test {
 
     Trajectory trajectory(spline, constraints_, high_gear, model_);
 
-    Trajectory::TimedPose sample = trajectory.Advance(0.02);
+    Trajectory::TimedPose sample = trajectory.Advance(0.04);
     Pose current_pose = sample.pose.pose();
     NonLinearFeedbackController::Output goal;
 
@@ -51,9 +51,9 @@ class TestFixture : public ::testing::Test {
 
     double t = 0.0;
     while (!trajectory.done()) {
-      t += 0.02;
+      t += 0.04;
       Trajectory::TimedPose prev_sample = sample;
-      sample = trajectory.Advance(0.02);
+      sample = trajectory.Advance(0.04);
 
       error = sample.pose.pose() - current_pose;
 
@@ -68,11 +68,11 @@ class TestFixture : public ::testing::Test {
       Eigen::Vector2d velocity = model_.ForwardKinematics(goal.velocity) * 0.9;
 
       Eigen::Vector3d delta;
-      delta(0) = velocity(0) * 0.02 *
-                 std::cos(current_pose.heading() + velocity(1) * 0.02);
-      delta(1) = velocity(0) * 0.02 *
-                 std::sin(current_pose.heading() + velocity(1) * 0.02);
-      delta(2) = velocity(1) * 0.02;
+      delta(0) = velocity(0) * 0.04 *
+                 std::cos(current_pose.heading() + velocity(1) * 0.04);
+      delta(1) = velocity(0) * 0.04 *
+                 std::sin(current_pose.heading() + velocity(1) * 0.04);
+      delta(2) = velocity(1) * 0.04;
 
       current_pose = Pose(current_pose.Get() + delta);
 

@@ -21,7 +21,7 @@ AutonomousRunner::AutonomousRunner()
                             .MakeReader()) {}
 
 void AutonomousRunner::operator()() {
-  aos::SetCurrentThreadRealtimePriority(10);
+  /* aos::SetCurrentThreadRealtimePriority(10); */
   muan::utils::SetCurrentThreadName("Autonomous");
 
   muan::wpilib::DriverStationProto driver_station;

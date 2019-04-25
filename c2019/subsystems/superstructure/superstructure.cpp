@@ -58,10 +58,10 @@ void Superstructure::BoundGoal(double* elevator_goal, double* wrist_goal) {
     force_backplate_ = true;
   }
 
-  if (elevator_status_->elevator_height() > kElevatorBoardHeight &&
-      *elevator_goal < kElevatorBoardHeight) {
-    *wrist_goal = 0;
-  }
+  /* if (elevator_status_->elevator_height() > kElevatorBoardHeight && */
+  /*     *elevator_goal < kElevatorBoardHeight) { */
+  /*   *wrist_goal = 0; */
+  /* } */
 }
 
 elevator::ElevatorGoalProto Superstructure::PopulateElevatorGoal() {
@@ -281,7 +281,6 @@ void Superstructure::Update() {
   output->set_pins(pins_);
 
   if (rezero_mode_) {
-    cargo_out_ = false;
     force_backplate_ = true;
     if (!elevator_rezeroed_) {
       output->set_elevator_setpoint(-2);
@@ -315,6 +314,9 @@ void Superstructure::Update() {
     output->set_wrist_setpoint(wrist_output->wrist_setpoint() + wrist_offset_);
     output->set_wrist_setpoint_type(
         static_cast<TalonOutput>(wrist_output->output_type()));
+    if (goal->climb_mode()) {
+      cargo_out_ = false;
+    }
     output->set_cargo_out(cargo_out_);
     output->set_arrow_solenoid(hatch_intake_output->flute_solenoid());
     output->set_backplate_solenoid(hatch_intake_output->backplate_solenoid());

@@ -10,16 +10,15 @@ InterfaceRunner::InterfaceRunner()
     : can_(QueueManager<PdpMessage>::Fetch()), superstructure_(&can_) {
   std::thread can_thread(std::ref(can_));
   can_thread.detach();
-
-  std::thread superstructure_thread(std::ref(superstructure_));
-  superstructure_thread.detach();
 }
 
 void InterfaceRunner::ReadSensors() {
+  superstructure_.ReadSensors();
   drive_.ReadSensors();
 }
 
 void InterfaceRunner::WriteActuators() {
+  superstructure_.WriteActuators();
   drive_.WriteActuators();
 }
 
