@@ -71,12 +71,6 @@ void DrivetrainInterface::LoadGains() {
   right_master_.Config_kD(kTurningSlot, kTurningD, kSetupTimeout);
   right_master_.Config_kF(kTurningSlot, kTurningF, kSetupTimeout);
   right_master_.Config_IntegralZone(kTurningSlot, 400, kSetupTimeout);
-
-  /* right_master_.ConfigNeutralDeadband(0, kPositionSlot); */
-  /* left_master_.ConfigNeutralDeadband(0, kPositionSlot); */
-
-  /* right_master_.ConfigNeutralDeadband(0.04, kVelocitySlot); */
-  /* left_master_.ConfigNeutralDeadband(0.04, kVelocitySlot); */
 }
 
 void DrivetrainInterface::SetBrakeMode(bool mode) {
@@ -121,18 +115,10 @@ DrivetrainInterface::DrivetrainInterface()
 
   pigeon_.SetYaw(0, 100);
 
-  /* right_master_.ConfigRemoteFeedbackFilter(left_master_.GetDeviceID(),
-   * RemoteSensorSource::RemoteSensorSource_TalonSRX_SelectedSensor, 0, 100); */
   right_master_.ConfigRemoteFeedbackFilter(
       left_slave_a_.GetDeviceID(),
       RemoteSensorSource::RemoteSensorSource_GadgeteerPigeon_Yaw, 1, 100);
 
-  /* right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum0,
-   * FeedbackDevice::RemoteSensor0, 100); */
-  /* right_master_.ConfigSensorTerm(SensorTerm::SensorTerm_Sum1,
-   * FeedbackDevice::CTRE_MagEncoder_Relative, 100); */
-  /* right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::SensorSum, 0,
-   * 100); */
   right_master_.ConfigSelectedFeedbackSensor(FeedbackDevice::RemoteSensor1, 1,
                                              100);
   right_master_.ConfigSelectedFeedbackCoefficient((3600. / 8192.), 1, 100);
@@ -191,10 +177,8 @@ DrivetrainInterface::DrivetrainInterface()
   left_master_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 5, 100);
 
   right_master_.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_50Ms, 100);
-  /* left_master_.ConfigVelocityMeasurementWindow(1, 100); */
 
   right_master_.ConfigVelocityMeasurementWindow(VelocityMeasPeriod::Period_50Ms, 100);
-  /* left_master_.ConfigVelocityMeasurementWIndow(1, 100); */
 
   left_slave_a_.SetStatusFramePeriod(StatusFrameEnhanced::Status_11_UartGadgeteer, 10, 10);
 }
@@ -274,12 +258,9 @@ void DrivetrainInterface::WriteActuators() {
       right_master_.SelectProfileSlot(kVelocitySlot, 0);
       left_master_.Set(ControlMode::Velocity,
                        outputs->left_setpoint() * kDriveConversionFactor * 0.1);
-                       /* DemandType_ArbitraryFeedForward, */
-                       /* outputs->left_setpoint_ff() / 12.); */
       right_master_.Set(
           ControlMode::Velocity,
           outputs->right_setpoint() * kDriveConversionFactor * 0.1);
-          /* DemandType_ArbitraryFeedForward, outputs->right_setpoint_ff() / 12.); */
       break;
     case TalonOutput::ARC:
       if (compressor_.Enabled()) {
@@ -294,8 +275,6 @@ void DrivetrainInterface::WriteActuators() {
       left_master_.Follow(right_master_, FollowerType::FollowerType_AuxOutput1);
       break;
   }
-
-  // shifter_.Set(false);
 }
 
 }  // namespace interfaces

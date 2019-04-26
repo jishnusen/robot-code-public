@@ -77,18 +77,6 @@ SuperstructureInterface::SuperstructureInterface(
   wrist_.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20, 100);
 }
 
-/* void SuperstructureInterface::operator()() { */
-/*   aos::time::PhasedLoop phased_loop(std::chrono::milliseconds(20)); */
-/*   aos::SetCurrentThreadRealtimePriority(10); */
-/*   muan::utils::SetCurrentThreadName("SuperInterface"); */
-
-/*   while (true) { */
-/*     ReadSensors(); */
-/*     phased_loop.SleepUntilNext(); */
-/*     WriteActuators(); */
-/*   } */
-/* } */
-
 void SuperstructureInterface::ReadSensors() {
   SuperstructureInputProto inputs;
   muan::wpilib::PdpMessage pdp;
