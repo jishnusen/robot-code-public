@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys
 from collections import defaultdict
@@ -17,13 +17,14 @@ if is_pyqt5():
     from matplotlib.backends.backend_qt5agg import (
         FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 else:
-    print("Requires PyQt5")
+    from matplotlib.backends.backend_qt4agg import (
+        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 
 
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
-        super().__init__()
+        super(ApplicationWindow, self).__init__()
         self._main = QtWidgets.QWidget()
         self.setCentralWidget(self._main)
         layout = QtWidgets.QGridLayout(self._main)
