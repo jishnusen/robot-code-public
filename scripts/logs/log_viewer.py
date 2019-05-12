@@ -56,11 +56,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         fit_x.clicked.connect(self.fit_x)
         fit_y = QtWidgets.QPushButton('Fit Y', self)
         fit_y.clicked.connect(self.fit_y)
+        fit_match = QtWidgets.QPushButton('Fit Match', self)
+        fit_match.clicked.connect(self.fit_match)
         splitter.addWidget(self.tree)
         layout.addWidget(splitter, 0, 0, 1, 4)
         layout.addWidget(update_plot, 1, 1)
         layout.addWidget(fit_x, 1, 2)
         layout.addWidget(fit_y, 1, 3)
+        layout.addWidget(fit_match, 1, 4)
         self.autoscale = True
 
     def fit_y(self):
@@ -95,6 +98,41 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         self._static_ax.set_xlim((lower, upper))
         self._static_ax.figure.canvas.draw()
+
+    def fit_match(self):
+        key = 'driver_station_status.csv'
+        if not (key in self.dataframes):
+            print("ERR: Tried to fit auto without DS Status")
+            return
+
+        fit_types = ("Auto Period", "Teleop Period", "Full Match Period")
+
+        fit_type, ok = QtWidgets.QInputDialog.getItem(
+            self, "Fit Match", "Match Data Type:",
+            fit_types, 0, False)
+
+        df = self.dataframes[key]
+        x = np.array(df.timestamp)
+        mode = np.array(df['mode'])
+
+        if not (ok and fit_type):
+            print("ERR: Didn't select fit type")
+            return
+
+        if (fit_type == fit_types[0]):
+            idx = x[mode == 1]
+        elif (fit_type == fit_types[1]):
+            idx = x[mode == 2]
+        elif (fit_type == fit_types[2]):
+            idx = x[mode.nonzero()]
+        else:
+            print("ERR: Unexpected Fit Type")
+
+        print ("INFO: Fit to " + fit_type)
+
+        self._static_ax.set_xlim((idx.min(), idx.max()))
+        self._static_ax.figure.canvas.draw()
+        self.autoscale = False
 
     def open_file_name_dialog(self):
         directory = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select directory')
