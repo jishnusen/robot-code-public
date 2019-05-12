@@ -77,7 +77,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         xlim = (self._static_ax.get_xlim())
         lower = 5e10
         upper = -5e10
-        for f,c in self.plotted_items:
+        for f, c in self.plotted_items:
             df = self.dataframes[f]
             x = np.array(df.timestamp)
 
@@ -88,16 +88,16 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                 lower = min(lower, y_sel.min())
                 upper = max(upper, y_sel.max())
 
-        self._static_ax.set_ylim((lower + (lower - upper) * 0.05, upper + (upper - lower) * 0.05))
+        self._static_ax.set_ylim((lower + (lower - upper) * 0.05,
+                                  upper + (upper - lower) * 0.05))
         self._static_ax.figure.canvas.draw()
-
 
     def fit_x(self):
         x = np.array([])
         lower = 5e10
         upper = -5e10
 
-        for f,c in self.plotted_items:
+        for f, c in self.plotted_items:
             df = self.dataframes[f]
             x = np.array(df.timestamp)
             lower = min(lower, x.min())
@@ -142,7 +142,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.autoscale = False
 
     def open_file_name_dialog(self):
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self, 'Select directory')
+        directory = QtWidgets.QFileDialog.getExistingDirectory(
+            self, 'Select directory')
+        self.load_dir(directory)
+
+    def load_dir(self, directory):
         files = (os.listdir(directory))
         self.csvs = []
         self.dataframes = {}
@@ -155,7 +159,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.update_side_bar(self.dataframes[c].columns.tolist(), c)
             self._static_ax.clear()
             self.plotted_items = []
-
 
     def update_side_bar(self, columns, filename):
         parent = QtWidgets.QTreeWidgetItem(self.tree)
@@ -206,13 +209,18 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         root = self.tree.invisibleRootItem()
         for index in range(root.childCount()):
             parent = root.child(index)
-            if parent.checkState(0) == QtCore.Qt.PartiallyChecked or parent.checkState(0) == QtCore.Qt.Checked:
+            if parent.checkState(
+                    0) == QtCore.Qt.PartiallyChecked or parent.checkState(
+                        0) == QtCore.Qt.Checked:
                 features = mapping[parent.text(0)]
                 for row in range(parent.childCount()):
                     child = parent.child(row)
-                    if child.checkState(0) == QtCore.Qt.Checked and child.text(0) != "timestamp" and child.text(0) != "queue_index":
+                    if child.checkState(0) == QtCore.Qt.Checked and child.text(
+                            0) != "timestamp" and child.text(
+                                0) != "queue_index":
                         features.append(child.text(0))
         return mapping
+
 
 if __name__ == "__main__":
     qapp = QtWidgets.QApplication(sys.argv)
