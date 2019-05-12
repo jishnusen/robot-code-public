@@ -82,8 +82,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.autoscale = True
 
         # If plottable dir is in arg, then load it
-        if (sys.argv[1] and os.path.exists(sys.argv[1])):
-            self.load_dir(sys.argv[1])
+        if len(sys.argv) > 1:
+            if os.path.exists(sys.argv[1]):
+                self.load_dir(sys.argv[1])
 
     # Connected to: plot_chooser
     def new_plot_type(self, choice):
