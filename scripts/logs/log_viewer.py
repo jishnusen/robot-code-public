@@ -59,12 +59,19 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         fit_match = QtWidgets.QPushButton('Fit Match', self)
         fit_match.clicked.connect(self.fit_match)
         splitter.addWidget(self.tree)
-        layout.addWidget(splitter, 0, 0, 1, 4)
-        layout.addWidget(update_plot, 1, 1)
+        layout.addWidget(splitter, 0, 0, 1, 5)
+        layout.addWidget(plot_chooser, 1, 1)
         layout.addWidget(fit_x, 1, 2)
         layout.addWidget(fit_y, 1, 3)
         layout.addWidget(fit_match, 1, 4)
         self.autoscale = True
+
+        if (sys.argv[1] and os.path.exists(sys.argv[1])):
+            self.load_dir(sys.argv[1])
+
+    def new_plot_type(self, choice):
+        self.plot_type = choice
+        self.update_plot()
 
     def fit_y(self):
         xlim = (self._static_ax.get_xlim())
@@ -167,15 +174,21 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self._static_ax.clear()
         to_plot = self.export_tree()
 
-        for fname,colnames in to_plot.items():
+        for fname, colnames in to_plot.items():
             df = self.dataframes[fname]
             for colname in colnames:
                 if colname == "timestamp":
                     continue
                 if not colname:
                     continue
-                self._static_ax.plot(df.timestamp, df[colname], label=colname)
-                print("plotting " + fname + " " + colname)
+                if self.plot_type == self.plot_types[0]:
+                    self._static_ax.scatter(df.timestamp, df[colname], label=colname)
+                elif self.plot_type == self.plot_types[1]:
+                    self._static_ax.plot(df.timestamp, df[colname], label=colname)
+                else:
+                    print("ERR: Unknown plot type, " + self.plot_type)
+
+                print("INFO: Plotting " + fname + " " + colname)
 
         if not self.autoscale:
             self._static_ax.set_xlim(xlim)
