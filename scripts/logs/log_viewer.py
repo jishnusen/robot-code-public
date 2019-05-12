@@ -10,7 +10,8 @@ import pandas as pd
 import numpy as np
 
 import matplotlib
-matplotlib.rcParams.update({'font.size': 8})
+matplotlib.rcParams.update({'font.size': 8, 'scatter.marker': 'o',
+    'lines.markersize': 1})
 
 from matplotlib.backends.qt_compat import QtCore, QtWidgets, QtGui, is_pyqt5
 if is_pyqt5():
