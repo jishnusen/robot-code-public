@@ -41,9 +41,17 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         chooser.clicked.connect(self.open_file_name_dialog)
         layout.addWidget(chooser, 1, 0)
         self.tree = QtWidgets.QTreeWidget()
+        self.tree.itemClicked.connect(self.update_plot)
+        self.tree.setSortingEnabled(True)
 
-        update_plot = QtWidgets.QPushButton('Update Plot', self)
-        update_plot.clicked.connect(self.update_plot)
+        plot_chooser = QtWidgets.QComboBox(self)
+        plot_chooser.activated[str].connect(self.new_plot_type)
+
+
+        self.plot_types = ("Scatter Plot", "Line Plot")
+        self.plot_type = self.plot_types[0]
+        plot_chooser.addItems(self.plot_types)
+
         fit_x = QtWidgets.QPushButton('Fit X', self)
         fit_x.clicked.connect(self.fit_x)
         fit_y = QtWidgets.QPushButton('Fit Y', self)
