@@ -238,7 +238,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         self.plotted_items = to_plot.items()
 
-        self._static_ax.legend(loc='upper right')
+        self._static_ax.legend(loc='best')
         self._static_ax.figure.canvas.draw()
 
         self.autoscale = False
