@@ -34,7 +34,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         # Main App + Layouts
         self._main = QtWidgets.QWidget()
         self.setCentralWidget(self._main)
-        layout = QtWidgets.QGridLayout(self._main)
+        grid = QtWidgets.QGridLayout(self._main)
         splitter = QtWidgets.QSplitter()
 
         # Plot canvas
@@ -69,14 +69,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         fit_match = QtWidgets.QPushButton('Fit Match', self)
         fit_match.clicked.connect(self.fit_match)
 
-        # Stick everything in its layour
+        # Stick everything in its layout
         splitter.addWidget(self.tree)
-        layout.addWidget(splitter, 0, 0, 1, 5)
-        layout.addWidget(chooser, 1, 0)
-        layout.addWidget(plot_chooser, 1, 1)
-        layout.addWidget(fit_x, 1, 2)
-        layout.addWidget(fit_y, 1, 3)
-        layout.addWidget(fit_match, 1, 4)
+        grid.addWidget(splitter, 0, 0, 1, 5)
+        grid.addWidget(chooser, 1, 0)
+        grid.addWidget(plot_chooser, 1, 1)
+        grid.addWidget(fit_x, 1, 2)
+        grid.addWidget(fit_y, 1, 3)
+        grid.addWidget(fit_match, 1, 4)
 
         # Auto scale for the first plot
         self.autoscale = True
