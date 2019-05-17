@@ -221,8 +221,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             for colname in colnames:
                 if colname == "timestamp":
                     continue
-                if not colname:
-                    continue
                 if self.plot_type == self.plot_types[0]:
                     self._static_ax.scatter(
                         df.timestamp, df[colname], label=colname)
