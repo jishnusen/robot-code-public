@@ -47,7 +47,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         # Opens file browser for new plot dir
         chooser = QtWidgets.QPushButton('Choose Directory', self)
-        chooser.clicked.connect(self.open_file_name_dialog)
+        chooser.clicked.connect(self.open_directory_dialog)
 
         # Sidebar for data browsing
         self.tree = QtWidgets.QTreeWidget()
@@ -174,7 +174,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.autoscale = False
 
     # Connected to: chooser
-    def open_file_name_dialog(self):
+    def open_directory_dialog(self):
         directory = QtWidgets.QFileDialog.getExistingDirectory(
             self, 'Select directory')
         self.load_dir(directory)
