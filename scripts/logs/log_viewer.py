@@ -251,15 +251,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         root = self.tree.invisibleRootItem()
         for index in range(root.childCount()):
             parent = root.child(index)
-            if parent.checkState(
-                    0) == QtCore.Qt.PartiallyChecked or parent.checkState(
-                        0) == QtCore.Qt.Checked:
+            if parent.checkState(0) == QtCore.Qt.PartiallyChecked or \
+                    parent.checkState(0) == QtCore.Qt.Checked:
                 features = mapping[parent.text(0)]
                 for row in range(parent.childCount()):
                     child = parent.child(row)
-                    if child.checkState(0) == QtCore.Qt.Checked and child.text(
-                            0) != "timestamp" and child.text(
-                                0) != "queue_index":
+                    if child.checkState(0) == QtCore.Qt.Checked and \
+                            child.text(0) != "timestamp" and \
+                            child.text(0) != "queue_index":
                         features.append(child.text(0))
         return mapping
 
