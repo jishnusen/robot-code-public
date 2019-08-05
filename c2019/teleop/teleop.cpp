@@ -279,6 +279,8 @@ void TeleopBase::SendDrivetrainMessage() {
         }
       }
     }
+  } else {
+    vision = false;
   }
 
   if (vision_->was_released()) {
