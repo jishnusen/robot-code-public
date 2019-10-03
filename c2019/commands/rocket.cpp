@@ -23,10 +23,9 @@ void Rocket::RightBackRocket() {
 
   StartDrivePath(7.7, -3.1, -210 * (M_PI / 180.), -1, true);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   WaitUntilDriveComplete();
-  StartPointTurn(60 * (M_PI / 180.));
+  StartPointTurn(55 * (M_PI / 180.));
   WaitUntilDriveComplete();
   bool success = StartDriveVision();
   if (!success) {
@@ -43,12 +42,14 @@ void Rocket::RightBackRocket() {
   /* final_vel_ = 1.5; */
 
   WaitUntilDriveComplete();
-  StartDrivePath(.4, -3.1, -170 * (M_PI / 180.), 1, true, true, 0, 0.5);
+  final_vel_ = 1.5;
+  StartDrivePath(1., -3.4, -170 * (M_PI / 180.), 1, true, true, 0, 0.5);
+  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::INTAKE_HATCH);
+  final_vel_ = 0.0;
   /* final_vel_ = 0.0; */
   /* Wait(150); */
 
-  WaitUntilDrivetrainNear(1.4, -3.4, 0.6);
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::INTAKE_HATCH);
+  WaitUntilDrivetrainNear(1., -3.4, 0.3);
   // Activate vision once dt is reasonably near loading station
   success = StartDriveVision();
   if (!success) {
@@ -63,11 +64,11 @@ void Rocket::RightBackRocket() {
   SetFieldPosition(
       0.4, -3.4, (drive_status->estimated_heading() - init_gyro) + init_theta);
 
-  StartDrivePath(7.6, -2.8, -220 * (M_PI / 180.), -1, true);
+  StartDrivePath(7.2, -3.0, -210 * (M_PI / 180.), -1, true);
   WaitUntilDrivetrainNear(6.2, -2.2, .6);
   GoTo(superstructure::HATCH_ROCKET_SECOND, superstructure::PREP_SCORE);
   WaitUntilDriveComplete();
-  StartPointTurn(90 * (M_PI / 180.));
+  StartPointTurn(70 * (M_PI / 180.));
   WaitUntilDriveComplete();
   success = StartDriveVisionBottom();
   if (!success) {
@@ -100,10 +101,9 @@ void Rocket::LeftBackRocket() {
 
   StartDrivePath(7.7, 3.1, 210 * (M_PI / 180.), -1, true);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   WaitUntilDriveComplete();
-  StartPointTurn(-60 * (M_PI / 180.));
+  StartPointTurn(-55 * (M_PI / 180.));
   WaitUntilDriveComplete();
   bool success = StartDriveVision();
   if (!success) {
@@ -120,12 +120,14 @@ void Rocket::LeftBackRocket() {
   /* final_vel_ = 1.5; */
 
   WaitUntilDriveComplete();
-  StartDrivePath(.4, 3.1, 170 * (M_PI / 180.), 1, true, true, 0, 0.5);
+  final_vel_ = 1.5;
+  StartDrivePath(1., 3.4, 170 * (M_PI / 180.), 1, true, true, 0, 0.5);
+  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::INTAKE_HATCH);
+  final_vel_ = 0.0;
   /* final_vel_ = 0.0; */
   /* Wait(150); */
 
-  WaitUntilDrivetrainNear(1.4, 3.4, 0.6);
-  GoTo(superstructure::HATCH_ROCKET_FIRST, superstructure::INTAKE_HATCH);
+  WaitUntilDrivetrainNear(1., 3.4, 0.3);
   // Activate vision once dt is reasonably near loading station
   success = StartDriveVision();
   if (!success) {
@@ -140,11 +142,11 @@ void Rocket::LeftBackRocket() {
   SetFieldPosition(
       0.4, 3.4, (drive_status->estimated_heading() - init_gyro) + init_theta);
 
-  StartDrivePath(7.6, 2.8, 220 * (M_PI / 180.), -1, true);
+  StartDrivePath(7.2, 3.0, 210 * (M_PI / 180.), -1, true);
   WaitUntilDrivetrainNear(6.2, 2.2, .6);
   GoTo(superstructure::HATCH_ROCKET_SECOND, superstructure::PREP_SCORE);
   WaitUntilDriveComplete();
-  StartPointTurn(-90 * (M_PI / 180.));
+  StartPointTurn(-70 * (M_PI / 180.));
   WaitUntilDriveComplete();
   success = StartDriveVisionBottom();
   if (!success) {
@@ -178,7 +180,6 @@ void Rocket::RightDoubleRocket() {
 
   StartDrivePath(7.7, -3.1, -210 * (M_PI / 180.), -1, true);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   WaitUntilDrivetrainNear(5.8, -2.0, .5);
   GoTo(superstructure::HATCH_ROCKET_SECOND, superstructure::PREP_SCORE);
@@ -272,7 +273,6 @@ void Rocket::LeftDoubleRocket() {
 
   StartDrivePath(7.7, 3.1, 210 * (M_PI / 180.), -1, true);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   WaitUntilDrivetrainNear(5.8, 2.0, .5);
   GoTo(superstructure::HATCH_ROCKET_SECOND, superstructure::PREP_SCORE);
@@ -363,7 +363,6 @@ void Rocket::RightCargoRocket() {
   LOG(INFO, "Running CARGO_ROCKET auto");
 
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   StartDrivePath(5.3, -0.2, 0 * (M_PI / 180), 1, true);
   WaitUntilDrivetrainNear(5.3, -0.2, .3);
@@ -434,7 +433,6 @@ void Rocket::LeftCargoRocket() {
   LOG(INFO, "Running CARGO_ROCKET auto");
 
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   StartDrivePath(5.3, 0.2, 0 * (M_PI / 180), 1, true);
   WaitUntilDrivetrainNear(5.3, 0.2, .3);
@@ -505,7 +503,6 @@ void Rocket::RightFrontCargoShip() {
   LOG(INFO, "Running CARGO_ROCKET auto");
 
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   StartDrivePath(5.3, -0.2, 0 * (M_PI / 180), 1, true);
   WaitUntilDrivetrainNear(5.3, -0.2, .3);
@@ -595,7 +592,6 @@ void Rocket::LeftFrontCargoShip() {
   LOG(INFO, "Running CARGO_ROCKET auto");
 
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   StartDrivePath(5.3, 0.2, 0 * (M_PI / 180), 1, true);
   WaitUntilDrivetrainNear(5.3, 0.2, .3);
@@ -685,7 +681,6 @@ void Rocket::RightSideCargoShip() {
 
   // score hatch on left side, 2, of the CS
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   final_vel_ = 0.5;
   StartDrivePath(7., -1.3, 80 * (M_PI / 180), 1, true);
@@ -776,7 +771,6 @@ void Rocket::LeftSideCargoShip() {
 
   // score hatch on left side, 2, of the CS
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
-  GoTo(superstructure::REZERO);
   GoTo(superstructure::CARGO_GROUND, superstructure::PREP_SCORE);
   final_vel_ = 0.5;
   StartDrivePath(7., 1.3, -80 * (M_PI / 180), 1, true);
