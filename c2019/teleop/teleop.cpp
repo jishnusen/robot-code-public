@@ -211,9 +211,9 @@ void TeleopBase::Update() {
   std::string url = "";
 
   if (superstructure_status->wrist_goal() > 1.57) {
-    url = "10.16.78.13:5800";
+    url = "10.16.78.12:5800";
   } else {
-    url = "10.16.78.13:5800";
+    url = "10.16.78.12:5800";
   }
 
   webdash_proto->set_stream_url(url);
